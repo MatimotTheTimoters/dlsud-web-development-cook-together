@@ -57,3 +57,17 @@
 /* Utility spacing tweaks used in many components */
 .u-gap-sm { gap: .5rem !important; }
 .u-gap-md { gap: 1rem !important; }
+
+/* === Aside specific === */
+.aside-list .list-group-item {
+  border-color: var(--ct-border);
+  color: var(--ct-muted);
+  background-color: var(--ct-paper);
+}
+
+.aside-list .list-group-item.active {
+  background-color: var(--ct-aside-active-bg) !important;
+  color: var(--ct-ink) !important;
+  border-color: var(--ct-border) !important;
+  font-weight: 600;
+}
