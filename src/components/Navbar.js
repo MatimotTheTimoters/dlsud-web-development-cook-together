@@ -1,22 +1,17 @@
 import React from "react";
 import { Navbar, Nav, Container, Button, Dropdown } from "react-bootstrap";
+import "../styles/colors.css";
 
-function AppNavbar({ isLoggedIn }) {
+function AppNavbar({
+  isLoggedIn = false,
+  goldCount = "0",
+  gemCount = "0",
+  onLogout = () => {},
+}) {
   return (
-    <Navbar
-      expand="lg"
-      style={{
-        backgroundColor: "#FFFFFF", // --ct-paper
-        borderBottom: "1px solid #E6E9EE", // --ct-border
-      }}
-    >
+    <Navbar expand="lg" className="navbar-ct">
       <Container fluid>
-        {/* Brand */}
-        <Navbar.Brand
-          href="/"
-          className="d-flex align-items-center fw-bold"
-          style={{ color: "#0F172A" }} // --ct-ink
-        >
+        <Navbar.Brand href="/" className="d-flex align-items-center navbar-brand-ink">
           <img
             src="/assets/images/logo.png"
             alt="Cook Together"
@@ -24,75 +19,46 @@ function AppNavbar({ isLoggedIn }) {
             height="36"
             className="d-inline-block align-text-top me-2"
           />
-          Cook Together
+          <span>Cook Together</span>
         </Navbar.Brand>
 
-        {/* Toggler */}
         <Navbar.Toggle aria-controls="main-navbar" />
 
         <Navbar.Collapse id="main-navbar">
           {!isLoggedIn ? (
-            // === Landing Page Navbar (new user) ===
             <Nav className="ms-auto align-items-center">
-              <Nav.Link href="/about" style={{ color: "#64748B" }}>
+              <Nav.Link href="/about" className="text-ct-muted">
                 About
               </Nav.Link>
-              <Nav.Link href="/pricing" style={{ color: "#64748B" }}>
+              <Nav.Link href="/pricing" className="text-ct-muted">
                 Pricing
               </Nav.Link>
-              <Nav.Link href="/contacts" style={{ color: "#64748B" }}>
+              <Nav.Link href="/contacts" className="text-ct-muted">
                 Contacts
               </Nav.Link>
             </Nav>
           ) : (
-            // === Logged-in Navbar ===
             <Nav className="ms-auto align-items-center gap-2 flex-wrap">
-              {/* Inventory & Shop */}
               <div className="d-flex gap-2">
-                <Button
-                  size="sm"
-                  style={{ backgroundColor: "#FF7043", border: "none" }} // --ct-primary
-                >
+                <Button size="sm" className="btn-ct-primary">
                   INVENTORY
                 </Button>
-                <Button
-                  size="sm"
-                  style={{ backgroundColor: "#FF7043", border: "none" }}
-                >
+                <Button size="sm" className="btn-ct-primary">
                   SHOP
                 </Button>
               </div>
 
-              {/* Currency display */}
               <div className="d-flex align-items-center ms-2">
-                <span
-                  className="badge me-2"
-                  style={{
-                    backgroundColor: "#F2C94C", // --ct-gold
-                    color: "#0F172A",
-                  }}
-                >
-                  🪙 12.5k
+                <span className="chip chip-gold me-2" aria-label="gold">
+                  🪙 {String(goldCount)}
                 </span>
-                <span
-                  className="badge"
-                  style={{
-                    backgroundColor: "#2BC1A9", // --ct-secondary
-                    color: "#0F172A",
-                  }}
-                >
-                  💎 1.2k
+                <span className="chip chip-gem" aria-label="gems">
+                  💎 {String(gemCount)}
                 </span>
               </div>
 
-              {/* Notifications */}
-              <Dropdown align="end">
-                <Dropdown.Toggle
-                  size="sm"
-                  variant="light"
-                  id="dropdown-notif"
-                  style={{ color: "#64748B" }} // muted
-                >
+              <Dropdown align="end" className="ms-2">
+                <Dropdown.Toggle size="sm" variant="light" id="dropdown-notif" className="text-ct-muted">
                   🔔
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
@@ -101,18 +67,22 @@ function AppNavbar({ isLoggedIn }) {
                 </Dropdown.Menu>
               </Dropdown>
 
-              {/* User buttons */}
-              <div className="d-flex gap-2 flex-wrap">
-                <Button size="sm" variant="light">
+              <div className="d-flex gap-2 flex-wrap ms-2">
+                <Button size="sm" variant="light" aria-label="people">
                   👥
                 </Button>
-                <Button size="sm" variant="light">
+                <Button size="sm" variant="light" aria-label="profile">
                   👤
                 </Button>
-                <Button size="sm" variant="light">
+                <Button size="sm" variant="light" aria-label="settings">
                   ⚙️
                 </Button>
-                <Button size="sm" variant="outline-danger">
+                <Button
+                  size="sm"
+                  variant="outline-danger"
+                  onClick={onLogout}
+                  aria-label="logout"
+                >
                   Logout
                 </Button>
               </div>
