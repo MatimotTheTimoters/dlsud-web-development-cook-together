@@ -1,4 +1,3 @@
-// src/components/Main.js
 import React from "react";
 import { Row, Col, Card, Button } from "react-bootstrap";
 import "../styles/colors.css";

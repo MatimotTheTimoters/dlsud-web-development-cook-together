@@ -1,4 +1,3 @@
-// src/components/Hero.js
 import React from "react";
 import { Container, Row, Col, Button, Image } from "react-bootstrap";
 import "../styles/colors.css";
