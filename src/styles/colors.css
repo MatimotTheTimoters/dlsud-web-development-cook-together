@@ -1,0 +1,59 @@
+:root{
+  --ct-primary: #FF7043;
+  --ct-secondary: #2BC1A9;
+  --ct-gold: #F2C94C;
+  --ct-ink: #0F172A;
+  --ct-muted: #64748B;
+  --ct-surface: #F4F6F8;
+  --ct-paper: #FFFFFF;
+  --ct-border: #E6E9EE;
+  --ct-danger: #E85959;
+  --ct-success: #2ECC71;
+  --ct-shadow: rgba(15, 23, 42, 0.06);
+  /* small derived tokens */
+  --ct-hero-gradient-start: #FFFFFF;
+  --ct-hero-gradient-end: var(--ct-surface);
+  --ct-aside-active-bg: #E8FBF6;
+  --ct-card-surface: #F0F2F4;
+}
+
+/* Background helpers */
+.bg-ct-surface { background-color: var(--ct-surface) !important; }
+.bg-ct-paper { background-color: var(--ct-paper) !important; }
+.bg-ct-card { background-color: var(--ct-card-surface) !important; }
+
+/* Text helpers */
+.text-ct-ink { color: var(--ct-ink) !important; }
+.text-ct-muted { color: var(--ct-muted) !important; }
+
+/* Border / stroke */
+.border-ct { border-color: var(--ct-border) !important; }
+.border-bottom-ct { border-bottom: 1px solid var(--ct-border) !important; }
+
+/* Navbar specific */
+.navbar-ct { background-color: var(--ct-paper); border-bottom: 1px solid var(--ct-border); }
+.navbar-brand-ink { color: var(--ct-ink); font-weight: 700; }
+
+/* CTA / button utilities */
+.btn-ct-primary { background-color: var(--ct-primary); color: #fff; border-color: var(--ct-primary); }
+.btn-ct-primary:disabled { opacity: 0.6; }
+
+/* Currency chips */
+.chip { display: inline-flex; align-items: center; gap: .5rem; padding: .25rem .5rem; border-radius: .5rem; font-size: .85rem; font-weight: 600; box-shadow: 0 1px 2px var(--ct-shadow); }
+.chip-gold { background-color: var(--ct-gold); color: var(--ct-ink); }
+.chip-gem { background-color: var(--ct-secondary); color: var(--ct-ink); }
+
+/* Modal / form helpers */
+.input-disabled-surface { background-color: var(--ct-surface); color: var(--ct-muted); border: 1px solid var(--ct-border); }
+
+/* Action menu / floating */
+.action-toggle { background-color: var(--ct-ink); color: #fff; border-radius: 999px; width: 56px; height: 56px; display: inline-grid; place-items: center; }
+.action-card { background-color: var(--ct-paper); border: 1px solid var(--ct-border); box-shadow: 0 6px 18px var(--ct-shadow); }
+
+/* Small accessibility helpers */
+.text-contrast-high { color: var(--ct-ink); }
+.text-contrast-muted { color: var(--ct-muted); }
+
+/* Utility spacing tweaks used in many components */
+.u-gap-sm { gap: .5rem !important; }
+.u-gap-md { gap: 1rem !important; }
