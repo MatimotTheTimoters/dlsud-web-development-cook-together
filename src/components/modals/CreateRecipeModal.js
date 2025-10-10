@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import apiLinks from '../../constants/api.js';
 import { generateUniqueId } from '../../hooks/uuidHelper.js';
 import { useAuth } from '../../hooks/useAuth.js';
+import { calculateMaxRewards, updateUserRewardLimits } from '../../utils/rewardCalculator.js';
 
 /**
  * ModalCreateRecipe
  * - show / onHide control modal visibility (this component should only be used as a popup/modal)
  * - uses theme styles from src/styles/colors.css (class btn-ct-primary, modal-ct etc.)
  * - generates a unique id via uuidHelper and preserves logged in user via useAuth
+ * - enforces reward limits based on user level and engagement
  *
  * Note: replace the Cloudinary placeholders if you want client-side image upload.
  */
@@ -31,10 +33,68 @@ export default function ModalCreateRecipe({ show, onHide, onCreated }) {
     isPublic: true,
   });
   const [loading, setLoading] = useState(false);
+  const [userRewardLimits, setUserRewardLimits] = useState({
+    maxExp: 100,
+    maxGold: 50,
+    maxGem: 5,
+    successRate: 50
+  });
+  const [userStats, setUserStats] = useState(null);
+
+  // Fetch user data and calculate reward limits
+  useEffect(() => {
+    const fetchUserLimits = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const userRes = await fetch(`${apiLinks.users}?id=${user.id}`);
+        const userData = await userRes.json();
+        
+        if (userData.length > 0) {
+          const userStats = userData[0];
+          setUserStats(userStats);
+          const limits = calculateMaxRewards(userStats);
+          setUserRewardLimits(limits);
+          
+          // Set default values within limits
+          setValues(prev => ({
+            ...prev,
+            expReward: Math.min(prev.expReward, limits.maxExp),
+            goldReward: Math.min(prev.goldReward, limits.maxGold),
+            gemReward: Math.min(prev.gemReward, limits.maxGem)
+          }));
+        }
+      } catch (error) {
+        console.warn('Failed to fetch user limits, using defaults:', error);
+      }
+    };
+    
+    if (show) {
+      fetchUserLimits();
+    }
+  }, [user?.id, show]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setValues(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    
+    // Auto-cap reward values to user limits
+    if (name === 'expReward' && Number(value) > userRewardLimits.maxExp) {
+      setValues(prev => ({ ...prev, [name]: userRewardLimits.maxExp }));
+      return;
+    }
+    if (name === 'goldReward' && Number(value) > userRewardLimits.maxGold) {
+      setValues(prev => ({ ...prev, [name]: userRewardLimits.maxGold }));
+      return;
+    }
+    if (name === 'gemReward' && Number(value) > userRewardLimits.maxGem) {
+      setValues(prev => ({ ...prev, [name]: userRewardLimits.maxGem }));
+      return;
+    }
+    
+    setValues(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   const handleFile = (e) => {
@@ -63,28 +123,44 @@ export default function ModalCreateRecipe({ show, onHide, onCreated }) {
     e.preventDefault();
     setLoading(true);
     try {
-      // basic validation
+      // Basic validation
       if (!values.description.trim()) {
         alert('Please provide a description.');
         setLoading(false);
         return;
       }
 
-      // 1) generate a unique id for this recipe (uses uuidHelper)
+      // Reward validation
+      if (Number(values.expReward) > userRewardLimits.maxExp) {
+        alert(`EXP reward cannot exceed your limit of ${userRewardLimits.maxExp}`);
+        setLoading(false);
+        return;
+      }
+      if (Number(values.goldReward) > userRewardLimits.maxGold) {
+        alert(`Gold reward cannot exceed your limit of ${userRewardLimits.maxGold}`);
+        setLoading(false);
+        return;
+      }
+      if (Number(values.gemReward) > userRewardLimits.maxGem) {
+        alert(`Gem reward cannot exceed your limit of ${userRewardLimits.maxGem}`);
+        setLoading(false);
+        return;
+      }
+
+      // 1) Generate a unique id for this recipe
       const id = await generateUniqueId(apiLinks.recipes, { idField: 'id', retries: 5, check: true });
 
-      // 2) upload image if any and get public URL
+      // 2) Upload image if any and get public URL
       let coverImageUrl = '';
       if (file) {
         try {
           coverImageUrl = await uploadImageToCloudinary(file) || '';
         } catch (imgErr) {
-          // continue but warn
           console.warn('Image upload failed, continuing without cover image:', imgErr);
         }
       }
 
-      // 3) build row matching sheet header names
+      // 3) Build row matching sheet header names
       const preparationTime = `${values.preparationTimeValue} ${values.preparationTimeUnit}`;
       const servingSize = `${values.servingSizeValue} ${values.servingSizeUnit}`;
 
@@ -102,11 +178,10 @@ export default function ModalCreateRecipe({ show, onHide, onCreated }) {
         isPaid: values.isPaid ? 'true' : 'false',
         price: values.isPaid ? String(Number(values.price) || 0) : '',
         isPublic: values.isPublic ? 'true' : 'false',
-        // optionally store who created it (if your sheet has this column)
         createdBy: user?.id ?? ''
       };
 
-      // 4) post to SheetDB
+      // 4) Post to SheetDB
       const payload = { data: [row] };
       const res = await fetch(apiLinks.recipes, {
         method: 'POST',
@@ -118,7 +193,25 @@ export default function ModalCreateRecipe({ show, onHide, onCreated }) {
         throw new Error(`SheetDB insert failed: ${res.status} ${txt}`);
       }
 
-      // success: notify parent and close modal
+      // 5) Update user stats - increment recipesCreated
+      if (userStats) {
+        const currentRecipesCreated = parseInt(userStats.recipesCreated || 0);
+        await fetch(apiLinks.users, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: {
+              id: user.id,
+              recipesCreated: currentRecipesCreated + 1
+            }
+          })
+        });
+
+        // Update user reward limits for next time
+        await updateUserRewardLimits(user.id, apiLinks);
+      }
+
+      // Success: notify parent and close modal
       if (typeof onCreated === 'function') onCreated(row);
       onHide();
     } catch (err) {
@@ -136,6 +229,21 @@ export default function ModalCreateRecipe({ show, onHide, onCreated }) {
         </Modal.Header>
 
         <Modal.Body>
+          {/* Reward Limits Info */}
+          <div className="mb-3 p-3 bg-light rounded">
+            <h6 className="text-ct-muted mb-2">Your Reward Limits</h6>
+            <div className="d-flex justify-content-between small">
+              <span>Max EXP: <strong>{userRewardLimits.maxExp}</strong></span>
+              <span>Max Gold: <strong>{userRewardLimits.maxGold}</strong></span>
+              <span>Max Gems: <strong>{userRewardLimits.maxGem}</strong></span>
+            </div>
+            {userStats && (
+              <div className="mt-2 text-muted small">
+                Based on: Level {userStats.level || 1} • {userStats.recipesCreated || 0} recipes created • {userRewardLimits.successRate}% success rate
+              </div>
+            )}
+          </div>
+
           <Form.Group className="mb-2">
             <Form.Label className="text-ct-muted">Cover Image</Form.Label>
             <Form.Control type="file" accept="image/*" onChange={handleFile} />
@@ -203,33 +311,54 @@ export default function ModalCreateRecipe({ show, onHide, onCreated }) {
           </Form.Group>
 
           <Form.Group className="mb-2">
-            <Form.Label className="text-ct-muted">Experience Reward</Form.Label>
+            <Form.Label className="text-ct-muted">
+              Experience Reward (Max: {userRewardLimits.maxExp})
+            </Form.Label>
             <Form.Control
               type="number"
               name="expReward"
               value={values.expReward}
               onChange={handleChange}
+              min="0"
+              max={userRewardLimits.maxExp}
             />
+            <Form.Text className="text-muted">
+              Available: {userRewardLimits.maxExp - values.expReward}
+            </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-2">
-            <Form.Label className="text-ct-muted">Gold Reward</Form.Label>
+            <Form.Label className="text-ct-muted">
+              Gold Reward (Max: {userRewardLimits.maxGold})
+            </Form.Label>
             <Form.Control
               type="number"
               name="goldReward"
               value={values.goldReward}
               onChange={handleChange}
+              min="0"
+              max={userRewardLimits.maxGold}
             />
+            <Form.Text className="text-muted">
+              Available: {userRewardLimits.maxGold - values.goldReward}
+            </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-2">
-            <Form.Label className="text-ct-muted">Gem Reward</Form.Label>
+            <Form.Label className="text-ct-muted">
+              Gem Reward (Max: {userRewardLimits.maxGem})
+            </Form.Label>
             <Form.Control
               type="number"
               name="gemReward"
               value={values.gemReward}
               onChange={handleChange}
+              min="0"
+              max={userRewardLimits.maxGem}
             />
+            <Form.Text className="text-muted">
+              Available: {userRewardLimits.maxGem - values.gemReward}
+            </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-2">
