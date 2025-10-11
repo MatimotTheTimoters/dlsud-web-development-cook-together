@@ -13,6 +13,9 @@ const RecipesPage = () => {
             <AsideComponent />
           </Col>
           <Col xs={12} md={9} className="app-main">
+            <h2>My Kitchen Page</h2>
+          </Col>
+          <Col xs={12} md={9} className="app-main">
             <BodyComponent />
           </Col>
         </Row>

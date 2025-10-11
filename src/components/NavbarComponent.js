@@ -16,7 +16,7 @@ function NavbarComponent() {
   const { user } = useAuth();
 
   // If no user is logged in, show a minimal navbar
-  if (!user) {
+  if (!user || !user.id) {
     return (
       <Navbar expand="lg" className="navbar-ct" bg="light" variant="light">
         <Container fluid>
@@ -30,6 +30,10 @@ function NavbarComponent() {
             />
             <span>Cook Together</span>
           </Navbar.Brand>
+          <Nav className="ms-auto">
+            <Nav.Link as={Link} to="/login">Login</Nav.Link>
+            <Nav.Link as={Link} to="/registration">Register</Nav.Link>
+          </Nav>
         </Container>
       </Navbar>
     );
@@ -62,18 +66,18 @@ function NavbarComponent() {
 
         {/* Group 2: Shop and Inventory Buttons */}
         <div className="navbar-button-group">
-          <Button 
-            as={Link} 
-            to="/inventory" 
-            size="sm" 
+          <Button
+            as={Link}
+            to="/inventory"
+            size="sm"
             className="btn-ct-primary navbar-action-button"
           >
             INVENTORY
           </Button>
-          <Button 
-            as={Link} 
-            to="/shop" 
-            size="sm" 
+          <Button
+            as={Link}
+            to="/shop"
+            size="sm"
             className="btn-ct-primary navbar-action-button"
           >
             SHOP
@@ -88,7 +92,7 @@ function NavbarComponent() {
             </div>
             <span className="navbar-currency-text">{goldCount} Gold</span>
           </div>
-          
+
           <div className="navbar-currency-item">
             <div className="navbar-currency-icon gem-currency-icon">
               <img src={gemIcon} alt="Gems" className="navbar-currency-img" />
@@ -101,7 +105,7 @@ function NavbarComponent() {
         <div className="navbar-level-group">
           {/* Ring version for mobile */}
           <div className="navbar-level-ring">
-            <div 
+            <div
               className="navbar-level-progress"
               style={{
                 background: `conic-gradient(var(--ct-primary) ${expProgress}%, var(--ct-surface) ${expProgress}%)`
@@ -112,7 +116,7 @@ function NavbarComponent() {
               </div>
             </div>
           </div>
-          
+
           {/* Bar version for desktop */}
           <div className="navbar-level-bar">
             <div className="navbar-level-info">
@@ -120,7 +124,7 @@ function NavbarComponent() {
               <span className="navbar-level-stats">{currentEXP}/{currentLevelCeiling} EXP</span>
             </div>
             <div className="navbar-level-bar-container">
-              <div 
+              <div
                 className="navbar-level-bar-progress"
                 style={{ width: `${expProgress}%` }}
               ></div>
@@ -130,30 +134,30 @@ function NavbarComponent() {
 
         {/* Group 4: Profile, Users and Settings Icons */}
         <div className="navbar-icon-group">
-          <Button 
-            as={Link} 
-            to="/profile" 
-            variant="light" 
+          <Button
+            as={Link}
+            to="/profile"
+            variant="light"
             aria-label="profile"
             className="navbar-icon-button"
           >
             <img src={profileIcon} alt="Profile" className="navbar-icon-img" />
           </Button>
-          
-          <Button 
-            as={Link} 
-            to="/people" 
-            variant="light" 
+
+          <Button
+            as={Link}
+            to="/people"
+            variant="light"
             aria-label="users"
             className="navbar-icon-button"
           >
             <img src={usersIcon} alt="Users" className="navbar-icon-img" />
           </Button>
-          
-          <Button 
-            as={Link} 
-            to="/settings" 
-            variant="light" 
+
+          <Button
+            as={Link}
+            to="/settings"
+            variant="light"
             aria-label="settings"
             className="navbar-icon-button"
           >
