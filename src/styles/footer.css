@@ -1,23 +1,40 @@
-/* FooterComponent */
-.sticky-footer {
-  position: relative;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  padding: 10px 0;
-  text-align: center;
-}
-
-/* FooterComponent Styles */
+/* FooterComponent Styles - Fixed to bottom */
 .footer-ct {
   background-color: var(--ct-surface);
   padding: 1rem 0;
   color: var(--ct-muted);
-  position: relative;
+  border-top: 1px solid var(--ct-border);
+  position: fixed;
+  left: 0;
   bottom: 0;
   width: 100%;
+  z-index: 1030; /* Above most content but below modals */
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
 }
 
-body > .footer-ct {
-  margin-top: auto;
+/* Add padding to main content to prevent footer overlap */
+.main-content {
+  padding-bottom: 80px; /* Adjust based on footer height */
+}
+
+/* Adjust for mobile */
+@media (max-width: 768px) {
+  .footer-ct {
+    padding: 0.75rem 0;
+  }
+  
+  .main-content {
+    padding-bottom: 70px; /* Slightly less on mobile */
+  }
+}
+
+/* Ensure footer stays above floating action menu */
+.floating-action-menu {
+  bottom: 80px; /* Position above footer */
+}
+
+@media (max-width: 768px) {
+  .floating-action-menu {
+    bottom: 70px;
+  }
 }

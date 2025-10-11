@@ -3,7 +3,7 @@ import { Container } from "react-bootstrap";
 
 function FooterComponent() {
   return (
-    <footer className="footer-ct">
+    <footer className="footer-ct sticky-footer">
       <Container className="text-center">
         <h5 className="text-ct-ink mb-2">Cook Together</h5>
         <p className="text-ct-muted small">
