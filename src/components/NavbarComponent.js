@@ -143,7 +143,7 @@ function NavbarComponent() {
             <div className="navbar-nav-group">
               <Button
                 as={Link}
-                to="/people"
+                to="/users"
                 variant="light"
                 aria-label="users"
                 className="navbar-nav-button"
@@ -235,7 +235,7 @@ function NavbarComponent() {
           <div className="navbar-nav-group">
             <Button
               as={Link}
-              to="/people"
+              to="/users"
               variant="light"
               aria-label="users"
               className="navbar-nav-button"
