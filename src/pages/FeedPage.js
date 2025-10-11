@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import AsideComponent from '../components/AsideComponent';
+import AsideComponent from '../components/AsideComponent.js';
 import ChallengeBody from '../components/ChallengeBody.js';
 import '../styles/colors.css';
 

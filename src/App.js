@@ -9,31 +9,28 @@ import LandingPage from './pages/LandingPage';
 import RegistrationPage from './pages/RegistrationPage';
 import LoginPage from './pages/LoginPage';
 
-import RecipesPage from './pages/RecipesPage';
-import Challenges from './pages/Challenges';
-import KitchensPage from './pages/KitchensPage';
-import Inventory from './pages/Inventory';
+import FeedPage from './pages/FeedPage'; // Corrected from RecipesPage
+import DiscoverPage from './pages/DiscoverPage'; // Corrected from Challenges
+import MyKitchenPage from './pages/MyKitchenPage'; // Corrected from KitchensPage
+import InventoryPage from './pages/InventoryPage'; // Corrected from Inventory
 
 function App() {
   return (
     <Router>
-      <NavbarComponent /> 
+      <NavbarComponent />
       <Routes>
+        {/* Homepage routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/registration" element={<RegistrationPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/recipes" element={<FeedPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
 
-        {/* homepage routes */}
-        <Route path='/' element={<LandingPage />} />
-        <Route path='/registration' element={<RegistrationPage />} />
-        <Route path='/login' element={<LoginPage />} />
-        <Route path='/recipes' element={<RecipesPage />} />
-        <Route path='*' element={<Navigate to='/' replace />} />
-
-        
         {/* AsideComponent routes */}
-        <Route path='/Discover' element={<Challenges/>} />
-        <Route path='/Challenges' element={<Challenges/>} />
-        <Route path='/KitchensPage' element={<KitchensPage />} />
-        <Route path='/inventory' element={<Inventory/>} />
-
+        <Route path="/discover" element={<DiscoverPage />} />
+        <Route path="/challenges" element={<DiscoverPage />} />
+        <Route path="/kitchens" element={<MyKitchenPage />} />
+        <Route path="/inventory" element={<InventoryPage />} />
       </Routes>
       <FooterComponent />
     </Router>
