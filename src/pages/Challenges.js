@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import AsideComponent from '../components/AsideComponent';
-import ChallengeBody from '../components/ChallengeBody.js';
+import ChallengeBody from '../components/ChallengeBody';
 import '../styles/colors.css';
 
 const Challenges = () => {
@@ -13,7 +13,7 @@ const Challenges = () => {
             <AsideComponent activeKey="/challenges" />
           </Col>
           <Col xs={12} md={9} className="app-main">
-          <ChallengeBody />
+            <ChallengeBody />
           </Col>
         </Row>
       </Container>
