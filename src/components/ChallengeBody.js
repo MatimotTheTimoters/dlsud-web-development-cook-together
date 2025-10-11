@@ -9,6 +9,10 @@ const ChallengeItems = [
   { id: 2, title: 'React Hooks Mastery', author: 'Jane', reward: '150', difficulty: 'Medium', end: '09/21/25', tags: 'React, Hooks', img: '/assets/images/placeholder.svg' },
   { id: 3, title: 'Sorting Challenge', author: 'John', reward: '200', difficulty: 'Hard', end: '01/01/26', tags: 'Sorting, Algorithms', img: '/assets/images/placeholder.svg' },
   { id: 4, title: 'API Integration', author: 'Mary', reward: '180', difficulty: 'Medium', end: '11/20/25', tags: 'API, Fetch', img: '/assets/images/placeholder.svg' },
+  { id: 5, title: 'Algorithm Basics', author: 'Mary', reward: '120', difficulty: 'Easy', end: '06/12/25', tags: 'Arrays, Loops', img: '/assets/images/placeholder.svg' },
+  { id: 6, title: 'React Hooks Mastery', author: 'Jane', reward: '150', difficulty: 'Medium', end: '09/21/25', tags: 'React, Hooks', img: '/assets/images/placeholder.svg' },
+  { id: 7, title: 'Sorting Challenge', author: 'John', reward: '200', difficulty: 'Hard', end: '01/01/26', tags: 'Sorting, Algorithms', img: '/assets/images/placeholder.svg' },
+  { id: 8, title: 'API Integration', author: 'Mary', reward: '180', difficulty: 'Medium', end: '11/20/25', tags: 'API, Fetch', img: '/assets/images/placeholder.svg' },
 ];
 
 function ChallengeBody() {
