@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import apiSheets from '../../constants/api.js';
-import { generateUniqueId } from '../../hooks/uuidHelper.js';
+import { generateBatchIds } from '../../hooks/uuidHelper.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { calculateMaxRewards } from '../../utils/rewardCalculator.js';
 
 export default function CreateRecipeModal({ show, onHide, onCreated }) {
   const { user } = useAuth();
-  const [file, setFile] = useState(null);
   const [recipeValues, setRecipeValues] = useState({
     title: '',
     description: '',
@@ -36,7 +35,6 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
     maxGemPrice: 10,
   });
 
-  // Fetch user reward limits
   useEffect(() => {
     const fetchUserLimits = async () => {
       if (!user?.id) return;
@@ -95,10 +93,6 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
     }));
   };
 
-  const handleFile = (e) => {
-    setFile(e.target.files && e.target.files[0] ? e.target.files[0] : null);
-  };
-
   const addIngredient = () => {
     setIngredients((prev) => [
       ...prev,
@@ -129,24 +123,14 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
     setLoading(true);
 
     try {
-      // Generate unique IDs
-      const recipeId = await generateUniqueId(apiSheets.recipes, { idField: 'id' });
+      const totalIdsNeeded = 1 + ingredients.length + steps.length;
+      const batchIds = await generateBatchIds(totalIdsNeeded, 'id');
+      
+      const recipeId = batchIds[0];
+      const ingredientIds = batchIds.slice(1, 1 + ingredients.length);
+      const stepIds = batchIds.slice(1 + ingredients.length);
 
-      // Upload image if provided
-      let coverImageUrl = '/src/assets/placeholders/new-recipe.png';
-      if (file) {
-        const cloudName = 'YOUR_CLOUD_NAME';
-        const unsignedPreset = 'YOUR_UNSIGNED_PRESET';
-        const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', unsignedPreset);
-        const res = await fetch(url, { method: 'POST', body: fd });
-        if (res.ok) {
-          const json = await res.json();
-          coverImageUrl = json.secure_url || json.url || coverImageUrl;
-        }
-      }
+      const coverImageUrl = '/src/assets/placeholders/new-recipe.png';
 
       // Prepare recipe data
       const preparationTime = `${recipeValues.preparationTimeValue} ${recipeValues.preparationTimeUnit}`;
@@ -171,49 +155,56 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
         author: user?.fullName || '',
       };
 
-      // Post recipe to SheetDB
-      await fetch(apiSheets.recipes, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: [recipePayload] }),
-      });
+      const allPostRequests = [];
 
-      // Post ingredients to SheetDB
-      const ingredientPromises = ingredients.map(async (ingredient) => {
-        const ingredientId = await generateUniqueId(apiSheets.recipesIngredients, {
-          idField: 'ingredientId',
-        });
-        const ingredientPayload = {
-          ingredientId,
+      // Post recipe to SheetDB
+      allPostRequests.push(
+        fetch(apiSheets.recipes, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: [recipePayload] }),
+        })
+      );
+
+      // Prepare and post ingredients
+      if (ingredients.length > 0) {
+        const ingredientPayloads = ingredients.map((ingredient, index) => ({
+          ingredientId: ingredientIds[index],
           createdAt: new Date().toISOString(),
           recipeId,
           recipeContent: ingredient.recipeContent,
           servingSize: `${ingredient.servingSizeValue} ${ingredient.servingSizeUnit}`,
-        };
-        return fetch(apiSheets.recipesIngredients, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: [ingredientPayload] }),
-        });
-      });
-      await Promise.all(ingredientPromises);
+        }));
 
-      // Post steps to SheetDB
-      const stepPromises = steps.map(async (step) => {
-        const stepId = await generateUniqueId(apiSheets.recipesSteps, { idField: 'stepId' });
-        const stepPayload = {
-          stepId,
+        allPostRequests.push(
+          fetch(apiSheets.recipesIngredients, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: ingredientPayloads }),
+          })
+        );
+      }
+
+      // Prepare and post steps
+      if (steps.length > 0) {
+        const stepPayloads = steps.map((step, index) => ({
+          stepId: stepIds[index],
           createdAt: new Date().toISOString(),
           recipeId,
           stepContent: step.stepContent,
-        };
-        return fetch(apiSheets.recipesSteps, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: [stepPayload] }),
-        });
-      });
-      await Promise.all(stepPromises);
+        }));
+
+        allPostRequests.push(
+          fetch(apiSheets.recipesSteps, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: stepPayloads }),
+          })
+        );
+      }
+
+      // Execute all POST requests in parallel
+      await Promise.all(allPostRequests);
 
       // Notify parent and close modal
       if (typeof onCreated === 'function') onCreated(recipePayload);
@@ -232,6 +223,8 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
           <Modal.Title>Create Recipe</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {/* 🚀 REMOVED file upload input from the form */}
+          
           {/* Recipe Fields */}
           <Form.Group>
             <Form.Label>Title</Form.Label>
