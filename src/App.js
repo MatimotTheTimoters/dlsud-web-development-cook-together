@@ -21,7 +21,6 @@ function App() {
     <Router>
       <div className="app-container">
         <NavbarComponent />
-        <AsideComponent />
         <main className="main-content">
           <Routes>
             {/* Homepage routes */}
