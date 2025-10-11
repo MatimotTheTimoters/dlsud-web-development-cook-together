@@ -11,14 +11,29 @@
   justify-content: space-between;
 }
 
-/* Logo Group */
-.navbar-logo-group {
+/* ===== FLEX GROUP BASE STYLES ===== */
+.navbar-logo-group,
+.navbar-button-group,
+.navbar-currency-group,
+.navbar-level-group,
+.navbar-icon-group,
+.navbar-profile-group,
+.navbar-nav-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex: 1;
 }
 
+/* ===== SPECIFIC GROUP POSITIONING ===== */
+.navbar-logo-group { flex: 1; }
+.navbar-button-group { flex: 1; justify-content: center; }
+.navbar-currency-group { flex: 1; justify-content: center; gap: 1rem; }
+.navbar-level-group { flex: 1; justify-content: center; gap: 1rem; }
+.navbar-icon-group { flex: 1; justify-content: flex-end; gap: 1rem; }
+.navbar-profile-group { margin-left: 1.5rem; }
+.navbar-nav-group { margin-left: 1rem; }
+
+/* ===== LOGO STYLES ===== */
 .navbar-logo-img {
   width: 36px;
   height: 36px;
@@ -30,29 +45,13 @@
   color: var(--ct-ink);
 }
 
-/* Shop and Inventory Buttons */
-.navbar-button-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-  justify-content: center;
-}
-
+/* ===== BUTTON STYLES ===== */
 .navbar-action-button {
   font-size: 0.875rem;
   padding: 0.5rem 1rem;
 }
 
-/* Currency Group */
-.navbar-currency-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-  justify-content: center;
-}
-
+/* ===== CURRENCY STYLES ===== */
 .navbar-currency-item {
   display: flex;
   align-items: center;
@@ -70,15 +69,7 @@
   color: var(--ct-ink);
 }
 
-/* Level Progress */
-.navbar-level-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-  justify-content: center;
-}
-
+/* ===== LEVEL PROGRESS STYLES ===== */
 .navbar-level-bar {
   display: flex;
   flex-direction: column;
@@ -108,59 +99,137 @@
   transition: width 0.3s ease;
 }
 
-/* User Actions */
-.navbar-icon-group {
+/* ===== ICON BUTTON BASE STYLES ===== */
+.navbar-icon-button,
+.navbar-nav-button {
+  padding: 0.5rem !important;
+  border-radius: 50% !important;
+  background-color: var(--ct-surface) !important;
+  border: 1px solid var(--ct-border) !important;
+  transition: all 0.2s ease;
+}
+
+.navbar-icon-button:hover,
+.navbar-nav-button:hover {
+  background-color: var(--ct-primary-light) !important;
+  transform: translateY(-1px);
+}
+
+.navbar-icon-img,
+.navbar-nav-img {
+  width: 20px;
+  height: 20px;
+}
+
+/* ===== PROFILE SPECIFIC STYLES ===== */
+.navbar-profile-button {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex: 1;
-  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem !important;
+  border: 1px solid var(--ct-border) !important;
+  border-radius: 50px !important;
+  background-color: var(--ct-surface) !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
 }
 
-.navbar-icon-button {
-  padding: 0.5rem;
+.navbar-profile-button:hover {
+  background-color: var(--ct-primary-light) !important;
+  transform: translateY(-1px);
+}
+
+.navbar-profile-img {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: var(--ct-surface);
-  border: 1px solid var(--ct-border);
 }
 
-.navbar-icon-img {
-  width: 24px;
-  height: 24px;
+.navbar-username {
+  font-weight: 600;
+  color: var(--ct-ink);
+  font-size: 0.9rem;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet and Mobile (≤ 991px) */
+@media (max-width: 991px) {
   .navbar-ct {
-    flex-wrap: wrap;
     padding: 0.5rem;
+    flex-wrap: wrap;
   }
 
-  .navbar-logo-group {
-    justify-content: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .navbar-button-group {
-    justify-content: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .navbar-currency-group {
-    justify-content: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .navbar-level-group {
-    justify-content: center;
-    margin-bottom: 0.5rem;
-  }
-
+  /* Center all groups on mobile */
+  .navbar-logo-group,
+  .navbar-button-group,
+  .navbar-currency-group,
+  .navbar-level-group,
   .navbar-icon-group {
     justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Reset margins for profile and nav groups */
+  .navbar-profile-group,
+  .navbar-nav-group {
+    margin-left: 0;
+    margin-bottom: 1rem;
+    justify-content: center;
+  }
+
+  .navbar-profile-button {
+    justify-content: center;
+    width: 100%;
   }
 
   .navbar-currency-text {
     display: inline; /* Ensure gold and gem counts remain visible */
   }
+}
+
+/* Small Mobile (≤ 768px) */
+@media (max-width: 768px) {
+  .navbar-currency-group,
+  .navbar-level-group {
+    gap: 0.5rem; /* Reduce gap on very small screens */
+  }
+
+  .navbar-level-bar-container {
+    width: 80px; /* Slightly smaller progress bar */
+  }
+}
+
+/* ===== OFFCANVAS SPECIFIC STYLES ===== */
+.navbar-offcanvas {
+  .navbar-profile-group,
+  .navbar-nav-group {
+    margin-left: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .navbar-profile-button {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .navbar-nav-group {
+    justify-content: space-around;
+  }
+}
+
+/* ===== UTILITY CLASSES ===== */
+.navbar-burger-toggle {
+  border: none;
+  background: transparent;
+}
+
+.navbar-offcanvas {
+  background-color: var(--ct-surface);
+}
+
+/* Ensure proper icon sizing */
+.navbar-icon-img {
+  width: 24px;
+  height: 24px;
 }
