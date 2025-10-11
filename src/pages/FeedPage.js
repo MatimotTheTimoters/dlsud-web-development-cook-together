@@ -13,9 +13,6 @@ const FeedPage = () => {
             <AsideComponent activeKey="/feed" />
           </Col>
           <Col xs={12} md={9} className="app-main">
-            <h2>Feed Page</h2>
-          </Col>
-          <Col xs={12} md={9} className="app-main">
             <BodyComponent />
           </Col>
         </Row>

@@ -13,9 +13,8 @@ const DiscoverPage = () => {
             <AsideComponent activeKey="/DiscoverPage" />
           </Col>
           <Col xs={12} md={9} className="app-main">
-            <h2>Discover Page</h2>
+            <BodyComponent />
           </Col>
-          <BodyComponent/>
         </Row>
       </Container>
     </main>
