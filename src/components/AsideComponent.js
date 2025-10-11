@@ -4,13 +4,12 @@ import { Link } from "react-router-dom";
 import "../styles/colors.css";
 
 const defaultItems = [
-  { key: "discover", label: "Discover", to: "/home-recipes", badge: null },
-  { key: "challenges", label: "Challenges", to: "/Challenges", badge: "New" },
-  { key: "kitchens", label: "Kitchens", to: "/KitchensPage", badge: null },
-  { key: "inventory", label: "Inventory", to: "/inventory", badge: null },
+  { key: "feed", label: "Feed", to: "/feed", badge: null },
+  { key: "discover", label: "Discover", to: "/discover", badge: null },
+  { key: "my-kitchen", label: "My Kitchen", to: "/my-kitchen", badge: null },
 ];
 
-function AsideComponent({ items = defaultItems, activeKey = "/home-recipes", className = "" }) {
+function AsideComponent({ items = defaultItems, activeKey = "/feed", className = "" }) {
   return (
     <aside className={`app-sidebar aside-card ${className}`}>
       <Nav className="flex-column" as="nav" aria-label="aside navigation">
@@ -25,6 +24,11 @@ function AsideComponent({ items = defaultItems, activeKey = "/home-recipes", cla
                   isActive ? "aside-item--active" : "text-ct-muted"
                 }`}
                 aria-current={isActive ? "page" : undefined}
+                style={{
+                  backgroundColor: isActive ? "var(--ct-aside-active-bg)" : "transparent",
+                  borderRadius: "0.375rem",
+                  padding: "0.5rem 1rem",
+                }}
               >
                 <span className={isActive ? "text-ct-ink" : "text-ct-muted"}>{it.label}</span>
                 {it.badge ? <small className="badge-ct">{it.badge}</small> : null}
