@@ -1,68 +1,40 @@
-import React from 'react';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Container, Button } from 'react-bootstrap';
+import ChallengeCardGroup from './card-groups/ChallengeCardGroup';
+import ScrollDownNav from './ScrollDownNav.js';
 import '../styles/colors.css';
 
 const ChallengeItems = [
-  { id: 1, title: 'Challenge Name', author: 'Mary', reward: '120', difficulty: 'Easy',   end: '06/12/25', tags: "tags", img: '/assets/images/placeholder.svg' },
-  { id: 2, title: 'Challenge Name', author: 'Jane', reward: '120', difficulty: 'Medium', end: '09/21/25', tags: "tags", img: '/assets/images/placeholder.svg' },
-  { id: 3, title: 'Challenge Name', author: 'John', reward: '120', difficulty: 'Hard',   end: '01/01/26', tags: "tags", img: '/assets/images/placeholder.svg' },
+  { id: 1, title: 'Algorithm Basics', author: 'Mary', reward: '120', difficulty: 'Easy', end: '06/12/25', tags: 'Arrays, Loops', img: '/assets/images/placeholder.svg' },
+  { id: 2, title: 'React Hooks Mastery', author: 'Jane', reward: '150', difficulty: 'Medium', end: '09/21/25', tags: 'React, Hooks', img: '/assets/images/placeholder.svg' },
+  { id: 3, title: 'Sorting Challenge', author: 'John', reward: '200', difficulty: 'Hard', end: '01/01/26', tags: 'Sorting, Algorithms', img: '/assets/images/placeholder.svg' },
+  { id: 4, title: 'API Integration', author: 'Mary', reward: '180', difficulty: 'Medium', end: '11/20/25', tags: 'API, Fetch', img: '/assets/images/placeholder.svg' },
 ];
 
-function Stars({ value = 0 }) {
-  const full = '★'.repeat(Math.max(0, Math.floor(value)));
-  const empty = '☆'.repeat(Math.max(0, 5 - Math.floor(value)));
-  return <span className="text-warning">{full}{empty}</span>;
-}
-
 function ChallengeBody() {
+  const [filteredItems, setFilteredItems] = useState(ChallengeItems);
+
+  const handleSearch = (query) => {
+    const lower = query.toLowerCase();
+    const filtered = ChallengeItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(lower) ||
+        item.author.toLowerCase().includes(lower) ||
+        item.difficulty.toLowerCase().includes(lower) ||
+        item.tags.toLowerCase().includes(lower)
+    );
+    setFilteredItems(filtered);
+  };
+
   return (
-    <Container className="mt-4">
+    <Container className="mt-4 position-relative">
+      <ScrollDownNav onSearch={handleSearch} />
+
       <section className="col-12 col-md-9">
-        <Row xs={1} sm={2} md={3} className="g-3">
-          {ChallengeItems.map(r => (
-            <Col key={r.id} className="col">
-              <Card className="h-100 ct-card">
-                <Card.Img variant="top" src={r.img} alt={r.title} className="card-img-top" />
-                <Card.Body>
-                  <Card.Title className="text-ct-ink">{r.title}</Card.Title>
-                  
-                  <p className="card-text">
-                    <span className="fw-bold">Created by:</span> <span className="text-ct-muted">{r.author}</span>
-                  </p>
-
-                  <p className="card-text">
-                    <span className="fw-bold">Difficulty</span> <span className="text-ct-muted">{r.difficulty}</span>
-                  </p>
-
-                  <div className="border rounded p-3 my-3 bg-light d-flex flex-column align-items-center">
-                  <p className="mb-1 fw-bold">Rewards</p>
-                  <p className="mb-0">
-                  <img src={r.img} style={{marginRight: "2px"}} /> <span className="text-ct-muted">{r.reward}</span>
-                
-                  <img src={r.img} style={{ marginLeft: "40px" }} /> <span className="text-ct-muted">{r.reward}</span>
-                  </p>
-                  </div>
-
-                  <Button className="btn-ct-primary btn-sm">Join   </Button> Ends at:    <span className="text-ct-muted">{r.end}</span>
-                  
-                  <div className="border rounded p-3 my-3 bg-light d-flex flex-row align-items-center" style={{ marginLeft: "4px", marginRight: "4px", gap: "6px"  }}>
-                  <Button className="btn btn-primary">tags</Button>
-                  <Button className="btn btn-secondary">tags</Button>
-                  <Button className="btn btn-success">tags</Button>
-                  <Button className="btn btn-danger">tags</Button>
-                  </div>
-
-
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-
+        <ChallengeCardGroup items={filteredItems} />
         <div className="d-grid gap-2 col-6 mx-auto my-4">
           <Button className="btn-ct-outline">Load more</Button>
         </div>
-        
       </section>
     </Container>
   );
