@@ -8,7 +8,7 @@ export function makeId() {
 
 /**
  * Generate a unique id that is not present in the target SheetDB sheet.
- * - sheetUrl: the SheetDB URL already containing ?sheet=SheetName (e.g. apiLinks.users)
+ * - sheetUrl: the SheetDB URL already containing ?sheet=SheetName (e.g. apiSheets.users)
  * - opts:
  *    idField: the column name for the id in the sheet (default 'id')
  *    retries: number of attempts (default 3)

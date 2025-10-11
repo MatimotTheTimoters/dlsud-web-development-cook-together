@@ -3,7 +3,7 @@ import { Modal, Button, Form } from 'react-bootstrap';
 import { useAuth } from '../../hooks/useAuth.js';
 import { generateUniqueId } from '../../hooks/uuidHelper.js';
 import { useRewardLimits } from '../../hooks/useSheetData.js';
-import apiLinks from '../../constants/api.js';
+import apiSheets from '../../constants/api.js';
 
 export default function BuildChallengeModal({ show, onHide, onCreated }) {
   const { user } = useAuth();
@@ -29,7 +29,7 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
   useEffect(() => {
     const generateChallengeId = async () => {
       try {
-        const id = await generateUniqueId(apiLinks.challengesCookQuota, { idField: 'challengeId' });
+        const id = await generateUniqueId(apiSheets.challengesCookQuota, { idField: 'challengeId' });
         setValues((prev) => ({ ...prev, challengeId: id }));
       } catch (err) {
         console.error('Failed to generate challenge ID:', err);
@@ -91,7 +91,7 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
         ],
       };
 
-      const res = await fetch(apiLinks.challengesCookQuota, {
+      const res = await fetch(apiSheets.challengesCookQuota, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(payload),

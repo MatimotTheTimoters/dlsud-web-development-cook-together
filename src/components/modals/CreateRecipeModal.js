@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import apiLinks from '../../constants/api.js';
+import apiSheets from '../../constants/api.js';
 import { generateUniqueId } from '../../hooks/uuidHelper.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { calculateMaxRewards, updateUserRewardLimits } from '../../utils/rewardCalculator.js';
@@ -42,7 +42,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
       if (!user?.id) return;
 
       try {
-        const userRes = await fetch(`${apiLinks.users}?id=${user.id}`);
+        const userRes = await fetch(`${apiSheets.users}?id=${user.id}`);
         const userData = await userRes.json();
 
         if (userData.length > 0) {
@@ -130,7 +130,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
 
     try {
       // Generate unique IDs
-      const recipeId = await generateUniqueId(apiLinks.recipes, { idField: 'id' });
+      const recipeId = await generateUniqueId(apiSheets.recipes, { idField: 'id' });
 
       // Upload image if provided
       let coverImageUrl = '/src/assets/placeholders/new-recipe.png';
@@ -172,7 +172,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
       };
 
       // Post recipe to SheetDB
-      await fetch(apiLinks.recipes, {
+      await fetch(apiSheets.recipes, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: [recipePayload] }),
@@ -180,7 +180,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
 
       // Post ingredients to SheetDB
       for (const ingredient of ingredients) {
-        const ingredientId = await generateUniqueId(apiLinks.recipesIngredients, {
+        const ingredientId = await generateUniqueId(apiSheets.recipesIngredients, {
           idField: 'ingredientId',
         });
         const ingredientPayload = {
@@ -190,7 +190,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
           recipeContent: ingredient.recipeContent,
           servingSize: `${ingredient.servingSizeValue} ${ingredient.servingSizeUnit}`,
         };
-        await fetch(apiLinks.recipesIngredients, {
+        await fetch(apiSheets.recipesIngredients, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: [ingredientPayload] }),
@@ -199,14 +199,14 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
 
       // Post steps to SheetDB
       for (const step of steps) {
-        const stepId = await generateUniqueId(apiLinks.recipesSteps, { idField: 'stepId' });
+        const stepId = await generateUniqueId(apiSheets.recipesSteps, { idField: 'stepId' });
         const stepPayload = {
           stepId,
           createdAt: new Date().toISOString(),
           recipeId,
           stepContent: step.stepContent,
         };
-        await fetch(apiLinks.recipesSteps, {
+        await fetch(apiSheets.recipesSteps, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: [stepPayload] }),

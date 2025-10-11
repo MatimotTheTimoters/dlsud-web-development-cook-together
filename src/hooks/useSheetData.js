@@ -1,6 +1,6 @@
 // src/hooks/useSheetData.js
 import { useState, useEffect } from 'react';
-import apiLinks from '../constants/api.js';
+import apiSheets from '../constants/api.js';
 
 /**
  * Custom hook for fetching data from SheetDB API
@@ -25,7 +25,7 @@ export const useSheetData = (sheetName, queryParams = {}, enabled = true) => {
   };
 
   const fetchData = async () => {
-    if (!enabled || !apiLinks[sheetName]) {
+    if (!enabled || !apiSheets[sheetName]) {
       setData(null);
       return;
     }
@@ -35,7 +35,7 @@ export const useSheetData = (sheetName, queryParams = {}, enabled = true) => {
 
     try {
       const queryString = buildQueryString(queryParams);
-      const url = `${apiLinks[sheetName]}${queryString}`;
+      const url = `${apiSheets[sheetName]}${queryString}`;
       
       const response = await fetch(url);
       
