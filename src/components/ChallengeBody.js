@@ -20,7 +20,7 @@ function ChallengeBody({ query, onQueryChange }) {
   useEffect(() => {
     const lowerQuery = query.toLowerCase();
     const filtered = ChallengeItems.filter(
-      item =>
+      (item) =>
         item.title.toLowerCase().includes(lowerQuery) ||
         item.author.toLowerCase().includes(lowerQuery) ||
         item.tags.toLowerCase().includes(lowerQuery)
@@ -29,16 +29,13 @@ function ChallengeBody({ query, onQueryChange }) {
   }, [query]);
 
   const handleTagClick = (tag) => {
-    onQueryChange(tag); 
+    onQueryChange(tag);
   };
 
   return (
     <div className="challenge-card-grid mt-3">
-      {filteredItems.map(item => (
-        <ChallengeCard
-          key={item.id}
-          challenge={{ ...item, onTagClick: handleTagClick }}
-        />
+      {filteredItems.map((item) => (
+        <ChallengeCard key={item.id} challenge={{ ...item, onTagClick: handleTagClick }} />
       ))}
     </div>
   );
