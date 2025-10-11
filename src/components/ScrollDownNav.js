@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Searchbar from "./Searchbar";
 
-const ScrollDownNav = ({ onSearch }) => {
+const ScrollDownNav = ({ onSearch, query, onQueryChange }) => {
   const [visible, setVisible] = useState(false);
-  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show when scrolled down or query is not empty
-      if (window.scrollY > 200 || query.trim() !== "") {
+      if (query && query.trim() !== "") {
+        setVisible(true);
+      } else if (window.scrollY > 200) {
         setVisible(true);
       } else {
         setVisible(false);
@@ -20,6 +20,11 @@ const ScrollDownNav = ({ onSearch }) => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [query]);
+
+  const handleClear = () => {
+    onQueryChange("");
+    onSearch("");
+  };
 
   return (
     <div
@@ -35,8 +40,30 @@ const ScrollDownNav = ({ onSearch }) => {
       }}
     >
       <div className="container-fluid d-flex justify-content-center p-2">
-        <div className="w-100 px-3" style={{ maxWidth: "800px" }}>
-          <Searchbar onSearch={onSearch} onQueryChange={setQuery} />
+        <div className="w-100 px-3" style={{ maxWidth: "800px", position: "relative" }}>
+          <Searchbar
+            value={query}
+            onSearch={onSearch}
+            onQueryChange={onQueryChange}
+          />
+          {query && (
+            <button
+              onClick={handleClear}
+              style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                fontWeight: "bold",
+                color: "#090808ff",
+              }}
+            >
+             ✕
+            </button>
+          )}
         </div>
       </div>
     </div>
