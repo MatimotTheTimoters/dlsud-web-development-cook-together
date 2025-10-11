@@ -14,6 +14,7 @@ import FeedPage from './pages/FeedPage';
 import DiscoverPage from './pages/DiscoverPage';
 import MyKitchenPage from './pages/MyKitchenPage';
 import InventoryPage from './pages/InventoryPage';
+import TestPages from './pages/TestPages';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/my-kitchen" element={<MyKitchenPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/TestPages" element={<TestPages />} />
           </Routes>
         </main>
         <FooterComponent />
