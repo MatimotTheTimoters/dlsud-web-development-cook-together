@@ -1,13 +1,13 @@
-const apiLinks = {
-    main: "https://sheetdb.io/api/v1/bry4xqkea1b8c",
-    users: "https://sheetdb.io/api/v1/bry4xqkea1b8c?sheet=users",
-    usersRelationships: "https://sheetdb.io/api/v1/bry4xqkea1b8c?sheet=users-relationships",
-    recipes: "https://sheetdb.io/api/v1/bry4xqkea1b8c?sheet=recipes",
-    recipesIngredients: "https://sheetdb.io/api/v1/bry4xqkea1b8c?sheet=recipes-ingredients",
-    recipesSteps: "https://sheetdb.io/api/v1/bry4xqkea1b8c?sheet=recipes-steps",
-    challengesCookQuota: "https://sheetdb.io/api/v1/bry4xqkea1b8c?sheet=challenges-cook-quota",
-    challengesCookQuotaParticipants: "https://sheetdb.io/api/v1/bry4xqkea1b8c?sheet=challenges-cook-quota-participants",
+const mainApi = "https://sheetdb.io/api/v1/3qimhi9nbg9bl";
+const apiSheets = {
+    users: `${mainApi}?sheet=users`,
+    usersRelationships: `${mainApi}?sheet=users-relationships`,
+    recipes: `${mainApi}?sheet=recipes`,
+    recipesIngredients: `${mainApi}?sheet=recipes-ingredients`,
+    recipesSteps: `${mainApi}?sheet=recipes-steps`,
+    challengesCookQuota: `${mainApi}?sheet=challenges-cook-quota`,
+    challengesCookQuotaParticipants: `${mainApi}?sheet=challenges-cook-quota-participants`,
 
 }
 
-export default apiLinks;
+export default apiSheets;
