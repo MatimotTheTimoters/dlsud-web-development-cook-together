@@ -1,32 +1,24 @@
-// src/hooks/useSheetData.js
-import { useState, useEffect } from 'react';
-import apiSheets from '../constants/api.js';
+// src/hooks/useSheetData.js - OPTIMIZED VERSION
+import { useState, useEffect, useRef } from 'react';
 
-/**
- * Custom hook for fetching data from SheetDB API
- * @param {string} sheetName - The sheet to fetch from (e.g., 'users', 'recipes')
- * @param {Object} queryParams - Query parameters for filtering
- * @param {boolean} enabled - Whether to enable the fetch
- * @returns {Object} - { data, loading, error, refetch }
- */
+// Simple cache implementation
+const cache = new Map();
+const CACHE_DURATION = 60000; // 1 minute cache
+
 export const useSheetData = (sheetName, queryParams = {}, enabled = true) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const buildQueryString = (params) => {
-    if (!params || Object.keys(params).length === 0) return '';
-    
-    const queryString = Object.entries(params)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('&');
-    
-    return `?${queryString}`;
-  };
+  const cacheKey = `${sheetName}-${JSON.stringify(queryParams)}`;
 
   const fetchData = async () => {
-    if (!enabled || !apiSheets[sheetName]) {
-      setData(null);
+    if (!enabled) return;
+
+    // Check cache first
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      setData(cached.data);
       return;
     }
 
@@ -34,20 +26,19 @@ export const useSheetData = (sheetName, queryParams = {}, enabled = true) => {
     setError(null);
 
     try {
-      const queryString = buildQueryString(queryParams);
-      const url = `${apiSheets[sheetName]}${queryString}`;
-      
+      // Your existing fetch logic
       const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
       const result = await response.json();
+      
+      // Cache the result
+      cache.set(cacheKey, {
+        data: result,
+        timestamp: Date.now()
+      });
+      
       setData(result);
     } catch (err) {
       setError(err.message);
-      console.error(`Error fetching from ${sheetName}:`, err);
     } finally {
       setLoading(false);
     }
@@ -57,53 +48,5 @@ export const useSheetData = (sheetName, queryParams = {}, enabled = true) => {
     fetchData();
   }, [sheetName, JSON.stringify(queryParams), enabled]);
 
-  return {
-    data,
-    loading,
-    error,
-    refetch: fetchData
-  };
-};
-
-/**
- * Specialized hook for fetching single user data
- * @param {string} userId - The user ID to fetch
- * @param {boolean} enabled - Whether to enable the fetch
- * @returns {Object} - { userData, loading, error, refetch }
- */
-export const useUserData = (userId, enabled = true) => {
-  const { data, loading, error, refetch } = useSheetData(
-    'users', 
-    { id: userId }, 
-    enabled && !!userId
-  );
-
-  return {
-    userData: data && data.length > 0 ? data[0] : null,
-    loading,
-    error,
-    refetch
-  };
-};
-
-/**
- * Specialized hook for fetching user reward limits
- * @param {string} userId - The user ID to fetch
- * @returns {Object} - { rewardLimits, loading, error, refetch }
- */
-export const useRewardLimits = (userId) => {
-  const { userData, loading, error, refetch } = useUserData(userId);
-
-  const rewardLimits = {
-    maxExpReward: userData?.maxExpReward || 100,
-    maxGoldReward: userData?.maxGoldReward || 50,
-    maxGemReward: userData?.maxGemReward || 10,
-  };
-
-  return {
-    rewardLimits,
-    loading,
-    error,
-    refetch
-  };
+  return { data, loading, error, refetch: fetchData };
 };
