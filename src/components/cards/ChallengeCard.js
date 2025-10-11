@@ -1,5 +1,6 @@
 import React from "react";
-import { Card, Badge, Button } from "react-bootstrap";
+import { Card, Button, Badge } from "react-bootstrap";
+import "../../styles/colors.css";
 
 function ChallengeCard({ challenge }) {
   const {
@@ -8,7 +9,6 @@ function ChallengeCard({ challenge }) {
     lastUpdated, // hidden
     coverImage,
     title,
-    description, // hidden
     tags,
     totalCookQuota,
     author,
@@ -19,16 +19,26 @@ function ChallengeCard({ challenge }) {
     expReward,
     goldReward,
     gemReward,
+    onTagClick, // optional handler
   } = challenge;
 
+  const tagColors = {
+    tag1: "warning",
+    tag2: "primary",
+    tag3: "info",
+    tag4: "danger",
+    tag5: "success",
+    tag6: "secondary",
+  };
+
   return (
-    <Card className="challenge-card h-100">
+    <Card className="ct-card" style={{ maxWidth: "320px", margin: "0 auto" }}>
       {/* Cover Image */}
       <Card.Img
         variant="top"
         src={coverImage || "/assets/images/placeholder.svg"}
         alt={title}
-        className="challenge-card-img"
+        className="card-img-top"
         style={{ height: "200px", objectFit: "cover" }}
       />
 
@@ -38,41 +48,48 @@ function ChallengeCard({ challenge }) {
 
         {/* Tags */}
         {tags && (
-          <div className="mb-3">
-            {tags.split(",").map((tag, index) => (
-              <Badge
-                key={index}
-                bg="secondary"
-                className="me-1 text-ct-muted"
-                style={{ fontSize: "0.75rem" }}
-              >
-                {tag.trim()}
-              </Badge>
-            ))}
+          <div
+            className="border rounded p-3 my-3 bg-light d-flex flex-wrap justify-content-center"
+            style={{ gap: "8px" }}
+          >
+            {tags.split(",").map((tag, index) => {
+              const trimmedTag = tag.trim();
+              const color = tagColors[trimmedTag] || "primary";
+
+              return (
+                <Button
+                  key={index}
+                  variant={`outline-${color}`}
+                  className="btn-sm px-3"
+                  style={{
+                    borderRadius: "20px",
+                    fontSize: "0.85rem",
+                    whiteSpace: "nowrap",
+                  }}
+                  onClick={() => onTagClick?.(trimmedTag)}
+                >
+                  {trimmedTag}
+                </Button>
+              );
+            })}
           </div>
         )}
 
-        {/* Total Cook Quota */}
+        {/* Stats */}
         <div className="text-ct-muted small mb-2">
           <strong>Total Cook Quota:</strong> {totalCookQuota || "N/A"}
         </div>
-
-        {/* Author */}
         <div className="text-ct-muted small mb-2">
           <strong>Author:</strong> {author || "Anonymous"}
         </div>
-
-        {/* Participant Count */}
         <div className="text-ct-muted small mb-2">
           <strong>Participants:</strong> {participantCount || 0}
         </div>
-
-        {/* Status */}
         <div className="text-ct-muted small mb-2">
           <strong>Status:</strong> {status || "Unknown"}
         </div>
 
-        {/* Start and End Dates */}
+        {/* Dates */}
         <div className="d-flex justify-content-between small mb-3">
           <span>
             <strong>Start:</strong> {startDate || "N/A"}
@@ -85,20 +102,18 @@ function ChallengeCard({ challenge }) {
         {/* Rewards */}
         <div className="d-flex justify-content-between small mb-3">
           <span>
-            <strong>EXP:</strong> {expReward}
+            <strong>EXP:</strong> {expReward || 0}
           </span>
           <span>
-            <strong>Gold:</strong> {goldReward}
+            <strong>Gold:</strong> {goldReward || 0}
           </span>
           <span>
-            <strong>Gems:</strong> {gemReward}
+            <strong>Gems:</strong> {gemReward || 0}
           </span>
         </div>
 
-        {/* Action Button */}
-        <Button variant="primary" size="sm">
-          View Challenge
-        </Button>
+        {/* Action */}
+        <Button className="btn-ct-primary btn-sm w-100">View Challenge</Button>
       </Card.Body>
     </Card>
   );

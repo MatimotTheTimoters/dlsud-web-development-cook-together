@@ -39,3 +39,45 @@
     padding: 0.5rem;
   }
 }
+
+/* FooterComponent */
+.sticky-footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+/*Resizing card grid*/
+
+.challenge-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  justify-content: start; 
+  padding: 1rem;
+  box-sizing: border-box;
+  margin-left: var(--ct-sidebar-width);
+  width: calc(100% - var(--ct-sidebar-width) - 1rem);
+  padding-bottom: calc(var(--ct-footer-height, 80px) + 2rem);
+}
+
+.recipe-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  justify-content: start; 
+  padding: 1rem;
+  box-sizing: border-box;
+  margin-left: var(--ct-sidebar-width);
+  width: calc(100% - var(--ct-sidebar-width) - 1rem);
+  padding-bottom: calc(var(--ct-footer-height, 80px) + 2rem);
+}
+
+
+
+
+
+
+
