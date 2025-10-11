@@ -1,3 +1,5 @@
 @import './colors.css';
-@import './components.css'; 
+@import './floatingActionMenu.css';
+@import './footer.css';
 @import './layout.css';
+@import './navbar.css'; 

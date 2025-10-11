@@ -1,0 +1,23 @@
+/* FooterComponent */
+.sticky-footer {
+  position: relative;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 10px 0;
+  text-align: center;
+}
+
+/* FooterComponent Styles */
+.footer-ct {
+  background-color: var(--ct-surface);
+  padding: 1rem 0;
+  color: var(--ct-muted);
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+body > .footer-ct {
+  margin-top: auto;
+}
