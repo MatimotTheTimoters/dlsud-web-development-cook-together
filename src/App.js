@@ -36,8 +36,8 @@ function App() {
             <Route path="/inventory" element={<InventoryPage />} />
           </Routes>
         </main>
-        <FooterComponent />
         <FloatingActionMenu />
+        <FooterComponent />
       </div>
     </Router>
   );

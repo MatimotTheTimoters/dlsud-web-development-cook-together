@@ -1,8 +1,8 @@
-// src/components/buttons/FloatingActionMenu.js
 import React, { useState } from 'react';
 import { Button, ButtonGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import BuildChallengeModal from './modals/BuildChallengeModal'; // Corrected path
-import CreateRecipeModal from './modals/CreateRecipeModal'; // Corrected path
+import BuildChallengeModal from './modals/BuildChallengeModal';
+import CreateRecipeModal from './modals/CreateRecipeModal';
+import "../styles/layout.css";
 
 function FloatingActionMenu() {
   const [showRecipeModal, setShowRecipeModal] = useState(false);
