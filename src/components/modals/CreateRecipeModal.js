@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import apiSheets from '../../constants/api.js';
 import { generateBatchIds } from '../../hooks/uuidHelper.js';
-import { useAuth } from '../../hooks/useAuth.js';
-import { calculateMaxRewards } from '../../utils/rewardCalculator.js';
+import { useData } from '../../contexts/DataContext.js';
 
 export default function CreateRecipeModal({ show, onHide, onCreated }) {
-  const { user } = useAuth();
+  const { currentUserData, userRewardLimits } = useData();
+
   const [recipeValues, setRecipeValues] = useState({
     title: '',
     description: '',
@@ -27,63 +27,15 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [userRewardLimits, setUserRewardLimits] = useState({
-    maxExp: 100,
-    maxGold: 50,
-    maxGem: 5,
-    maxGoldPrice: 100,
-    maxGemPrice: 10,
-  });
-
-  useEffect(() => {
-    const fetchUserLimits = async () => {
-      if (!user?.id) return;
-
-      try {
-        const userRes = await fetch(`${apiSheets.users}&id=${user.id}`);
-        const userData = await userRes.json();
-
-        if (userData.length > 0) {
-          const userStats = userData[0];
-          const limits = calculateMaxRewards(userStats);
-          setUserRewardLimits({
-            ...limits,
-            maxGoldPrice: userStats.maxGoldPrice || 100,
-            maxGemPrice: userStats.maxGemPrice || 10,
-          });
-        }
-      } catch (error) {
-        console.warn('Failed to fetch user limits:', error);
-      }
-    };
-
-    if (show) {
-      fetchUserLimits();
-    }
-  }, [user?.id, show]);
 
   const handleRecipeChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // Auto-cap reward values to user limits
-    if (name === 'expReward' && Number(value) > userRewardLimits.maxExp) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxExp }));
-      return;
-    }
-    if (name === 'goldReward' && Number(value) > userRewardLimits.maxGold) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxGold }));
-      return;
-    }
-    if (name === 'gemReward' && Number(value) > userRewardLimits.maxGem) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxGem }));
-      return;
-    }
-    if (name === 'goldPrice' && Number(value) > userRewardLimits.maxGoldPrice) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxGoldPrice }));
-      return;
-    }
-    if (name === 'gemPrice' && Number(value) > userRewardLimits.maxGemPrice) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxGemPrice }));
+    // Auto-cap reward values to user limits FROM DATACONTEXT
+    if (['expReward', 'goldReward', 'gemReward', 'goldPrice', 'gemPrice'].includes(name)) {
+      const limitKey = `max${name.charAt(0).toUpperCase() + name.slice(1)}`;
+      const cappedValue = Math.min(Number(value), userRewardLimits[limitKey] || 9999);
+      setRecipeValues((prev) => ({ ...prev, [name]: cappedValue }));
       return;
     }
 
@@ -96,7 +48,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
   const addIngredient = () => {
     setIngredients((prev) => [
       ...prev,
-      { ingredientId: '', recipeContent: '', servingSizeValue: '', servingSizeUnit: 'grams' },
+      { recipeContent: '', servingSizeValue: '', servingSizeUnit: 'grams' },
     ]);
   };
 
@@ -109,7 +61,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
   };
 
   const addStep = () => {
-    setSteps((prev) => [...prev, { stepId: '', stepContent: '' }]);
+    setSteps((prev) => [...prev, { stepContent: '' }]);
   };
 
   const handleStepChange = (index, value) => {
@@ -123,14 +75,15 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
     setLoading(true);
 
     try {
+      // Generate all IDs in a single batch
       const totalIdsNeeded = 1 + ingredients.length + steps.length;
       const batchIds = await generateBatchIds(totalIdsNeeded, 'id');
-      
       const recipeId = batchIds[0];
       const ingredientIds = batchIds.slice(1, 1 + ingredients.length);
       const stepIds = batchIds.slice(1 + ingredients.length);
 
-      const coverImageUrl = '/src/assets/placeholders/new-recipe.png';
+      // Get user data from currentUserData
+      const userFullName = currentUserData?.fullName || '';
 
       // Prepare recipe data
       const preparationTime = `${recipeValues.preparationTimeValue} ${recipeValues.preparationTimeUnit}`;
@@ -138,7 +91,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
       const recipePayload = {
         id: recipeId,
         createdAt: new Date().toISOString(),
-        coverImage: coverImageUrl,
+        coverImage: '/src/assets/placeholders/new-recipe.png',
         title: recipeValues.title,
         description: recipeValues.description,
         origin: recipeValues.origin.split(',').map((o) => o.trim()).join(','),
@@ -152,56 +105,52 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
         goldPrice: recipeValues.isPaid ? recipeValues.goldPrice : 0,
         gemPrice: recipeValues.isPaid ? recipeValues.gemPrice : 0,
         isPublic: recipeValues.isPublic,
-        author: user?.fullName || '',
+        author: userFullName,
       };
 
-      const allPostRequests = [];
+      // Prepare ingredients data
+      const ingredientPayloads = ingredients.map((ingredient, index) => ({
+        ingredientId: ingredientIds[index],
+        createdAt: new Date().toISOString(),
+        recipeId,
+        recipeContent: ingredient.recipeContent,
+        servingSize: `${ingredient.servingSizeValue} ${ingredient.servingSizeUnit}`,
+      }));
 
-      // Post recipe to SheetDB
-      allPostRequests.push(
+      // Prepare steps data
+      const stepPayloads = steps.map((step, index) => ({
+        stepId: stepIds[index],
+        createdAt: new Date().toISOString(),
+        recipeId,
+        stepContent: step.stepContent,
+      }));
+
+      // Batch all POST requests
+      const allPostRequests = [
         fetch(apiSheets.recipes, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: [recipePayload] }),
-        })
-      );
-
-      // Prepare and post ingredients
-      if (ingredients.length > 0) {
-        const ingredientPayloads = ingredients.map((ingredient, index) => ({
-          ingredientId: ingredientIds[index],
-          createdAt: new Date().toISOString(),
-          recipeId,
-          recipeContent: ingredient.recipeContent,
-          servingSize: `${ingredient.servingSizeValue} ${ingredient.servingSizeUnit}`,
-        }));
-
-        allPostRequests.push(
-          fetch(apiSheets.recipesIngredients, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: ingredientPayloads }),
-          })
-        );
-      }
-
-      // Prepare and post steps
-      if (steps.length > 0) {
-        const stepPayloads = steps.map((step, index) => ({
-          stepId: stepIds[index],
-          createdAt: new Date().toISOString(),
-          recipeId,
-          stepContent: step.stepContent,
-        }));
-
-        allPostRequests.push(
-          fetch(apiSheets.recipesSteps, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: stepPayloads }),
-          })
-        );
-      }
+        }),
+        ...(ingredientPayloads.length > 0
+          ? [
+              fetch(apiSheets.recipesIngredients, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: ingredientPayloads }),
+              }),
+            ]
+          : []),
+        ...(stepPayloads.length > 0
+          ? [
+              fetch(apiSheets.recipesSteps, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: stepPayloads }),
+              }),
+            ]
+          : []),
+      ];
 
       // Execute all POST requests in parallel
       await Promise.all(allPostRequests);
@@ -223,8 +172,6 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
           <Modal.Title>Create Recipe</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {/* 🚀 REMOVED file upload input from the form */}
-          
           {/* Recipe Fields */}
           <Form.Group>
             <Form.Label>Title</Form.Label>
