@@ -3,7 +3,6 @@ import { Form, Button, Card, Row, Col, Image } from "react-bootstrap";
 import goldIcon from "../assets/icons/gold-icon.png";
 import gemIcon from "../assets/icons/gem-icon.png";
 import profileIcon from "../assets/icons/profile-icon.png";
-import "../styles/layout.css";
 
 const SettingsPage = () => {
   const userData = {

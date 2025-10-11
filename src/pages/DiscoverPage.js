@@ -2,7 +2,6 @@ import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import AsideComponent from '../components/AsideComponent';
 import BodyComponent from '../components/BodyComponent';
-import '../styles/colors.css';
 
 const DiscoverPage = () => {
   return (

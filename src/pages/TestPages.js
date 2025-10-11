@@ -2,7 +2,6 @@ import React from "react";
 import AsideComponent from "../components/AsideComponent";
 import ScrollDownNav from "../components/ScrollDownNav";
 import SettingsPage from "./SettingsPage";
-import "../styles/layout.css";
 
 function TestPages() {
   return (
