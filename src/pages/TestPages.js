@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import AsideComponent from "../components/AsideComponent";
-import ChallengeBody from "../components/ChallengeBody";
+import RecipeBody from "../components/RecipeBody";
 import ScrollDownNav from "../components/ScrollDownNav";
 import "../styles/layout.css";
 
@@ -18,9 +18,9 @@ function TestPages() {
       />
 
       <div className="testpage-main">
-        <h2 className="testpage-title">Challenges</h2>
+        <h2 className="testpage-title">Recipe</h2>
 
-        <ChallengeBody
+        <RecipeBody
           query={searchQuery}
           onQueryChange={setSearchQuery} 
         />
