@@ -50,3 +50,20 @@
     padding: 10px 0;
     text-align: center;
 }
+/*Resizing card grid*/
+
+.challenge-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  justify-content: center; 
+  align-items: start;
+  padding: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+
+
