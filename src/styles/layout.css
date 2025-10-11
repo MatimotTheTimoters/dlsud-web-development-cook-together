@@ -56,12 +56,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: clamp(0.75rem, 1.5vw, 1.5rem);
-  justify-content: center; 
-  align-items: start;
+  justify-content: start; 
   padding: 1rem;
   width: 100%;
   box-sizing: border-box;
+  margin-left: var(--ct-sidebar-width);
+  width: calc(100% - var(--ct-sidebar-width) - 1rem);
 }
+
 
 
 
