@@ -1,38 +1,44 @@
+// Updated App.js
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import NavbarComponent from './components/NavbarComponent';
+import FloatingActionMenu from './components/FloatingActionMenu';
 import FooterComponent from './components/FooterComponent';
 import AsideComponent from './components/AsideComponent';
 
 import LandingPage from './pages/LandingPage';
 import RegistrationPage from './pages/RegistrationPage';
 import LoginPage from './pages/LoginPage';
-
-import FeedPage from './pages/FeedPage'; // Corrected from RecipesPage
-import DiscoverPage from './pages/DiscoverPage'; // Corrected from Challenges
-import MyKitchenPage from './pages/MyKitchenPage'; // Corrected from KitchensPage
-import InventoryPage from './pages/InventoryPage'; // Corrected from Inventory
+import FeedPage from './pages/FeedPage';
+import DiscoverPage from './pages/DiscoverPage';
+import MyKitchenPage from './pages/MyKitchenPage';
+import InventoryPage from './pages/InventoryPage';
 
 function App() {
   return (
     <Router>
-      <NavbarComponent />
-      <Routes>
-        {/* Homepage routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/registration" element={<RegistrationPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/recipes" element={<FeedPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+      <div className="app-container">
+        <NavbarComponent />
+        <AsideComponent />
+        <main className="main-content">
+          <Routes>
+            {/* Homepage routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/registration" element={<RegistrationPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
 
-        {/* AsideComponent routes */}
-        <Route path="/discover" element={<DiscoverPage />} />
-        <Route path="/challenges" element={<DiscoverPage />} />
-        <Route path="/kitchens" element={<MyKitchenPage />} />
-        <Route path="/inventory" element={<InventoryPage />} />
-      </Routes>
-      <FooterComponent />
+            {/* AsideComponent routes */}
+            <Route path="/feed" element={<FeedPage />} />
+            <Route path="/discover" element={<DiscoverPage />} />
+            <Route path="/my-kitchen" element={<MyKitchenPage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
+          </Routes>
+        </main>
+        <FooterComponent />
+        <FloatingActionMenu />
+      </div>
     </Router>
   );
 }
