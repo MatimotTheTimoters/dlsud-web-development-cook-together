@@ -1,7 +1,6 @@
 import React from "react";
 import { Nav } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
-import "../styles/colors.css";
 
 const defaultItems = [
   { key: "feed", label: "Feed", to: "/feed", badge: null },

@@ -1,7 +1,5 @@
 import React from "react";
 import { Card, ProgressBar, Badge } from "react-bootstrap";
-import "../styles/colors.css";
-import "../styles/components.css";
 
 function UserCard({ user }) {
   const {

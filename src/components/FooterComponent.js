@@ -1,8 +1,6 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "../styles/colors.css";
-import "../styles/layout.css";
 
 function FooterComponent() {
   return (

@@ -1,7 +1,6 @@
 import React from "react";
 import { Container, Card, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "../styles/colors.css";
 
 const MediaRow = ({ alt = "", src = "/assets/images/placeholder.svg" }) => (
   <div className="d-flex gap-2 overflow-auto ct-media-row" aria-hidden="false">

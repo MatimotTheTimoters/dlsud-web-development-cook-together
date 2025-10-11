@@ -5,7 +5,6 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useSheetData } from '../hooks/useSheetData';
 import SearchFilter from './SearchFilter';
-import '../styles/colors.css';
 
 // Temporary simple card until we fix the card components
 const TempCard = ({ item, type }) => {

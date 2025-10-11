@@ -1,7 +1,5 @@
 import React from "react";
 import { Card, Badge, Button } from "react-bootstrap";
-import "../styles/colors.css";
-import "../styles/components.css";
 
 function ChallengeCard({ challenge }) {
   const {

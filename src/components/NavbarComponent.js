@@ -3,8 +3,6 @@ import { Navbar, Nav, Container, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
 import apiLinks from "../constants/api.js";
-import "../styles/colors.css";
-import "../styles/components.css";
 import logo from "../assets/icons/logo.png";
 import goldIcon from "../assets/icons/gold-icon.png";
 import gemIcon from "../assets/icons/gem-icon.png";
