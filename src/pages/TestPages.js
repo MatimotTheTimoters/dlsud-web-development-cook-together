@@ -1,29 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import AsideComponent from "../components/AsideComponent";
-import RecipeBody from "../components/RecipeBody";
 import ScrollDownNav from "../components/ScrollDownNav";
+import SettingsPage from "./SettingsPage";
 import "../styles/layout.css";
 
 function TestPages() {
-  const [searchQuery, setSearchQuery] = useState("");
-
   return (
-    <div className="testpage-layout">
+    <div className="settingspage-layout">
       <AsideComponent />
-
-      <ScrollDownNav
-        query={searchQuery}
-        onQueryChange={setSearchQuery} 
-        onSearch={setSearchQuery}     
-      />
-
-      <div className="testpage-main">
-        <h2 className="testpage-title">Recipe</h2>
-
-        <RecipeBody
-          query={searchQuery}
-          onQueryChange={setSearchQuery} 
-        />
+      <ScrollDownNav />
+      <div className="settingspage-main">
+        <h2 className="settingspage-title">Settings</h2>
+        <SettingsPage />
       </div>
     </div>
   );
