@@ -7,6 +7,7 @@ const defaultItems = [
   { key: "feed", label: "Feed", to: "/feed", badge: null },
   { key: "discover", label: "Discover", to: "/discover", badge: null },
   { key: "my-kitchen", label: "My Kitchen", to: "/my-kitchen", badge: null },
+  { key: "Test Pages", label: "Test Pages", to: "/TestPages", badge: null },
 ];
 
 function AsideComponent({ items = defaultItems, activeKey = "/feed", className = "" }) {
