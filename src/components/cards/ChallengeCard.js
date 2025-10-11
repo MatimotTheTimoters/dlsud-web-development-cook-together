@@ -3,9 +3,18 @@ import { Card, Button } from 'react-bootstrap';
 import '../../styles/colors.css';
 
 function ChallengeCard({ challenge }) {
-  const { title, author, reward, difficulty, end, tags, img } = challenge;
+  const { title, author, reward, end, tags, img } = challenge;
 
-  return (
+  const tagColors = {
+  tag1: 'warning',
+  tag2: 'primary',
+  tag3: 'info',
+  tag4: 'danger',
+  tag5: 'success',
+  tag6: 'secondary',
+};
+
+ return (
     <Card className="ct-card" style={{ maxWidth: '320px', margin: '0 auto' }}>
       <Card.Img variant="top" src={img} alt={title} className="card-img-top" />
       <Card.Body>
@@ -16,33 +25,39 @@ function ChallengeCard({ challenge }) {
           <span className="text-ct-muted">{author}</span>
         </p>
 
-        <p className="card-text">
-          <span className="fw-bold">Difficulty:</span>{' '}
-          <span className="text-ct-muted">{difficulty}</span>
-        </p>
-
         <div className="border rounded p-3 my-3 bg-light d-flex flex-column align-items-center">
           <p className="mb-1 fw-bold">Rewards</p>
-          <p className="mb-0">
-            <img src={img} style={{ marginRight: '2px' }} alt="reward" />
-            <span className="text-ct-muted">{reward}</span>
-
-            <img src={img} style={{ marginLeft: '4px' }} alt="reward" />
-            <span className="text-ct-muted">{reward}</span>
-          </p>
+          <p className="mb-0 text-ct-muted">{reward}</p>
         </div>
 
         <Button className="btn-ct-primary btn-sm">Join</Button>{' '}
         Ends at: <span className="text-ct-muted">{end}</span>
 
+        {/* Tags */}
         <div
-          className="border rounded p-3 my-3 bg-light d-flex flex-row align-items-center"
-          style={{ marginLeft: '4px', marginRight: '4px', gap: '6px' }}
+          className="border rounded p-3 my-3 bg-light d-flex flex-wrap justify-content-center"
+          style={{ gap: '8px' }}
         >
-          <Button className="btn btn-primary">tags</Button>
-          <Button className="btn btn-secondary">tags</Button>
-          <Button className="btn btn-success">tags</Button>
-          <Button className="btn btn-danger">tags</Button>
+          {tags.split(',').map((tag, index) => {
+            const trimmedTag = tag.trim();
+            const color = tagColors[trimmedTag] || 'primary';
+
+            return (
+              <Button
+                key={index}
+                variant={`outline-${color}`}
+                className="btn-sm px-3"
+                style={{
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  whiteSpace: 'nowrap',
+                }}
+                onClick={() => challenge.onTagClick(trimmedTag)}
+              >
+                {trimmedTag}
+              </Button>
+            );
+          })}
         </div>
       </Card.Body>
     </Card>
