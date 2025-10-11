@@ -3,7 +3,7 @@ import { Modal, Button, Form } from 'react-bootstrap';
 import apiSheets from '../../constants/api.js';
 import { generateUniqueId } from '../../hooks/uuidHelper.js';
 import { useAuth } from '../../hooks/useAuth.js';
-import { calculateMaxRewards, updateUserRewardLimits } from '../../utils/rewardCalculator.js';
+import { calculateMaxRewards } from '../../utils/rewardCalculator.js';
 
 export default function CreateRecipeModal({ show, onHide, onCreated }) {
   const { user } = useAuth();
@@ -42,7 +42,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
       if (!user?.id) return;
 
       try {
-        const userRes = await fetch(`${apiSheets.users}?id=${user.id}`);
+        const userRes = await fetch(`${apiSheets.users}&id=${user.id}`);
         const userData = await userRes.json();
 
         if (userData.length > 0) {
@@ -179,7 +179,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
       });
 
       // Post ingredients to SheetDB
-      for (const ingredient of ingredients) {
+      const ingredientPromises = ingredients.map(async (ingredient) => {
         const ingredientId = await generateUniqueId(apiSheets.recipesIngredients, {
           idField: 'ingredientId',
         });
@@ -190,15 +190,16 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
           recipeContent: ingredient.recipeContent,
           servingSize: `${ingredient.servingSizeValue} ${ingredient.servingSizeUnit}`,
         };
-        await fetch(apiSheets.recipesIngredients, {
+        return fetch(apiSheets.recipesIngredients, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: [ingredientPayload] }),
         });
-      }
+      });
+      await Promise.all(ingredientPromises);
 
       // Post steps to SheetDB
-      for (const step of steps) {
+      const stepPromises = steps.map(async (step) => {
         const stepId = await generateUniqueId(apiSheets.recipesSteps, { idField: 'stepId' });
         const stepPayload = {
           stepId,
@@ -206,12 +207,13 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
           recipeId,
           stepContent: step.stepContent,
         };
-        await fetch(apiSheets.recipesSteps, {
+        return fetch(apiSheets.recipesSteps, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: [stepPayload] }),
         });
-      }
+      });
+      await Promise.all(stepPromises);
 
       // Notify parent and close modal
       if (typeof onCreated === 'function') onCreated(recipePayload);
