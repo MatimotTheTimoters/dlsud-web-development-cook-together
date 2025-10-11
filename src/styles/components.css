@@ -261,3 +261,35 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transition: box-shadow 0.2s ease;
 }
+
+.floating-action-menu {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1050;
+}
+
+.floating-button-group {
+  gap: 0.5rem;
+}
+
+.floating-action-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  background-color: var(--ct-primary) !important;
+  color: white !important;
+  transition: all 0.3s ease;
+}
+
+.floating-action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background-color: var(--ct-primary-dark) !important;
+}
