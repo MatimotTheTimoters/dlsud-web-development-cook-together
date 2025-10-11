@@ -1,10 +1,7 @@
-import React from "react";
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import React, { useState } from "react";
+import { Navbar, Nav, Container, Button, Offcanvas } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
-import apiLinks from "../constants/api.js";
-import "../styles/colors.css";
-import "../styles/components.css";
 import logo from "../assets/icons/logo.png";
 import goldIcon from "../assets/icons/gold-icon.png";
 import gemIcon from "../assets/icons/gem-icon.png";
@@ -14,21 +11,18 @@ import settingsIcon from "../assets/icons/settings-icon.png";
 
 function NavbarComponent() {
   const { user } = useAuth();
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+
+  const handleOffcanvasToggle = () => setShowOffcanvas(!showOffcanvas);
 
   // If no user is logged in, show a minimal navbar
   if (!user || !user.id) {
     return (
       <Navbar expand="lg" className="navbar-ct" bg="light" variant="light">
         <Container fluid>
-          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center navbar-brand-ink">
-            <img
-              src={logo}
-              alt="Cook Together"
-              width="36"
-              height="36"
-              className="d-inline-block align-text-top me-2"
-            />
-            <span>Cook Together</span>
+          <Navbar.Brand as={Link} to="/" className="navbar-logo-group">
+            <img src={logo} alt="Cook Together" className="navbar-logo-img" />
+            <span className="navbar-logo-text">Cook Together</span>
           </Navbar.Brand>
           <Nav className="ms-auto">
             <Nav.Link as={Link} to="/login">Login</Nav.Link>
@@ -51,119 +45,198 @@ function NavbarComponent() {
 
   return (
     <Navbar expand="lg" className="navbar-ct" bg="light" variant="light">
-      <Container fluid className="d-flex align-items-center">
-        {/* Group 1: Logo and Logo Text */}
-        <div className="d-flex align-items-center">
-          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center navbar-brand-ink navbar-logo-group">
-            <img
-              src={logo}
-              alt="Cook Together"
-              className="navbar-logo-img me-2"
-            />
-            <span className="navbar-logo-text">Cook Together</span>
-          </Navbar.Brand>
-        </div>
+      <Container fluid>
+        {/* Logo */}
+        <Navbar.Brand as={Link} to="/" className="navbar-logo-group">
+          <img src={logo} alt="Cook Together" className="navbar-logo-img" />
+          <span className="navbar-logo-text">Cook Together</span>
+        </Navbar.Brand>
 
-        {/* Group 2: Shop and Inventory Buttons */}
-        <div className="navbar-button-group">
-          <Button
-            as={Link}
-            to="/inventory"
-            size="sm"
-            className="btn-ct-primary navbar-action-button"
-          >
-            INVENTORY
-          </Button>
-          <Button
-            as={Link}
-            to="/shop"
-            size="sm"
-            className="btn-ct-primary navbar-action-button"
-          >
-            SHOP
-          </Button>
-        </div>
+        {/* Burger Menu Toggle */}
+        <Navbar.Toggle
+          aria-controls="navbar-offcanvas"
+          className="navbar-burger-toggle"
+          onClick={handleOffcanvasToggle}
+        />
 
-        {/* Group 3: Gold and Gem Currencies */}
-        <div className="navbar-currency-group">
-          <div className="navbar-currency-item">
-            <div className="navbar-currency-icon gold-currency-icon">
-              <img src={goldIcon} alt="Gold" className="navbar-currency-img" />
+        {/* Offcanvas Menu for Small Screens */}
+        <Offcanvas
+          id="navbar-offcanvas"
+          show={showOffcanvas}
+          onHide={handleOffcanvasToggle}
+          placement="end"
+          className="navbar-offcanvas"
+        >
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title>Menu</Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body>
+            {/* Shop and Inventory Buttons */}
+            <div className="navbar-button-group">
+              <Button
+                as={Link}
+                to="/inventory"
+                size="sm"
+                className="btn-ct-primary navbar-action-button"
+              >
+                INVENTORY
+              </Button>
+              <Button
+                as={Link}
+                to="/shop"
+                size="sm"
+                className="btn-ct-primary navbar-action-button"
+              >
+                SHOP
+              </Button>
             </div>
-            <span className="navbar-currency-text">{goldCount} Gold</span>
-          </div>
 
-          <div className="navbar-currency-item">
-            <div className="navbar-currency-icon gem-currency-icon">
-              <img src={gemIcon} alt="Gems" className="navbar-currency-img" />
+            {/* Gold and Gem Currencies */}
+            <div className="navbar-currency-group">
+              <div className="navbar-currency-item">
+                <img src={goldIcon} alt="Gold" className="navbar-currency-img" />
+                <span className="navbar-currency-text">{goldCount} Gold</span>
+              </div>
+              <div className="navbar-currency-item">
+                <img src={gemIcon} alt="Gems" className="navbar-currency-img" />
+                <span className="navbar-currency-text">{gemCount} Gems</span>
+              </div>
             </div>
-            <span className="navbar-currency-text">{gemCount} Gems</span>
-          </div>
-        </div>
 
-        {/* Level Progress - Responsive */}
-        <div className="navbar-level-group">
-          {/* Ring version for mobile */}
-          <div className="navbar-level-ring">
-            <div
-              className="navbar-level-progress"
-              style={{
-                background: `conic-gradient(var(--ct-primary) ${expProgress}%, var(--ct-surface) ${expProgress}%)`
-              }}
+            {/* Level Progress */}
+            <div className="navbar-level-group">
+              <div className="navbar-level-bar">
+                <div className="navbar-level-info">
+                  <span className="navbar-level-label">Lv.{level}</span>
+                  <span className="navbar-level-stats">
+                    {currentEXP}/{currentLevelCeiling} EXP
+                  </span>
+                </div>
+                <div className="navbar-level-bar-container">
+                  <div
+                    className="navbar-level-bar-progress"
+                    style={{ width: `${expProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Profile, Users, and Settings */}
+            <div className="navbar-icon-group">
+              <Button
+                as={Link}
+                to="/profile"
+                variant="light"
+                aria-label="profile"
+                className="navbar-icon-button"
+              >
+                <img src={profileIcon} alt="Profile" className="navbar-icon-img" />
+              </Button>
+              <Button
+                as={Link}
+                to="/people"
+                variant="light"
+                aria-label="users"
+                className="navbar-icon-button"
+              >
+                <img src={usersIcon} alt="Users" className="navbar-icon-img" />
+              </Button>
+              <Button
+                as={Link}
+                to="/settings"
+                variant="light"
+                aria-label="settings"
+                className="navbar-icon-button"
+              >
+                <img src={settingsIcon} alt="Settings" className="navbar-icon-img" />
+              </Button>
+            </div>
+          </Offcanvas.Body>
+        </Offcanvas>
+
+        {/* Desktop View */}
+        <Navbar.Collapse id="navbar-content">
+          {/* Shop and Inventory Buttons */}
+          <div className="navbar-button-group">
+            <Button
+              as={Link}
+              to="/inventory"
+              size="sm"
+              className="btn-ct-primary navbar-action-button"
             >
-              <div className="navbar-level-inner">
-                <span className="navbar-level-text">Lv.{level}</span>
+              INVENTORY
+            </Button>
+            <Button
+              as={Link}
+              to="/shop"
+              size="sm"
+              className="btn-ct-primary navbar-action-button"
+            >
+              SHOP
+            </Button>
+          </div>
+
+          {/* Gold and Gem Currencies */}
+          <div className="navbar-currency-group">
+            <div className="navbar-currency-item">
+              <img src={goldIcon} alt="Gold" className="navbar-currency-img" />
+              <span className="navbar-currency-text">{goldCount} Gold</span>
+            </div>
+            <div className="navbar-currency-item">
+              <img src={gemIcon} alt="Gems" className="navbar-currency-img" />
+              <span className="navbar-currency-text">{gemCount} Gems</span>
+            </div>
+          </div>
+
+          {/* Level Progress */}
+          <div className="navbar-level-group">
+            <div className="navbar-level-bar">
+              <div className="navbar-level-info">
+                <span className="navbar-level-label">Lv.{level}</span>
+                <span className="navbar-level-stats">
+                  {currentEXP}/{currentLevelCeiling} EXP
+                </span>
+              </div>
+              <div className="navbar-level-bar-container">
+                <div
+                  className="navbar-level-bar-progress"
+                  style={{ width: `${expProgress}%` }}
+                ></div>
               </div>
             </div>
           </div>
 
-          {/* Bar version for desktop */}
-          <div className="navbar-level-bar">
-            <div className="navbar-level-info">
-              <span className="navbar-level-label">Lv.{level}</span>
-              <span className="navbar-level-stats">{currentEXP}/{currentLevelCeiling} EXP</span>
-            </div>
-            <div className="navbar-level-bar-container">
-              <div
-                className="navbar-level-bar-progress"
-                style={{ width: `${expProgress}%` }}
-              ></div>
-            </div>
+          {/* Profile, Users, and Settings */}
+          <div className="navbar-icon-group">
+            <Button
+              as={Link}
+              to="/profile"
+              variant="light"
+              aria-label="profile"
+              className="navbar-icon-button"
+            >
+              <img src={profileIcon} alt="Profile" className="navbar-icon-img" />
+            </Button>
+            <Button
+              as={Link}
+              to="/people"
+              variant="light"
+              aria-label="users"
+              className="navbar-icon-button"
+            >
+              <img src={usersIcon} alt="Users" className="navbar-icon-img" />
+            </Button>
+            <Button
+              as={Link}
+              to="/settings"
+              variant="light"
+              aria-label="settings"
+              className="navbar-icon-button"
+            >
+              <img src={settingsIcon} alt="Settings" className="navbar-icon-img" />
+            </Button>
           </div>
-        </div>
-
-        {/* Group 4: Profile, Users and Settings Icons */}
-        <div className="navbar-icon-group">
-          <Button
-            as={Link}
-            to="/profile"
-            variant="light"
-            aria-label="profile"
-            className="navbar-icon-button"
-          >
-            <img src={profileIcon} alt="Profile" className="navbar-icon-img" />
-          </Button>
-
-          <Button
-            as={Link}
-            to="/people"
-            variant="light"
-            aria-label="users"
-            className="navbar-icon-button"
-          >
-            <img src={usersIcon} alt="Users" className="navbar-icon-img" />
-          </Button>
-
-          <Button
-            as={Link}
-            to="/settings"
-            variant="light"
-            aria-label="settings"
-            className="navbar-icon-button"
-          >
-            <img src={settingsIcon} alt="Settings" className="navbar-icon-img" />
-          </Button>
-        </div>
+        </Navbar.Collapse>
       </Container>
     </Navbar>
   );

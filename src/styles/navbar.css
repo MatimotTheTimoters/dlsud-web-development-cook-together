@@ -1,0 +1,166 @@
+/* ===== NAVBAR COMPONENT STYLES ===== */
+
+.navbar-ct {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--ct-border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--ct-surface);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo Group */
+.navbar-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.navbar-logo-img {
+  width: 36px;
+  height: 36px;
+}
+
+.navbar-logo-text {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--ct-ink);
+}
+
+/* Shop and Inventory Buttons */
+.navbar-button-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.navbar-action-button {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+}
+
+/* Currency Group */
+.navbar-currency-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.navbar-currency-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-currency-img {
+  width: 24px;
+  height: 24px;
+}
+
+.navbar-currency-text {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ct-ink);
+}
+
+/* Level Progress */
+.navbar-level-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.navbar-level-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.navbar-level-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.navbar-level-bar-container {
+  width: 100px;
+  height: 8px;
+  background-color: var(--ct-surface);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--ct-border);
+}
+
+.navbar-level-bar-progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ct-primary), var(--ct-primary-light));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* User Actions */
+.navbar-icon-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.navbar-icon-button {
+  padding: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+}
+
+.navbar-icon-img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .navbar-ct {
+    flex-wrap: wrap;
+    padding: 0.5rem;
+  }
+
+  .navbar-logo-group {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .navbar-button-group {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .navbar-currency-group {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .navbar-level-group {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .navbar-icon-group {
+    justify-content: center;
+  }
+
+  .navbar-currency-text {
+    display: inline; /* Ensure gold and gem counts remain visible */
+  }
+}

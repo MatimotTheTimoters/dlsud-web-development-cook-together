@@ -46,7 +46,7 @@ const LoginPage = () => {
     // optionally fetch user profile row to get fullName/email and store that
     const userObj = { id, email: form.email.trim() };
     login(userObj);
-    navigate('/recipes');
+    navigate('/feed');
   };
 
   return (

@@ -1,5 +1,4 @@
-/* Layout: fixed left sidebar + main content */
-:root{
+:root {
   --ct-sidebar-width: 240px;
   --ct-navbar-height: 72px;
 }
@@ -39,14 +38,4 @@
     margin-left: 0;
     padding: 0.5rem;
   }
-}
-
-/* FooterComponent */
-.sticky-footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    padding: 10px 0;
-    text-align: center;
 }
