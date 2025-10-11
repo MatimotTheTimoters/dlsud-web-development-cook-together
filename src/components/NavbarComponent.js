@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
 import apiLinks from "../constants/api.js";
 import "../styles/colors.css";
+import "../styles/components.css";
 import logo from "../assets/icons/logo.png";
 import goldIcon from "../assets/icons/gold-icon.png";
 import gemIcon from "../assets/icons/gem-icon.png";
@@ -47,63 +48,116 @@ function NavbarComponent() {
   return (
     <Navbar expand="lg" className="navbar-ct" bg="light" variant="light">
       <Container fluid className="d-flex align-items-center">
-        {/* Logo */}
-        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center navbar-brand-ink">
-          <img
-            src={logo}
-            alt="Cook Together"
-            width="36"
-            height="36"
-            className="d-inline-block align-text-top me-2"
-          />
-          <span>Cook Together</span>
-        </Navbar.Brand>
+        {/* Group 1: Logo and Logo Text */}
+        <div className="d-flex align-items-center">
+          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center navbar-brand-ink navbar-logo-group">
+            <img
+              src={logo}
+              alt="Cook Together"
+              className="navbar-logo-img me-2"
+            />
+            <span className="navbar-logo-text">Cook Together</span>
+          </Navbar.Brand>
+        </div>
 
-        {/* Inventory and Shop Buttons */}
-        <div className="d-flex gap-2 ms-auto">
-          <Button as={Link} to="/inventory" size="sm" className="btn-ct-primary">
+        {/* Group 2: Shop and Inventory Buttons */}
+        <div className="navbar-button-group">
+          <Button 
+            as={Link} 
+            to="/inventory" 
+            size="sm" 
+            className="btn-ct-primary navbar-action-button"
+          >
             INVENTORY
           </Button>
-          <Button as={Link} to="/shop" size="sm" className="btn-ct-primary">
+          <Button 
+            as={Link} 
+            to="/shop" 
+            size="sm" 
+            className="btn-ct-primary navbar-action-button"
+          >
             SHOP
           </Button>
         </div>
 
-        {/* Gold and Gem Counts */}
-        <div className="d-flex align-items-center ms-3">
-          <img src={goldIcon} alt="Gold" width="24" height="24" className="me-1" />
-          <span className="chip chip-gold me-3">{goldCount}</span>
-          <img src={gemIcon} alt="Gems" width="24" height="24" className="me-1" />
-          <span className="chip chip-gem">{gemCount}</span>
-        </div>
-
-        {/* Level Progress */}
-        <div className="d-flex align-items-center ms-3">
-          <div
-            className="position-relative"
-            style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              background: `conic-gradient(var(--ct-primary) ${expProgress}%, var(--ct-surface) ${expProgress}%)`,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            <span className="text-ct-ink fw-bold">{level}</span>
+        {/* Group 3: Gold and Gem Currencies */}
+        <div className="navbar-currency-group">
+          <div className="navbar-currency-item">
+            <div className="navbar-currency-icon gold-currency-icon">
+              <img src={goldIcon} alt="Gold" className="navbar-currency-img" />
+            </div>
+            <span className="navbar-currency-text">{goldCount} Gold</span>
+          </div>
+          
+          <div className="navbar-currency-item">
+            <div className="navbar-currency-icon gem-currency-icon">
+              <img src={gemIcon} alt="Gems" className="navbar-currency-img" />
+            </div>
+            <span className="navbar-currency-text">{gemCount} Gems</span>
           </div>
         </div>
 
-        {/* Profile, Users, and Settings Icons */}
-        <div className="d-flex align-items-center gap-2 ms-3">
-          <Button as={Link} to="/profile" size="sm" variant="light" aria-label="profile">
-            <img src={profileIcon} alt="Profile" width="24" height="24" />
+        {/* Level Progress - Responsive */}
+        <div className="navbar-level-group">
+          {/* Ring version for mobile */}
+          <div className="navbar-level-ring">
+            <div 
+              className="navbar-level-progress"
+              style={{
+                background: `conic-gradient(var(--ct-primary) ${expProgress}%, var(--ct-surface) ${expProgress}%)`
+              }}
+            >
+              <div className="navbar-level-inner">
+                <span className="navbar-level-text">Lv.{level}</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Bar version for desktop */}
+          <div className="navbar-level-bar">
+            <div className="navbar-level-info">
+              <span className="navbar-level-label">Lv.{level}</span>
+              <span className="navbar-level-stats">{currentEXP}/{currentLevelCeiling} EXP</span>
+            </div>
+            <div className="navbar-level-bar-container">
+              <div 
+                className="navbar-level-bar-progress"
+                style={{ width: `${expProgress}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Group 4: Profile, Users and Settings Icons */}
+        <div className="navbar-icon-group">
+          <Button 
+            as={Link} 
+            to="/profile" 
+            variant="light" 
+            aria-label="profile"
+            className="navbar-icon-button"
+          >
+            <img src={profileIcon} alt="Profile" className="navbar-icon-img" />
           </Button>
-          <Button as={Link} to="/people" size="sm" variant="light" aria-label="users">
-            <img src={usersIcon} alt="Users" width="24" height="24" />
+          
+          <Button 
+            as={Link} 
+            to="/people" 
+            variant="light" 
+            aria-label="users"
+            className="navbar-icon-button"
+          >
+            <img src={usersIcon} alt="Users" className="navbar-icon-img" />
           </Button>
-          <Button as={Link} to="/settings" size="sm" variant="light" aria-label="settings">
-            <img src={settingsIcon} alt="Settings" width="24" height="24" />
+          
+          <Button 
+            as={Link} 
+            to="/settings" 
+            variant="light" 
+            aria-label="settings"
+            className="navbar-icon-button"
+          >
+            <img src={settingsIcon} alt="Settings" className="navbar-icon-img" />
           </Button>
         </div>
       </Container>
