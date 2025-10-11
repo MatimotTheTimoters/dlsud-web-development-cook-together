@@ -1,6 +1,7 @@
 // Updated App.js
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/index.css'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import NavbarComponent from './components/NavbarComponent';
 import FloatingActionMenu from './components/FloatingActionMenu';
@@ -16,13 +17,13 @@ import MyKitchenPage from './pages/MyKitchenPage';
 import InventoryPage from './pages/InventoryPage';
 import TestPages from './pages/TestPages';
 
+// App.js - Add bottom padding class
 function App() {
   return (
     <Router>
       <div className="app-container">
         <NavbarComponent />
-        <AsideComponent />
-        <main className="main-content">
+        <main className="main-content with-fixed-footer">
           <Routes>
             {/* Homepage routes */}
             <Route path="/" element={<LandingPage />} />
@@ -38,8 +39,8 @@ function App() {
             <Route path="/TestPages" element={<TestPages />} />
           </Routes>
         </main>
-        <FooterComponent />
         <FloatingActionMenu />
+        <FooterComponent />
       </div>
     </Router>
   );

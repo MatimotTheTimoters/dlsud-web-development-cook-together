@@ -4,7 +4,6 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { generateUniqueId } from '../../hooks/uuidHelper.js';
 import { useRewardLimits } from '../../hooks/useSheetData.js';
 import apiLinks from '../../constants/api.js';
-import '../../styles/colors.css';
 
 export default function BuildChallengeModal({ show, onHide, onCreated }) {
   const { user } = useAuth();

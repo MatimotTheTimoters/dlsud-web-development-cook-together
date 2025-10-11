@@ -1,7 +1,6 @@
 import React from "react";
 import { Nav } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import "../styles/colors.css";
+import { Link, useLocation } from "react-router-dom";
 
 const defaultItems = [
   { key: "feed", label: "Feed", to: "/feed", badge: null },
@@ -10,20 +9,26 @@ const defaultItems = [
   { key: "Test Pages", label: "Test Pages", to: "/TestPages", badge: null },
 ];
 
-function AsideComponent({ items = defaultItems, activeKey = "/feed", className = "" }) {
+function AsideComponent({
+  items = defaultItems,
+  activeKey,
+  className = ""
+}) {
+  const location = useLocation();
+  const currentPath = activeKey || location.pathname;
+
   return (
     <aside className={`app-sidebar aside-card ${className}`}>
       <Nav className="flex-column" as="nav" aria-label="aside navigation">
         {items.map((it) => {
-          const isActive = it.to === activeKey;
+          const isActive = currentPath === it.to || currentPath.startsWith(`${it.to}/`);
           return (
             <Nav.Item key={it.key} className="mb-2">
               <Nav.Link
                 as={Link}
                 to={it.to}
-                className={`d-flex justify-content-between align-items-center ${
-                  isActive ? "aside-item--active" : "text-ct-muted"
-                }`}
+                className={`d-flex justify-content-between align-items-center ${isActive ? "aside-item--active" : "text-ct-muted"
+                  }`}
                 aria-current={isActive ? "page" : undefined}
                 style={{
                   backgroundColor: isActive ? "var(--ct-aside-active-bg)" : "transparent",

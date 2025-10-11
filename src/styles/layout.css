@@ -1,5 +1,4 @@
-/* Layout: fixed left sidebar + main content */
-:root{
+:root {
   --ct-sidebar-width: 240px;
   --ct-navbar-height: 72px;
 }
