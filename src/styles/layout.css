@@ -62,6 +62,7 @@
   box-sizing: border-box;
   margin-left: var(--ct-sidebar-width);
   width: calc(100% - var(--ct-sidebar-width) - 1rem);
+  padding-bottom: calc(var(--ct-footer-height, 80px) + 2rem);
 }
 
 
