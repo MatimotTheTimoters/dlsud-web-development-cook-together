@@ -1,6 +1,7 @@
 // Updated App.js
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/index.css'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import NavbarComponent from './components/NavbarComponent';
 import FloatingActionMenu from './components/FloatingActionMenu';
