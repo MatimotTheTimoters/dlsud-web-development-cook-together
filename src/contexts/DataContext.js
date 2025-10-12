@@ -115,10 +115,11 @@ export function DataProvider({ children }) {
       .map((relationship) => relationship.targetUserId);
   }, [currentUserData?.id, data.usersRelationships]);
 
-  // Query functions for Searchbar
+  // Query functions for Searchbar - FIXED VERSION
   const queryData = (page, filter, query) => {
-    const lowerQuery = query.toLowerCase().trim();
-    if (!lowerQuery) return [];
+    const lowerQuery = query ? query.toLowerCase().trim() : '';
+    
+    // REMOVED: if (!lowerQuery) return []; - This was the problem!
 
     const path = `/${page}`;
 
@@ -128,7 +129,8 @@ export function DataProvider({ children }) {
           return data.recipes.filter(
             (recipe) =>
               followedUserIds.includes(recipe.userId) &&
-              (recipe.title?.toLowerCase().includes(lowerQuery) ||
+              (!lowerQuery || 
+                recipe.title?.toLowerCase().includes(lowerQuery) ||
                 recipe.description?.toLowerCase().includes(lowerQuery) ||
                 recipe.tags?.toLowerCase().includes(lowerQuery))
           );
@@ -137,14 +139,15 @@ export function DataProvider({ children }) {
           return data.challengesCookQuota.filter(
             (challenge) =>
               followedUserIds.includes(challenge.author) &&
-              challenge.title?.toLowerCase().includes(lowerQuery)
+              (!lowerQuery || challenge.title?.toLowerCase().includes(lowerQuery))
           );
         }
         if (filter === 'users') {
           return data.users.filter(
             (user) =>
               followedUserIds.includes(user.id) &&
-              (user.fullName?.toLowerCase().includes(lowerQuery) ||
+              (!lowerQuery ||
+                user.fullName?.toLowerCase().includes(lowerQuery) ||
                 user.email?.toLowerCase().includes(lowerQuery))
           );
         }
@@ -154,6 +157,7 @@ export function DataProvider({ children }) {
         if (filter === 'recipes') {
           return data.recipes.filter(
             (recipe) =>
+              !lowerQuery ||
               recipe.title?.toLowerCase().includes(lowerQuery) ||
               recipe.description?.toLowerCase().includes(lowerQuery) ||
               recipe.tags?.toLowerCase().includes(lowerQuery)
@@ -161,6 +165,7 @@ export function DataProvider({ children }) {
         }
         if (filter === 'challenges') {
           return data.challengesCookQuota.filter((challenge) =>
+            !lowerQuery ||
             challenge.title?.toLowerCase().includes(lowerQuery) ||
             challenge.description?.toLowerCase().includes(lowerQuery)
           );
@@ -168,6 +173,7 @@ export function DataProvider({ children }) {
         if (filter === 'users') {
           return data.users.filter(
             (user) =>
+              !lowerQuery ||
               user.fullName?.toLowerCase().includes(lowerQuery) ||
               user.email?.toLowerCase().includes(lowerQuery)
           );
@@ -179,7 +185,8 @@ export function DataProvider({ children }) {
           return data.recipes.filter(
             (recipe) =>
               recipe.userId === currentUserData?.id &&
-              (recipe.title?.toLowerCase().includes(lowerQuery) ||
+              (!lowerQuery ||
+                recipe.title?.toLowerCase().includes(lowerQuery) ||
                 recipe.description?.toLowerCase().includes(lowerQuery) ||
                 recipe.tags?.toLowerCase().includes(lowerQuery))
           );
@@ -196,7 +203,7 @@ export function DataProvider({ children }) {
           return data.challengesCookQuota.filter(
             (challenge) =>
               userChallengeIds.includes(challenge.challengeId) &&
-              challenge.title?.toLowerCase().includes(lowerQuery)
+              (!lowerQuery || challenge.title?.toLowerCase().includes(lowerQuery))
           );
         }
         break;
@@ -219,7 +226,7 @@ export function DataProvider({ children }) {
         setHasFetched(false);
         fetchAllData();
       },
-      refetchUsers: fetchUsersData, // Add method to refetch users specifically
+      refetchUsers: fetchUsersData,
     }),
     [data, loading, currentUserData, userRewardLimits, followedUserIds]
   );
