@@ -1,7 +1,8 @@
 // Updated App.js
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/index.css'
+import './styles/index.css';
+import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './contexts/DataContext';
 
@@ -23,33 +24,36 @@ import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
 import SettingsPage from './pages/SettingsPage';
 
-// App.js - Add bottom padding class
 function App() {
   return (
     <DataProvider>
       <Router>
-        <NavbarComponent />
-        <Routes>
-          {/* Main routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/registration" element={<RegistrationPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+        <div className="app-container d-flex flex-column min-vh-100">
+          <NavbarComponent />
+          <main className="app-main flex-grow-1">
+            <Routes>
+              {/* Main routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/registration" element={<RegistrationPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
 
-          {/* Navbar routes */}
-          <Route path="/inventory" element={<InventoryPage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+              {/* Navbar routes */}
+              <Route path="/inventory" element={<InventoryPage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
 
-          {/* AsideComponent routes */}
-          <Route path="/feed" element={<FeedPage />} />
-          <Route path="/discover" element={<DiscoverPage />} />
-          <Route path="/my-kitchen" element={<MyKitchenPage />} />
-          <Route path="/TestPages" element={<TestPages />} />
-        </Routes>
-        <FooterComponent />
+              {/* AsideComponent routes */}
+              <Route path="/feed" element={<FeedPage />} />
+              <Route path="/discover" element={<DiscoverPage />} />
+              <Route path="/my-kitchen" element={<MyKitchenPage />} />
+              <Route path="/TestPages" element={<TestPages />} />
+            </Routes>
+          </main>
+          <FooterComponent />
+        </div>
       </Router>
     </DataProvider>
   );
