@@ -1,46 +1,207 @@
 /* Aside Component Styles */
 .app-sidebar {
-  width: 250px;
-  min-height: calc(100vh - 80px);
-  background: var(--ct-surface);
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--ct-surface);
   border-right: 1px solid var(--ct-border);
-  padding: 1rem;
+  padding: 1rem 0.75rem;
+  transition: all 0.3s ease-in-out;
 }
 
 .aside-card {
-  background: var(--ct-surface);
-  border-radius: 8px;
+  background-color: var(--ct-surface);
+  border-radius: 12px;
+}
+
+.aside-nav {
+  padding: 0.5rem 0;
+}
+
+.aside-nav-link {
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1rem !important;
+  width: 100% !important;
+  text-align: left !important;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.aside-nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background-color: var(--ct-primary);
+  border-radius: 0 2px 2px 0;
+  transition: height 0.2s ease-in-out;
+}
+
+.aside-nav-link:hover {
+  background-color: var(--ct-hover-bg) !important;
+  transform: translateX(4px);
+}
+
+.aside-nav-link:hover::before {
+  height: 60%;
+}
+
+.aside-nav-link:hover .aside-item-icon {
+  transform: scale(1.1);
 }
 
 .aside-item--active {
   font-weight: 600;
   background-color: var(--ct-aside-active-bg) !important;
+  color: var(--ct-ink) !important;
+}
+
+.aside-item--active::before {
+  height: 80% !important;
+  background-color: var(--ct-primary) !important;
+}
+
+.aside-item--active .aside-item-icon {
+  transform: scale(1.1);
+}
+
+.aside-item-icon {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease-in-out;
+  width: 20px;
+  text-align: center;
+}
+
+.aside-item-label {
+  font-size: 0.95rem;
+  transition: color 0.2s ease-in-out;
 }
 
 /* Logout item specific styles */
 .logout-item {
   color: var(--ct-error) !important;
-  border: 1px solid var(--ct-error-light) !important;
+  border: 1px solid transparent !important;
+  margin-top: 1rem !important;
 }
 
 .logout-item:hover {
   background-color: var(--ct-error-light) !important;
-  color: white !important;
+  color: var(--ct-error-dark) !important;
+  border-color: var(--ct-error) !important;
+  transform: translateX(4px);
 }
 
-/* Ensure proper text colors */
+/* Text colors */
 .text-ct-ink {
-  color: var(--ct-ink);
+  color: var(--ct-ink) !important;
 }
 
 .text-ct-muted {
-  color: var(--ct-muted);
+  color: var(--ct-muted) !important;
 }
 
+/* Badge styles */
 .badge-ct {
   background-color: var(--ct-primary);
-  color: white;
+  color: var(--ct-white);
   padding: 0.25rem 0.5rem;
   border-radius: 12px;
   font-size: 0.75rem;
+  font-weight: 600;
 }
+
+.badge-pill {
+  border-radius: 50px;
+}
+
+/* Modal customization */
+.modal-ct .modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .app-sidebar {
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--ct-border);
+    padding: 0.5rem;
+  }
+  
+  .aside-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+  
+  .aside-nav .nav-item {
+    margin-bottom: 0 !important;
+    flex-shrink: 0;
+  }
+  
+  .aside-nav-link {
+    white-space: nowrap;
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .aside-item-icon {
+    margin-right: 0.5rem !important;
+  }
+  
+  .aside-nav-link::before {
+    display: none;
+  }
+  
+  .aside-nav-link:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 576px) {
+  .app-sidebar {
+    padding: 0.25rem;
+  }
+  
+  .aside-nav-link {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.9rem;
+  }
+  
+  .aside-item-icon {
+    font-size: 1rem;
+    margin-right: 0.4rem !important;
+  }
+}
+
+/* Animation keyframes */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.aside-nav .nav-item {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Stagger animation for list items */
+.aside-nav .nav-item:nth-child(1) { animation-delay: 0.05s; }
+.aside-nav .nav-item:nth-child(2) { animation-delay: 0.1s; }
+.aside-nav .nav-item:nth-child(3) { animation-delay: 0.15s; }
+.aside-nav .nav-item:nth-child(4) { animation-delay: 0.2s; }
+.aside-nav .nav-item:nth-child(5) { animation-delay: 0.25s; }
+.aside-nav .nav-item:nth-child(6) { animation-delay: 0.3s; }
