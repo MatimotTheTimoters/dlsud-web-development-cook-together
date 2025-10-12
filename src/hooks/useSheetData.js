@@ -1,5 +1,5 @@
-// src/hooks/useSheetData.js - OPTIMIZED VERSION
 import { useState, useEffect, useRef } from 'react';
+import apiSheets from '../constants/api.js'; //
 
 // Simple cache implementation
 const cache = new Map();
@@ -26,8 +26,28 @@ export const useSheetData = (sheetName, queryParams = {}, enabled = true) => {
     setError(null);
 
     try {
-      // Your existing fetch logic
+      const sheetUrl = apiSheets[sheetName];
+      if (!sheetUrl) {
+        throw new Error(`Sheet "${sheetName}" not found in api configuration`);
+      }
+
+      let url = sheetUrl;
+      const queryString = Object.keys(queryParams)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
+        .join('&');
+      
+      if (queryString) {
+        // Handle existing query params in sheetUrl (like ?sheet=name)
+        url += sheetUrl.includes('?') ? `&${queryString}` : `?${queryString}`;
+      }
+
+      console.log(`📡 Fetching from: ${url}`); // Optional: for debugging
+
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const result = await response.json();
       
       // Cache the result
@@ -39,6 +59,7 @@ export const useSheetData = (sheetName, queryParams = {}, enabled = true) => {
       setData(result);
     } catch (err) {
       setError(err.message);
+      console.error(`Error fetching ${sheetName}:`, err);
     } finally {
       setLoading(false);
     }
