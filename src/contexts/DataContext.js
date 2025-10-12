@@ -1,4 +1,3 @@
-// src/contexts/DataContext.js - UPDATED
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import apiSheets from '../constants/api.js';
@@ -20,7 +19,7 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
 
-  // 🚀 Fetch all data in one function
+  // Fetch all data in one function
   const fetchAllData = async () => {
     if (hasFetched) return;
     
@@ -63,7 +62,7 @@ export function DataProvider({ children }) {
     }
   };
 
-  // 🚀 Fetch data only when authenticated
+  // Fetch data only when authenticated
   useEffect(() => {
     if (isAuthenticated && !hasFetched) {
       fetchAllData();
