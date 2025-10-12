@@ -1,4 +1,4 @@
-// hooks/useAuth.js - REMOVE useData dependency
+// src/hooks/useAuth.js - COMPLETE & WORKING
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import apiSheets from '../constants/api.js';
 import { calculateAllUserLimits } from '../utils/userCalculations.js';
