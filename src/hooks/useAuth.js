@@ -1,6 +1,7 @@
+// src/hooks/useAuth.js - COMPLETE & WORKING
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import apiSheets from '../constants/api.js';
-import { calculateMaxRewards } from '../utils/rewardCalculator.js';
+import { calculateAllUserLimits } from '../utils/userCalculations.js';
 
 const STORAGE_KEY = 'ct_user';
 const USER_LIMITS_KEY = 'ct_user_limits';
@@ -18,7 +19,21 @@ export function AuthProvider({ children }) {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch user limits from API
+  // 🚀 Calculate limits from user data
+  const calculateUserLimits = useCallback((userData) => {
+    if (!userData) {
+      return {
+        maxExp: 100,
+        maxGold: 50,
+        maxGem: 5,
+        maxGoldPrice: 100,
+        maxGemPrice: 10,
+      };
+    }
+    return calculateAllUserLimits(userData);
+  }, []);
+
+  // 🚀 Fetch user data and calculate limits
   const fetchUserLimits = useCallback(async (userId) => {
     if (!userId) return;
     
@@ -28,35 +43,70 @@ export function AuthProvider({ children }) {
 
       if (userData.length > 0) {
         const userStats = userData[0];
-        const limits = calculateMaxRewards(userStats);
-        const newLimits = {
-          ...limits,
-          maxGoldPrice: userStats.maxGoldPrice || 100,
-          maxGemPrice: userStats.maxGemPrice || 10,
-        };
+        const newLimits = calculateUserLimits(userStats);
         
         setUserRewardLimits(newLimits);
-        // Cache limits in localStorage
         localStorage.setItem(USER_LIMITS_KEY, JSON.stringify(newLimits));
         return newLimits;
       }
     } catch (error) {
       console.warn('Failed to fetch user limits:', error);
-      // Fallback to cached limits
       const cached = localStorage.getItem(USER_LIMITS_KEY);
       if (cached) {
         setUserRewardLimits(JSON.parse(cached));
       }
     }
-  }, []);
+  }, [calculateUserLimits]);
 
-  // Refresh user limits (for after recipe/challenge creation)
+  // Refresh user limits
   const refreshUserLimits = useCallback(async () => {
     if (user?.id) {
       return await fetchUserLimits(user.id);
     }
   }, [user?.id, fetchUserLimits]);
 
+  // Update user limits in database
+  const updateUserLimitsInDB = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const userRes = await fetch(`${apiSheets.users}&id=${user.id}`);
+      const userData = await userRes.json();
+
+      if (userData.length > 0) {
+        const userStats = userData[0];
+        const allLimits = calculateAllUserLimits(userStats);
+        
+        // Update in database
+        await fetch(apiSheets.users, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: {
+              id: user.id,
+              maxExpReward: allLimits.maxExp,
+              maxGoldReward: allLimits.maxGold,
+              maxGemReward: allLimits.maxGem,
+              maxGoldPrice: allLimits.maxGoldPrice,
+              maxGemPrice: allLimits.maxGemPrice,
+              creatorTier: allLimits.creatorTier,
+              lastLimitUpdate: new Date().toISOString()
+            }
+          })
+        });
+        
+        // Update local state
+        setUserRewardLimits(allLimits);
+        localStorage.setItem(USER_LIMITS_KEY, JSON.stringify(allLimits));
+        
+        return allLimits;
+      }
+    } catch (error) {
+      console.error('Failed to update user limits in DB:', error);
+    }
+  }, [user?.id]);
+
+  // Initialize auth
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -71,7 +121,6 @@ export function AuthProvider({ children }) {
           const parsed = JSON.parse(raw);
           if (parsed && parsed.id) {
             setUser(parsed);
-            // Fetch fresh limits after setting user
             await fetchUserLimits(parsed.id);
           } else {
             localStorage.removeItem(STORAGE_KEY);
@@ -89,6 +138,7 @@ export function AuthProvider({ children }) {
     initializeAuth();
   }, [fetchUserLimits]);
 
+  // Persist user to localStorage
   useEffect(() => {
     try {
       if (user && user.id) {
@@ -131,6 +181,7 @@ export function AuthProvider({ children }) {
       login, 
       logout, 
       refreshUserLimits,
+      updateUserLimitsInDB,
       isAuthenticated: !!(user && user.id),
       isLoading 
     }}>

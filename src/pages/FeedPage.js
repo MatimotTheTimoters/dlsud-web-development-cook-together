@@ -2,6 +2,7 @@ import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import AsideComponent from '../components/AsideComponent.js';
 import BodyComponent from '../components/BodyComponent.js';
+import FloatingActionMenu from '../components/ui/FloatingActionMenu.js';
 
 const FeedPage = () => {
   return (
@@ -16,6 +17,7 @@ const FeedPage = () => {
           </Col>
         </Row>
       </Container>
+      <FloatingActionMenu /> {/* Place outside the Row */}
     </main>
   );
 };
