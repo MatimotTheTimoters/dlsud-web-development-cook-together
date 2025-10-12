@@ -2,7 +2,6 @@ import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import AsideComponent from '../components/AsideComponent.js';
 import BodyComponent from '../components/BodyComponent.js';
-import '../styles/colors.css';
 
 const FeedPage = () => {
   return (

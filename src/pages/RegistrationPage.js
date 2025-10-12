@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import '../styles/colors.css';
-import apiLinks from '../constants/api.js';
+import apiSheets from '../constants/api.js';
 import { generateUniqueId } from '../hooks/uuidHelper.js';
 
 export default function RegistrationPage() {
-  const usersSheet = apiLinks.users;
+  const usersSheet = apiSheets.users;
 
   const navigate = useNavigate();
   const [form, setForm] = useState({ fullName: '', email: '', password: '', confirm: '', age: 18, gender: 'non-binary', loginStreak: 0, level: 0, currentEXP: 0, currentLevelCeiling: 0, goldCount: 0, gemCount: 0 });
