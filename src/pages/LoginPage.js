@@ -7,11 +7,11 @@ import { useData } from '../contexts/DataContext.js';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { users, getUserById } = useData(); // Fetch users and helper functions from DataContext
+  const { users, loading } = useData(); // Fetch users and loading state from DataContext
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loadingState, setLoadingState] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,25 +28,31 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingState(true);
     setError('');
 
     if (!form.email.trim() || !form.password) {
       setError('Please provide email and password.');
-      setLoading(false);
+      setLoadingState(false);
       return;
     }
 
     try {
+      if (loading) {
+        setError('Data is still loading. Please wait.');
+        setLoadingState(false);
+        return;
+      }
+
       const user = validateCredentials(form.email.trim(), form.password);
       if (!user) {
         setError('Invalid email or password.');
-        setLoading(false);
+        setLoadingState(false);
         return;
       }
 
       // Log the user in
-      login({
+      await login({
         id: user.id,
         fullName: user.fullName,
         email: user.email,
@@ -60,7 +66,7 @@ const LoginPage = () => {
       console.error('❌ Login failed:', err);
       setError('An unexpected error occurred. Please try again.');
     } finally {
-      setLoading(false);
+      setLoadingState(false);
     }
   };
 
@@ -88,7 +94,7 @@ const LoginPage = () => {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
-                disabled={loading}
+                disabled={loadingState}
               />
             </Form.Group>
 
@@ -100,13 +106,13 @@ const LoginPage = () => {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Your password"
-                disabled={loading}
+                disabled={loadingState}
               />
             </Form.Group>
 
             <div className="d-flex justify-content-between align-items-center">
-              <Button type="submit" className="btn-ct-primary" disabled={loading}>
-                {loading ? 'Logging in...' : 'Login'}
+              <Button type="submit" className="btn-ct-primary" disabled={loadingState}>
+                {loadingState ? 'Logging in...' : 'Login'}
               </Button>
 
               <Link to="/registration" className="text-ct-muted small">
