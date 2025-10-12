@@ -102,23 +102,29 @@ export function DataProvider({ children }) {
   }, [currentUserData?.id, data.usersRelationships]);
 
   // Query functions for Searchbar
-  const queryData = (path, filter, query) => {
-    const lowerQuery = query.toLowerCase();
+  // In DataContext.js - Update the queryData function:
+  const queryData = (page, filter, query) => {
+    const lowerQuery = query.toLowerCase().trim();
+    if (!lowerQuery) return [];
+
+    // Convert page to path format for consistency
+    const path = `/${page}`;
 
     switch (path) {
       case '/feed':
         if (filter === 'recipes') {
           return data.recipes.filter(
             (recipe) =>
-              followedUserIds.includes(recipe.author) &&
+              followedUserIds.includes(recipe.userId) && // Fixed: recipe.userId instead of recipe.author
               (recipe.title?.toLowerCase().includes(lowerQuery) ||
-                recipe.description?.toLowerCase().includes(lowerQuery))
+                recipe.description?.toLowerCase().includes(lowerQuery) ||
+                recipe.tags?.toLowerCase().includes(lowerQuery))
           );
         }
         if (filter === 'challenges') {
           return data.challengesCookQuota.filter(
             (challenge) =>
-              followedUserIds.includes(challenge.creatorId) &&
+              followedUserIds.includes(challenge.author) && // Fixed: challenge.author instead of challenge.creatorId
               challenge.title?.toLowerCase().includes(lowerQuery)
           );
         }
@@ -137,12 +143,14 @@ export function DataProvider({ children }) {
           return data.recipes.filter(
             (recipe) =>
               recipe.title?.toLowerCase().includes(lowerQuery) ||
-              recipe.description?.toLowerCase().includes(lowerQuery)
+              recipe.description?.toLowerCase().includes(lowerQuery) ||
+              recipe.tags?.toLowerCase().includes(lowerQuery)
           );
         }
         if (filter === 'challenges') {
           return data.challengesCookQuota.filter((challenge) =>
-            challenge.title?.toLowerCase().includes(lowerQuery)
+            challenge.title?.toLowerCase().includes(lowerQuery) ||
+            challenge.description?.toLowerCase().includes(lowerQuery)
           );
         }
         if (filter === 'users') {
@@ -158,9 +166,10 @@ export function DataProvider({ children }) {
         if (filter === 'user-recipes') {
           return data.recipes.filter(
             (recipe) =>
-              recipe.author === currentUserData?.id &&
+              recipe.userId === currentUserData?.id && // Fixed: recipe.userId instead of recipe.author
               (recipe.title?.toLowerCase().includes(lowerQuery) ||
-                recipe.description?.toLowerCase().includes(lowerQuery))
+                recipe.description?.toLowerCase().includes(lowerQuery) ||
+                recipe.tags?.toLowerCase().includes(lowerQuery))
           );
         }
         if (filter === 'user-challenges') {
@@ -174,7 +183,7 @@ export function DataProvider({ children }) {
 
           return data.challengesCookQuota.filter(
             (challenge) =>
-              userChallengeIds.includes(challenge.id) &&
+              userChallengeIds.includes(challenge.challengeId) && // Fixed: challenge.challengeId instead of challenge.id
               challenge.title?.toLowerCase().includes(lowerQuery)
           );
         }
@@ -183,6 +192,8 @@ export function DataProvider({ children }) {
       default:
         return [];
     }
+
+    return [];
   };
 
   const value = useMemo(
