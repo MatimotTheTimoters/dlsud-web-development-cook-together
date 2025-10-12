@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Nav, Modal, Button } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 // Default navigation items for main app
@@ -15,7 +15,7 @@ const defaultItems = [
 const settingsItems = [
   { key: "profile", label: "Profile", to: "/profile", badge: null },
   { key: "account", label: "Account", to: "/settings", badge: null },
-  { key: "logout", label: "Logout", to: "/landing", badge: null },
+  { key: "logout", label: "Logout", to: "/", badge: null },
 ];
 
 function AsideComponent({
@@ -24,6 +24,7 @@ function AsideComponent({
   className = ""
 }) {
   const location = useLocation();
+  const navigate = useNavigate(); // Add navigate hook
   const { logout } = useAuth();
   const currentPath = activeKey || location.pathname;
 
@@ -33,12 +34,12 @@ function AsideComponent({
   const getNavigationItems = () => {
     // If custom items are provided via props, use them
     if (items) return items;
-    
+
     // Show settings navigation when in settings section
     if (currentPath.startsWith('/settings')) {
       return settingsItems;
     }
-    
+
     // Default navigation for all other pages
     return defaultItems;
   };
@@ -54,8 +55,9 @@ function AsideComponent({
   };
 
   const handleLogoutConfirm = () => {
-    logout();
+    logout(); // Perform logout
     setShowLogoutModal(false);
+    navigate('/'); // Navigate to landing page
   };
 
   return (
@@ -64,7 +66,7 @@ function AsideComponent({
         <Nav className="flex-column" as="nav" aria-label="aside navigation">
           {navigationItems.map((item) => {
             const isActive = currentPath === item.to || currentPath.startsWith(`${item.to}/`);
-            
+
             return (
               <Nav.Item key={item.key} className="mb-2">
                 <Nav.Link
