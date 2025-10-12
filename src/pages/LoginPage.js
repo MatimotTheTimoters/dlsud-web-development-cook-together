@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
@@ -7,15 +7,26 @@ import { useData } from '../contexts/DataContext.js';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { users, loading } = useData(); // Fetch users and loading state from DataContext
+  const { users, loading, refetchUsers } = useData();
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loadingState, setLoadingState] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  // Check if users data is available
+  useEffect(() => {
+    if (users.length > 0) {
+      setInitialLoad(false);
+    } else if (!loading && users.length === 0) {
+      // If no users data but not loading, try to refetch
+      refetchUsers?.();
+    }
+  }, [users, loading, refetchUsers]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError(''); // Clear error when user types
+    setError('');
   };
 
   const validateCredentials = (email, password) => {
@@ -38,8 +49,9 @@ const LoginPage = () => {
     }
 
     try {
-      if (loading) {
-        setError('Data is still loading. Please wait.');
+      // If still loading initially, show message
+      if (initialLoad && users.length === 0) {
+        setError('System is initializing. Please try again in a moment.');
         setLoadingState(false);
         return;
       }
@@ -85,6 +97,12 @@ const LoginPage = () => {
             </Alert>
           )}
 
+          {initialLoad && users.length === 0 && (
+            <Alert variant="info" className="mb-3">
+              Loading system data...
+            </Alert>
+          )}
+
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="loginEmail" className="mb-3">
               <Form.Label className="text-ct-muted">Email</Form.Label>
@@ -94,7 +112,7 @@ const LoginPage = () => {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
-                disabled={loadingState}
+                disabled={loadingState || (initialLoad && users.length === 0)}
               />
             </Form.Group>
 
@@ -106,13 +124,18 @@ const LoginPage = () => {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Your password"
-                disabled={loadingState}
+                disabled={loadingState || (initialLoad && users.length === 0)}
               />
             </Form.Group>
 
             <div className="d-flex justify-content-between align-items-center">
-              <Button type="submit" className="btn-ct-primary" disabled={loadingState}>
-                {loadingState ? 'Logging in...' : 'Login'}
+              <Button 
+                type="submit" 
+                className="btn-ct-primary" 
+                disabled={loadingState || (initialLoad && users.length === 0)}
+              >
+                {loadingState ? 'Logging in...' : 
+                 (initialLoad && users.length === 0) ? 'Initializing...' : 'Login'}
               </Button>
 
               <Link to="/registration" className="text-ct-muted small">

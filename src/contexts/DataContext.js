@@ -19,14 +19,24 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
 
-  // Fetch all data
+  // Fetch users data immediately (needed for login)
+  const fetchUsersData = async () => {
+    try {
+      const usersRes = await fetch(apiSheets.users);
+      const users = await usersRes.json();
+      setData(prev => ({ ...prev, users }));
+    } catch (error) {
+      console.error('Failed to fetch users data:', error);
+    }
+  };
+
+  // Fetch all other data only when authenticated
   const fetchAllData = async () => {
     if (hasFetched) return;
 
     setLoading(true);
     try {
       const [
-        usersRes,
         usersRelationshipsRes,
         recipesRes,
         recipesIngredientsRes,
@@ -34,7 +44,6 @@ export function DataProvider({ children }) {
         challengesCookQuotaRes,
         challengesCookQuotaParticipantsRes,
       ] = await Promise.all([
-        fetch(apiSheets.users),
         fetch(apiSheets.usersRelationships),
         fetch(apiSheets.recipes),
         fetch(apiSheets.recipesIngredients),
@@ -44,7 +53,7 @@ export function DataProvider({ children }) {
       ]);
 
       const newData = {
-        users: await usersRes.json(),
+        users: data.users, // Keep existing users data
         usersRelationships: await usersRelationshipsRes.json(),
         recipes: await recipesRes.json(),
         recipesIngredients: await recipesIngredientsRes.json(),
@@ -62,7 +71,12 @@ export function DataProvider({ children }) {
     }
   };
 
-  // Fetch data only when authenticated
+  // Fetch users data on mount (needed for login validation)
+  useEffect(() => {
+    fetchUsersData();
+  }, []);
+
+  // Fetch all other data only when authenticated
   useEffect(() => {
     if (isAuthenticated && !hasFetched) {
       fetchAllData();
@@ -101,90 +115,109 @@ export function DataProvider({ children }) {
       .map((relationship) => relationship.targetUserId);
   }, [currentUserData?.id, data.usersRelationships]);
 
-  // Query functions for Searchbar
-  // In DataContext.js - Update the queryData function:
-  const queryData = (page, filter, query) => {
-    const lowerQuery = query.toLowerCase().trim();
-    if (!lowerQuery) return [];
+  // Query functions for Searchbar - FIXED VERSION
+  const queryData = (page, filter, query, forceDefault = false) => {
+    const lowerQuery = query ? query.toLowerCase().trim() : "";
 
-    // Convert page to path format for consistency
     const path = `/${page}`;
 
     switch (path) {
-      case '/feed':
-        if (filter === 'recipes') {
+      case "/feed":
+        if (filter === "recipes") {
           return data.recipes.filter(
             (recipe) =>
-              followedUserIds.includes(recipe.userId) && // Fixed: recipe.userId instead of recipe.author
-              (recipe.title?.toLowerCase().includes(lowerQuery) ||
+              followedUserIds.includes(recipe.userId) &&
+              (forceDefault ||
+                lowerQuery === "" ||
+                recipe.title?.toLowerCase().includes(lowerQuery) ||
                 recipe.description?.toLowerCase().includes(lowerQuery) ||
                 recipe.tags?.toLowerCase().includes(lowerQuery))
           );
         }
-        if (filter === 'challenges') {
+        if (filter === "challenges") {
           return data.challengesCookQuota.filter(
             (challenge) =>
-              followedUserIds.includes(challenge.author) && // Fixed: challenge.author instead of challenge.creatorId
-              challenge.title?.toLowerCase().includes(lowerQuery)
+              followedUserIds.includes(challenge.author) &&
+              (forceDefault ||
+                lowerQuery === "" ||
+                challenge.title?.toLowerCase().includes(lowerQuery) ||
+                challenge.description?.toLowerCase().includes(lowerQuery) ||
+                challenge.tags?.toLowerCase().includes(lowerQuery))
           );
         }
-        if (filter === 'users') {
+        if (filter === "users") {
           return data.users.filter(
             (user) =>
               followedUserIds.includes(user.id) &&
-              (user.fullName?.toLowerCase().includes(lowerQuery) ||
+              (forceDefault ||
+                lowerQuery === "" ||
+                user.fullName?.toLowerCase().includes(lowerQuery) ||
                 user.email?.toLowerCase().includes(lowerQuery))
           );
         }
         break;
 
-      case '/discover':
-        if (filter === 'recipes') {
+      case "/discover":
+        if (filter === "recipes") {
           return data.recipes.filter(
             (recipe) =>
+              forceDefault ||
+              lowerQuery === "" ||
               recipe.title?.toLowerCase().includes(lowerQuery) ||
               recipe.description?.toLowerCase().includes(lowerQuery) ||
               recipe.tags?.toLowerCase().includes(lowerQuery)
           );
         }
-        if (filter === 'challenges') {
-          return data.challengesCookQuota.filter((challenge) =>
-            challenge.title?.toLowerCase().includes(lowerQuery) ||
-            challenge.description?.toLowerCase().includes(lowerQuery)
+        if (filter === "challenges") {
+          return data.challengesCookQuota.filter(
+            (challenge) =>
+              forceDefault ||
+              lowerQuery === "" ||
+              challenge.title?.toLowerCase().includes(lowerQuery) ||
+              challenge.description?.toLowerCase().includes(lowerQuery) ||
+              challenge.tags?.toLowerCase().includes(lowerQuery)
           );
         }
-        if (filter === 'users') {
+        if (filter === "users") {
           return data.users.filter(
             (user) =>
+              forceDefault ||
+              lowerQuery === "" ||
               user.fullName?.toLowerCase().includes(lowerQuery) ||
               user.email?.toLowerCase().includes(lowerQuery)
           );
         }
         break;
 
-      case '/my-kitchen':
-        if (filter === 'user-recipes') {
+      case "/my-kitchen":
+        if (filter === "user-recipes") {
           return data.recipes.filter(
             (recipe) =>
-              recipe.userId === currentUserData?.id && // Fixed: recipe.userId instead of recipe.author
-              (recipe.title?.toLowerCase().includes(lowerQuery) ||
+              recipe.userId === currentUserData?.id &&
+              (forceDefault ||
+                lowerQuery === "" ||
+                recipe.title?.toLowerCase().includes(lowerQuery) ||
                 recipe.description?.toLowerCase().includes(lowerQuery) ||
                 recipe.tags?.toLowerCase().includes(lowerQuery))
           );
         }
-        if (filter === 'user-challenges') {
+        if (filter === "user-challenges") {
           const userChallengeIds = data.challengesCookQuotaParticipants
             .filter(
               (participant) =>
                 participant.userId === currentUserData?.id &&
-                participant.status === 'joined'
+                participant.status === "joined"
             )
             .map((participant) => participant.challengeId);
 
           return data.challengesCookQuota.filter(
             (challenge) =>
-              userChallengeIds.includes(challenge.challengeId) && // Fixed: challenge.challengeId instead of challenge.id
-              challenge.title?.toLowerCase().includes(lowerQuery)
+              userChallengeIds.includes(challenge.challengeId) &&
+              (forceDefault ||
+                lowerQuery === "" ||
+                challenge.title?.toLowerCase().includes(lowerQuery) ||
+                challenge.description?.toLowerCase().includes(lowerQuery) ||
+                challenge.tags?.toLowerCase().includes(lowerQuery))
           );
         }
         break;
@@ -196,17 +229,43 @@ export function DataProvider({ children }) {
     return [];
   };
 
+  // Add a method to refetch records from a specific sheet
+  const refetchSheet = async (sheetName) => {
+    try {
+      const sheetUrl = apiSheets[sheetName];
+      if (!sheetUrl) {
+        console.error(`Sheet name "${sheetName}" does not exist in apiSheets.`);
+        return;
+      }
+
+      const response = await fetch(sheetUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch data from sheet: ${sheetName}`);
+      }
+
+      const newData = await response.json();
+      setData((prev) => ({
+        ...prev,
+        [sheetName]: newData,
+      }));
+    } catch (error) {
+      console.error(`Error refetching sheet "${sheetName}":`, error);
+    }
+  };
+
   const value = useMemo(
     () => ({
       ...data,
       loading,
       currentUserData,
       userRewardLimits,
-      queryData, // Expose queryData for Searchbar
+      queryData,
       refetchAll: () => {
         setHasFetched(false);
         fetchAllData();
       },
+      refetchUsers: fetchUsersData,
+      refetchSheet, // Add the new method here
     }),
     [data, loading, currentUserData, userRewardLimits, followedUserIds]
   );
