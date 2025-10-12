@@ -6,7 +6,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { DataProvider } from './contexts/DataContext';
 
 import NavbarComponent from './components/NavbarComponent';
-import FloatingActionMenu from './components/FloatingActionMenu';
 import FooterComponent from './components/FooterComponent';
 
 import LandingPage from './pages/LandingPage';
@@ -50,7 +49,6 @@ function App() {
           <Route path="/my-kitchen" element={<MyKitchenPage />} />
           <Route path="/TestPages" element={<TestPages />} />
         </Routes>
-        <FloatingActionMenu />
         <FooterComponent />
       </Router>
     </DataProvider>
