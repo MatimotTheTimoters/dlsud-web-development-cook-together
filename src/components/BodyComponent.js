@@ -7,6 +7,7 @@ import Searchbar from "./ui/Searchbar";
 import RecipeCard from "./cards/RecipeCard";
 import ChallengeCard from "./cards/ChallengeCard";
 import UserCard from "./cards/UserCard";
+import noRecordsImage from "../assets/icons/no-records-icon.png";
 
 function BodyComponent() {
   const { user } = useAuth();
@@ -100,9 +101,12 @@ function BodyComponent() {
             </div>
           ) : filteredData.length === 0 ? (
             <div className="text-center py-5">
-              <div className="mb-3" style={{ fontSize: "3rem" }}>
-                {searchQuery ? "🔍" : "📝"}
-              </div>
+              <img
+                src={noRecordsImage}
+                alt="No records found"
+                className="mb-3"
+                style={{ width: "150px", height: "150px" }}
+              />
               <h5 className="text-ct-muted">
                 {searchQuery
                   ? `No ${activeFilter} found for "${searchQuery}"`
