@@ -1,3 +1,4 @@
+// src/contexts/DataContext.js - FIXED & CLEAN
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import apiSheets from '../constants/api.js';
@@ -8,18 +9,18 @@ const DataContext = createContext();
 export function DataProvider({ children }) {
   const { user, isAuthenticated } = useAuth();
   const [data, setData] = useState({
-    users: null,
-    usersRelationships: null,
-    recipes: null,
-    recipesIngredients: null,
-    recipesSteps: null,
-    challengesCookQuota: null,
-    challengesCookQuotaParticipants: null,
+    users: [],
+    usersRelationships: [],
+    recipes: [],
+    recipesIngredients: [],
+    recipesSteps: [],
+    challengesCookQuota: [],
+    challengesCookQuotaParticipants: [],
   });
   const [loading, setLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
 
-  // Fetch all data in one function
+  // 🚀 Fetch all data in one function
   const fetchAllData = async () => {
     if (hasFetched) return;
     
@@ -62,7 +63,7 @@ export function DataProvider({ children }) {
     }
   };
 
-  // Fetch data only when authenticated
+  // 🚀 Fetch data only when authenticated
   useEffect(() => {
     if (isAuthenticated && !hasFetched) {
       fetchAllData();
@@ -89,10 +90,8 @@ export function DataProvider({ children }) {
     return calculateAllUserLimits(currentUserData);
   }, [currentUserData]);
 
-  // 🔍 SEARCH HELPER FUNCTIONS
-
-  // Get users that the current user is following
-  const getFollowedUsers = useMemo(() => {
+  // 🔍 Get followed users IDs
+  const followedUserIds = useMemo(() => {
     if (!currentUserData?.id || !data.usersRelationships) return [];
     
     return data.usersRelationships
@@ -103,59 +102,46 @@ export function DataProvider({ children }) {
       .map(relationship => relationship.targetUserId);
   }, [currentUserData?.id, data.usersRelationships]);
 
-  // Get recipes from users that the current user follows
+  // 🔍 SEARCH HELPER FUNCTIONS
   const getRecipesByFollowing = useMemo(() => {
-    if (!data.recipes || !getFollowedUsers.length) return [];
-    
+    if (!data.recipes || !followedUserIds.length) return [];
     return data.recipes.filter(recipe => 
-      getFollowedUsers.includes(recipe.author)
+      followedUserIds.includes(recipe.author)
     );
-  }, [data.recipes, getFollowedUsers]);
+  }, [data.recipes, followedUserIds]);
 
-  // Get challenges from users that the current user follows
   const getChallengesByFollowing = useMemo(() => {
-    if (!data.challengesCookQuota || !getFollowedUsers.length) return [];
-    
+    if (!data.challengesCookQuota || !followedUserIds.length) return [];
     return data.challengesCookQuota.filter(challenge => 
-      getFollowedUsers.includes(challenge.creatorId)
+      followedUserIds.includes(challenge.creatorId)
     );
-  }, [data.challengesCookQuota, getFollowedUsers]);
+  }, [data.challengesCookQuota, followedUserIds]);
 
-  // Get users that the current user follows (excluding self)
   const getUsersByFollowing = useMemo(() => {
-    if (!data.users || !getFollowedUsers.length) return [];
-    
+    if (!data.users || !followedUserIds.length) return [];
     return data.users.filter(user => 
-      getFollowedUsers.includes(user.id) && user.id !== currentUserData?.id
+      followedUserIds.includes(user.id) && user.id !== currentUserData?.id
     );
-  }, [data.users, getFollowedUsers, currentUserData?.id]);
+  }, [data.users, followedUserIds, currentUserData?.id]);
 
-  // Get all recipes (no filtering)
   const getAllRecipes = useMemo(() => {
     return data.recipes || [];
   }, [data.recipes]);
 
-  // Get all challenges (no filtering)
   const getAllChallenges = useMemo(() => {
     return data.challengesCookQuota || [];
   }, [data.challengesCookQuota]);
 
-  // Get all users (no filtering, excluding current user)
   const getAllUsers = useMemo(() => {
     if (!data.users) return [];
     return data.users.filter(user => user.id !== currentUserData?.id);
   }, [data.users, currentUserData?.id]);
 
-  // Get recipes created by the current user
   const getUserRecipes = useMemo(() => {
     if (!data.recipes || !currentUserData?.id) return [];
-    
-    return data.recipes.filter(recipe => 
-      recipe.author === currentUserData.id
-    );
+    return data.recipes.filter(recipe => recipe.author === currentUserData.id);
   }, [data.recipes, currentUserData?.id]);
 
-  // Get challenges that the current user has joined
   const getUserChallenges = useMemo(() => {
     if (!data.challengesCookQuotaParticipants || !currentUserData?.id) return [];
     
@@ -171,12 +157,19 @@ export function DataProvider({ children }) {
     );
   }, [data.challengesCookQuota, data.challengesCookQuotaParticipants, currentUserData?.id]);
 
-  // Get user's cookbooks (if you have a cookbooks sheet)
   const getUserCookbooks = useMemo(() => {
-    // This would need to be implemented when you have a cookbooks sheet
-    // For now, return empty array as placeholder
+    // Placeholder - implement when you have cookbooks data
     return [];
   }, []);
+
+  // 🔍 FEED DATA FUNCTION
+  const getFeedData = useMemo(() => {
+    return {
+      recipes: getRecipesByFollowing,
+      challenges: getChallengesByFollowing,
+      users: getUsersByFollowing
+    };
+  }, [getRecipesByFollowing, getChallengesByFollowing, getUsersByFollowing]);
 
   const value = useMemo(() => ({
     // Raw data
@@ -195,7 +188,8 @@ export function DataProvider({ children }) {
     getUserRecipes,
     getUserChallenges,
     getUserCookbooks,
-    getFollowedUsers, // Export this for other components if needed
+    getFeedData,
+    followedUserIds,
 
     // Existing helper functions
     getUserById: (userId) => data.users?.find(user => user.id === userId),
@@ -221,7 +215,6 @@ export function DataProvider({ children }) {
     loading,
     currentUserData,
     userRewardLimits,
-    // Search helpers dependencies
     getRecipesByFollowing,
     getChallengesByFollowing,
     getUsersByFollowing,
@@ -231,7 +224,8 @@ export function DataProvider({ children }) {
     getUserRecipes,
     getUserChallenges,
     getUserCookbooks,
-    getFollowedUsers
+    getFeedData,
+    followedUserIds
   ]);
 
   return (
