@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, ButtonGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import BuildChallengeModal from './modals/BuildChallengeModal';
-import CreateRecipeModal from './modals/CreateRecipeModal';
+import BuildChallengeModal from '../modals/BuildChallengeModal';
+import CreateRecipeModal from '../modals/CreateRecipeModal';
 
 function FloatingActionMenu() {
   const [showRecipeModal, setShowRecipeModal] = useState(false);
