@@ -1,0 +1,185 @@
+:root{
+  /* Global tokens (from colors.md) */
+  --ct-primary: #FF7043;
+  --ct-secondary: #2BC1A9;
+  --ct-gold: #F2C94C;
+  --ct-ink: #0F172A;
+  --ct-muted: #64748B;
+  --ct-surface: #F4F6F8;
+  --ct-paper: #FFFFFF;
+  --ct-border: #E6E9EE;
+  --ct-danger: #E85959;
+  --ct-success: #2ECC71;
+  --ct-shadow: rgba(15, 23, 42, 0.06);
+
+  /* Derived / convenience tokens */
+  --ct-hero-gradient-start: #FFFFFF;
+  --ct-hero-gradient-end: var(--ct-surface);
+  --ct-aside-active-bg: #E8FBF6;
+  --ct-card-surface: #F0F2F4;
+
+  /* Logo / icon accents */
+  --logo-primary: var(--ct-primary);
+  --logo-secondary: var(--ct-secondary);
+  --logo-highlight: var(--ct-gold);
+}
+
+/* -----------------------
+   Global helpers/utilities
+   ----------------------- */
+.bg-ct-surface { background-color: var(--ct-surface) !important; }
+.bg-ct-paper   { background-color: var(--ct-paper) !important; }
+.bg-ct-card    { background-color: var(--ct-card-surface) !important; }
+
+.text-ct-ink   { color: var(--ct-ink) !important; }
+.text-ct-muted { color: var(--ct-muted) !important; }
+
+.border-ct     { border-color: var(--ct-border) !important; }
+.border-bottom-ct { border-bottom: 1px solid var(--ct-border) !important; }
+
+.u-gap-sm { gap: .5rem !important; }
+.u-gap-md { gap: 1rem !important; }
+
+/* Accessibility helpers */
+.text-contrast-high { color: var(--ct-ink) !important; }
+.text-contrast-muted { color: var(--ct-muted) !important; }
+
+/* -----------------------
+   NavbarComponent (src/components/NavbarComponent.js)
+   ----------------------- */
+.navbar-ct {
+  background-color: var(--ct-paper);
+  border-bottom: 1px solid var(--ct-border);
+}
+.navbar-brand-ink {
+  color: var(--ct-ink);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+.navbar-ct .nav-link,
+.navbar-ct .navbar-toggler {
+  color: var(--ct-muted);
+}
+
+/* CTA buttons in navbar */
+.btn-ct-primary {
+  background-color: var(--ct-primary);
+  color: #fff;
+  border-color: var(--ct-primary);
+}
+.btn-ct-primary:disabled { opacity: 0.6; }
+
+/* Currency chips used in navbar */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .25rem .5rem;
+  border-radius: .5rem;
+  font-size: .85rem;
+  font-weight: 600;
+  box-shadow: 0 1px 2px var(--ct-shadow);
+}
+.chip-gold { background-color: var(--ct-gold); color: var(--ct-ink); }
+.chip-gem  { background-color: var(--ct-secondary); color: var(--ct-ink); }
+
+/* -----------------------
+   HeroComponent (src/components/HeroComponent.js)
+   ----------------------- */
+.hero-ct {
+  background: linear-gradient(180deg, var(--ct-hero-gradient-start) 0%, var(--ct-hero-gradient-end) 100%);
+  color: var(--ct-ink);
+  padding: 2.5rem 1rem;
+}
+.hero-ct .lead { color: var(--ct-muted); }
+
+/* -----------------------
+   Aside (src/components/Aside.js)
+   ----------------------- */
+.aside-card {
+  background-color: var(--ct-paper);
+  border: 1px solid var(--ct-border);
+  padding: 1rem;
+}
+.aside-item--active {
+  background-color: var(--ct-aside-active-bg);
+  color: var(--ct-ink);
+}
+
+/* -----------------------
+   BodyComponent / Cards (src/components/BodyComponent.js)
+   ----------------------- */
+.ct-card {
+  background-color: var(--ct-paper);
+  border: 1px solid var(--ct-border);
+  border-radius: .5rem;
+  padding: 1rem;
+  box-shadow: 0 6px 18px var(--ct-shadow);
+}
+.ct-surface { background-color: var(--ct-surface); }
+
+/* Card title / meta */
+.ct-card .title { color: var(--ct-ink); font-weight: 700; }
+.ct-card .meta  { color: var(--ct-muted); font-size: .9rem; }
+
+/* -----------------------
+   FooterComponent (src/components/FooterComponent.js)
+   ----------------------- */
+.footer-ct {
+  background-color: var(--ct-surface);
+  border-top: 1px solid var(--ct-border);
+  color: var(--ct-muted);
+  padding: 1rem 0;
+}
+
+/* -----------------------
+   ActionMenu / Floating (src/components/ActionMenu.js)
+   ----------------------- */
+.action-toggle {
+  background-color: var(--ct-ink);
+  color: #fff;
+  border-radius: 999px;
+  width: 56px;
+  height: 56px;
+  display: inline-grid;
+  place-items: center;
+}
+.action-card {
+  background-color: var(--ct-paper);
+  border: 1px solid var(--ct-border);
+  box-shadow: 0 6px 18px var(--ct-shadow);
+}
+
+/* -----------------------
+   Modals (src/components/modals/*.js)
+   ----------------------- */
+.modal-ct {
+  background-color: var(--ct-paper);
+  color: var(--ct-ink);
+}
+.input-disabled-surface {
+  background-color: var(--ct-surface);
+  color: var(--ct-muted);
+  border: 1px solid var(--ct-border);
+}
+
+/* -----------------------
+   Small component-specific tweaks
+   ----------------------- */
+/* Buttons: outline alternative using brand */
+.btn-ct-outline {
+  background: transparent;
+  border: 1px solid var(--ct-primary);
+  color: var(--ct-primary);
+}
+
+/* Utility for small chips / badges */
+.badge-ct {
+  background-color: var(--ct-card-surface);
+  color: var(--ct-ink);
+  padding: .25rem .5rem;
+  border-radius: .375rem;
+  font-weight: 600;
+}

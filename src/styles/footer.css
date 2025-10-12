@@ -1,0 +1,405 @@
+/* ===== FOOTER COMPONENT STYLES ===== */
+/* Enhanced with CSS custom properties from colors.css - No gradients */
+
+.footer-ct {
+  background-color: var(--ct-surface);
+  border-top: 2px solid var(--ct-border);
+  padding: 2rem 0 1rem;
+  color: var(--ct-muted);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.footer-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Footer decorative elements */
+.footer-ct::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--ct-primary);
+  transform: scaleX(0);
+  transition: transform 0.8s ease;
+}
+
+.footer-visible::before {
+  transform: scaleX(1);
+}
+
+/* Brand section */
+.footer-title {
+  position: relative;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.footer-title:hover {
+  color: var(--ct-primary);
+  transform: translateX(5px);
+}
+
+.footer-badge {
+  font-size: 0.6rem;
+  padding: 0.25rem 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+.footer-description {
+  line-height: 1.6;
+  transition: color 0.3s ease;
+}
+
+.footer-stats .bg-ct-surface {
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.footer-stats .bg-ct-surface:hover {
+  border-color: var(--ct-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--ct-shadow);
+}
+
+/* Section titles */
+.footer-section-title {
+  position: relative;
+  padding-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.footer-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background-color: var(--ct-primary);
+  transition: width 0.3s ease;
+}
+
+.footer-section-title:hover::after {
+  width: 50px;
+}
+
+.footer-section-title:hover {
+  color: var(--ct-primary);
+}
+
+/* Navigation links */
+.footer-nav {
+  gap: 0.5rem;
+}
+
+.footer-link {
+  padding: 0.25rem 0 !important;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: slideInLeft 0.6s ease-out both;
+}
+
+.footer-link::before {
+  content: '';
+  position: absolute;
+  left: -100%;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--ct-primary-light);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.footer-link:hover {
+  color: var(--ct-primary) !important;
+  transform: translateX(5px);
+  text-decoration: none;
+}
+
+.footer-link:hover::before {
+  left: 0;
+}
+
+/* Social links */
+.footer-social-link {
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.footer-social-link:hover {
+  border-color: var(--ct-primary);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px var(--ct-shadow);
+  text-decoration: none;
+  color: var(--ct-primary) !important;
+}
+
+.footer-social-link:hover small {
+  color: var(--ct-primary) !important;
+}
+
+/* Newsletter form */
+.footer-newsletter .form-control {
+  border: 1px solid var(--ct-border);
+  background-color: var(--ct-paper);
+  transition: all 0.3s ease;
+}
+
+.footer-newsletter .form-control:focus {
+  border-color: var(--ct-primary);
+  box-shadow: 0 0 0 2px rgba(255, 112, 67, 0.1);
+}
+
+.footer-newsletter .btn-ct-primary {
+  transition: all 0.3s ease;
+}
+
+.footer-newsletter .btn-ct-primary:hover {
+  transform: scale(1.05);
+}
+
+/* Bottom bar */
+.border-top-ct {
+  border-top: 1px solid var(--ct-border) !important;
+}
+
+.footer-copyright {
+  transition: color 0.3s ease;
+}
+
+.footer-copyright:hover {
+  color: var(--ct-ink);
+}
+
+/* Mobile app badge */
+.mobile-app-badge {
+  border: 1px solid var(--ct-border);
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+  animation: bounce 2s infinite;
+}
+
+.mobile-app-badge:hover {
+  background-color: var(--ct-primary) !important;
+  color: white !important;
+  border-color: var(--ct-primary);
+  transform: scale(1.05);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Large devices (≥ 992px) */
+@media (min-width: 992px) {
+  .footer-ct {
+    padding: 3rem 0 1.5rem;
+  }
+}
+
+/* Medium devices (768px - 991px) */
+@media (max-width: 991px) and (min-width: 768px) {
+  .footer-ct {
+    padding: 2.5rem 0 1.25rem;
+  }
+}
+
+/* Small devices (≤ 767px) */
+@media (max-width: 767px) {
+  .footer-ct {
+    padding: 2rem 0 1rem;
+    text-align: center;
+  }
+
+  .footer-section-title::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .footer-link:hover {
+    transform: translateY(-2px);
+  }
+
+  .footer-stats .row {
+    justify-content: center;
+  }
+
+  .footer-stats .col-6 {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 100px;
+  }
+
+  .footer-social .row {
+    justify-content: center;
+  }
+
+  .footer-social .col-4 {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 80px;
+  }
+}
+
+/* Extra small devices (≤ 575px) */
+@media (max-width: 575px) {
+  .footer-ct {
+    padding: 1.5rem 0 1rem;
+  }
+
+  .footer-title {
+    font-size: 1.25rem !important;
+  }
+
+  .footer-section-title {
+    font-size: 0.9rem;
+  }
+
+  .footer-newsletter .input-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-newsletter .btn {
+    width: 100%;
+  }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+  .footer-ct,
+  .footer-link,
+  .footer-social-link,
+  .footer-stats .bg-ct-surface,
+  .footer-title,
+  .footer-section-title,
+  .mobile-app-badge,
+  .footer-badge {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .footer-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.footer-link:focus,
+.footer-social-link:focus,
+.mobile-app-badge:focus,
+.footer-newsletter .form-control:focus,
+.footer-newsletter .btn:focus {
+  outline: 2px solid var(--ct-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .footer-ct {
+    border-top: 3px solid var(--ct-ink);
+  }
+
+  .footer-ct::before {
+    background-color: var(--ct-ink);
+  }
+
+  .footer-link:hover,
+  .footer-social-link:hover {
+    background-color: var(--ct-ink);
+    color: var(--ct-paper) !important;
+  }
+
+  .footer-stats .bg-ct-surface:hover {
+    border: 2px solid var(--ct-ink);
+  }
+}
+
+/* ===== STICKY FOOTER ADJUSTMENTS ===== */
+/* If you need a sticky footer, use these classes */
+.sticky-footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 1030;
+}
+
+.main-content {
+  padding-bottom: 200px; /* Adjust based on footer height */
+}
+
+@media (max-width: 767px) {
+  .main-content {
+    padding-bottom: 300px; /* More space on mobile */
+  }
+}
+
+/* Floating action menu adjustment */
+.floating-action-menu {
+  bottom: 220px; /* Position above footer */
+}
+
+@media (max-width: 767px) {
+  .floating-action-menu {
+    bottom: 320px;
+  }
+}

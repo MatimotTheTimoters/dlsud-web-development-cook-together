@@ -1,0 +1,384 @@
+/* ===== NAVBAR COMPONENT STYLES ===== */
+/* Enhanced with CSS custom properties from colors.css - No gradients */
+
+.navbar-ct {
+  background-color: var(--ct-paper);
+  border-bottom: 1px solid var(--ct-border);
+  box-shadow: 0 2px 8px var(--ct-shadow);
+  padding: 0.75rem 0;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+/* Navbar scroll effect */
+.navbar-ct.navbar-scrolled {
+  padding: 0.5rem 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background-color: var(--ct-paper);
+}
+
+/* Logo and brand styles */
+.navbar-brand-ink {
+  color: var(--ct-primary);
+  transition: all 0.3s ease;
+}
+
+.navbar-brand-hover:hover .navbar-brand-ink {
+  color: var(--ct-secondary);
+  transform: translateX(2px);
+}
+
+/* Navigation links */
+.navbar-ct .nav-link {
+  color: var(--ct-muted);
+  font-weight: 500;
+  position: relative;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.nav-link-hover:hover {
+  color: var(--ct-primary);
+  background-color: var(--ct-surface);
+  transform: translateY(-1px);
+}
+
+/* Button enhancements */
+.btn-ct-primary {
+  background-color: var(--ct-primary);
+  border-color: var(--ct-primary);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(255, 112, 67, 0.2);
+}
+
+.btn-ct-primary:hover {
+  background-color: var(--ct-secondary);
+  border-color: var(--ct-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(43, 193, 169, 0.3);
+}
+
+.btn-ct-outline {
+  border: 2px solid var(--ct-primary);
+  color: var(--ct-primary);
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.btn-ct-outline:hover {
+  background-color: var(--ct-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 112, 67, 0.2);
+}
+
+/* Currency badges */
+.currency-badge {
+  border-radius: 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px var(--ct-shadow);
+  border: 1px solid transparent;
+}
+
+.currency-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px var(--ct-shadow);
+  border-color: var(--ct-border);
+}
+
+/* Progress bar customization */
+.navbar-progress {
+  background-color: var(--ct-surface);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.navbar-progress .progress-bar {
+  background-color: var(--ct-primary);
+  border-radius: 10px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Icon buttons */
+.nav-icon-button {
+  transition: all 0.3s ease;
+  border: 1px solid var(--ct-border);
+  background-color: var(--ct-paper);
+}
+
+.nav-icon-button:hover {
+  background-color: var(--ct-primary);
+  border-color: var(--ct-primary);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 112, 67, 0.2);
+}
+
+.nav-icon-button:hover img {
+  filter: brightness(0) invert(1);
+}
+
+/* Profile button */
+.nav-profile-button {
+  transition: all 0.3s ease;
+  border: 1px solid var(--ct-border);
+  background-color: var(--ct-paper);
+}
+
+.nav-profile-button:hover {
+  border-color: var(--ct-primary);
+  background-color: var(--ct-primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 112, 67, 0.1);
+}
+
+/* Toggle button */
+.navbar-toggle-button {
+  transition: all 0.3s ease;
+  padding: 0.25rem;
+}
+
+.navbar-toggle-button:hover {
+  background-color: var(--ct-surface);
+  transform: scale(1.1);
+}
+
+.navbar-toggle-button .navbar-toggler-icon {
+  transition: transform 0.3s ease;
+}
+
+.navbar-toggle-button[aria-expanded="true"] .navbar-toggler-icon {
+  transform: rotate(90deg);
+}
+
+/* ===== OFFCANVAS STYLES ===== */
+.navbar-offcanvas {
+  background-color: var(--ct-paper);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-offcanvas .offcanvas-header {
+  background-color: var(--ct-surface);
+  border-bottom: 1px solid var(--ct-border);
+}
+
+.navbar-offcanvas .btn-close {
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+}
+
+.navbar-offcanvas .btn-close:hover {
+  transform: rotate(90deg);
+  background-color: var(--ct-surface);
+}
+
+/* Mobile profile image */
+.profile-image-mobile {
+  border: 3px solid var(--ct-primary);
+  transition: all 0.3s ease;
+}
+
+.profile-image-mobile:hover {
+  transform: scale(1.05);
+  border-color: var(--ct-secondary);
+}
+
+/* Mobile navigation buttons */
+.mobile-nav-button {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.mobile-nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--ct-shadow);
+}
+
+.mobile-nav-link {
+  border-radius: 8px;
+  border: 1px solid var(--ct-border);
+  transition: all 0.3s ease;
+}
+
+.mobile-nav-link:hover {
+  background-color: var(--ct-surface);
+  border-color: var(--ct-primary);
+  transform: translateX(4px);
+}
+
+/* Mobile currency section */
+.currency-section-mobile {
+  transition: all 0.3s ease;
+  border: 1px solid var(--ct-border);
+}
+
+.currency-section-mobile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--ct-shadow);
+}
+
+.currency-item-mobile {
+  transition: all 0.3s ease;
+}
+
+.currency-item-mobile:hover {
+  transform: scale(1.05);
+}
+
+/* Mobile level section */
+.level-section-mobile {
+  transition: all 0.3s ease;
+  border: 1px solid var(--ct-border);
+}
+
+.level-section-mobile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--ct-shadow);
+}
+
+.navbar-progress-mobile .progress-bar {
+  background-color: var(--ct-primary);
+  transition: width 0.8s ease;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Large devices (≥ 992px) */
+@media (min-width: 992px) {
+  .navbar-ct {
+    padding: 1rem 0;
+  }
+}
+
+/* Medium devices (768px - 991px) */
+@media (max-width: 991px) and (min-width: 768px) {
+  .navbar-ct {
+    padding: 0.75rem 0;
+  }
+}
+
+/* Small devices (≤ 767px) */
+@media (max-width: 767px) {
+  .navbar-ct {
+    padding: 0.5rem 0;
+  }
+  
+  .navbar-brand-ink {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* Extra small devices (≤ 575px) */
+@media (max-width: 575px) {
+  .navbar-offcanvas {
+    width: 85vw !important;
+  }
+  
+  .currency-section-mobile .stack {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Apply animations */
+.navbar-ct {
+  animation: slideInDown 0.5s ease-out;
+}
+
+.navbar-offcanvas .offcanvas-body > * {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.navbar-offcanvas .offcanvas-body > *:nth-child(1) { animation-delay: 0.1s; }
+.navbar-offcanvas .offcanvas-body > *:nth-child(2) { animation-delay: 0.2s; }
+.navbar-offcanvas .offcanvas-body > *:nth-child(3) { animation-delay: 0.3s; }
+.navbar-offcanvas .offcanvas-body > *:nth-child(4) { animation-delay: 0.4s; }
+.navbar-offcanvas .offcanvas-body > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* Hover pulse for important elements */
+.btn-ct-primary:hover,
+.currency-badge:hover {
+  animation: pulse 1s ease-in-out;
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+  .navbar-ct,
+  .navbar-offcanvas .offcanvas-body > *,
+  .btn-ct-primary:hover,
+  .currency-badge:hover,
+  .nav-icon-button,
+  .nav-profile-button,
+  .mobile-nav-button,
+  .mobile-nav-link {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.navbar-ct .nav-link:focus,
+.btn:focus,
+.currency-badge:focus,
+.navbar-toggle-button:focus {
+  outline: 2px solid var(--ct-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .navbar-ct {
+    border-bottom: 2px solid var(--ct-ink);
+  }
+  
+  .btn-ct-primary {
+    background: var(--ct-ink);
+    color: var(--ct-paper);
+    border: 2px solid var(--ct-ink);
+  }
+  
+  .nav-icon-button:hover,
+  .nav-profile-button:hover {
+    border: 2px solid var(--ct-ink);
+  }
+}
