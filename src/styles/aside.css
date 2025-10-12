@@ -1,0 +1,46 @@
+/* Aside Component Styles */
+.app-sidebar {
+  width: 250px;
+  min-height: calc(100vh - 80px);
+  background: var(--ct-surface);
+  border-right: 1px solid var(--ct-border);
+  padding: 1rem;
+}
+
+.aside-card {
+  background: var(--ct-surface);
+  border-radius: 8px;
+}
+
+.aside-item--active {
+  font-weight: 600;
+  background-color: var(--ct-aside-active-bg) !important;
+}
+
+/* Logout item specific styles */
+.logout-item {
+  color: var(--ct-error) !important;
+  border: 1px solid var(--ct-error-light) !important;
+}
+
+.logout-item:hover {
+  background-color: var(--ct-error-light) !important;
+  color: white !important;
+}
+
+/* Ensure proper text colors */
+.text-ct-ink {
+  color: var(--ct-ink);
+}
+
+.text-ct-muted {
+  color: var(--ct-muted);
+}
+
+.badge-ct {
+  background-color: var(--ct-primary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}

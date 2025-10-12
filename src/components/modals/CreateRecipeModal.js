@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import apiLinks from '../../constants/api.js';
-import { generateUniqueId } from '../../hooks/uuidHelper.js';
-import { useAuth } from '../../hooks/useAuth.js';
-import { calculateMaxRewards, updateUserRewardLimits } from '../../utils/rewardCalculator.js';
+import apiSheets from '../../constants/api.js';
+import { generateBatchIds } from '../../hooks/uuidHelper.js';
+import { useData } from '../../contexts/DataContext.js';
 
 export default function CreateRecipeModal({ show, onHide, onCreated }) {
-  const { user } = useAuth();
-  const [file, setFile] = useState(null);
+  const { currentUserData, userRewardLimits } = useData();
+
   const [recipeValues, setRecipeValues] = useState({
     title: '',
     description: '',
@@ -28,64 +27,15 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [userRewardLimits, setUserRewardLimits] = useState({
-    maxExp: 100,
-    maxGold: 50,
-    maxGem: 5,
-    maxGoldPrice: 100,
-    maxGemPrice: 10,
-  });
-
-  // Fetch user reward limits
-  useEffect(() => {
-    const fetchUserLimits = async () => {
-      if (!user?.id) return;
-
-      try {
-        const userRes = await fetch(`${apiLinks.users}?id=${user.id}`);
-        const userData = await userRes.json();
-
-        if (userData.length > 0) {
-          const userStats = userData[0];
-          const limits = calculateMaxRewards(userStats);
-          setUserRewardLimits({
-            ...limits,
-            maxGoldPrice: userStats.maxGoldPrice || 100,
-            maxGemPrice: userStats.maxGemPrice || 10,
-          });
-        }
-      } catch (error) {
-        console.warn('Failed to fetch user limits:', error);
-      }
-    };
-
-    if (show) {
-      fetchUserLimits();
-    }
-  }, [user?.id, show]);
 
   const handleRecipeChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // Auto-cap reward values to user limits
-    if (name === 'expReward' && Number(value) > userRewardLimits.maxExp) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxExp }));
-      return;
-    }
-    if (name === 'goldReward' && Number(value) > userRewardLimits.maxGold) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxGold }));
-      return;
-    }
-    if (name === 'gemReward' && Number(value) > userRewardLimits.maxGem) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxGem }));
-      return;
-    }
-    if (name === 'goldPrice' && Number(value) > userRewardLimits.maxGoldPrice) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxGoldPrice }));
-      return;
-    }
-    if (name === 'gemPrice' && Number(value) > userRewardLimits.maxGemPrice) {
-      setRecipeValues((prev) => ({ ...prev, [name]: userRewardLimits.maxGemPrice }));
+    // Auto-cap reward values to user limits FROM DATACONTEXT
+    if (['expReward', 'goldReward', 'gemReward', 'goldPrice', 'gemPrice'].includes(name)) {
+      const limitKey = `max${name.charAt(0).toUpperCase() + name.slice(1)}`;
+      const cappedValue = Math.min(Number(value), userRewardLimits[limitKey] || 9999);
+      setRecipeValues((prev) => ({ ...prev, [name]: cappedValue }));
       return;
     }
 
@@ -95,14 +45,10 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
     }));
   };
 
-  const handleFile = (e) => {
-    setFile(e.target.files && e.target.files[0] ? e.target.files[0] : null);
-  };
-
   const addIngredient = () => {
     setIngredients((prev) => [
       ...prev,
-      { ingredientId: '', recipeContent: '', servingSizeValue: '', servingSizeUnit: 'grams' },
+      { recipeContent: '', servingSizeValue: '', servingSizeUnit: 'grams' },
     ]);
   };
 
@@ -115,7 +61,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
   };
 
   const addStep = () => {
-    setSteps((prev) => [...prev, { stepId: '', stepContent: '' }]);
+    setSteps((prev) => [...prev, { stepContent: '' }]);
   };
 
   const handleStepChange = (index, value) => {
@@ -129,24 +75,15 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
     setLoading(true);
 
     try {
-      // Generate unique IDs
-      const recipeId = await generateUniqueId(apiLinks.recipes, { idField: 'id' });
+      // Generate all IDs in a single batch
+      const totalIdsNeeded = 1 + ingredients.length + steps.length;
+      const batchIds = await generateBatchIds(totalIdsNeeded, 'id');
+      const recipeId = batchIds[0];
+      const ingredientIds = batchIds.slice(1, 1 + ingredients.length);
+      const stepIds = batchIds.slice(1 + ingredients.length);
 
-      // Upload image if provided
-      let coverImageUrl = '/src/assets/placeholders/new-recipe.png';
-      if (file) {
-        const cloudName = 'YOUR_CLOUD_NAME';
-        const unsignedPreset = 'YOUR_UNSIGNED_PRESET';
-        const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', unsignedPreset);
-        const res = await fetch(url, { method: 'POST', body: fd });
-        if (res.ok) {
-          const json = await res.json();
-          coverImageUrl = json.secure_url || json.url || coverImageUrl;
-        }
-      }
+      // Get user data from currentUserData
+      const userFullName = currentUserData?.fullName || '';
 
       // Prepare recipe data
       const preparationTime = `${recipeValues.preparationTimeValue} ${recipeValues.preparationTimeUnit}`;
@@ -154,7 +91,7 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
       const recipePayload = {
         id: recipeId,
         createdAt: new Date().toISOString(),
-        coverImage: coverImageUrl,
+        coverImage: '/src/assets/placeholders/new-recipe.png',
         title: recipeValues.title,
         description: recipeValues.description,
         origin: recipeValues.origin.split(',').map((o) => o.trim()).join(','),
@@ -168,50 +105,55 @@ export default function CreateRecipeModal({ show, onHide, onCreated }) {
         goldPrice: recipeValues.isPaid ? recipeValues.goldPrice : 0,
         gemPrice: recipeValues.isPaid ? recipeValues.gemPrice : 0,
         isPublic: recipeValues.isPublic,
-        author: user?.fullName || '',
+        author: userFullName,
       };
 
-      // Post recipe to SheetDB
-      await fetch(apiLinks.recipes, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: [recipePayload] }),
-      });
+      // Prepare ingredients data
+      const ingredientPayloads = ingredients.map((ingredient, index) => ({
+        ingredientId: ingredientIds[index],
+        createdAt: new Date().toISOString(),
+        recipeId,
+        recipeContent: ingredient.recipeContent,
+        servingSize: `${ingredient.servingSizeValue} ${ingredient.servingSizeUnit}`,
+      }));
 
-      // Post ingredients to SheetDB
-      for (const ingredient of ingredients) {
-        const ingredientId = await generateUniqueId(apiLinks.recipesIngredients, {
-          idField: 'ingredientId',
-        });
-        const ingredientPayload = {
-          ingredientId,
-          createdAt: new Date().toISOString(),
-          recipeId,
-          recipeContent: ingredient.recipeContent,
-          servingSize: `${ingredient.servingSizeValue} ${ingredient.servingSizeUnit}`,
-        };
-        await fetch(apiLinks.recipesIngredients, {
+      // Prepare steps data
+      const stepPayloads = steps.map((step, index) => ({
+        stepId: stepIds[index],
+        createdAt: new Date().toISOString(),
+        recipeId,
+        stepContent: step.stepContent,
+      }));
+
+      // Batch all POST requests
+      const allPostRequests = [
+        fetch(apiSheets.recipes, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: [ingredientPayload] }),
-        });
-      }
+          body: JSON.stringify({ data: [recipePayload] }),
+        }),
+        ...(ingredientPayloads.length > 0
+          ? [
+              fetch(apiSheets.recipesIngredients, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: ingredientPayloads }),
+              }),
+            ]
+          : []),
+        ...(stepPayloads.length > 0
+          ? [
+              fetch(apiSheets.recipesSteps, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: stepPayloads }),
+              }),
+            ]
+          : []),
+      ];
 
-      // Post steps to SheetDB
-      for (const step of steps) {
-        const stepId = await generateUniqueId(apiLinks.recipesSteps, { idField: 'stepId' });
-        const stepPayload = {
-          stepId,
-          createdAt: new Date().toISOString(),
-          recipeId,
-          stepContent: step.stepContent,
-        };
-        await fetch(apiLinks.recipesSteps, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: [stepPayload] }),
-        });
-      }
+      // Execute all POST requests in parallel
+      await Promise.all(allPostRequests);
 
       // Notify parent and close modal
       if (typeof onCreated === 'function') onCreated(recipePayload);

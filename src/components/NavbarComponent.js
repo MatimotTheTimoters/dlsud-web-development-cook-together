@@ -39,9 +39,13 @@ function NavbarComponent() {
     level = 1,
     currentEXP = 0,
     currentLevelCeiling = 100,
+    fullName = "User"
   } = user;
 
   const expProgress = Math.min((currentEXP / currentLevelCeiling) * 100, 100);
+
+  // Truncate long usernames
+  const displayName = fullName.length > 15 ? `${fullName.substring(0, 15)}...` : fullName;
 
   return (
     <Navbar expand="lg" className="navbar-ct" bg="light" variant="light">
@@ -121,34 +125,41 @@ function NavbarComponent() {
               </div>
             </div>
 
-            {/* Profile, Users, and Settings */}
-            <div className="navbar-icon-group">
+            {/* Profile Group */}
+            <div className="navbar-profile-group">
               <Button
                 as={Link}
                 to="/profile"
                 variant="light"
                 aria-label="profile"
-                className="navbar-icon-button"
+                className="navbar-profile-button"
               >
-                <img src={profileIcon} alt="Profile" className="navbar-icon-img" />
+                <img src={profileIcon} alt="Profile" className="navbar-profile-img" />
+                <span className="navbar-username">{displayName}</span>
               </Button>
+            </div>
+
+            {/* Navigation Icons Group */}
+            <div className="navbar-nav-group">
               <Button
                 as={Link}
-                to="/people"
+                to="/users"
                 variant="light"
                 aria-label="users"
-                className="navbar-icon-button"
+                className="navbar-nav-button"
+                title="Find Users"
               >
-                <img src={usersIcon} alt="Users" className="navbar-icon-img" />
+                <img src={usersIcon} alt="Users" className="navbar-nav-img" />
               </Button>
               <Button
                 as={Link}
                 to="/settings"
                 variant="light"
                 aria-label="settings"
-                className="navbar-icon-button"
+                className="navbar-nav-button"
+                title="Settings"
               >
-                <img src={settingsIcon} alt="Settings" className="navbar-icon-img" />
+                <img src={settingsIcon} alt="Settings" className="navbar-nav-img" />
               </Button>
             </div>
           </Offcanvas.Body>
@@ -206,34 +217,41 @@ function NavbarComponent() {
             </div>
           </div>
 
-          {/* Profile, Users, and Settings */}
-          <div className="navbar-icon-group">
+          {/* Profile Group */}
+          <div className="navbar-profile-group">
             <Button
               as={Link}
               to="/profile"
               variant="light"
               aria-label="profile"
-              className="navbar-icon-button"
+              className="navbar-profile-button"
             >
-              <img src={profileIcon} alt="Profile" className="navbar-icon-img" />
+              <img src={profileIcon} alt="Profile" className="navbar-profile-img" />
+              <span className="navbar-username">{displayName}</span>
             </Button>
+          </div>
+
+          {/* Navigation Icons Group */}
+          <div className="navbar-nav-group">
             <Button
               as={Link}
-              to="/people"
+              to="/users"
               variant="light"
               aria-label="users"
-              className="navbar-icon-button"
+              className="navbar-nav-button"
+              title="Find Users"
             >
-              <img src={usersIcon} alt="Users" className="navbar-icon-img" />
+              <img src={usersIcon} alt="Users" className="navbar-nav-img" />
             </Button>
             <Button
               as={Link}
               to="/settings"
               variant="light"
               aria-label="settings"
-              className="navbar-icon-button"
+              className="navbar-nav-button"
+              title="Settings"
             >
-              <img src={settingsIcon} alt="Settings" className="navbar-icon-img" />
+              <img src={settingsIcon} alt="Settings" className="navbar-nav-img" />
             </Button>
           </div>
         </Navbar.Collapse>

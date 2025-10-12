@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import '../styles/colors.css';
-import apiLinks from '../constants/api.js';
+import apiSheets from '../constants/api.js';
 import { useAuth } from '../hooks/useAuth.js';
 
 /**
  * Query SheetDB for a user matching email+password and return the id field (or null).
- * - sheetUrl: apiLinks.users (contains ?sheet=Users)
+ * - sheetUrl: apiSheets.users (contains ?sheet=Users)
  * - returns string id or null
  */
-export async function getUserIdByCredentials(email, password, sheetUrl = apiLinks.users) {
+export async function getUserIdByCredentials(email, password, sheetUrl = apiSheets.users) {
   if (!email || !password) return null;
   const url = `${sheetUrl}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
   try {

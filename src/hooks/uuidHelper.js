@@ -8,7 +8,7 @@ export function makeId() {
 
 /**
  * Generate a unique id that is not present in the target SheetDB sheet.
- * - sheetUrl: the SheetDB URL already containing ?sheet=SheetName (e.g. apiLinks.users)
+ * - sheetUrl: the SheetDB URL already containing ?sheet=SheetName (e.g. apiSheets.users)
  * - opts:
  *    idField: the column name for the id in the sheet (default 'id')
  *    retries: number of attempts (default 3)
@@ -42,3 +42,14 @@ export async function generateUniqueId(sheetUrl, opts = {}) {
   }
   throw new Error('Could not generate a unique id after retries');
 }
+
+// Add to src/hooks/uuidHelper.js
+export const generateBatchIds = async (count, prefix = 'id') => {
+  // Generate IDs locally without API calls
+  const ids = [];
+  for (let i = 0; i < count; i++) {
+    const id = `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${i}`;
+    ids.push(id);
+  }
+  return ids;
+};

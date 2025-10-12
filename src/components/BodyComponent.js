@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Container, Row, Col, Form, InputGroup } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { useSheetData } from "../hooks/useSheetData";
+import { useData } from "../contexts/DataContext";
 import SearchFilter from "./SearchFilter";
 import RecipeCard from "./cards/RecipeCard";
 import ChallengeCard from "./cards/ChallengeCard";
@@ -10,11 +10,20 @@ import UserCard from "./cards/UserCard";
 import CookbookCard from "./cards/CookbookCard";
 
 function BodyComponent() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("recipes");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  const { 
+    recipes, 
+    challenges, 
+    users, 
+    loading, 
+    userRecipes,
+    getUserById 
+  } = useData();
 
   // Determine current page from URL
   const currentPage = useMemo(() => {
@@ -33,45 +42,68 @@ function BodyComponent() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Get query parameters based on current page
-  const getQueryParams = useMemo(() => {
+  // Get appropriate data based on current page and filter
+  const getDataForContext = () => {
+    if (!isAuthenticated && currentPage !== "discover") {
+      return [];
+    }
+
     switch (currentPage) {
-      case "my-kitchen":
-        if (activeFilter === "challenges") {
-          return user ? { participantId: user.id } : {};
-        }
-        return user ? { createdBy: user.id } : {};
       case "feed":
-        return user ? { followerId: user.id } : {};
+        // For feed, show content from friends (simplified for now)
+        // In a real app, you'd filter by friendships data
+        switch (activeFilter) {
+          case "recipes":
+            return recipes || [];
+          case "challenges":
+            return challenges || [];
+          case "users":
+            return (users || []).filter(u => u.id !== user?.id);
+          default:
+            return [];
+        }
+
+      case "my-kitchen":
+        // Show user's own content
+        switch (activeFilter) {
+          case "recipes":
+            return userRecipes || [];
+          case "challenges":
+            // Filter challenges where user is participant (simplified)
+            return (challenges || []).filter(challenge => 
+              challenge.author === user?.id || 
+              challenge.participants?.includes(user?.id)
+            );
+          case "users":
+            return []; // Don't show users in "my kitchen"
+          default:
+            return [];
+        }
+
       case "discover":
       default:
-        return {};
+        // Show all public content
+        switch (activeFilter) {
+          case "recipes":
+            return recipes || [];
+          case "challenges":
+            return challenges || [];
+          case "users":
+            return (users || []).filter(u => u.id !== user?.id);
+          case "cookbooks":
+            return []; // Placeholder for cookbooks
+          default:
+            return [];
+        }
     }
-  }, [currentPage, activeFilter, user]);
-
-  // Get sheet name based on active filter
-  const getSheetName = () => {
-    const sheetMap = {
-      recipes: "recipes",
-      challenges: currentPage === "my-kitchen" ? "challengesCookQuotaParticipants" : "challengesCookQuota",
-      users: "users",
-      cookbooks: "cookbooks",
-    };
-    return sheetMap[activeFilter] || "recipes";
   };
-
-  // Fetch main data
-  const { data: mainData, loading: mainLoading, error: mainError } = useSheetData(
-    getSheetName(),
-    getQueryParams,
-    !!user || currentPage === "discover"
-  );
 
   // Filter data based on search
   const filteredData = useMemo(() => {
-    if (!mainData) return [];
+    const contextData = getDataForContext();
+    if (!contextData || contextData.length === 0) return [];
 
-    let data = [...mainData];
+    let data = [...contextData];
 
     // Apply search filter
     if (debouncedQuery) {
@@ -102,11 +134,11 @@ function BodyComponent() {
     }
 
     return data;
-  }, [mainData, debouncedQuery, activeFilter]);
+  }, [getDataForContext, debouncedQuery, activeFilter]);
 
   // Render cards
   const renderCards = () => {
-    if (mainLoading) {
+    if (loading) {
       return (
         <Row>
           {[1, 2, 3].map((i) => (
@@ -122,11 +154,11 @@ function BodyComponent() {
       );
     }
 
-    if (mainError) {
+    if (!isAuthenticated && currentPage !== "discover") {
       return (
         <div className="text-center py-5">
-          <h5 className="text-ct-muted">Error loading data</h5>
-          <p className="text-muted">Please try again later</p>
+          <h5 className="text-ct-muted">Please log in to view this content</h5>
+          <p className="text-muted">This page requires authentication</p>
         </div>
       );
     }
@@ -142,7 +174,9 @@ function BodyComponent() {
           <p className="text-muted">
             {debouncedQuery
               ? `Try adjusting your search for "${debouncedQuery}"`
-              : "Check back later for new content"}
+              : currentPage === "my-kitchen" 
+                ? "Create some content to get started!" 
+                : "Check back later for new content"}
           </p>
         </div>
       );
@@ -150,16 +184,14 @@ function BodyComponent() {
 
     return (
       <Row>
-        {filteredData
-          .filter((item) => activeFilter !== "users" || item.id !== user?.id) // Don't show current user in user list
-          .map((item) => (
-            <Col key={item.id} md={6} lg={4} className="mb-4">
-              {activeFilter === "recipes" && <RecipeCard recipe={item} />}
-              {activeFilter === "challenges" && <ChallengeCard challenge={item} />}
-              {activeFilter === "users" && <UserCard user={item} />}
-              {activeFilter === "cookbooks" && <CookbookCard cookbook={item} />}
-            </Col>
-          ))}
+        {filteredData.map((item) => (
+          <Col key={item.id} md={6} lg={4} className="mb-4">
+            {activeFilter === "recipes" && <RecipeCard recipe={item} />}
+            {activeFilter === "challenges" && <ChallengeCard challenge={item} />}
+            {activeFilter === "users" && <UserCard user={item} />}
+            {activeFilter === "cookbooks" && <CookbookCard cookbook={item} />}
+          </Col>
+        ))}
       </Row>
     );
   };
@@ -212,7 +244,7 @@ function BodyComponent() {
         <Col lg={9}>
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h4 className="text-ct-ink mb-0">{getPageTitle()}</h4>
-            {!mainLoading && (
+            {!loading && (
               <span className="text-muted">
                 {filteredData.length} {activeFilter}
                 {filteredData.length !== 1 ? "s" : ""} found

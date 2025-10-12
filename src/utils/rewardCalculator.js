@@ -54,10 +54,10 @@ export const calculateMaxRewards = (userData) => {
 };
 
 // Helper to update user's max rewards in SheetDB
-export const updateUserRewardLimits = async (userId, apiLinks) => {
+export const updateUserRewardLimits = async (userId, apiSheets) => {
   try {
     // Fetch current user data
-    const userRes = await fetch(`${apiLinks.users}?id=${userId}`);
+    const userRes = await fetch(`${apiSheets.users}?id=${userId}`);
     const userData = await userRes.json();
     
     if (userData.length > 0) {
@@ -65,7 +65,7 @@ export const updateUserRewardLimits = async (userId, apiLinks) => {
       const newLimits = calculateMaxRewards(user);
       
       // Update user with new calculated limits
-      const updateRes = await fetch(apiLinks.users, {
+      const updateRes = await fetch(apiSheets.users, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
