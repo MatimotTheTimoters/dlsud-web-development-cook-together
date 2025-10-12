@@ -20,10 +20,10 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
 
-  // 🚀 Fetch all data in one function
+  // Fetch all data
   const fetchAllData = async () => {
     if (hasFetched) return;
-    
+
     setLoading(true);
     try {
       const [
@@ -33,7 +33,7 @@ export function DataProvider({ children }) {
         recipesIngredientsRes,
         recipesStepsRes,
         challengesCookQuotaRes,
-        challengesCookQuotaParticipantsRes
+        challengesCookQuotaParticipantsRes,
       ] = await Promise.all([
         fetch(apiSheets.users),
         fetch(apiSheets.usersRelationships),
@@ -63,7 +63,7 @@ export function DataProvider({ children }) {
     }
   };
 
-  // 🚀 Fetch data only when authenticated
+  // Fetch data only when authenticated
   useEffect(() => {
     if (isAuthenticated && !hasFetched) {
       fetchAllData();
@@ -73,7 +73,7 @@ export function DataProvider({ children }) {
   // Get current user's data
   const currentUserData = useMemo(() => {
     if (!user?.id || !data.users) return null;
-    return data.users.find(u => u.id === user.id) || null;
+    return data.users.find((u) => u.id === user.id) || null;
   }, [user?.id, data.users]);
 
   // Calculate user reward limits
@@ -90,149 +90,118 @@ export function DataProvider({ children }) {
     return calculateAllUserLimits(currentUserData);
   }, [currentUserData]);
 
-  // 🔍 Get followed users IDs
+  // Get followed users IDs
   const followedUserIds = useMemo(() => {
     if (!currentUserData?.id || !data.usersRelationships) return [];
-    
     return data.usersRelationships
-      .filter(relationship => 
-        relationship.sourceUserId === currentUserData.id && 
-        relationship.relationship === 'following'
+      .filter(
+        (relationship) =>
+          relationship.sourceUserId === currentUserData.id &&
+          relationship.relationship === 'following'
       )
-      .map(relationship => relationship.targetUserId);
+      .map((relationship) => relationship.targetUserId);
   }, [currentUserData?.id, data.usersRelationships]);
 
-  // 🔍 SEARCH HELPER FUNCTIONS
-  const getRecipesByFollowing = useMemo(() => {
-    if (!data.recipes || !followedUserIds.length) return [];
-    return data.recipes.filter(recipe => 
-      followedUserIds.includes(recipe.author)
-    );
-  }, [data.recipes, followedUserIds]);
+  // Query functions for Searchbar
+  const queryData = (path, filter, query) => {
+    const lowerQuery = query.toLowerCase();
 
-  const getChallengesByFollowing = useMemo(() => {
-    if (!data.challengesCookQuota || !followedUserIds.length) return [];
-    return data.challengesCookQuota.filter(challenge => 
-      followedUserIds.includes(challenge.creatorId)
-    );
-  }, [data.challengesCookQuota, followedUserIds]);
+    switch (path) {
+      case '/feed':
+        if (filter === 'recipes') {
+          return data.recipes.filter(
+            (recipe) =>
+              followedUserIds.includes(recipe.author) &&
+              (recipe.title?.toLowerCase().includes(lowerQuery) ||
+                recipe.description?.toLowerCase().includes(lowerQuery))
+          );
+        }
+        if (filter === 'challenges') {
+          return data.challengesCookQuota.filter(
+            (challenge) =>
+              followedUserIds.includes(challenge.creatorId) &&
+              challenge.title?.toLowerCase().includes(lowerQuery)
+          );
+        }
+        if (filter === 'users') {
+          return data.users.filter(
+            (user) =>
+              followedUserIds.includes(user.id) &&
+              (user.fullName?.toLowerCase().includes(lowerQuery) ||
+                user.email?.toLowerCase().includes(lowerQuery))
+          );
+        }
+        break;
 
-  const getUsersByFollowing = useMemo(() => {
-    if (!data.users || !followedUserIds.length) return [];
-    return data.users.filter(user => 
-      followedUserIds.includes(user.id) && user.id !== currentUserData?.id
-    );
-  }, [data.users, followedUserIds, currentUserData?.id]);
+      case '/discover':
+        if (filter === 'recipes') {
+          return data.recipes.filter(
+            (recipe) =>
+              recipe.title?.toLowerCase().includes(lowerQuery) ||
+              recipe.description?.toLowerCase().includes(lowerQuery)
+          );
+        }
+        if (filter === 'challenges') {
+          return data.challengesCookQuota.filter((challenge) =>
+            challenge.title?.toLowerCase().includes(lowerQuery)
+          );
+        }
+        if (filter === 'users') {
+          return data.users.filter(
+            (user) =>
+              user.fullName?.toLowerCase().includes(lowerQuery) ||
+              user.email?.toLowerCase().includes(lowerQuery)
+          );
+        }
+        break;
 
-  const getAllRecipes = useMemo(() => {
-    return data.recipes || [];
-  }, [data.recipes]);
+      case '/my-kitchen':
+        if (filter === 'user-recipes') {
+          return data.recipes.filter(
+            (recipe) =>
+              recipe.author === currentUserData?.id &&
+              (recipe.title?.toLowerCase().includes(lowerQuery) ||
+                recipe.description?.toLowerCase().includes(lowerQuery))
+          );
+        }
+        if (filter === 'user-challenges') {
+          const userChallengeIds = data.challengesCookQuotaParticipants
+            .filter(
+              (participant) =>
+                participant.userId === currentUserData?.id &&
+                participant.status === 'joined'
+            )
+            .map((participant) => participant.challengeId);
 
-  const getAllChallenges = useMemo(() => {
-    return data.challengesCookQuota || [];
-  }, [data.challengesCookQuota]);
+          return data.challengesCookQuota.filter(
+            (challenge) =>
+              userChallengeIds.includes(challenge.id) &&
+              challenge.title?.toLowerCase().includes(lowerQuery)
+          );
+        }
+        break;
 
-  const getAllUsers = useMemo(() => {
-    if (!data.users) return [];
-    return data.users.filter(user => user.id !== currentUserData?.id);
-  }, [data.users, currentUserData?.id]);
+      default:
+        return [];
+    }
+  };
 
-  const getUserRecipes = useMemo(() => {
-    if (!data.recipes || !currentUserData?.id) return [];
-    return data.recipes.filter(recipe => recipe.author === currentUserData.id);
-  }, [data.recipes, currentUserData?.id]);
-
-  const getUserChallenges = useMemo(() => {
-    if (!data.challengesCookQuotaParticipants || !currentUserData?.id) return [];
-    
-    const userChallengeIds = data.challengesCookQuotaParticipants
-      .filter(participant => 
-        participant.userId === currentUserData.id && 
-        participant.status === 'joined'
-      )
-      .map(participant => participant.challengeId);
-    
-    return data.challengesCookQuota.filter(challenge => 
-      userChallengeIds.includes(challenge.id)
-    );
-  }, [data.challengesCookQuota, data.challengesCookQuotaParticipants, currentUserData?.id]);
-
-  const getUserCookbooks = useMemo(() => {
-    // Placeholder - implement when you have cookbooks data
-    return [];
-  }, []);
-
-  // 🔍 FEED DATA FUNCTION
-  const getFeedData = useMemo(() => {
-    return {
-      recipes: getRecipesByFollowing,
-      challenges: getChallengesByFollowing,
-      users: getUsersByFollowing
-    };
-  }, [getRecipesByFollowing, getChallengesByFollowing, getUsersByFollowing]);
-
-  const value = useMemo(() => ({
-    // Raw data
-    ...data,
-    loading,
-    currentUserData,
-    userRewardLimits,
-    
-    // 🔍 SEARCH HELPER FUNCTIONS
-    getRecipesByFollowing,
-    getChallengesByFollowing,
-    getUsersByFollowing,
-    getAllRecipes,
-    getAllChallenges,
-    getAllUsers,
-    getUserRecipes,
-    getUserChallenges,
-    getUserCookbooks,
-    getFeedData,
-    followedUserIds,
-
-    // Existing helper functions
-    getUserById: (userId) => data.users?.find(user => user.id === userId),
-    getRecipesByUser: (userId) => data.recipes?.filter(recipe => recipe.author === userId),
-    getRecipeIngredients: (recipeId) => data.recipesIngredients?.filter(ingredient => ingredient.recipeId === recipeId),
-    getRecipeSteps: (recipeId) => data.recipesSteps?.filter(step => step.recipeId === recipeId),
-    getChallengeParticipants: (challengeId) => data.challengesCookQuotaParticipants?.filter(participant => participant.challengeId === challengeId),
-    getUserRelationships: (userId) => data.usersRelationships?.filter(relationship => 
-      relationship.sourceUserId === userId || relationship.targetUserId === userId
-    ),
-    isUserFriend: (userId, friendId) => data.usersRelationships?.some(relationship => 
-      (relationship.sourceUserId === userId && relationship.targetUserId === friendId) ||
-      (relationship.sourceUserId === friendId && relationship.targetUserId === userId)
-    ),
-    
-    // Refresh function
-    refetchAll: () => {
-      setHasFetched(false);
-      fetchAllData();
-    },
-  }), [
-    data,
-    loading,
-    currentUserData,
-    userRewardLimits,
-    getRecipesByFollowing,
-    getChallengesByFollowing,
-    getUsersByFollowing,
-    getAllRecipes,
-    getAllChallenges,
-    getAllUsers,
-    getUserRecipes,
-    getUserChallenges,
-    getUserCookbooks,
-    getFeedData,
-    followedUserIds
-  ]);
-
-  return (
-    <DataContext.Provider value={value}>
-      {children}
-    </DataContext.Provider>
+  const value = useMemo(
+    () => ({
+      ...data,
+      loading,
+      currentUserData,
+      userRewardLimits,
+      queryData, // Expose queryData for Searchbar
+      refetchAll: () => {
+        setHasFetched(false);
+        fetchAllData();
+      },
+    }),
+    [data, loading, currentUserData, userRewardLimits, followedUserIds]
   );
+
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
 
 export const useData = () => {
