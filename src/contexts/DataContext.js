@@ -116,94 +116,108 @@ export function DataProvider({ children }) {
   }, [currentUserData?.id, data.usersRelationships]);
 
   // Query functions for Searchbar - FIXED VERSION
-  const queryData = (page, filter, query) => {
-    const lowerQuery = query ? query.toLowerCase().trim() : '';
-    
-    // REMOVED: if (!lowerQuery) return []; - This was the problem!
+  const queryData = (page, filter, query, forceDefault = false) => {
+    const lowerQuery = query ? query.toLowerCase().trim() : "";
 
     const path = `/${page}`;
 
     switch (path) {
-      case '/feed':
-        if (filter === 'recipes') {
+      case "/feed":
+        if (filter === "recipes") {
           return data.recipes.filter(
             (recipe) =>
               followedUserIds.includes(recipe.userId) &&
-              (!lowerQuery || 
+              (forceDefault ||
+                lowerQuery === "" ||
                 recipe.title?.toLowerCase().includes(lowerQuery) ||
                 recipe.description?.toLowerCase().includes(lowerQuery) ||
                 recipe.tags?.toLowerCase().includes(lowerQuery))
           );
         }
-        if (filter === 'challenges') {
+        if (filter === "challenges") {
           return data.challengesCookQuota.filter(
             (challenge) =>
               followedUserIds.includes(challenge.author) &&
-              (!lowerQuery || challenge.title?.toLowerCase().includes(lowerQuery))
+              (forceDefault ||
+                lowerQuery === "" ||
+                challenge.title?.toLowerCase().includes(lowerQuery) ||
+                challenge.description?.toLowerCase().includes(lowerQuery) ||
+                challenge.tags?.toLowerCase().includes(lowerQuery))
           );
         }
-        if (filter === 'users') {
+        if (filter === "users") {
           return data.users.filter(
             (user) =>
               followedUserIds.includes(user.id) &&
-              (!lowerQuery ||
+              (forceDefault ||
+                lowerQuery === "" ||
                 user.fullName?.toLowerCase().includes(lowerQuery) ||
                 user.email?.toLowerCase().includes(lowerQuery))
           );
         }
         break;
 
-      case '/discover':
-        if (filter === 'recipes') {
+      case "/discover":
+        if (filter === "recipes") {
           return data.recipes.filter(
             (recipe) =>
-              !lowerQuery ||
+              forceDefault ||
+              lowerQuery === "" ||
               recipe.title?.toLowerCase().includes(lowerQuery) ||
               recipe.description?.toLowerCase().includes(lowerQuery) ||
               recipe.tags?.toLowerCase().includes(lowerQuery)
           );
         }
-        if (filter === 'challenges') {
-          return data.challengesCookQuota.filter((challenge) =>
-            !lowerQuery ||
-            challenge.title?.toLowerCase().includes(lowerQuery) ||
-            challenge.description?.toLowerCase().includes(lowerQuery)
+        if (filter === "challenges") {
+          return data.challengesCookQuota.filter(
+            (challenge) =>
+              forceDefault ||
+              lowerQuery === "" ||
+              challenge.title?.toLowerCase().includes(lowerQuery) ||
+              challenge.description?.toLowerCase().includes(lowerQuery) ||
+              challenge.tags?.toLowerCase().includes(lowerQuery)
           );
         }
-        if (filter === 'users') {
+        if (filter === "users") {
           return data.users.filter(
             (user) =>
-              !lowerQuery ||
+              forceDefault ||
+              lowerQuery === "" ||
               user.fullName?.toLowerCase().includes(lowerQuery) ||
               user.email?.toLowerCase().includes(lowerQuery)
           );
         }
         break;
 
-      case '/my-kitchen':
-        if (filter === 'user-recipes') {
+      case "/my-kitchen":
+        if (filter === "user-recipes") {
           return data.recipes.filter(
             (recipe) =>
               recipe.userId === currentUserData?.id &&
-              (!lowerQuery ||
+              (forceDefault ||
+                lowerQuery === "" ||
                 recipe.title?.toLowerCase().includes(lowerQuery) ||
                 recipe.description?.toLowerCase().includes(lowerQuery) ||
                 recipe.tags?.toLowerCase().includes(lowerQuery))
           );
         }
-        if (filter === 'user-challenges') {
+        if (filter === "user-challenges") {
           const userChallengeIds = data.challengesCookQuotaParticipants
             .filter(
               (participant) =>
                 participant.userId === currentUserData?.id &&
-                participant.status === 'joined'
+                participant.status === "joined"
             )
             .map((participant) => participant.challengeId);
 
           return data.challengesCookQuota.filter(
             (challenge) =>
               userChallengeIds.includes(challenge.challengeId) &&
-              (!lowerQuery || challenge.title?.toLowerCase().includes(lowerQuery))
+              (forceDefault ||
+                lowerQuery === "" ||
+                challenge.title?.toLowerCase().includes(lowerQuery) ||
+                challenge.description?.toLowerCase().includes(lowerQuery) ||
+                challenge.tags?.toLowerCase().includes(lowerQuery))
           );
         }
         break;
@@ -213,6 +227,30 @@ export function DataProvider({ children }) {
     }
 
     return [];
+  };
+
+  // Add a method to refetch records from a specific sheet
+  const refetchSheet = async (sheetName) => {
+    try {
+      const sheetUrl = apiSheets[sheetName];
+      if (!sheetUrl) {
+        console.error(`Sheet name "${sheetName}" does not exist in apiSheets.`);
+        return;
+      }
+
+      const response = await fetch(sheetUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch data from sheet: ${sheetName}`);
+      }
+
+      const newData = await response.json();
+      setData((prev) => ({
+        ...prev,
+        [sheetName]: newData,
+      }));
+    } catch (error) {
+      console.error(`Error refetching sheet "${sheetName}":`, error);
+    }
   };
 
   const value = useMemo(
@@ -227,6 +265,7 @@ export function DataProvider({ children }) {
         fetchAllData();
       },
       refetchUsers: fetchUsersData,
+      refetchSheet, // Add the new method here
     }),
     [data, loading, currentUserData, userRewardLimits, followedUserIds]
   );
