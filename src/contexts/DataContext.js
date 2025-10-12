@@ -1,7 +1,7 @@
-// src/contexts/DataContext.js - COMPLETE & WORKING
+// src/contexts/DataContext.js - UPDATED
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import apiSheets from '../constants/api.js'; // 🚀 IMPORT API SHEETS
+import apiSheets from '../constants/api.js';
 import { calculateAllUserLimits } from '../utils/userCalculations.js';
 
 const DataContext = createContext();
@@ -90,6 +90,95 @@ export function DataProvider({ children }) {
     return calculateAllUserLimits(currentUserData);
   }, [currentUserData]);
 
+  // 🔍 SEARCH HELPER FUNCTIONS
+
+  // Get users that the current user is following
+  const getFollowedUsers = useMemo(() => {
+    if (!currentUserData?.id || !data.usersRelationships) return [];
+    
+    return data.usersRelationships
+      .filter(relationship => 
+        relationship.sourceUserId === currentUserData.id && 
+        relationship.relationship === 'following'
+      )
+      .map(relationship => relationship.targetUserId);
+  }, [currentUserData?.id, data.usersRelationships]);
+
+  // Get recipes from users that the current user follows
+  const getRecipesByFollowing = useMemo(() => {
+    if (!data.recipes || !getFollowedUsers.length) return [];
+    
+    return data.recipes.filter(recipe => 
+      getFollowedUsers.includes(recipe.author)
+    );
+  }, [data.recipes, getFollowedUsers]);
+
+  // Get challenges from users that the current user follows
+  const getChallengesByFollowing = useMemo(() => {
+    if (!data.challengesCookQuota || !getFollowedUsers.length) return [];
+    
+    return data.challengesCookQuota.filter(challenge => 
+      getFollowedUsers.includes(challenge.creatorId)
+    );
+  }, [data.challengesCookQuota, getFollowedUsers]);
+
+  // Get users that the current user follows (excluding self)
+  const getUsersByFollowing = useMemo(() => {
+    if (!data.users || !getFollowedUsers.length) return [];
+    
+    return data.users.filter(user => 
+      getFollowedUsers.includes(user.id) && user.id !== currentUserData?.id
+    );
+  }, [data.users, getFollowedUsers, currentUserData?.id]);
+
+  // Get all recipes (no filtering)
+  const getAllRecipes = useMemo(() => {
+    return data.recipes || [];
+  }, [data.recipes]);
+
+  // Get all challenges (no filtering)
+  const getAllChallenges = useMemo(() => {
+    return data.challengesCookQuota || [];
+  }, [data.challengesCookQuota]);
+
+  // Get all users (no filtering, excluding current user)
+  const getAllUsers = useMemo(() => {
+    if (!data.users) return [];
+    return data.users.filter(user => user.id !== currentUserData?.id);
+  }, [data.users, currentUserData?.id]);
+
+  // Get recipes created by the current user
+  const getUserRecipes = useMemo(() => {
+    if (!data.recipes || !currentUserData?.id) return [];
+    
+    return data.recipes.filter(recipe => 
+      recipe.author === currentUserData.id
+    );
+  }, [data.recipes, currentUserData?.id]);
+
+  // Get challenges that the current user has joined
+  const getUserChallenges = useMemo(() => {
+    if (!data.challengesCookQuotaParticipants || !currentUserData?.id) return [];
+    
+    const userChallengeIds = data.challengesCookQuotaParticipants
+      .filter(participant => 
+        participant.userId === currentUserData.id && 
+        participant.status === 'joined'
+      )
+      .map(participant => participant.challengeId);
+    
+    return data.challengesCookQuota.filter(challenge => 
+      userChallengeIds.includes(challenge.id)
+    );
+  }, [data.challengesCookQuota, data.challengesCookQuotaParticipants, currentUserData?.id]);
+
+  // Get user's cookbooks (if you have a cookbooks sheet)
+  const getUserCookbooks = useMemo(() => {
+    // This would need to be implemented when you have a cookbooks sheet
+    // For now, return empty array as placeholder
+    return [];
+  }, []);
+
   const value = useMemo(() => ({
     // Raw data
     ...data,
@@ -97,18 +186,30 @@ export function DataProvider({ children }) {
     currentUserData,
     userRewardLimits,
     
-    // Helper functions
+    // 🔍 SEARCH HELPER FUNCTIONS
+    getRecipesByFollowing,
+    getChallengesByFollowing,
+    getUsersByFollowing,
+    getAllRecipes,
+    getAllChallenges,
+    getAllUsers,
+    getUserRecipes,
+    getUserChallenges,
+    getUserCookbooks,
+    getFollowedUsers, // Export this for other components if needed
+
+    // Existing helper functions
     getUserById: (userId) => data.users?.find(user => user.id === userId),
     getRecipesByUser: (userId) => data.recipes?.filter(recipe => recipe.author === userId),
     getRecipeIngredients: (recipeId) => data.recipesIngredients?.filter(ingredient => ingredient.recipeId === recipeId),
     getRecipeSteps: (recipeId) => data.recipesSteps?.filter(step => step.recipeId === recipeId),
     getChallengeParticipants: (challengeId) => data.challengesCookQuotaParticipants?.filter(participant => participant.challengeId === challengeId),
     getUserRelationships: (userId) => data.usersRelationships?.filter(relationship => 
-      relationship.userId === userId || relationship.friendId === userId
+      relationship.sourceUserId === userId || relationship.targetUserId === userId
     ),
     isUserFriend: (userId, friendId) => data.usersRelationships?.some(relationship => 
-      (relationship.userId === userId && relationship.friendId === friendId) ||
-      (relationship.userId === friendId && relationship.friendId === userId)
+      (relationship.sourceUserId === userId && relationship.targetUserId === friendId) ||
+      (relationship.sourceUserId === friendId && relationship.targetUserId === userId)
     ),
     
     // Refresh function
@@ -116,7 +217,23 @@ export function DataProvider({ children }) {
       setHasFetched(false);
       fetchAllData();
     },
-  }), [data, loading, currentUserData, userRewardLimits]);
+  }), [
+    data,
+    loading,
+    currentUserData,
+    userRewardLimits,
+    // Search helpers dependencies
+    getRecipesByFollowing,
+    getChallengesByFollowing,
+    getUsersByFollowing,
+    getAllRecipes,
+    getAllChallenges,
+    getAllUsers,
+    getUserRecipes,
+    getUserChallenges,
+    getUserCookbooks,
+    getFollowedUsers
+  ]);
 
   return (
     <DataContext.Provider value={value}>
@@ -125,7 +242,6 @@ export function DataProvider({ children }) {
   );
 }
 
-// 🚀 MAKE SURE THIS EXPORT EXISTS
 export const useData = () => {
   const context = useContext(DataContext);
   if (!context) {
