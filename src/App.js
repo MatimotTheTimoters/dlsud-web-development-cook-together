@@ -1,9 +1,9 @@
-// Updated App.js
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/index.css'
+import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './contexts/DataContext';
+import { AuthProvider } from './hooks/useAuth';
 
 import NavbarComponent from './components/NavbarComponent';
 import FooterComponent from './components/FooterComponent';
@@ -23,35 +23,42 @@ import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
 import SettingsPage from './pages/SettingsPage';
 
-// App.js - Add bottom padding class
 function App() {
   return (
-    <DataProvider>
-      <Router>
-        <NavbarComponent />
-        <Routes>
-          {/* Main routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/registration" element={<RegistrationPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+    <AuthProvider>
+      <DataProvider>
+        <Router>
+          <div className="app-container">
+            <NavbarComponent />
+            <main className="app-main-content">
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/registration" element={<RegistrationPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/testpages" element={<TestPages />} />
 
-          {/* Navbar routes */}
-          <Route path="/inventory" element={<InventoryPage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+                {/* Protected routes - Main app pages */}
+                <Route path="/feed" element={<FeedPage />} />
+                <Route path="/discover" element={<DiscoverPage />} />
+                <Route path="/my-kitchen" element={<MyKitchenPage />} />
 
-          {/* AsideComponent routes */}
-          <Route path="/feed" element={<FeedPage />} />
-          <Route path="/discover" element={<DiscoverPage />} />
-          <Route path="/my-kitchen" element={<MyKitchenPage />} />
-          <Route path="/TestPages" element={<TestPages />} />
-        </Routes>
-        <FooterComponent />
-      </Router>
-    </DataProvider>
+                {/* Protected routes - Feature pages */}
+                <Route path="/inventory" element={<InventoryPage />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/users" element={<UsersPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+
+                {/* Catch all route */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+            <FooterComponent />
+          </div>
+        </Router>
+      </DataProvider>
+    </AuthProvider>
   );
 }
 

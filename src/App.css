@@ -1,38 +1,327 @@
-.App {
-  text-align: center;
-}
+/* ===== APP LAYOUT STYLES ===== */
+/* Enhanced with CSS custom properties from colors.css */
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--ct-surface);
+  position: relative;
+}
+
+.app-main-content {
+  flex: 1;
+  padding-top: 80px; /* Space for fixed navbar */
+  padding-bottom: 0; /* Footer will handle its own spacing */
+  min-height: calc(100vh - 80px); /* Full height minus navbar */
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== LAYOUT UTILITIES ===== */
+
+/* Full page layouts (Landing, Login, Registration) */
+.page-full {
+  min-height: calc(100vh - 80px);
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  padding: 2rem 1rem;
 }
 
-.App-link {
-  color: #61dafb;
+/* App layouts (with aside navigation) */
+.app-layout {
+  display: flex;
+  min-height: calc(100vh - 80px);
+  background-color: var(--ct-surface);
 }
 
-@keyframes App-logo-spin {
+.app-aside {
+  width: 280px;
+  flex-shrink: 0;
+  background-color: var(--ct-paper);
+  border-right: 1px solid var(--ct-border);
+  position: sticky;
+  top: 80px;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.app-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: var(--ct-surface);
+  min-height: calc(100vh - 80px);
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Large devices (≥ 1200px) */
+@media (min-width: 1200px) {
+  .app-aside {
+    width: 300px;
+  }
+  
+  .app-content {
+    padding: 2.5rem 3rem;
+  }
+}
+
+/* Medium devices (768px - 1199px) */
+@media (max-width: 1199px) and (min-width: 768px) {
+  .app-aside {
+    width: 250px;
+  }
+  
+  .app-content {
+    padding: 1.5rem 2rem;
+  }
+}
+
+/* Small devices (≤ 767px) */
+@media (max-width: 767px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  
+  .app-aside {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--ct-border);
+  }
+  
+  .app-content {
+    padding: 1rem;
+    min-height: auto;
+  }
+  
+  .app-main-content {
+    padding-top: 70px; /* Slightly less on mobile */
+  }
+}
+
+/* Extra small devices (≤ 575px) */
+@media (max-width: 575px) {
+  .app-main-content {
+    padding-top: 65px;
+  }
+  
+  .app-content {
+    padding: 0.75rem;
+  }
+  
+  .page-full {
+    padding: 1rem 0.5rem;
+  }
+}
+
+/* ===== FOOTER SPACING FIXES ===== */
+
+/* Ensure footer stays at bottom and content doesn't overlap */
+.app-container > footer {
+  margin-top: auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* Specific page content spacing */
+.page-content {
+  padding-bottom: 2rem;
+}
+
+.page-with-footer {
+  min-height: calc(100vh - 80px - 200px); /* Account for navbar and footer */
+  padding-bottom: 2rem;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+
+.app-aside::-webkit-scrollbar,
+.app-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.app-aside::-webkit-scrollbar-track,
+.app-content::-webkit-scrollbar-track {
+  background: var(--ct-surface);
+}
+
+.app-aside::-webkit-scrollbar-thumb,
+.app-content::-webkit-scrollbar-thumb {
+  background: var(--ct-border);
+  border-radius: 3px;
+}
+
+.app-aside::-webkit-scrollbar-thumb:hover,
+.app-content::-webkit-scrollbar-thumb:hover {
+  background: var(--ct-muted);
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Page transition animations */
+.page-enter {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.aside-enter {
+  animation: slideIn 0.4s ease-out;
+}
+
+/* = ACCESSIBILITY ENHANCEMENTS = */
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .aside-enter {
+    animation: none;
+  }
+}
+
+/* Focus management for better keyboard navigation */
+.app-content:focus {
+  outline: 2px solid var(--ct-primary);
+  outline-offset: -2px;
+}
+
+/* ===== LOADING STATES ===== */
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  background-color: var(--ct-surface);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--ct-border);
+  border-top: 3px solid var(--ct-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== ERROR BOUNDARY STYLES ===== */
+
+.app-error {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ct-surface);
+  padding: 2rem;
+  text-align: center;
+}
+
+.error-content {
+  max-width: 500px;
+  padding: 2rem;
+  background-color: var(--ct-paper);
+  border-radius: 12px;
+  border: 1px solid var(--ct-border);
+  box-shadow: 0 4px 12px var(--ct-shadow);
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  .app-container {
+    background: white;
+  }
+  
+  .app-main-content {
+    padding-top: 0;
+    min-height: auto;
+  }
+  
+  .navbar-ct,
+  .footer-ct {
+    display: none;
+  }
+  
+  .app-aside {
+    display: none;
+  }
+  
+  .app-content {
+    padding: 0;
+    background: white;
+  }
+}
+
+/* ===== DARK MODE SUPPORT (Future Enhancement) ===== */
+
+/* Uncomment when implementing dark mode
+@media (prefers-color-scheme: dark) {
+  .app-container {
+    background-color: #0f172a;
+  }
+  
+  .app-main-content {
+    background-color: #0f172a;
+  }
+}
+*/
+
+/* ===== UTILITY CLASSES ===== */
+
+.content-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px - 200px);
+}
+
+.content-padded {
+  padding: 2rem;
+}
+
+@media (max-width: 767px) {
+  .content-padded {
+    padding: 1rem;
+  }
+}
+
+.scroll-lock {
+  overflow: hidden;
+}
+
+.scroll-y-auto {
+  overflow-y: auto;
+}
+
+.scroll-y-hidden {
+  overflow-y: hidden;
 }
