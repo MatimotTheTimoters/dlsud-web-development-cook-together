@@ -19,14 +19,24 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
 
-  // Fetch all data
+  // Fetch users data immediately (needed for login)
+  const fetchUsersData = async () => {
+    try {
+      const usersRes = await fetch(apiSheets.users);
+      const users = await usersRes.json();
+      setData(prev => ({ ...prev, users }));
+    } catch (error) {
+      console.error('Failed to fetch users data:', error);
+    }
+  };
+
+  // Fetch all other data only when authenticated
   const fetchAllData = async () => {
     if (hasFetched) return;
 
     setLoading(true);
     try {
       const [
-        usersRes,
         usersRelationshipsRes,
         recipesRes,
         recipesIngredientsRes,
@@ -34,7 +44,6 @@ export function DataProvider({ children }) {
         challengesCookQuotaRes,
         challengesCookQuotaParticipantsRes,
       ] = await Promise.all([
-        fetch(apiSheets.users),
         fetch(apiSheets.usersRelationships),
         fetch(apiSheets.recipes),
         fetch(apiSheets.recipesIngredients),
@@ -44,7 +53,7 @@ export function DataProvider({ children }) {
       ]);
 
       const newData = {
-        users: await usersRes.json(),
+        users: data.users, // Keep existing users data
         usersRelationships: await usersRelationshipsRes.json(),
         recipes: await recipesRes.json(),
         recipesIngredients: await recipesIngredientsRes.json(),
@@ -62,7 +71,12 @@ export function DataProvider({ children }) {
     }
   };
 
-  // Fetch data only when authenticated
+  // Fetch users data on mount (needed for login validation)
+  useEffect(() => {
+    fetchUsersData();
+  }, []);
+
+  // Fetch all other data only when authenticated
   useEffect(() => {
     if (isAuthenticated && !hasFetched) {
       fetchAllData();
@@ -102,12 +116,10 @@ export function DataProvider({ children }) {
   }, [currentUserData?.id, data.usersRelationships]);
 
   // Query functions for Searchbar
-  // In DataContext.js - Update the queryData function:
   const queryData = (page, filter, query) => {
     const lowerQuery = query.toLowerCase().trim();
     if (!lowerQuery) return [];
 
-    // Convert page to path format for consistency
     const path = `/${page}`;
 
     switch (path) {
@@ -115,7 +127,7 @@ export function DataProvider({ children }) {
         if (filter === 'recipes') {
           return data.recipes.filter(
             (recipe) =>
-              followedUserIds.includes(recipe.userId) && // Fixed: recipe.userId instead of recipe.author
+              followedUserIds.includes(recipe.userId) &&
               (recipe.title?.toLowerCase().includes(lowerQuery) ||
                 recipe.description?.toLowerCase().includes(lowerQuery) ||
                 recipe.tags?.toLowerCase().includes(lowerQuery))
@@ -124,7 +136,7 @@ export function DataProvider({ children }) {
         if (filter === 'challenges') {
           return data.challengesCookQuota.filter(
             (challenge) =>
-              followedUserIds.includes(challenge.author) && // Fixed: challenge.author instead of challenge.creatorId
+              followedUserIds.includes(challenge.author) &&
               challenge.title?.toLowerCase().includes(lowerQuery)
           );
         }
@@ -166,7 +178,7 @@ export function DataProvider({ children }) {
         if (filter === 'user-recipes') {
           return data.recipes.filter(
             (recipe) =>
-              recipe.userId === currentUserData?.id && // Fixed: recipe.userId instead of recipe.author
+              recipe.userId === currentUserData?.id &&
               (recipe.title?.toLowerCase().includes(lowerQuery) ||
                 recipe.description?.toLowerCase().includes(lowerQuery) ||
                 recipe.tags?.toLowerCase().includes(lowerQuery))
@@ -183,7 +195,7 @@ export function DataProvider({ children }) {
 
           return data.challengesCookQuota.filter(
             (challenge) =>
-              userChallengeIds.includes(challenge.challengeId) && // Fixed: challenge.challengeId instead of challenge.id
+              userChallengeIds.includes(challenge.challengeId) &&
               challenge.title?.toLowerCase().includes(lowerQuery)
           );
         }
@@ -202,11 +214,12 @@ export function DataProvider({ children }) {
       loading,
       currentUserData,
       userRewardLimits,
-      queryData, // Expose queryData for Searchbar
+      queryData,
       refetchAll: () => {
         setHasFetched(false);
         fetchAllData();
       },
+      refetchUsers: fetchUsersData, // Add method to refetch users specifically
     }),
     [data, loading, currentUserData, userRewardLimits, followedUserIds]
   );
