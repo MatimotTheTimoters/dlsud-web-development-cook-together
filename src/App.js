@@ -1,5 +1,6 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/index.css';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './contexts/DataContext';
@@ -25,40 +26,36 @@ import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <Router>
-          <div className="app-container">
-            <NavbarComponent />
-            <main className="app-main-content">
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/registration" element={<RegistrationPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/testpages" element={<TestPages />} />
+    <DataProvider>
+      <Router>
+        <div className="app-container d-flex flex-column min-vh-100">
+          <NavbarComponent />
+          <main className="app-main flex-grow-1">
+            <Routes>
+              {/* Main routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/registration" element={<RegistrationPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
 
-                {/* Protected routes - Main app pages */}
-                <Route path="/feed" element={<FeedPage />} />
-                <Route path="/discover" element={<DiscoverPage />} />
-                <Route path="/my-kitchen" element={<MyKitchenPage />} />
+              {/* Navbar routes */}
+              <Route path="/inventory" element={<InventoryPage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
 
-                {/* Protected routes - Feature pages */}
-                <Route path="/inventory" element={<InventoryPage />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/users" element={<UsersPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-
-                {/* Catch all route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-            <FooterComponent />
-          </div>
-        </Router>
-      </DataProvider>
-    </AuthProvider>
+              {/* AsideComponent routes */}
+              <Route path="/feed" element={<FeedPage />} />
+              <Route path="/discover" element={<DiscoverPage />} />
+              <Route path="/my-kitchen" element={<MyKitchenPage />} />
+              <Route path="/TestPages" element={<TestPages />} />
+            </Routes>
+          </main>
+          <FooterComponent />
+        </div>
+      </Router>
+    </DataProvider>
   );
 }
 
