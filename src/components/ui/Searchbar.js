@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Form, InputGroup, ListGroup } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
-/*************  ✨ Windsurf Command ⭐  *************/
 /**
  * Searchbar component for searching recipes, challenges, and users.
  * @param {string} searchQuery - The current search query.
@@ -12,7 +11,7 @@ import { useLocation } from "react-router-dom";
  * @param {function} onFilterChange - Callback for when the filter selection changes.
  * @returns {JSX.Element} - A Searchbar component with an input field and a popup filter.
  */
-/*******  32746e57-e56c-4386-aa07-356b15ef2b21  *******/const Searchbar = ({ searchQuery, onSearchChange, activeFilter, onFilterChange }) => {
+const Searchbar = ({ searchQuery, onSearchChange, activeFilter, onFilterChange }) => {
   const location = useLocation();
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [showPopup, setShowPopup] = useState(false);
@@ -45,7 +44,7 @@ import { useLocation } from "react-router-dom";
 
   const currentFilters = filterOptions[currentPage] || filterOptions.discover;
 
-  // Debounced search
+  // Debounced search query update
   useEffect(() => {
     const timer = setTimeout(() => {
       onSearchChange(localQuery);
@@ -65,12 +64,12 @@ import { useLocation } from "react-router-dom";
   };
 
   const handleBlur = () => {
-    setTimeout(() => setShowPopup(false), 200);
+    setTimeout(() => setShowPopup(false), 150); // Delay to allow click events to register
   };
 
   return (
     <div className="searchbar-container position-relative">
-      {/* Search Bar */}
+      {/* Search Input */}
       <InputGroup>
         <Form.Control
           ref={inputRef}
@@ -86,7 +85,7 @@ import { useLocation } from "react-router-dom";
       </InputGroup>
 
       {/* Popup Filter */}
-      {showPopup && localQuery && (
+      {showPopup && (
         <ListGroup className="position-absolute w-100 mt-1 shadow-sm z-3">
           {currentFilters.map((filter) => (
             <ListGroup.Item
@@ -97,7 +96,7 @@ import { useLocation } from "react-router-dom";
                 activeFilter === filter.key ? "active" : ""
               }`}
             >
-              <span>{filter.label}</span>
+              {filter.label}
             </ListGroup.Item>
           ))}
         </ListGroup>

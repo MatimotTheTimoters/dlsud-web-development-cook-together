@@ -1,38 +1,173 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+/* App.css - Global Layout and Spacing */
+.app-container {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background-color: var(--ct-bg, #f8f9fa);
 }
 
-.App-link {
-  color: #61dafb;
+.app-main {
+  padding-top: 80px; /* Account for fixed navbar */
+  padding-bottom: 2rem;
+  min-height: calc(100vh - 160px); /* Account for navbar and footer */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Global page spacing */
+.page-container {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.page-section {
+  margin-bottom: 3rem;
+}
+
+.page-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Content spacing */
+.content-section {
+  padding: 2rem 0;
+}
+
+.section-divider {
+  margin: 3rem 0;
+  border: none;
+  border-top: 1px solid var(--ct-border, #dee2e6);
+}
+
+/* Card grid spacing */
+.cards-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.card-item {
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive spacing */
+@media (max-width: 768px) {
+  .app-main {
+    padding-top: 70px; /* Smaller navbar on mobile */
+    padding-bottom: 1rem;
   }
-  to {
-    transform: rotate(360deg);
+
+  .page-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .page-section {
+    margin-bottom: 2rem;
+  }
+
+  .content-section {
+    padding: 1.5rem 0;
+  }
+
+  .section-divider {
+    margin: 2rem 0;
+  }
+
+  .cards-grid {
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .card-item {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .app-main {
+    padding-top: 60px;
+  }
+
+  .page-container {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .page-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .content-section {
+    padding: 1rem 0;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .card-item {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Utility spacing classes */
+.section-padding {
+  padding: 3rem 0;
+}
+
+.section-padding-sm {
+  padding: 1.5rem 0;
+}
+
+.section-padding-lg {
+  padding: 4rem 0;
+}
+
+.margin-top-auto {
+  margin-top: auto;
+}
+
+.margin-bottom-auto {
+  margin-bottom: auto;
+}
+
+/* Container fluid with consistent spacing */
+.container-fluid-spacing {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .container-fluid-spacing {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .container-fluid-spacing {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+.app-container:focus {
+  outline: 2px solid var(--ct-primary, #007bff);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .app-main {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  
+  .page-container {
+    padding: 0;
   }
 }

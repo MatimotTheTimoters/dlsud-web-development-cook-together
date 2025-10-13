@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, Button } from "react-bootstrap";
 import "../../styles/colors.css";
+import placeholderImage from "../../assets/placeholders/images/new-recipe.png"; // Add this import
 
 function RecipeCard({ recipe = {} }) {
   const {
@@ -41,13 +42,17 @@ function RecipeCard({ recipe = {} }) {
 
   return (
     <Card className="ct-card h-100" style={{ maxWidth: "320px", margin: "0 auto" }}>
-      {/* Cover Image */}
+      {/* Cover Image - Use imported placeholder */}
       <Card.Img
         variant="top"
-        src={coverImage || "/assets/images/placeholder.svg"}
+        src={coverImage || placeholderImage} // Use imported image
         alt={title}
         className="card-img-top"
         style={{ height: "200px", objectFit: "cover" }}
+        onError={(e) => {
+          // Fallback if coverImage fails to load
+          e.target.src = placeholderImage;
+        }}
       />
 
       <Card.Body>

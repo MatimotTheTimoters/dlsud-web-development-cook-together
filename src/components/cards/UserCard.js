@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, ProgressBar, Badge } from "react-bootstrap";
+import placeholderImage from "../../assets/placeholders/images/new-user.png"; // Add this import
 
 function UserCard({ user }) {
   const {
@@ -27,13 +28,17 @@ function UserCard({ user }) {
 
   return (
     <Card className="user-card h-100">
-      {/* Profile Picture */}
+      {/* Profile Picture - Use imported placeholder */}
       <Card.Img
         variant="top"
-        src={profilePicture || "/assets/images/placeholder-profile.svg"}
+        src={profilePicture || placeholderImage} // Use imported image
         alt={fullName}
         className="user-card-img"
         style={{ height: "200px", objectFit: "cover" }}
+        onError={(e) => {
+          // Fallback if profilePicture fails to load
+          e.target.src = placeholderImage;
+        }}
       />
 
       <Card.Body>
