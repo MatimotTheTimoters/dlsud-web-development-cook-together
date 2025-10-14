@@ -44,28 +44,25 @@ Cook Together transforms cooking into an exciting game experience!
 ## API Integration
 
 This project uses **SheetDB.io** with multiple individual sheets to manage:
-- User accounts and profiles
-- Recipe database
-- Challenge listings
-- User relationships (following)
-- Currency and progression tracking
-- Shop inventory and purchases
+- users
+- users-relationships
+- users-friend-requests
+- recipes
+- recipes-ingredients
+- recipes-steps
+- user-recipes
+- recipes-interactions
+- recipes-comments
+- recipes-comments-interactions
+- challenges-cook-quota
+- challenges-cook-quota-participants
+- user-cookbooks
 
 ## Getting Started
 
 1. Clone the repository
-2. Open `index.html` in your web browser
+2. Run `npm run start` in your console
 3. Register a new account or login to start cooking!
-
-## Contributing
-
-We welcome contributions from fellow cooking enthusiasts! Feel free to submit pull requests or open issues for new features and bug fixes.
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
 
 **Start your culinary journey today and become the ultimate master chef!** 🏆👨‍🍳👩‍🍳
 
@@ -75,5 +72,5 @@ This project is open source and available under the [MIT License](LICENSE).
 - Reganit, John
 - Sta. Ana Matthew
 
-## Documentation
+## References
 - [🎨 Project Color Theme](./colors.md)
