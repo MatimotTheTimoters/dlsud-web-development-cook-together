@@ -23,7 +23,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background-color: var(--ct-primary);
+  /* background-color: var(--ct-primary); */
   transform: scaleX(0);
   transition: transform 0.8s ease;
 }
