@@ -64,9 +64,78 @@ This project uses **SheetDB.io** with multiple individual sheets to manage:
 2. Run `npm run start` in your console
 3. Register a new account or login to start cooking!
 
-**Start your culinary journey today and become the ultimate master chef!** 🏆👨‍🍳👩‍🍳
+## Optimization
+
+### Centralized API Configuration
+- All API sheet endpoints are centralized in `src\constants\api.js` for easy management and updates
+- Single source of truth for all external data connections
+
+### Efficient Data Fetching
+- **Bulk Data Retrieval**: All sheet data is retrieved at once upon login using `src\hooks\useSheetData.js`
+- **Optimized API Calls**: Minimizes GET requests by fetching data in bulk rather than per-component
+- **Smart Caching**: Implements 1-minute cache duration to reduce redundant API calls
+
+### Global State Management
+- **Centralized Data Storage**: All retrieved data is stored in `src\contexts\DataContext.js`
+- **Cross-Component Sharing**: Data is shared across all components through React Context
+- **Real-time Updates**: Components access fresh data without individual API calls
+
+### Styling Architecture
+- **Aggregated Styles**: All CSS styles are consolidated in `src\styles\index.css`
+- **Single Import**: Styles are imported only once in `src\App.js` for optimal performance
+- **Modular Design**: Component-specific styles can be imported as needed while maintaining central management
+
+## Misc Backend Features
+
+### Unique Identifier System
+- **UUID Generation**: Unique record IDs are generated using `src\hooks\uuidHelper.js`
+- **Collision Prevention**: Ensures no duplicate IDs across all data entities
+- **Consistent Formatting**: Standardized ID format for users, recipes, challenges, and interactions
+
+### Data Integrity
+- **Relationship Management**: Robust user relationships and follow system
+- **Transaction Tracking**: Comprehensive logging of user interactions and progress
+- **Error Handling**: Graceful fallbacks for failed API requests with cached data usage
+
+### Performance Enhancements
+- **Memoized Calculations**: User reward limits and progress calculations are memoized for performance
+- **Conditional Rendering**: Components only render when necessary data is available
+- **Optimized Re-renders**: Context updates are optimized to prevent unnecessary component updates
+
+## Coming Soon 🚀
+
+We're constantly cooking up new features! Here's what's in development:
+
+### 🎯 Gamification & Progression
+- [ ] **Leveling System** - Progress through chef ranks with increasing difficulty
+- [ ] **Reward System** - Earn EXP, Gold, and Gems from cooking and completing challenges
+- [ ] **User Achievements** - Unlock badges and trophies for culinary milestones
+- [ ] **Login Streak Feature** - Daily login bonuses and streak multipliers
+- [ ] **Reward Multipliers** - Boost your earnings with special modifiers
+
+### 📱 Enhanced User Experience
+- [ ] **Expanded Detail Pages** - Full-page views for recipes, challenges, and user profiles
+- [ ] **Shop & Inventory** - Spend currencies on cosmetics, boosts, and kitchen upgrades
+- [ ] **Cookbooks** - Create custom folders to organize and group your favorite recipes
+- [ ] **Add Cookbook Modal** - Easy interface for creating new recipe collections
+
+### 👥 Social & Community
+- [ ] **Friends System** - Add friends and build your cooking network
+- [ ] **Enhanced Following** - Improved user discovery and relationship management
+- [ ] **Challenge Progress Tracking** - Monitor your progress in ongoing challenges
+
+### 🔍 Advanced Discovery
+- [ ] **Search Sorting** - Sort results by popularity, difficulty, date, and more
+- [ ] **Enhanced Filters** - Advanced filtering by cuisine, ingredients, cook time, and dietary restrictions
+- [ ] **Smart Recommendations** - Personalized recipe and challenge suggestions
+
+### ⚙️ Account Management
+- [ ] **User Settings** - Update account details, preferences, and privacy settings
+- [ ] **Profile Customization** - Personalize your chef profile with themes and layouts
 
 ---
+
+**Start your culinary journey today and become the ultimate master chef!** 🏆👨‍🍳👩‍🍳
 
 ## Contributors
 - Reganit, John
