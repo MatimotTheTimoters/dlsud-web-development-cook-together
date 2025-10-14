@@ -5,7 +5,7 @@ import { makeId } from '../../hooks/uuidHelper.js';
 import apiSheets from '../../constants/api.js';
 
 export default function BuildChallengeModal({ show, onHide, onCreated }) {
-  const { currentUserData, userRewardLimits } = useData();
+  const { currentUserData, userRewardLimits, refetchSheet } = useData();
 
   const [values, setValues] = useState({
     title: '',
@@ -54,13 +54,10 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-
-    // Auto-cap values to reward limits
+    // Allow typing for reward inputs: keep raw input while typing
     if (['expReward', 'goldReward', 'gemReward'].includes(name)) {
-      const numValue = Number(value);
-      const maxField = `max${name.charAt(0).toUpperCase() + name.slice(1)}Reward`;
-      const cappedValue = Math.min(Math.max(0, numValue), rewardLimits[maxField]);
-      setValues((prev) => ({ ...prev, [name]: cappedValue }));
+      // store raw string to allow typing (e.g. partial numbers)
+      setValues((prev) => ({ ...prev, [name]: value }));
       return;
     }
 
@@ -68,6 +65,15 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
       ...prev,
       [name]: type === 'number' ? Math.max(0, Number(value)) : value,
     }));
+  };
+
+  // When reward input loses focus, normalize and cap to allowed limits
+  const handleRewardBlur = (e) => {
+    const { name, value } = e.target;
+    const num = Number(value) || 0;
+    const limitKey = name === 'expReward' ? 'maxExpReward' : name === 'goldReward' ? 'maxGoldReward' : 'maxGemReward';
+    const capped = Math.min(Math.max(0, Math.floor(num)), rewardLimits[limitKey] ?? num);
+    setValues((prev) => ({ ...prev, [name]: capped }));
   };
 
   const handleSubmit = async (e) => {
@@ -102,11 +108,14 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
         return;
       }
 
-      // Reward validation using context data
+      // Reward validation using context data (parse values if stored as strings)
+      const expVal = Number(values.expReward) || 0;
+      const goldVal = Number(values.goldReward) || 0;
+      const gemVal = Number(values.gemReward) || 0;
       if (
-        values.expReward > rewardLimits.maxExpReward ||
-        values.goldReward > rewardLimits.maxGoldReward ||
-        values.gemReward > rewardLimits.maxGemReward
+        expVal > rewardLimits.maxExpReward ||
+        goldVal > rewardLimits.maxGoldReward ||
+        gemVal > rewardLimits.maxGemReward
       ) {
         alert('Reward values exceed the allowed limits.');
         setLoading(false);
@@ -121,6 +130,10 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
         data: [
           {
             ...values,
+            // ensure numeric types for rewards
+            expReward: Number(values.expReward) || 0,
+            goldReward: Number(values.goldReward) || 0,
+            gemReward: Number(values.gemReward) || 0,
             tags: values.tags
               .split(',')
               .map((tag) => tag.trim())
@@ -148,10 +161,18 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
         throw new Error(`Failed to create challenge: ${res.status} ${txt}`);
       }
 
+      // refresh challenges data so UI reflects the new challenge (like CreateRecipeModal)
+      try {
+        await refetchSheet('challengesCookQuota');
+      } catch (err) {
+        // non-fatal: log and continue
+        console.warn('refetchSheet failed for challengesCookQuota:', err);
+      }
+
       if (typeof onCreated === 'function') {
         onCreated({
           ...values,
-          id: values.challengeId,
+          challengeId: values.challengeId,
           author: userId,
           participantCount: 0,
           status: 'active',
@@ -307,6 +328,7 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
                   name="expReward"
                   value={values.expReward}
                   onChange={handleChange}
+                  onBlur={handleRewardBlur}
                   min="0"
                   max={rewardLimits.maxExpReward}
                   placeholder="0"
@@ -322,6 +344,7 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
                   name="goldReward"
                   value={values.goldReward}
                   onChange={handleChange}
+                  onBlur={handleRewardBlur}
                   min="0"
                   max={rewardLimits.maxGoldReward}
                   placeholder="0"
@@ -337,6 +360,7 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
                   name="gemReward"
                   value={values.gemReward}
                   onChange={handleChange}
+                  onBlur={handleRewardBlur}
                   min="0"
                   max={rewardLimits.maxGemReward}
                   placeholder="0"
