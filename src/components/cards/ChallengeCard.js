@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, Button, Badge } from "react-bootstrap";
 import "../../styles/colors.css";
+import "../../styles/cards.css";
 import placeholderImage from "../../assets/placeholders/images/new-challenge.png"; // Add this import
 
 function ChallengeCard({ challenge }) {
@@ -33,7 +34,7 @@ function ChallengeCard({ challenge }) {
   };
 
   return (
-    <Card className="ct-card" style={{ maxWidth: "320px", margin: "0 auto" }}>
+    <Card className="ct-card card-fade-in" style={{ maxWidth: "320px", margin: "0 auto" }}>
       {/* Cover Image - Use imported placeholder */}
       <Card.Img
         variant="top"
@@ -65,7 +66,7 @@ function ChallengeCard({ challenge }) {
                 <Button
                   key={index}
                   variant={`outline-${color}`}
-                  className="btn-sm px-3"
+                  className="btn-sm px-3 challenge-tag"
                   style={{
                     borderRadius: "20px",
                     fontSize: "0.85rem",

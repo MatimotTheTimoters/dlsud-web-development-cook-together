@@ -1,25 +1,56 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import apiSheets from '../constants/api.js';
-import { calculateAllUserLimits } from '../utils/userCalculations.js';
+import { useAuth } from '../hooks/useAuth'; // Authentication hook for user info
+import apiSheets from '../constants/api.js'; // API configuration for SheetDB endpoints
+import { calculateAllUserLimits } from '../utils/userCalculations.js'; // Utility for calculating user limits
 
+/**
+ * Data Context for managing global application state and data fetching
+ * Provides centralized data management, caching, and querying capabilities
+ */
 const DataContext = createContext();
 
+/**
+ * Data Provider Component
+ * Manages global application data state, handles data fetching, and provides query functions
+ * Implements optimized data loading with authentication-aware fetching
+ * 
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components that need access to data context
+ * 
+ * @example
+ * // Wrap your app with DataProvider (inside AuthProvider)
+ * <AuthProvider>
+ *   <DataProvider>
+ *     <App />
+ *   </DataProvider>
+ * </AuthProvider>
+ */
 export function DataProvider({ children }) {
+  // Get authentication state from Auth context
   const { user, isAuthenticated } = useAuth();
+  
+  // Centralized state for all application data
   const [data, setData] = useState({
-    users: [],
-    usersRelationships: [],
-    recipes: [],
-    recipesIngredients: [],
-    recipesSteps: [],
-    challengesCookQuota: [],
-    challengesCookQuotaParticipants: [],
+    users: [],                              // All user profiles
+    usersRelationships: [],                 // Following/follower relationships
+    recipes: [],                           // Recipe metadata and details
+    recipesIngredients: [],                // Ingredients for each recipe
+    recipesSteps: [],                      // Cooking steps for each recipe
+    challengesCookQuota: [],               // Challenge definitions and metadata
+    challengesCookQuotaParticipants: [],   // User participation in challenges
   });
+  
+  // Loading state for initial data fetch
   const [loading, setLoading] = useState(true);
+  
+  // Flag to prevent duplicate fetches
   const [hasFetched, setHasFetched] = useState(false);
 
-  // Fetch users data immediately (needed for login)
+  /**
+   * Fetches users data immediately on app load
+   * This is needed for login validation and user lookup
+   * Runs independently of authentication status
+   */
   const fetchUsersData = async () => {
     try {
       const usersRes = await fetch(apiSheets.users);
@@ -30,12 +61,18 @@ export function DataProvider({ children }) {
     }
   };
 
-  // Fetch all other data only when authenticated
+  /**
+   * Fetches all application data (except users) when user is authenticated
+   * Uses Promise.all for parallel fetching to optimize performance
+   * Only runs once per session unless explicitly refetched
+   */
   const fetchAllData = async () => {
+    // Prevent duplicate fetches
     if (hasFetched) return;
 
     setLoading(true);
     try {
+      // Fetch all data sheets in parallel for optimal performance
       const [
         usersRelationshipsRes,
         recipesRes,
@@ -52,8 +89,9 @@ export function DataProvider({ children }) {
         fetch(apiSheets.challengesCookQuotaParticipants),
       ]);
 
+      // Combine all fetched data into single object
       const newData = {
-        users: data.users, // Keep existing users data
+        users: data.users, // Preserve existing users data
         usersRelationships: await usersRelationshipsRes.json(),
         recipes: await recipesRes.json(),
         recipesIngredients: await recipesIngredientsRes.json(),
@@ -63,7 +101,7 @@ export function DataProvider({ children }) {
       };
 
       setData(newData);
-      setHasFetched(true);
+      setHasFetched(true); // Mark as fetched to prevent duplicates
     } catch (error) {
       console.error('Failed to fetch app data:', error);
     } finally {
@@ -71,27 +109,42 @@ export function DataProvider({ children }) {
     }
   };
 
-  // Fetch users data on mount (needed for login validation)
+  /**
+   * Initial data fetching effect
+   * Fetches users data immediately on component mount for login purposes
+   */
   useEffect(() => {
     fetchUsersData();
   }, []);
 
-  // Fetch all other data only when authenticated
+  /**
+   * Authentication-aware data fetching effect
+   * Fetches all application data only when user is authenticated
+   * Prevents unnecessary API calls for anonymous users
+   */
   useEffect(() => {
     if (isAuthenticated && !hasFetched) {
       fetchAllData();
     }
   }, [isAuthenticated, hasFetched]);
 
-  // Get current user's data
+  /**
+   * Memoized current user data object
+   * Finds and returns the complete user profile for the authenticated user
+   */
   const currentUserData = useMemo(() => {
     if (!user?.id || !data.users) return null;
     return data.users.find((u) => u.id === user.id) || null;
   }, [user?.id, data.users]);
 
-  // Calculate user reward limits
+  /**
+   * Memoized user reward limits calculation
+   * Calculates dynamic limits based on user level, progress, and achievements
+   * Falls back to default limits if user data is unavailable
+   */
   const userRewardLimits = useMemo(() => {
     if (!currentUserData) {
+      // Default limits for new/anonymous users
       return {
         maxExp: 100,
         maxGold: 50,
@@ -100,10 +153,15 @@ export function DataProvider({ children }) {
         maxGemPrice: 10,
       };
     }
+    // Calculate dynamic limits based on user stats
     return calculateAllUserLimits(currentUserData);
   }, [currentUserData]);
 
-  // Get followed users IDs
+  /**
+   * Memoized list of followed user IDs
+   * Extracts the IDs of all users that the current user is following
+   * Used for filtering feed content and social features
+   */
   const followedUserIds = useMemo(() => {
     if (!currentUserData?.id || !data.usersRelationships) return [];
     return data.usersRelationships
@@ -115,7 +173,28 @@ export function DataProvider({ children }) {
       .map((relationship) => relationship.targetUserId);
   }, [currentUserData?.id, data.usersRelationships]);
 
-  // Query functions for Searchbar - FIXED VERSION
+  /**
+   * Universal query function for searching and filtering data
+   * Supports multiple pages (feed, discover, my-kitchen) and filters
+   * 
+   * @param {string} page - The page context: '/feed', '/discover', or '/my-kitchen'
+   * @param {string} filter - The data type: 'recipes', 'challenges', 'users', etc.
+   * @param {string} query - Search query string for filtering results
+   * @param {boolean} forceDefault - If true, returns all results ignoring query (for reset)
+   * @returns {Array} Filtered array of data items matching the criteria
+   * 
+   * @example
+   * // Search for pasta recipes in discover page
+   * const pastaRecipes = queryData('/discover', 'recipes', 'pasta');
+   * 
+   * @example
+   * // Get all recipes from followed users in feed
+   * const feedRecipes = queryData('/feed', 'recipes', '');
+   * 
+   * @example  
+   * // Reset to show all user recipes
+   * const allUserRecipes = queryData('/my-kitchen', 'user-recipes', '', true);
+   */
   const queryData = (page, filter, query, forceDefault = false) => {
     const lowerQuery = query ? query.toLowerCase().trim() : "";
 
@@ -123,6 +202,7 @@ export function DataProvider({ children }) {
 
     switch (path) {
       case "/feed":
+        // Feed shows content only from followed users
         if (filter === "recipes") {
           return data.recipes.filter(
             (recipe) =>
@@ -158,6 +238,7 @@ export function DataProvider({ children }) {
         break;
 
       case "/discover":
+        // Discover shows all public content
         if (filter === "recipes") {
           return data.recipes.filter(
             (recipe) =>
@@ -190,6 +271,7 @@ export function DataProvider({ children }) {
         break;
 
       case "/my-kitchen":
+        // My Kitchen shows user's own content and participations
         if (filter === "user-recipes") {
           return data.recipes.filter(
             (recipe) =>
@@ -202,6 +284,7 @@ export function DataProvider({ children }) {
           );
         }
         if (filter === "user-challenges") {
+          // Find challenges where user has participated
           const userChallengeIds = data.challengesCookQuotaParticipants
             .filter(
               (participant) =>
@@ -229,7 +312,18 @@ export function DataProvider({ children }) {
     return [];
   };
 
-  // Add a method to refetch records from a specific sheet
+  /**
+   * Refetches a specific data sheet from the API
+   * Useful for updating individual data types without refetching everything
+   * 
+   * @param {string} sheetName - The name of the sheet to refetch (must match apiSheets key)
+   * @returns {Promise<void>}
+   * 
+   * @example
+   * // Refetch recipes after adding a new recipe
+   * const { refetchSheet } = useData();
+   * await refetchSheet('recipes');
+   */
   const refetchSheet = async (sheetName) => {
     try {
       const sheetUrl = apiSheets[sheetName];
@@ -253,19 +347,32 @@ export function DataProvider({ children }) {
     }
   };
 
+  /**
+   * Memoized context value to prevent unnecessary re-renders
+   * Combines all data, derived values, and functions into single context object
+   */
   const value = useMemo(
     () => ({
+      // Spread all data arrays for direct access
       ...data,
+      
+      // State flags
       loading,
+      
+      // Derived data
       currentUserData,
       userRewardLimits,
+      
+      // Query functions
       queryData,
+      
+      // Data refresh functions
       refetchAll: () => {
         setHasFetched(false);
         fetchAllData();
       },
       refetchUsers: fetchUsersData,
-      refetchSheet, // Add the new method here
+      refetchSheet,
     }),
     [data, loading, currentUserData, userRewardLimits, followedUserIds]
   );
@@ -273,6 +380,36 @@ export function DataProvider({ children }) {
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
 
+/**
+ * Custom hook to access data context
+ * Provides access to global application data and query functions
+ * 
+ * @returns {Object} Data context value containing:
+ *   - All data arrays (users, recipes, challenges, etc.)
+ *   - loading: Boolean indicating if initial data is loading
+ *   - currentUserData: Complete profile of authenticated user
+ *   - userRewardLimits: Calculated reward limits for current user
+ *   - queryData: Universal search and filter function
+ *   - refetchAll: Function to refetch all application data
+ *   - refetchUsers: Function to refetch only users data
+ *   - refetchSheet: Function to refetch specific data sheet
+ * 
+ * @throws {Error} If used outside of DataProvider
+ * 
+ * @example
+ * // Basic usage in components
+ * const { recipes, loading, queryData } = useData();
+ * 
+ * @example
+ * // Search functionality
+ * const searchResults = queryData('/discover', 'recipes', 'pasta');
+ * 
+ * @example
+ * // Data refresh after mutations
+ * const { refetchSheet } = useData();
+ * await handleAddRecipe();
+ * await refetchSheet('recipes');
+ */
 export const useData = () => {
   const context = useContext(DataContext);
   if (!context) {

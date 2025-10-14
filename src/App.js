@@ -23,6 +23,10 @@ import ShopPage from './pages/ShopPage';
 import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
 import SettingsPage from './pages/SettingsPage';
+import ChallengeCardPage from './pages/card-pages/ChallengeCardPage';
+import RecipeCardPage from './pages/card-pages/RecipeCardPage';
+import UserCardPage from './pages/card-pages/UserCardPage';
+
 
 function App() {
   return (
@@ -32,6 +36,7 @@ function App() {
           <NavbarComponent />
           <main className="app-main flex-grow-1">
             <Routes>
+              
               {/* Main routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/registration" element={<RegistrationPage />} />
@@ -50,6 +55,13 @@ function App() {
               <Route path="/discover" element={<DiscoverPage />} />
               <Route path="/my-kitchen" element={<MyKitchenPage />} />
               <Route path="/TestPages" element={<TestPages />} />
+
+              {/* Card Pages */}
+              <Route path="/challenge" element={<ChallengeCardPage />} />
+              <Route path="/recipe" element={<RecipeCardPage />} />
+              <Route path="/user" element={<UserCardPage />} />
+
+
             </Routes>
           </main>
           <FooterComponent />

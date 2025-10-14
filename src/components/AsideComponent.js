@@ -3,20 +3,43 @@ import { Nav, Modal, Button, Container, Row, Col } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import "../styles/aside.css";
+import settingsIcon from "../assets/icons/settings-icon.png";
+import profileIcon from "../assets/icons/profile-icon.png";
 
 // Default navigation items for main app
 const defaultItems = [
   { key: "feed", label: "Feed", to: "/feed", badge: null, icon: "📱" },
   { key: "discover", label: "Discover", to: "/discover", badge: null, icon: "🔍" },
   { key: "my-kitchen", label: "My Kitchen", to: "/my-kitchen", badge: null, icon: "👨‍🍳" },
-  { key: "test-pages", label: "Test Pages", to: "/TestPages", badge: null, icon: "🧪" },
+  // { key: "test-pages", label: "Test Pages", to: "/TestPages", badge: null, icon: "🧪" },
 ];
 
-// Settings navigation items
+// Settings navigation items - using imported icons
 const settingsItems = [
-  { key: "profile", label: "Profile", to: "/profile", badge: null, icon: "👤" },
-  { key: "account", label: "Account", to: "/settings", badge: null, icon: "⚙️" },
-  { key: "logout", label: "Logout", to: "/", badge: null, icon: "🚪" },
+  { 
+    key: "profile", 
+    label: "Profile", 
+    to: "/profile", 
+    badge: null, 
+    icon: profileIcon, // Use imported profile icon
+    iconType: "image" 
+  },
+  { 
+    key: "account", 
+    label: "Account", 
+    to: "/settings", 
+    badge: null, 
+    icon: settingsIcon, // Use imported settings icon
+    iconType: "image" 
+  },
+  { 
+    key: "logout", 
+    label: "Logout", 
+    to: "/", 
+    badge: null, 
+    icon: "🚪", 
+    iconType: "emoji" 
+  },
 ];
 
 function AsideComponent({
@@ -37,7 +60,7 @@ function AsideComponent({
     if (items) return items;
 
     // Show settings navigation when in settings section
-    if (currentPath.startsWith('/settings')) {
+    if (currentPath.startsWith('/settings') || currentPath.startsWith('/profile')) {
       return settingsItems;
     }
 
@@ -61,6 +84,30 @@ function AsideComponent({
     navigate('/'); // Navigate to landing page
   };
 
+  // Render icon based on type (image or emoji)
+  const renderIcon = (item) => {
+    if (item.iconType === "image") {
+      return (
+        <img 
+          src={item.icon} 
+          alt={`${item.label} icon`}
+          className="aside-item-icon me-3"
+          style={{ 
+            width: "20px", 
+            height: "20px"
+          }}
+        />
+      );
+    }
+    
+    // Default to emoji rendering
+    return (
+      <span className="aside-item-icon me-3" aria-hidden="true">
+        {item.icon}
+      </span>
+    );
+  };
+
   return (
     <>
       <Container fluid className="p-0">
@@ -82,11 +129,7 @@ function AsideComponent({
                         } ${item.key === 'logout' ? 'logout-item' : ''}`}
                         aria-current={isActive ? "page" : undefined}
                       >
-                        {item.icon && (
-                          <span className="aside-item-icon me-3" aria-hidden="true">
-                            {item.icon}
-                          </span>
-                        )}
+                        {renderIcon(item)}
                         <span className="aside-item-label flex-grow-1">
                           {item.label}
                         </span>

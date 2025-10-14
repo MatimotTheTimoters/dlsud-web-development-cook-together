@@ -1,6 +1,3 @@
-/* ===== NAVBAR COMPONENT STYLES ===== */
-/* Enhanced with CSS custom properties from colors.css - No gradients */
-
 .navbar-ct {
   background-color: var(--ct-paper);
   border-bottom: 1px solid var(--ct-border);

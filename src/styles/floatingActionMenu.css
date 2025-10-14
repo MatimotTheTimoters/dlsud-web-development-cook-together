@@ -1,9 +1,9 @@
 /* FloatingActionMenu */
 .floating-action-menu {
   position: fixed;
-  bottom: calc(var(--ct-navbar-height) + 1rem); /* Adjust to stay above the footer */
-  right: 2rem; /* Position it away from the right edge */
-  z-index: 1050; /* Ensure it is above most content */
+  bottom: calc(var(--ct-navbar-height) + 1rem);
+  right: 1rem;
+  z-index: 1040; /* Lower than navbar off-canvas (usually 1050-1060) */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -32,4 +32,56 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
   background-color: var(--ct-primary-dark) !important;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 991.98px) {
+  .floating-action-menu {
+    z-index: 1035; /* Even lower on mobile to ensure it stays behind off-canvas */
+    bottom: 1rem; /* Move slightly higher on mobile */
+    right: 1rem;
+  }
+  
+  .floating-action-button {
+    width: 56px;
+    height: 56px;
+    font-size: 1.25rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 575.98px) {
+  .floating-action-menu {
+    bottom: 0.75rem;
+    right: 0.75rem;
+  }
+  
+  .floating-action-button {
+    width: 52px;
+    height: 52px;
+    font-size: 1.125rem;
+  }
+}
+
+/* When off-canvas is open - hide floating menu */
+.navbar-offcanvas.show ~ .floating-action-menu {
+  display: none !important;
+}
+
+/* Alternative: Move behind off-canvas when open */
+/*
+.navbar-offcanvas.show ~ .floating-action-menu {
+  z-index: 1020 !important;
+  opacity: 0.3;
+  pointer-events: none;
+}
+*/
+
+/* Ensure proper stacking context */
+.navbar-offcanvas {
+  z-index: 1050 !important; /* Ensure off-canvas has higher z-index */
+}
+
+.floating-action-menu {
+  z-index: 1040 !important; /* Floating menu should be lower */
 }
