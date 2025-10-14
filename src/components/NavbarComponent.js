@@ -116,11 +116,11 @@ function NavbarComponent() {
             </span>
           </Navbar.Brand>
 
-          {/* Desktop Navigation */}
-          <Navbar.Collapse id="navbar-desktop-content" className="justify-content-end">
+          {/* Desktop Navigation - Only visible on lg screens and up */}
+          <Navbar.Collapse id="navbar-desktop-content" className="d-none d-lg-flex justify-content-end">
             <Stack direction="horizontal" gap={3} className="align-items-center">
               {/* Shop and Inventory Buttons */}
-              <Stack direction="horizontal" gap={2} className="d-none d-lg-flex">
+              <Stack direction="horizontal" gap={2}>
                 <Button
                   as={Link}
                   to="/inventory"
@@ -141,7 +141,7 @@ function NavbarComponent() {
               </Stack>
 
               {/* Currency Display */}
-              <Stack direction="horizontal" gap={2} className="d-none d-md-flex">
+              <Stack direction="horizontal" gap={2}>
                 <Badge bg="warning" text="dark" className="d-flex align-items-center gap-1 px-2 py-1 currency-badge">
                   <img src={goldIcon} alt="Gold" style={{ width: "16px", height: "16px" }} />
                   {goldCount}
@@ -153,7 +153,7 @@ function NavbarComponent() {
               </Stack>
 
               {/* Level Progress */}
-              <div className="d-none d-xl-flex flex-column" style={{ minWidth: "120px" }}>
+              <div className="d-flex flex-column" style={{ minWidth: "120px" }}>
                 <div className="d-flex justify-content-between small text-ct-muted mb-1">
                   <span>Lv.{level}</span>
                   <span>{currentEXP}/{currentLevelCeiling}</span>
@@ -193,7 +193,7 @@ function NavbarComponent() {
                     className="rounded-circle"
                     style={{ width: "24px", height: "24px" }}
                   />
-                  <span className="d-none d-lg-inline text-ct-ink fw-medium">
+                  <span className="text-ct-ink fw-medium">
                     {displayName}
                   </span>
                 </Button>
@@ -213,7 +213,7 @@ function NavbarComponent() {
             </Stack>
           </Navbar.Collapse>
 
-          {/* Mobile Toggle */}
+          {/* Mobile Toggle - Only visible on screens smaller than lg */}
           <Navbar.Toggle 
             aria-controls="navbar-offcanvas"
             className="border-0 d-lg-none navbar-toggle-button"
@@ -224,12 +224,12 @@ function NavbarComponent() {
         </Container>
       </Navbar>
 
-      {/* Mobile Offcanvas */}
+      {/* Mobile Offcanvas - Only for mobile screens */}
       <Offcanvas
         show={showOffcanvas}
         onHide={handleOffcanvasToggle}
         placement="end"
-        className="navbar-offcanvas"
+        className="navbar-offcanvas d-lg-none"
       >
         <Offcanvas.Header closeButton className="border-bottom-ct">
           <Offcanvas.Title className="text-ct-ink fw-bold">
@@ -318,6 +318,21 @@ function NavbarComponent() {
               >
                 <img src={usersIcon} alt="Users" style={{ width: "24px", height: "24px" }} />
                 <span className="flex-grow-1">Find Users</span>
+              </Button>
+              <Button
+                as={Link}
+                to="/profile"
+                variant="light"
+                className="d-flex align-items-center gap-3 py-2 text-start mobile-nav-link"
+                onClick={() => setShowOffcanvas(false)}
+              >
+                <img 
+                  src={profileIcon} 
+                  alt="Profile" 
+                  className="rounded-circle"
+                  style={{ width: "24px", height: "24px" }}
+                />
+                <span className="flex-grow-1">My Profile</span>
               </Button>
               <Button
                 as={Link}
