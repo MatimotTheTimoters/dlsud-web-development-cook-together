@@ -1,6 +1,4 @@
 import React from "react";
-import ScrollDownNav from "../ScrollDownNav"; // optional, comment out if not used
-import RecipeCardGroup from "../card-groups/RecipeCardGroup";
 
 function RecipeCardPage() {
   const recipes = [
@@ -65,8 +63,7 @@ function RecipeCardPage() {
   return (
     <div style={layoutStyle}>
       <div style={mainStyle}>
-        {/* <ScrollDownNav /> */}
-        <RecipeCardGroup items={recipes} />
+        
       </div>
     </div>
   );
