@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, Button } from "react-bootstrap";
 import "../../styles/colors.css";
+import "../../styles/cards.css";
 import placeholderImage from "../../assets/placeholders/images/new-recipe.png"; // Add this import
 
 function RecipeCard({ recipe = {} }) {
@@ -41,7 +42,7 @@ function RecipeCard({ recipe = {} }) {
   };
 
   return (
-    <Card className="ct-card h-100" style={{ maxWidth: "320px", margin: "0 auto" }}>
+    <Card className="ct-card card-fade-in h-100" style={{ maxWidth: "320px", margin: "0 auto" }}>
       {/* Cover Image - Use imported placeholder */}
       <Card.Img
         variant="top"

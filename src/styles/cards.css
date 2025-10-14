@@ -1,0 +1,197 @@
+.layoutstyle {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+.mainstyle {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Challenge Card Styles */
+.ct-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.ct-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.card-img-top {
+  transition: transform 0.3s ease;
+}
+
+.ct-card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+/* Modal Styles */
+.challenge-modal .modal-content {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.challenge-modal .modal-header {
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.5rem;
+}
+
+.challenge-modal .modal-body {
+  padding: 1.5rem;
+}
+
+.challenge-modal .modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding: 1rem 1.5rem;
+}
+
+/* Tag Styles */
+.challenge-tag {
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 2px solid;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.challenge-tag:hover {
+  transform: translateY(-1px);
+}
+
+/* Reward Styles */
+.reward-item {
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+  transition: all 0.2s ease;
+}
+
+.reward-item:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .layoutstyle {
+    flex-direction: column;
+  }
+  
+  .mainstyle {
+    padding: 15px;
+  }
+  
+  .ct-card {
+    max-width: 100% !important;
+    margin: 0 auto;
+  }
+  
+  .challenge-modal .modal-dialog {
+    margin: 10px;
+  }
+}
+
+/* Animation for modal entrance */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.challenge-modal .modal-content {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+/* Shared Card Utilities & Animations */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.ct-card {
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+
+.ct-card .card-img-top {
+  transition: transform 0.45s cubic-bezier(.2,.8,.2,1), filter 0.3s ease;
+}
+
+.ct-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 12px 34px rgba(16,24,40,0.12);
+}
+
+.ct-card:active {
+  transform: translateY(-2px) scale(0.998);
+}
+
+/* subtle fade-in when cards enter */
+.card-fade-in {
+  animation: cardFadeIn 360ms ease-out both;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* tag pill helpers used by multiple card components */
+.challenge-tag {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.85);
+}
+
+/* reward layout */
+.rewards-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.reward-item {
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+/* small utilities */
+.text-ct-muted { color: #6c757d; }
+.btn-ct-primary { background-color: #0d6efd; border-color: #0d6efd; color: white; }
+
+/* responsive tweaks */
+@media (max-width: 576px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .ct-card { margin-left: 0; margin-right: 0; }
+}
