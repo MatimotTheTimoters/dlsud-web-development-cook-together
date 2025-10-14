@@ -12,7 +12,7 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
     description: '',
     challengeId: '',
     createdAt: new Date().toISOString(),
-    coverImage: '/src/assets/placeholders/new-recipe.png',
+    coverImage: '/src/assets/placeholders/new-challenge.png',
     tags: '',
     totalCookQuota: 0,
     startDate: '',
@@ -40,7 +40,7 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
         description: '',
         challengeId: makeId(), // Generate ID locally
         createdAt: new Date().toISOString(),
-        coverImage: '/src/assets/placeholders/new-recipe.png',
+        coverImage: '/src/assets/placeholders/new-challenge.png',
         tags: '',
         totalCookQuota: 0,
         startDate: '',
@@ -168,7 +168,7 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered className="modal-ct">
+    <Modal show={show} onHide={onHide} centered className="modal-ct" size="lg">
       <Form onSubmit={handleSubmit}>
         <Modal.Header closeButton>
           <Modal.Title className="text-ct-ink">Create Challenge</Modal.Title>
@@ -192,7 +192,158 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
             )}
           </div>
 
-          {/* ... rest of your form JSX remains the same ... */}
+          {/* Basic Information */}
+          <Form.Group className="mb-3">
+            <Form.Label className="text-ct-ink fw-semibold">Challenge Title *</Form.Label>
+            <Form.Control
+              type="text"
+              name="title"
+              value={values.title}
+              onChange={handleChange}
+              placeholder="Enter challenge title"
+              required
+              maxLength={100}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label className="text-ct-ink fw-semibold">Description *</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              name="description"
+              value={values.description}
+              onChange={handleChange}
+              placeholder="Describe the challenge rules and objectives"
+              required
+              maxLength={500}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label className="text-ct-ink fw-semibold">Tags</Form.Label>
+            <Form.Control
+              type="text"
+              name="tags"
+              value={values.tags}
+              onChange={handleChange}
+              placeholder="Enter tags separated by commas (e.g., beginner, quick, healthy)"
+              maxLength={200}
+            />
+            <Form.Text className="text-muted">
+              Separate multiple tags with commas
+            </Form.Text>
+          </Form.Group>
+
+          {/* Challenge Details */}
+          <div className="row">
+            <Form.Group className="col-md-6 mb-3">
+              <Form.Label className="text-ct-ink fw-semibold">Total Cook Quota *</Form.Label>
+              <Form.Control
+                type="number"
+                name="totalCookQuota"
+                value={values.totalCookQuota}
+                onChange={handleChange}
+                min="1"
+                max="1000"
+                placeholder="Number of completions needed"
+                required
+              />
+              <Form.Text className="text-muted">
+                Total number of times this challenge needs to be completed
+              </Form.Text>
+            </Form.Group>
+
+            <Form.Group className="col-md-6 mb-3">
+              <Form.Label className="text-ct-ink fw-semibold">Cover Image URL</Form.Label>
+              <Form.Control
+                type="url"
+                name="coverImage"
+                value={values.coverImage}
+                onChange={handleChange}
+                placeholder="https://example.com/image.jpg"
+              />
+              <Form.Text className="text-muted">
+                Optional: URL for challenge cover image
+              </Form.Text>
+            </Form.Group>
+          </div>
+
+          {/* Date Range */}
+          <div className="row">
+            <Form.Group className="col-md-6 mb-3">
+              <Form.Label className="text-ct-ink fw-semibold">Start Date *</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                name="startDate"
+                value={values.startDate}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="col-md-6 mb-3">
+              <Form.Label className="text-ct-ink fw-semibold">End Date *</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                name="endDate"
+                value={values.endDate}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </div>
+
+          {/* Rewards Section */}
+          <div className="border-top pt-3 mt-3">
+            <h6 className="text-ct-ink mb-3">Rewards</h6>
+            <div className="row">
+              <Form.Group className="col-md-4 mb-3">
+                <Form.Label className="text-ct-ink fw-semibold">
+                  EXP Reward (Max: {rewardLimits.maxExpReward})
+                </Form.Label>
+                <Form.Control
+                  type="number"
+                  name="expReward"
+                  value={values.expReward}
+                  onChange={handleChange}
+                  min="0"
+                  max={rewardLimits.maxExpReward}
+                  placeholder="0"
+                />
+              </Form.Group>
+
+              <Form.Group className="col-md-4 mb-3">
+                <Form.Label className="text-ct-ink fw-semibold">
+                  Gold Reward (Max: {rewardLimits.maxGoldReward})
+                </Form.Label>
+                <Form.Control
+                  type="number"
+                  name="goldReward"
+                  value={values.goldReward}
+                  onChange={handleChange}
+                  min="0"
+                  max={rewardLimits.maxGoldReward}
+                  placeholder="0"
+                />
+              </Form.Group>
+
+              <Form.Group className="col-md-4 mb-3">
+                <Form.Label className="text-ct-ink fw-semibold">
+                  Gem Reward (Max: {rewardLimits.maxGemReward})
+                </Form.Label>
+                <Form.Control
+                  type="number"
+                  name="gemReward"
+                  value={values.gemReward}
+                  onChange={handleChange}
+                  min="0"
+                  max={rewardLimits.maxGemReward}
+                  placeholder="0"
+                />
+              </Form.Group>
+            </div>
+          </div>
         </Modal.Body>
 
         <Modal.Footer>
