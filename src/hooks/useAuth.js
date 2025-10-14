@@ -19,7 +19,6 @@ export function AuthProvider({ children }) {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🚀 Calculate limits from user data
   const calculateUserLimits = useCallback((userData) => {
     if (!userData) {
       return {
@@ -33,7 +32,6 @@ export function AuthProvider({ children }) {
     return calculateAllUserLimits(userData);
   }, []);
 
-  // 🚀 Fetch user data and calculate limits
   const fetchUserLimits = useCallback(async (userId) => {
     if (!userId) return;
     

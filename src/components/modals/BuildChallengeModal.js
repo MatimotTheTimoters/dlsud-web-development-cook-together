@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { useData } from '../../contexts/DataContext.js'; // 🚀 Only need useData
+import { useData } from '../../contexts/DataContext.js';
 import { makeId } from '../../hooks/uuidHelper.js';
 import apiSheets from '../../constants/api.js';
 
 export default function BuildChallengeModal({ show, onHide, onCreated }) {
-  const { currentUserData, userRewardLimits } = useData(); // 🚀 Get both from DataContext
+  const { currentUserData, userRewardLimits } = useData();
 
   const [values, setValues] = useState({
     title: '',
