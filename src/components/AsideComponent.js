@@ -9,7 +9,7 @@ const defaultItems = [
   { key: "feed", label: "Feed", to: "/feed", badge: null, icon: "📱" },
   { key: "discover", label: "Discover", to: "/discover", badge: null, icon: "🔍" },
   { key: "my-kitchen", label: "My Kitchen", to: "/my-kitchen", badge: null, icon: "👨‍🍳" },
-  { key: "test-pages", label: "Test Pages", to: "/TestPages", badge: null, icon: "🧪" },
+  // { key: "test-pages", label: "Test Pages", to: "/TestPages", badge: null, icon: "🧪" },
 ];
 
 // Settings navigation items
