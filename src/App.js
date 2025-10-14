@@ -36,7 +36,7 @@ function App() {
           <NavbarComponent />
           <main className="app-main flex-grow-1">
             <Routes>
-              
+
               {/* Main routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/registration" element={<RegistrationPage />} />
@@ -45,9 +45,14 @@ function App() {
 
               {/* Navbar routes */}
               <Route path="/inventory" element={<InventoryPage />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/users" element={<UsersPage />} />
+
+              {/* no pages to placeholders */}
+              <Route path="/shop" element={<TestPages />} />
+              
+              <Route path="/profile" element={<SettingsPage />} />
+
+              <Route path="/users" element={<TestPages />} />
+
               <Route path="/settings" element={<SettingsPage />} />
 
               {/* AsideComponent routes */}
