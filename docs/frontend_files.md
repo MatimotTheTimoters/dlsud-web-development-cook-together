@@ -1,5 +1,3 @@
-# Frontend Files and Directories
-
 <details>
 <summary>frontend/</summary>
 
@@ -13,6 +11,7 @@
 
 - **Description**: Main HTML template with gamified libraries
 - **Required Imports**: None
+- **Backend Endpoint**: None
 - layout: 
 ```
 ┌────────────────────────────────────────────┐
@@ -44,6 +43,7 @@
 
 - **Description**: Site favicon
 - **Required Imports**: None
+- **Backend Endpoint**: None
 </details>
 
 ---
@@ -53,6 +53,7 @@
 
 - **Description**: PWA manifest
 - **Required Imports**: None
+- **Backend Endpoint**: None
 </details>
 
 </details>
@@ -72,6 +73,7 @@
 <summary>src/components/auth/LoginForm.jsx</summary>
 
 - **Required Imports**: React, useState, useNavigate from 'react-router-dom', api from '../../api/auth', { FaUser, FaLock, FaFire } from 'react-icons/fa'
+- **Backend Endpoint**: api/auth/login.php
 - layout:
 ```
 ┌─────────────────────────────────────┐
@@ -102,6 +104,7 @@
 <summary>src/components/auth/RegisterForm.jsx</summary>
 
 - **Required Imports**: React, useState, useNavigate from 'react-router-dom', api from '../../api/auth', { FaUserPlus, FaCrown, FaTrophy } from 'react-icons/fa'
+- **Backend Endpoint**: api/auth/register.php
 - layout:
 ```
 ┌─────────────────────────────────────┐
@@ -134,6 +137,7 @@
 <summary>src/components/auth/ProtectedRoute.jsx</summary>
 
 - **Required Imports**: React, Navigate from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaShieldAlt } from 'react-icons/fa'
+- **Backend Endpoint**: api/auth/me.php (for token validation)
 <details>
 <summary>Functions</summary>
 
@@ -152,6 +156,7 @@
 <summary>src/components/common/Header.jsx</summary>
 
 - **Required Imports**: React, Link from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaHome, FaUtensils, FaUsers, FaBook, FaUser, FaCoins, FaGem } from 'react-icons/fa'
+- **Backend Endpoint**: api/auth/me.php, api/users/profile.php
 - layout:
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -177,6 +182,7 @@
 <summary>src/components/common/Footer.jsx</summary>
 
 - **Required Imports**: React, { FaHeart, FaTwitter, FaDiscord, FaGithub } from 'react-icons/fa'
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -190,6 +196,7 @@
 <summary>src/components/common/Navigation.jsx</summary>
 
 - **Required Imports**: React, NavLink from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaBell, FaEnvelope, FaUserFriends } from 'react-icons/fa'
+- **Backend Endpoint**: api/auth/me.php
 <details>
 <summary>Functions</summary>
 
@@ -204,6 +211,7 @@
 <summary>src/components/common/LoadingSpinner.jsx</summary>
 
 - **Required Imports**: React, { FaUtensilSpoon, FaBlender } from 'react-icons/fa'
+- **Backend Endpoint**: None
 <details>
 <summary>layout:</summary>
 ```
@@ -230,6 +238,7 @@
 <summary>src/components/common/ErrorBoundary.jsx</summary>
 
 - **Required Imports**: React, Component, { FaExclamationTriangle } from 'react-icons/fa'
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -249,6 +258,7 @@
 <summary>src/components/recipes/RecipeCard.jsx</summary>
 
 - **Required Imports**: React, Link from 'react-router-dom', formatTime from '../../utils/formatters', { FaClock, FaFire, FaUser, FaHeart, FaStar, FaCoins } from 'react-icons/fa'
+- **Backend Endpoint**: api/recipes/interact.php (for like/save interactions)
 - layout:
 ```
 ┌─────────────────────────────┐
@@ -276,6 +286,7 @@
 <summary>src/components/recipes/RecipeForm.jsx</summary>
 
 - **Required Imports**: React, useState, useEffect, useNavigate from 'react-router-dom', api from '../../api/recipes', { FaPlus, FaTrash, FaImage, FaListOl, FaClock, FaBalanceScale, FaCalculator } from 'react-icons/fa'
+- **Backend Endpoint**: api/recipes/create.php, api/recipes/update.php, api/upload/image.php
 - layout:
 ```
 ┌─────────────────────────────────────┐
@@ -325,6 +336,7 @@
 <summary>src/components/recipes/RecipeDetail.jsx</summary>
 
 - **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/recipes', { FaHeart, FaBookmark, FaShare, FaClock, FaFire, FaUtensils, FaUsers } from 'react-icons/fa'
+- **Backend Endpoint**: api/recipes/show.php, api/recipes/interact.php
 - layout:
 ```
 ┌─────────────────────────────────────┐
@@ -360,6 +372,7 @@
 <summary>src/components/recipes/RecipeList.jsx</summary>
 
 - **Required Imports**: React, useState, useEffect, RecipeCard from './RecipeCard', api from '../../api/recipes', { FaFilter, FaSort, FaSearch } from 'react-icons/fa'
+- **Backend Endpoint**: api/recipes/index.php
 - layout:
 ```
 ┌─────────────────────────────────────┐
@@ -396,6 +409,7 @@
 <summary>src/components/recipes/IngredientList.jsx</summary>
 
 - **Required Imports**: React, { FaCheckSquare, FaSquare, FaBalanceScale } from 'react-icons/fa'
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -409,6 +423,7 @@
 <summary>src/components/recipes/StepList.jsx</summary>
 
 - **Required Imports**: React, useState, { FaCheckCircle, FaPlayCircle, FaPauseCircle } from 'react-icons/fa'
+- **Backend Endpoint**: api/cooking-sessions/complete-step.php
 <details>
 <summary>Functions</summary>
 
@@ -428,6 +443,7 @@
 <summary>src/components/cooking/CookingSession.jsx</summary>
 
 - **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/cooking-sessions', { FaPlay, FaPause, FaStop, FaStepForward, FaUsers, FaTrophy } from 'react-icons/fa'
+- **Backend Endpoint**: api/cooking-sessions/show.php, api/cooking-sessions/update.php, api/cooking-sessions/complete-step.php, api/cooking-sessions/vote.php
 - layout:
 ```
 ┌─────────────────────────────────────┐
@@ -463,6 +479,7 @@
 <summary>src/components/cooking/SessionTimer.jsx</summary>
 
 - **Required Imports**: React, useState, useEffect, { FaPlay, FaPause, FaRedo, FaHourglassHalf } from 'react-icons/fa'
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -479,6 +496,7 @@
 <summary>src/components/cooking/ParticipantList.jsx</summary>
 
 - **Required Imports**: React, useEffect, api from '../../api/cooking-sessions', { FaUser, FaCrown, FaEye } from 'react-icons/fa'
+- **Backend Endpoint**: api/cooking-sessions/show.php, api/cooking-sessions/join.php
 <details>
 <summary>Functions</summary>
 
@@ -493,6 +511,7 @@
 <summary>src/components/cooking/StepProgress.jsx</summary>
 
 - **Required Imports**: React, { FaFlagCheckered, FaRoute } from 'react-icons/fa'
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -511,6 +530,7 @@
 <summary>src/components/users/UserCard.jsx</summary>
 
 - **Required Imports**: React, Link from 'react-router-dom', api from '../../api/relationships', { FaUserCircle, FaPlus, FaCheck, FaStar, FaFire } from 'react-icons/fa'
+- **Backend Endpoint**: api/relationships/follow.php, api/users/profile.php
 - layout:
 ```
 ┌─────────────────────────────┐
@@ -535,6 +555,7 @@
 <summary>src/components/users/UserProfile.jsx</summary>
 
 - **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/users', { FaEdit, FaCamera, FaTrophy, FaChartLine, FaAward, FaCrown } from 'react-icons/fa'
+- **Backend Endpoint**: api/users/profile.php, api/users/update.php, api/users/stats.php, api/upload/image.php
 - layout:
 ```
 ┌─────────────────────────────────────┐
@@ -567,6 +588,7 @@
 <summary>src/components/users/StatsDisplay.jsx</summary>
 
 - **Required Imports**: React, { FaChartBar, FaFire, FaCoins, FaGem, FaStar, FaMedal } from 'react-icons/fa'
+- **Backend Endpoint**: api/users/stats.php
 <details>
 <summary>Functions</summary>
 
@@ -581,6 +603,7 @@
 <summary>src/components/users/FollowButton.jsx</summary>
 
 - **Required Imports**: React, useState, api from '../../api/relationships', { FaUserPlus, FaUserCheck, FaUserTimes } from 'react-icons/fa'
+- **Backend Endpoint**: api/relationships/follow.php, api/relationships/friends.php
 <details>
 <summary>Functions</summary>
 
@@ -600,6 +623,7 @@
 <summary>src/components/gamification/CurrencyDisplay.jsx</summary>
 
 - **Required Imports**: React, { FaCoins, FaGem, FaMoneyBillWave } from 'react-icons/fa'
+- **Backend Endpoint**: api/users/stats.php
 <details>
 <summary>Functions</summary>
 
@@ -613,6 +637,7 @@
 <summary>src/components/gamification/LevelProgress.jsx</summary>
 
 - **Required Imports**: React, { FaTrophy, FaChessQueen, FaStar, FaCrown } from 'react-icons/fa'
+- **Backend Endpoint**: api/users/stats.php
 <details>
 <summary>Functions</summary>
 
@@ -627,6 +652,7 @@
 <summary>src/components/gamification/RewardNotification.jsx</summary>
 
 - **Required Imports**: React, useState, useEffect, { FaGift, FaCoins, FaGem, FaStar, FaTrophy } from 'react-icons/fa'
+- **Backend Endpoint**: api/users/stats.php (for reward updates)
 <details>
 <summary>Functions</summary>
 
@@ -641,6 +667,7 @@
 <summary>src/components/gamification/ShopItem.jsx</summary>
 
 - **Required Imports**: React, useState, api from '../../api/shop', { FaShoppingCart, FaLock, FaCheck } from 'react-icons/fa'
+- **Backend Endpoint**: api/shop.js (to be implemented)
 <details>
 <summary>Functions</summary>
 
@@ -662,7 +689,9 @@
 <summary>src/pages/HomePage.jsx</summary>
 
 - **Required Imports**: React, Link from 'react-router-dom', RecipeList from '../components/recipes/RecipeList', { FaFire, FaNewspaper, FaTrophy, FaUsers } from 'react-icons/fa'
-- layout:
+- **Backend Endpoint**: api/recipes/index.php, api/cooking-sessions/index.php
+<details>
+<summary>layout:</summary>
 ```
 ┌─────────────────────────────────────┐
 │          HERO SECTION               │
@@ -700,6 +729,7 @@
 <summary>src/pages/LoginPage.jsx</summary>
 
 - **Required Imports**: React, LoginForm from '../components/auth/LoginForm', { FaSignInAlt, FaFire, FaGift } from 'react-icons/fa'
+- **Backend Endpoint**: api/auth/login.php
 <details>
 <summary>Functions</summary>
 
@@ -713,6 +743,7 @@
 <summary>src/pages/RegisterPage.jsx</summary>
 
 - **Required Imports**: React, RegisterForm from '../components/auth/RegisterForm', { FaUserPlus, FaCrown, FaTrophy } from 'react-icons/fa'
+- **Backend Endpoint**: api/auth/register.php
 <details>
 <summary>Functions</summary>
 
@@ -726,6 +757,7 @@
 <summary>src/pages/RecipesPage.jsx</summary>
 
 - **Required Imports**: React, useState, RecipeList from '../components/recipes/RecipeList', RecipeFilters from '../components/recipes/RecipeFilters', { FaFilter, FaSortAmountDown, FaSearch } from 'react-icons/fa'
+- **Backend Endpoint**: api/recipes/index.php
 <details>
 <summary>Functions</summary>
 
@@ -741,6 +773,7 @@
 <summary>src/pages/RecipeDetailPage.jsx</summary>
 
 - **Required Imports**: React, RecipeDetail from '../components/recipes/RecipeDetail', CookingSession from '../components/cooking/CookingSession', { FaUtensils, FaUsers, FaHeart } from 'react-icons/fa'
+- **Backend Endpoint**: api/recipes/show.php, api/recipes/interact.php, api/cooking-sessions/create.php
 <details>
 <summary>Functions</summary>
 
@@ -754,6 +787,7 @@
 <summary>src/pages/CreateRecipePage.jsx</summary>
 
 - **Required Imports**: React, RecipeForm from '../components/recipes/RecipeForm', { FaPlusCircle, FaLightbulb, FaAward } from 'react-icons/fa'
+- **Backend Endpoint**: api/recipes/create.php, api/upload/image.php
 <details>
 <summary>Functions</summary>
 
@@ -767,6 +801,7 @@
 <summary>src/pages/ProfilePage.jsx</summary>
 
 - **Required Imports**: React, UserProfile from '../components/users/UserProfile', UserRecipes from '../components/users/UserRecipes', { FaUserCircle, FaCog, FaChartLine } from 'react-icons/fa'
+- **Backend Endpoint**: api/users/profile.php, api/users/update.php, api/users/stats.php, api/recipes/index.php, api/cookbooks/index.php
 <details>
 <summary>Functions</summary>
 
@@ -781,6 +816,7 @@
 <summary>src/pages/CookingSessionPage.jsx</summary>
 
 - **Required Imports**: React, CookingSession from '../components/cooking/CookingSession', SessionTimer from '../components/cooking/SessionTimer', { FaPlay, FaUsers, FaTrophy } from 'react-icons/fa'
+- **Backend Endpoint**: api/cooking-sessions/show.php, api/cooking-sessions/update.php, api/cooking-sessions/complete-step.php, api/cooking-sessions/vote.php
 <details>
 <summary>Functions</summary>
 
@@ -795,7 +831,9 @@
 <summary>src/pages/ShopPage.jsx</summary>
 
 - **Required Imports**: React, useState, ShopItem from '../components/gamification/ShopItem', { FaStore, FaCoins, FaGem, FaTags } from 'react-icons/fa'
-- layout:
+- **Backend Endpoint**: api/shop.js (to be implemented), api/users/stats.php
+<details>
+<summary>layout:</summary>
 ```
 ┌─────────────────────────────────────┐
 │          COOKTOGETHER SHOP          │
@@ -833,7 +871,9 @@
 <summary>src/pages/DiscoverPage.jsx</summary>
 
 - **Required Imports**: React, useState, UserCard from '../components/users/UserCard', RecipeCard from '../components/recipes/RecipeCard', { FaCompass, FaFire, FaTrophy, FaUsers } from 'react-icons/fa'
-- layout:
+- **Backend Endpoint**: api/recipes/index.php, api/users/search.php, api/users/profile.php
+<details>
+<summary>layout:</summary>
 ```
 ┌─────────────────────────────────────┐
 │           DISCOVER                  │
@@ -870,6 +910,7 @@
 <summary>src/pages/CookbooksPage.jsx</summary>
 
 - **Required Imports**: React, useState, api from '../api/cookbooks', { FaBook, FaPlus, FaFolderOpen } from 'react-icons/fa'
+- **Backend Endpoint**: api/cookbooks/index.php, api/cookbooks/create.php, api/cookbooks/add-recipe.php, api/cookbooks/remove-recipe.php
 <details>
 <summary>Functions</summary>
 
@@ -890,6 +931,7 @@
 <summary>src/contexts/AuthContext.jsx</summary>
 
 - **Required Imports**: React, createContext, useState, useContext, useEffect, { FaUserShield } from 'react-icons/fa'
+- **Backend Endpoint**: api/auth/login.php, api/auth/register.php, api/auth/logout.php, api/auth/me.php, api/auth/refresh-token.php
 <details>
 <summary>Functions</summary>
 
@@ -907,6 +949,7 @@
 <summary>src/contexts/DataContext.jsx</summary>
 
 - **Required Imports**: React, createContext, useState, useContext, { FaDatabase, FaSync } from 'react-icons/fa'
+- **Backend Endpoint**: Various API endpoints for data fetching
 <details>
 <summary>Functions</summary>
 
@@ -925,6 +968,7 @@
 <summary>src/contexts/NotificationContext.jsx</summary>
 
 - **Required Imports**: React, createContext, useState, useContext, { FaBell, FaTimes } from 'react-icons/fa'
+- **Backend Endpoint**: None (frontend-only)
 <details>
 <summary>Functions</summary>
 
@@ -945,6 +989,7 @@
 <summary>src/hooks/useAuth.js</summary>
 
 - **Required Imports**: useContext from 'react', AuthContext from '../contexts/AuthContext'
+- **Backend Endpoint**: Through AuthContext
 <details>
 <summary>Functions</summary>
 
@@ -958,6 +1003,7 @@
 <summary>src/hooks/useApi.js</summary>
 
 - **Required Imports**: useState, useEffect, useCallback
+- **Backend Endpoint**: Various (generic hook for all API calls)
 <details>
 <summary>Functions</summary>
 
@@ -975,6 +1021,7 @@
 <summary>src/hooks/useForm.js</summary>
 
 - **Required Imports**: useState, useCallback
+- **Backend Endpoint**: None (frontend-only)
 <details>
 <summary>Functions</summary>
 
@@ -992,6 +1039,7 @@
 <summary>src/hooks/useLocalStorage.js</summary>
 
 - **Required Imports**: useState, useEffect
+- **Backend Endpoint**: None (frontend-only)
 <details>
 <summary>Functions</summary>
 
@@ -1012,6 +1060,7 @@
 <summary>src/utils/api.js</summary>
 
 - **Required Imports**: None
+- **Backend Endpoint**: All backend API endpoints
 <details>
 <summary>Functions</summary>
 
@@ -1031,6 +1080,7 @@
 <summary>src/utils/formatters.js</summary>
 
 - **Required Imports**: None
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -1048,6 +1098,7 @@
 <summary>src/utils/validators.js</summary>
 
 - **Required Imports**: None
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -1065,6 +1116,7 @@
 <summary>src/utils/constants.js</summary>
 
 - **Required Imports**: None
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -1082,6 +1134,7 @@
 <summary>src/utils/helpers.js</summary>
 
 - **Required Imports**: None
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -1104,6 +1157,7 @@
 <summary>src/api/auth.js</summary>
 
 - **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/auth/login.php, api/auth/register.php, api/auth/logout.php, api/auth/me.php, api/auth/refresh-token.php
 <details>
 <summary>Functions</summary>
 
@@ -1121,6 +1175,7 @@
 <summary>src/api/users.js</summary>
 
 - **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/users/profile.php, api/users/update.php, api/users/stats.php, api/users/search.php
 <details>
 <summary>Functions</summary>
 
@@ -1139,6 +1194,7 @@
 <summary>src/api/recipes.js</summary>
 
 - **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/recipes/index.php, api/recipes/show.php, api/recipes/create.php, api/recipes/update.php, api/recipes/delete.php, api/recipes/interact.php
 <details>
 <summary>Functions</summary>
 
@@ -1159,6 +1215,7 @@
 <summary>src/api/cooking-sessions.js</summary>
 
 - **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/cooking-sessions/index.php, api/cooking-sessions/create.php, api/cooking-sessions/show.php, api/cooking-sessions/update.php, api/cooking-sessions/join.php, api/cooking-sessions/complete-step.php, api/cooking-sessions/vote.php
 <details>
 <summary>Functions</summary>
 
@@ -1178,6 +1235,7 @@
 <summary>src/api/relationships.js</summary>
 
 - **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/relationships/follow.php, api/relationships/friends.php, api/relationships/list.php
 <details>
 <summary>Functions</summary>
 
@@ -1196,6 +1254,7 @@
 <summary>src/api/cookbooks.js</summary>
 
 - **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/cookbooks/index.php, api/cookbooks/create.php, api/cookbooks/show.php, api/cookbooks/add-recipe.php, api/cookbooks/remove-recipe.php
 <details>
 <summary>Functions</summary>
 
@@ -1213,6 +1272,7 @@
 <summary>src/api/shop.js</summary>
 
 - **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/shop.php (to be implemented in backend)
 <details>
 <summary>Functions</summary>
 
@@ -1235,6 +1295,7 @@
 
 - **Required Imports**: './themes.css', './components.css', './layout.css', './utilities.css'
 - **Description**: Main stylesheet with global styles and gamified theme imports
+- **Backend Endpoint**: None
 - gamified libraries imported:
   ```css
   /* Gamified CSS Libraries */
@@ -1264,6 +1325,7 @@
 
 - **Required Imports**: None
 - **Description**: Component-specific styles with gamified elements
+- **Backend Endpoint**: None
 </details>
 
 ---
@@ -1273,6 +1335,7 @@
 
 - **Required Imports**: None
 - **Description**: Layout and grid styles
+- **Backend Endpoint**: None
 </details>
 
 ---
@@ -1282,6 +1345,7 @@
 
 - **Required Imports**: None
 - **Description**: Utility classes and helper styles
+- **Backend Endpoint**: None
 </details>
 
 ---
@@ -1291,6 +1355,7 @@
 
 - **Required Imports**: None
 - **Description**: Theme variables and color schemes from frontend_design.md
+- **Backend Endpoint**: None
 </details>
 
 </details>
@@ -1306,6 +1371,7 @@
 - icons/ - Gamified icons (swords, shields, crowns, etc.)
 - illustrations/ - Cooking and gamification illustrations
 - backgrounds/ - Patterned backgrounds for cards and sections
+- **Backend Endpoint**: None
 </details>
 
 ---
@@ -1314,6 +1380,7 @@
 <summary>src/assets/fonts/</summary>
 
 - Custom font files for gamified typography
+- **Backend Endpoint**: None
 </details>
 
 </details>
@@ -1324,6 +1391,7 @@
 <summary>src/App.jsx</summary>
 
 - **Required Imports**: React, BrowserRouter, Routes, Route from 'react-router-dom', AuthContext from './contexts/AuthContext', DataContext from './contexts/DataContext', NotificationContext from './contexts/NotificationContext', all page components from './pages', Header from './components/common/Header', Footer from './components/common/Footer', { FaGamepad, FaCookieBite } from 'react-icons/fa'
+- **Backend Endpoint**: Various (through page components)
 <details>
 <summary>Functions</summary>
 
@@ -1339,6 +1407,7 @@
 <summary>src/index.js</summary>
 
 - **Required Imports**: React, ReactDOM from 'react-dom/client', App from './App', './styles/index.css'
+- **Backend Endpoint**: None
 <details>
 <summary>Functions</summary>
 
@@ -1353,6 +1422,7 @@
 
 - **Required Imports**: '@testing-library/jest-dom'
 - **Description**: Test setup configuration
+- **Backend Endpoint**: None
 </details>
 
 </details>
@@ -1364,6 +1434,7 @@
 
 - **Required Imports**: None
 - **Description**: Project dependencies and scripts
+- **Backend Endpoint**: None
 - gamified dependencies added:
   ```json
   "dependencies": {
@@ -1385,6 +1456,7 @@
 
 - **Required Imports**: None
 - **Description**: Environment variables
+- **Backend Endpoint**: None
 </details>
 
 ---
@@ -1394,6 +1466,7 @@
 
 - **Required Imports**: None
 - **Description**: Git ignore rules
+- **Backend Endpoint**: None
 </details>
 
 </details>
