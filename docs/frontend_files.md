@@ -1,4 +1,4 @@
-# Frontend Directory Structure
+# Frontend Files and Directories
 
 <details>
 <summary>frontend/</summary>
@@ -9,28 +9,50 @@
 <summary>public/</summary>
 
 <details>
-<summary>index.html</summary>
+<summary>public/index.html</summary>
 
-- description: Main HTML template
-- requiredImports: None
+- **Description**: Main HTML template with gamified libraries
+- **Required Imports**: None
+- layout: 
+```
+┌────────────────────────────────────────────┐
+│                    HEADER                  │
+│  🍳 CookTogether | 🔍 Search | 👤 Profile │
+├────────────────────────────────────────────┤
+│                                            │
+│         GAMIFIED CONTENT AREA             │
+│   with progress bars, badges, rewards     │
+│                                            │
+├────────────────────────────────────────────┤
+│                    FOOTER                  │
+│  © CookTogether • Level up your cooking!  │
+└────────────────────────────────────────────┘
+```
+- gamified libraries added:
+  ```html
+  <!-- Gamified UI Libraries -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  ```
 </details>
 
 ---
 
 <details>
-<summary>favicon.ico</summary>
+<summary>public/favicon.ico</summary>
 
-- description: Site favicon
-- requiredImports: None
+- **Description**: Site favicon
+- **Required Imports**: None
 </details>
 
 ---
 
 <details>
-<summary>manifest.json</summary>
+<summary>public/manifest.json</summary>
 
-- description: PWA manifest
-- requiredImports: None
+- **Description**: PWA manifest
+- **Required Imports**: None
 </details>
 
 </details>
@@ -41,17 +63,32 @@
 <summary>src/</summary>
 
 <details>
-<summary>components/</summary>
+<summary>src/components/</summary>
 
 <details>
-<summary>components/auth/</summary>
+<summary>src/components/auth/</summary>
 
 <details>
-<summary>components/auth/LoginForm.jsx</summary>
+<summary>src/components/auth/LoginForm.jsx</summary>
 
-- requiredImports: React, useState, useNavigate from react-router-dom, api from ../api/auth
+- **Required Imports**: React, useState, useNavigate from 'react-router-dom', api from '../../api/auth', { FaUser, FaLock, FaFire } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│           LOGIN FORM                │
+│  ┌───────────────────────────┐      │
+│  │    👤 Email Address       │      │
+│  │    🔑 Password            │      │
+│  │                           │      │
+│  │    [🔥 Login Button]      │      │
+│  │    [🎮 Login Streak: 7]   │      │
+│  └───────────────────────────┘      │
+│                                     │
+│    🔥 Daily Login Bonus Available!  │
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleSubmit(event) -> void: Handles login form submission
 - validateForm() -> boolean: Validates form inputs
@@ -62,11 +99,28 @@
 ---
 
 <details>
-<summary>components/auth/RegisterForm.jsx</summary>
+<summary>src/components/auth/RegisterForm.jsx</summary>
 
-- requiredImports: React, useState, useNavigate from react-router-dom, api from ../api/auth
+- **Required Imports**: React, useState, useNavigate from 'react-router-dom', api from '../../api/auth', { FaUserPlus, FaCrown, FaTrophy } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│         REGISTER FORM               │
+│  ┌───────────────────────────┐      │
+│  │    👤 Full Name           │      │
+│  │    📧 Email               │      │
+│  │    🔑 Password            │      │
+│  │    👥 Age & Gender        │      │
+│  │                           │      │
+│  │   [👑 Register & Get 100 Gold]  │
+│  │   [🎯 Complete Profile +50 EXP] │
+│  └───────────────────────────┘      │
+│                                     │
+│    🏆 Welcome Bonus: 100 Gold + Chef Hat │
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleSubmit(event) -> void: Handles registration form submission
 - validateForm() -> boolean: Validates form inputs
@@ -77,11 +131,11 @@
 ---
 
 <details>
-<summary>components/auth/ProtectedRoute.jsx</summary>
+<summary>src/components/auth/ProtectedRoute.jsx</summary>
 
-- requiredImports: React, Navigate from react-router-dom, useAuth from ../contexts/AuthContext
+- **Required Imports**: React, Navigate from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaShieldAlt } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - ProtectedRoute({ children }) -> JSX: Wraps protected routes with authentication check
 </details>
@@ -92,14 +146,25 @@
 ---
 
 <details>
-<summary>components/common/</summary>
+<summary>src/components/common/</summary>
 
 <details>
-<summary>components/common/Header.jsx</summary>
+<summary>src/components/common/Header.jsx</summary>
 
-- requiredImports: React, Link from react-router-dom, useAuth from ../contexts/AuthContext
+- **Required Imports**: React, Link from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaHome, FaUtensils, FaUsers, FaBook, FaUser, FaCoins, FaGem } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────────────────────┐
+│ 🍳 CookTogether  │ 🔍 Search Recipes   │ 👤 Level 15│
+│                  │                     │ 💰 1,250G  │
+│                  │                     │ 💎 45 Gems │
+├─────────────────────────────────────────────────────┤
+│ [🏠] [📖] [👥] [📚] [👤] [⚔️] [🏆] [⚙️]           │
+│ Home  Recipes Sessions Cookbooks Profile Shop Settings│
+└─────────────────────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleLogout() -> void: Logs user out and redirects to login
 - getGreeting() -> string: Returns time-based greeting message
@@ -109,11 +174,11 @@
 ---
 
 <details>
-<summary>components/common/Footer.jsx</summary>
+<summary>src/components/common/Footer.jsx</summary>
 
-- requiredImports: React
+- **Required Imports**: React, { FaHeart, FaTwitter, FaDiscord, FaGithub } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getCurrentYear() -> number: Returns current year for copyright
 </details>
@@ -122,11 +187,11 @@
 ---
 
 <details>
-<summary>components/common/Navigation.jsx</summary>
+<summary>src/components/common/Navigation.jsx</summary>
 
-- requiredImports: React, NavLink from react-router-dom, useAuth from ../contexts/AuthContext
+- **Required Imports**: React, NavLink from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaBell, FaEnvelope, FaUserFriends } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - isActiveLink(isActive) -> string: Returns active link className
 - hasPermission(requiredRole) -> boolean: Checks if user has required permissions
@@ -136,11 +201,24 @@
 ---
 
 <details>
-<summary>components/common/LoadingSpinner.jsx</summary>
+<summary>src/components/common/LoadingSpinner.jsx</summary>
 
-- requiredImports: React
+- **Required Imports**: React, { FaUtensilSpoon, FaBlender } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>layout:</summary>
+```
+┌─────────────────────────┐
+│                         │
+│        🍳               │
+│    Cooking up data...   │
+│      ⚙️ ⚙️ ⚙️           │
+│                         │
+│   +10 EXP for patience  │
+└─────────────────────────┘
+```
+</details>
+<details>
+<summary>Functions</summary>
 
 - LoadingSpinner({ size, color }) -> JSX: Displays loading animation
 </details>
@@ -149,11 +227,11 @@
 ---
 
 <details>
-<summary>components/common/ErrorBoundary.jsx</summary>
+<summary>src/components/common/ErrorBoundary.jsx</summary>
 
-- requiredImports: React, Component
+- **Required Imports**: React, Component, { FaExclamationTriangle } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getDerivedStateFromError(error) -> object: Updates state so next render shows fallback UI
 - componentDidCatch(error, errorInfo) -> void: Logs error to error reporting service
@@ -165,14 +243,27 @@
 ---
 
 <details>
-<summary>components/recipes/</summary>
+<summary>src/components/recipes/</summary>
 
 <details>
-<summary>components/recipes/RecipeCard.jsx</summary>
+<summary>src/components/recipes/RecipeCard.jsx</summary>
 
-- requiredImports: React, Link from react-router-dom, formatTime from ../../utils/formatters
+- **Required Imports**: React, Link from 'react-router-dom', formatTime from '../../utils/formatters', { FaClock, FaFire, FaUser, FaHeart, FaStar, FaCoins } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────┐
+│   [RECIPE IMAGE 4:3]        │
+│   ⭐⭐⭐⭐⭐ (4.5)            │
+│   🍳 Spaghetti Carbonara    │
+│   ⏱️ 30min  🔥 Medium      │
+│   👤 Chef Mario             │
+│   🏷️ Italian, Pasta        │
+│   💰 25 Gold  💎 2 Gems    │
+│   [🍴 Cook] [❤️ Like]      │
+└─────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getDifficultyColor(difficulty) -> string: Returns color based on difficulty level
 - truncateText(text, maxLength) -> string: Truncates text to specified length
@@ -182,11 +273,41 @@
 ---
 
 <details>
-<summary>components/recipes/RecipeForm.jsx</summary>
+<summary>src/components/recipes/RecipeForm.jsx</summary>
 
-- requiredImports: React, useState, useEffect, useNavigate from react-router-dom, api from ../api/recipes
+- **Required Imports**: React, useState, useEffect, useNavigate from 'react-router-dom', api from '../../api/recipes', { FaPlus, FaTrash, FaImage, FaListOl, FaClock, FaBalanceScale, FaCalculator } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│        CREATE RECIPE                │
+├─────────────────────────────────────┤
+│  Recipe Title: [_______________]    │
+│  Description:  [_______________]    │
+│  Cover Image:  [📁 Upload]          │
+│  Difficulty:   [🔥 Easy/Medium/Hard]│
+├─────────────────────────────────────┤
+│  INGREDIENTS SECTION                │
+│  ┌─────────────────────────────┐    │
+│  │ [+] Add Ingredient          │    │
+│  │ 1. Pasta - 400g            │    │
+│  │ 2. Eggs - 3 large          │    │
+│  │ [Calculate Nutrition: 650cal]│    │
+│  └─────────────────────────────┘    │
+├─────────────────────────────────────┤
+│  STEPS SECTION                      │
+│  ┌─────────────────────────────┐    │
+│  │ [+] Add Step                │    │
+│  │ 1. Boil water (5min ⏱️)     │    │
+│  │ 2. Cook pasta (10min ⏱️)    │    │
+│  │ [Total: 8 steps, 45min]     │    │
+│  └─────────────────────────────┘    │
+├─────────────────────────────────────┤
+│  REWARDS: [50 EXP] [25 Gold] [2 Gems]│
+│  [🎮 Create Recipe & Earn EXP]      │
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleSubmit(event) -> void: Handles recipe form submission
 - addIngredient() -> void: Adds new ingredient field
@@ -201,11 +322,31 @@
 ---
 
 <details>
-<summary>components/recipes/RecipeDetail.jsx</summary>
+<summary>src/components/recipes/RecipeDetail.jsx</summary>
 
-- requiredImports: React, useState, useEffect, useParams from react-router-dom, api from ../api/recipes
+- **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/recipes', { FaHeart, FaBookmark, FaShare, FaClock, FaFire, FaUtensils, FaUsers } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│ [← Back] RECIPE TITLE  [❤️] [🔖]   │
+├─────────────────────────────────────┤
+│         [HERO IMAGE]                │
+├─────────────────────────────────────┤
+│ 👤 Chef  ⭐ 4.5  ⏱️ 30min  🔥 Medium│
+│ 💰 Price: 25 Gold | 💎 2 Gems      │
+├─────────────────────────────────────┤
+│ TABS: 📋 Ingredients | 📝 Steps     │
+│       💬 Comments   | 🏆 Rewards    │
+├─────────────────────────────────────┤
+│ INGREDIENTS LIST (with checkboxes)  │
+│ STEPS WITH TIMERS & COMPLETE BUTTONS│
+├─────────────────────────────────────┤
+│ [🎮 Start Cooking Session]          │
+│ [👥 Cook with Friends]              │
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadRecipe() -> void: Fetches recipe details from API
 - handleInteraction(type) -> void: Handles like/dislike/save interactions
@@ -216,11 +357,32 @@
 ---
 
 <details>
-<summary>components/recipes/RecipeList.jsx</summary>
+<summary>src/components/recipes/RecipeList.jsx</summary>
 
-- requiredImports: React, useState, useEffect, RecipeCard from ./RecipeCard, api from ../api/recipes
+- **Required Imports**: React, useState, useEffect, RecipeCard from './RecipeCard', api from '../../api/recipes', { FaFilter, FaSort, FaSearch } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│ RECIPE DISCOVERY                    │
+├─────────────────────────────────────┤
+│ [🔍 Search] [🔽 Filter] [🔼 Sort]   │
+├─────────────────────────────────────┤
+│ GRID:                               │
+│ ┌───┐ ┌───┐ ┌───┐                  │
+│ │ 🍳│ │ 🥗│ │ 🍰│                  │
+│ │   │ │   │ │   │                  │
+│ └───┘ └───┘ └───┘                  │
+│ ┌───┐ ┌───┐ ┌───┐                  │
+│ │ 🌮│ │ 🍣│ │ 🍕│                  │
+│ │   │ │   │ │   │                  │
+│ └───┘ └───┘ └───┘                  │
+├─────────────────────────────────────┤
+│ Pagination: [1] [2] [3] ... [Next]  │
+│ Showing 1-20 of 250 recipes         │
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadRecipes() -> void: Fetches recipes from API
 - filterRecipes(criteria) -> array: Filters recipes based on criteria
@@ -231,11 +393,11 @@
 ---
 
 <details>
-<summary>components/recipes/IngredientList.jsx</summary>
+<summary>src/components/recipes/IngredientList.jsx</summary>
 
-- requiredImports: React
+- **Required Imports**: React, { FaCheckSquare, FaSquare, FaBalanceScale } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - formatAmount(amount, unit) -> string: Formats ingredient amount and unit
 </details>
@@ -244,11 +406,11 @@
 ---
 
 <details>
-<summary>components/recipes/StepList.jsx</summary>
+<summary>src/components/recipes/StepList.jsx</summary>
 
-- requiredImports: React, useState
+- **Required Imports**: React, useState, { FaCheckCircle, FaPlayCircle, FaPauseCircle } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - startTimer(duration) -> void: Starts countdown timer for step
 - completeStep(stepId) -> void: Marks step as completed
@@ -260,14 +422,32 @@
 ---
 
 <details>
-<summary>components/cooking/</summary>
+<summary>src/components/cooking/</summary>
 
 <details>
-<summary>components/cooking/CookingSession.jsx</summary>
+<summary>src/components/cooking/CookingSession.jsx</summary>
 
-- requiredImports: React, useState, useEffect, useParams from react-router-dom, api from ../api/cooking-sessions
+- **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/cooking-sessions', { FaPlay, FaPause, FaStop, FaStepForward, FaUsers, FaTrophy } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│ [← Back] RECIPE   ⏱️ 12:45  [🎮]   │
+├─────────────────────────────────────┤
+│ Progress: ──────────●──── 70%      │
+├─────────────┬───────────────────────┤
+│             │                       │
+│ INGREDIENTS │   STEP 5/8            │
+│ • ✓ Pasta   │   "Add sauce and..."  │
+│ • ✓ Eggs    │   [⏱️ 5:00 Timer]     │
+│ • Cheese    │   [✅ Complete Step]   │
+│             │   [⏭️ Skip]           │
+│             ├───────────────────────┤
+│ PARTICIPANTS│   REWARDS:            │
+│ 👤👤👤      │   +15 EXP | +8 Gold   │
+└─────────────┴───────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadSession() -> void: Loads cooking session details
 - startSession() -> void: Starts the cooking session
@@ -280,11 +460,11 @@
 ---
 
 <details>
-<summary>components/cooking/SessionTimer.jsx</summary>
+<summary>src/components/cooking/SessionTimer.jsx</summary>
 
-- requiredImports: React, useState, useEffect
+- **Required Imports**: React, useState, useEffect, { FaPlay, FaPause, FaRedo, FaHourglassHalf } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - formatTime(seconds) -> string: Formats seconds to MM:SS
 - startTimer(duration) -> void: Starts the timer
@@ -296,11 +476,11 @@
 ---
 
 <details>
-<summary>components/cooking/ParticipantList.jsx</summary>
+<summary>src/components/cooking/ParticipantList.jsx</summary>
 
-- requiredImports: React, useEffect, api from ../api/cooking-sessions
+- **Required Imports**: React, useEffect, api from '../../api/cooking-sessions', { FaUser, FaCrown, FaEye } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadParticipants() -> void: Loads session participants
 - updateParticipantStatus(userId, status) -> void: Updates participant status
@@ -310,11 +490,11 @@
 ---
 
 <details>
-<summary>components/cooking/StepProgress.jsx</summary>
+<summary>src/components/cooking/StepProgress.jsx</summary>
 
-- requiredImports: React
+- **Required Imports**: React, { FaFlagCheckered, FaRoute } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - calculateProgress(current, total) -> number: Calculates progress percentage
 </details>
@@ -325,14 +505,24 @@
 ---
 
 <details>
-<summary>components/users/</summary>
+<summary>src/components/users/</summary>
 
 <details>
-<summary>components/users/UserCard.jsx</summary>
+<summary>src/components/users/UserCard.jsx</summary>
 
-- requiredImports: React, Link from react-router-dom, api from ../api/relationships
+- **Required Imports**: React, Link from 'react-router-dom', api from '../../api/relationships', { FaUserCircle, FaPlus, FaCheck, FaStar, FaFire } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────┐
+│   [PROFILE PICTURE]         │
+│   👨‍🍳 Chef Name             │
+│   ⭐⭐⭐⭐⭐ Level 15          │
+│   📊 42 Recipes | 128 Cooks│
+│   [➕ Follow] [📩 Message]   │
+└─────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleFollow() -> void: Follows/unfollows user
 - getLevelColor(level) -> string: Returns color based on user level
@@ -342,11 +532,27 @@
 ---
 
 <details>
-<summary>components/users/UserProfile.jsx</summary>
+<summary>src/components/users/UserProfile.jsx</summary>
 
-- requiredImports: React, useState, useEffect, useParams from react-router-dom, api from ../api/users
+- **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/users', { FaEdit, FaCamera, FaTrophy, FaChartLine, FaAward, FaCrown } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│ [✏️ Edit] [➕ Follow] [📩 Message]  │
+├─────────────────────────────────────┤
+│        [PROFILE PICTURE LARGE]      │
+│        👨‍🍳 John Doe | Level 15 Chef│
+│        🔥 7-Day Login Streak        │
+│        🏆 12 Achievements Unlocked  │
+├─────────────────────────────────────┤
+│  TABS: 📖 Recipes | 📚 Cookbooks    │
+│        👥 Following | 🏅 Achievements│
+├─────────────────────────────────────┤
+│  CONTENT AREA (Grid/List of items)  │
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadUserProfile() -> void: Loads user profile data
 - loadUserRecipes() -> void: Loads user's recipes
@@ -358,11 +564,11 @@
 ---
 
 <details>
-<summary>components/users/StatsDisplay.jsx</summary>
+<summary>src/components/users/StatsDisplay.jsx</summary>
 
-- requiredImports: React
+- **Required Imports**: React, { FaChartBar, FaFire, FaCoins, FaGem, FaStar, FaMedal } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - formatStatValue(value, type) -> string: Formats stat values for display
 - getStatIcon(statName) -> JSX: Returns icon for stat type
@@ -372,11 +578,11 @@
 ---
 
 <details>
-<summary>components/users/FollowButton.jsx</summary>
+<summary>src/components/users/FollowButton.jsx</summary>
 
-- requiredImports: React, useState, api from ../api/relationships
+- **Required Imports**: React, useState, api from '../../api/relationships', { FaUserPlus, FaUserCheck, FaUserTimes } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - checkFollowingStatus() -> boolean: Checks if current user follows target user
 - toggleFollow() -> void: Toggles follow/unfollow
@@ -388,14 +594,14 @@
 ---
 
 <details>
-<summary>components/gamification/</summary>
+<summary>src/components/gamification/</summary>
 
 <details>
-<summary>components/gamification/CurrencyDisplay.jsx</summary>
+<summary>src/components/gamification/CurrencyDisplay.jsx</summary>
 
-- requiredImports: React
+- **Required Imports**: React, { FaCoins, FaGem, FaMoneyBillWave } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - formatCurrency(amount, type) -> string: Formats currency values with appropriate symbols
 </details>
@@ -404,11 +610,11 @@
 ---
 
 <details>
-<summary>components/gamification/LevelProgress.jsx</summary>
+<summary>src/components/gamification/LevelProgress.jsx</summary>
 
-- requiredImports: React
+- **Required Imports**: React, { FaTrophy, FaChessQueen, FaStar, FaCrown } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - calculateProgress(currentExp, nextLevelExp) -> number: Calculates progress percentage
 - getLevelTitle(level) -> string: Returns title based on level
@@ -418,11 +624,11 @@
 ---
 
 <details>
-<summary>components/gamification/RewardNotification.jsx</summary>
+<summary>src/components/gamification/RewardNotification.jsx</summary>
 
-- requiredImports: React, useState, useEffect
+- **Required Imports**: React, useState, useEffect, { FaGift, FaCoins, FaGem, FaStar, FaTrophy } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - showNotification(reward) -> void: Displays reward notification
 - hideNotification() -> void: Hides notification after timeout
@@ -432,11 +638,11 @@
 ---
 
 <details>
-<summary>components/gamification/ShopItem.jsx</summary>
+<summary>src/components/gamification/ShopItem.jsx</summary>
 
-- requiredImports: React, useState, api from ../api/shop
+- **Required Imports**: React, useState, api from '../../api/shop', { FaShoppingCart, FaLock, FaCheck } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - canAfford() -> boolean: Checks if user can afford item
 - purchaseItem() -> void: Handles item purchase
@@ -450,14 +656,38 @@
 ---
 
 <details>
-<summary>pages/</summary>
+<summary>src/pages/</summary>
 
 <details>
-<summary>pages/HomePage.jsx</summary>
+<summary>src/pages/HomePage.jsx</summary>
 
-- requiredImports: React, Link from react-router-dom, RecipeList from ../components/recipes/RecipeList
+- **Required Imports**: React, Link from 'react-router-dom', RecipeList from '../components/recipes/RecipeList', { FaFire, FaNewspaper, FaTrophy, FaUsers } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│          HERO SECTION               │
+│   🍳 CookTogether                   │
+│   Level up your cooking skills!     │
+│   [🎮 Start Cooking] [📖 Browse]    │
+├─────────────────────────────────────┤
+│  FEATURED SECTIONS                  │
+│  ┌──────────┬──────────┬──────────┐│
+│  │ 🔥Trending│ 🏆Challenges│ 👥Community││
+│  │ Recipes  │ Daily/Weekly│ Top Chefs││
+│  └──────────┴──────────┴──────────┘│
+├─────────────────────────────────────┤
+│  QUICK ACTIONS                      │
+│  [🍳 Create Recipe] [👥 Find Friends]│
+│  [🏆 View Challenges] [🏪 Visit Shop]│
+├─────────────────────────────────────┤
+│  RECENT ACTIVITY FEED               │
+│  • Chef Mario cooked Carbonara +50XP│
+│  • Sarah reached Level 20! 🎉       │
+│  • New recipe: Vegan Lasagna        │
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getFeaturedRecipes() -> array: Returns featured recipes for homepage
 - getRecentActivities() -> array: Returns recent user activities
@@ -467,11 +697,11 @@
 ---
 
 <details>
-<summary>pages/LoginPage.jsx</summary>
+<summary>src/pages/LoginPage.jsx</summary>
 
-- requiredImports: React, LoginForm from ../components/auth/LoginForm
+- **Required Imports**: React, LoginForm from '../components/auth/LoginForm', { FaSignInAlt, FaFire, FaGift } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleLoginSuccess() -> void: Redirects after successful login
 </details>
@@ -480,11 +710,11 @@
 ---
 
 <details>
-<summary>pages/RegisterPage.jsx</summary>
+<summary>src/pages/RegisterPage.jsx</summary>
 
-- requiredImports: React, RegisterForm from ../components/auth/RegisterForm
+- **Required Imports**: React, RegisterForm from '../components/auth/RegisterForm', { FaUserPlus, FaCrown, FaTrophy } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleRegisterSuccess() -> void: Redirects after successful registration
 </details>
@@ -493,11 +723,11 @@
 ---
 
 <details>
-<summary>pages/RecipesPage.jsx</summary>
+<summary>src/pages/RecipesPage.jsx</summary>
 
-- requiredImports: React, useState, RecipeList from ../components/recipes/RecipeList, RecipeFilters from ../components/recipes/RecipeFilters
+- **Required Imports**: React, useState, RecipeList from '../components/recipes/RecipeList', RecipeFilters from '../components/recipes/RecipeFilters', { FaFilter, FaSortAmountDown, FaSearch } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadAllRecipes() -> void: Loads all recipes with pagination
 - handleSearch(query) -> void: Handles recipe search
@@ -508,11 +738,11 @@
 ---
 
 <details>
-<summary>pages/RecipeDetailPage.jsx</summary>
+<summary>src/pages/RecipeDetailPage.jsx</summary>
 
-- requiredImports: React, RecipeDetail from ../components/recipes/RecipeDetail, CookingSession from ../components/cooking/CookingSession
+- **Required Imports**: React, RecipeDetail from '../components/recipes/RecipeDetail', CookingSession from '../components/cooking/CookingSession', { FaUtensils, FaUsers, FaHeart } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleStartCooking() -> void: Starts cooking session from recipe
 </details>
@@ -521,11 +751,11 @@
 ---
 
 <details>
-<summary>pages/CreateRecipePage.jsx</summary>
+<summary>src/pages/CreateRecipePage.jsx</summary>
 
-- requiredImports: React, RecipeForm from ../components/recipes/RecipeForm
+- **Required Imports**: React, RecipeForm from '../components/recipes/RecipeForm', { FaPlusCircle, FaLightbulb, FaAward } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleRecipeCreated(recipeId) -> void: Handles successful recipe creation
 </details>
@@ -534,11 +764,11 @@
 ---
 
 <details>
-<summary>pages/ProfilePage.jsx</summary>
+<summary>src/pages/ProfilePage.jsx</summary>
 
-- requiredImports: React, UserProfile from ../components/users/UserProfile, UserRecipes from ../components/users/UserRecipes
+- **Required Imports**: React, UserProfile from '../components/users/UserProfile', UserRecipes from '../components/users/UserRecipes', { FaUserCircle, FaCog, FaChartLine } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadUserData() -> void: Loads comprehensive user data
 - handleProfileUpdate() -> void: Handles profile update success
@@ -548,11 +778,11 @@
 ---
 
 <details>
-<summary>pages/CookingSessionPage.jsx</summary>
+<summary>src/pages/CookingSessionPage.jsx</summary>
 
-- requiredImports: React, CookingSession from ../components/cooking/CookingSession, SessionTimer from ../components/cooking/SessionTimer
+- **Required Imports**: React, CookingSession from '../components/cooking/CookingSession', SessionTimer from '../components/cooking/SessionTimer', { FaPlay, FaUsers, FaTrophy } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - handleSessionComplete() -> void: Handles session completion
 - handleStepComplete() -> void: Handles step completion with rewards
@@ -562,11 +792,34 @@
 ---
 
 <details>
-<summary>pages/ShopPage.jsx</summary>
+<summary>src/pages/ShopPage.jsx</summary>
 
-- requiredImports: React, useState, ShopItem from ../components/gamification/ShopItem
+- **Required Imports**: React, useState, ShopItem from '../components/gamification/ShopItem', { FaStore, FaCoins, FaGem, FaTags } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│          COOKTOGETHER SHOP          │
+│   💰 Your Balance: 1,250G | 💎 45   │
+├─────────────────────────────────────┤
+│  CATEGORIES: [🎨 Cosmetics] [🔧 Tools]│
+│              [📚 Recipes] [🎁 Boosts]│
+├─────────────────────────────────────┤
+│  SHOP ITEMS GRID (3x3)              │
+│  ┌───┐ ┌───┐ ┌───┐                 │
+│  │ 👑│ │ 🎩│ │ 🔪│                 │
+│  │ 500G││ 750G││ 1,200G│           │
+│  └───┘ └───┘ └───┘                 │
+│  ┌───┐ ┌───┐ ┌───┐                 │
+│  │ 🍳│ │ 📖│ │ ⚡│                 │
+│  │ 300G││ 200G││ 150G│             │
+│  └───┘ └───┘ └───┘                 │
+├─────────────────────────────────────┤
+│  SPECIAL OFFERS:                    │
+│  🔥 Daily Deal: Golden Spoon 50% off│
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadShopItems() -> void: Loads available shop items
 - handlePurchase(itemId) -> void: Handles item purchase
@@ -577,11 +830,33 @@
 ---
 
 <details>
-<summary>pages/DiscoverPage.jsx</summary>
+<summary>src/pages/DiscoverPage.jsx</summary>
 
-- requiredImports: React, useState, UserCard from ../components/users/UserCard, RecipeCard from ../components/recipes/RecipeCard
+- **Required Imports**: React, useState, UserCard from '../components/users/UserCard', RecipeCard from '../components/recipes/RecipeCard', { FaCompass, FaFire, FaTrophy, FaUsers } from 'react-icons/fa'
+- layout:
+```
+┌─────────────────────────────────────┐
+│           DISCOVER                  │
+│  🔥 Trending | 👑 Top Chefs | 🏆 New│
+├─────────────────────────────────────┤
+│  TOP CHEFS THIS WEEK               │
+│  ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐    │
+│  │ 👨│ │ 👩│ │ 🧑│ │ 👨│ │ 👩│    │
+│  │Level││Level││Level││Level││Level││
+│  │ 25 ││ 22 ││ 20 ││ 18 ││ 17 │    │
+│  └───┘ └───┘ └───┘ └───┘ └───┘    │
+├─────────────────────────────────────┤
+│  TRENDING RECIPES                  │
+│  [🍕] [🥗] [🍣] [🌮] [🍰]          │
+│  +125   +98   +76   +64   +52      │
+├─────────────────────────────────────┤
+│  COMMUNITY CHALLENGES              │
+│  ⚔️ Vegan Week: 342 participants    │
+│  🏆 Master Chef: Top 10% get rewards│
+└─────────────────────────────────────┘
+```
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadTopChefs() -> void: Loads top-rated users
 - loadTrendingRecipes() -> void: Loads trending recipes
@@ -592,11 +867,11 @@
 ---
 
 <details>
-<summary>pages/CookbooksPage.jsx</summary>
+<summary>src/pages/CookbooksPage.jsx</summary>
 
-- requiredImports: React, useState, api from ../api/cookbooks
+- **Required Imports**: React, useState, api from '../api/cookbooks', { FaBook, FaPlus, FaFolderOpen } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - loadCookbooks() -> void: Loads user's cookbooks
 - createCookbook() -> void: Creates new cookbook
@@ -609,14 +884,14 @@
 ---
 
 <details>
-<summary>contexts/</summary>
+<summary>src/contexts/</summary>
 
 <details>
-<summary>contexts/AuthContext.jsx</summary>
+<summary>src/contexts/AuthContext.jsx</summary>
 
-- requiredImports: React, createContext, useState, useContext, useEffect
+- **Required Imports**: React, createContext, useState, useContext, useEffect, { FaUserShield } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - login(email, password) -> object: Authenticates user
 - logout() -> void: Logs out user and clears session
@@ -629,11 +904,11 @@
 ---
 
 <details>
-<summary>contexts/DataContext.jsx</summary>
+<summary>src/contexts/DataContext.jsx</summary>
 
-- requiredImports: React, createContext, useState, useContext
+- **Required Imports**: React, createContext, useState, useContext, { FaDatabase, FaSync } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - updateUserData(data) -> void: Updates user data in context
 - updateRecipes(data) -> void: Updates recipes in context
@@ -647,11 +922,11 @@
 ---
 
 <details>
-<summary>contexts/NotificationContext.jsx</summary>
+<summary>src/contexts/NotificationContext.jsx</summary>
 
-- requiredImports: React, createContext, useState, useContext
+- **Required Imports**: React, createContext, useState, useContext, { FaBell, FaTimes } from 'react-icons/fa'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - showNotification(message, type) -> void: Shows notification
 - hideNotification(id) -> void: Hides specific notification
@@ -664,14 +939,14 @@
 ---
 
 <details>
-<summary>hooks/</summary>
+<summary>src/hooks/</summary>
 
 <details>
-<summary>hooks/useAuth.js</summary>
+<summary>src/hooks/useAuth.js</summary>
 
-- requiredImports: useContext from react, AuthContext from ../contexts/AuthContext
+- **Required Imports**: useContext from 'react', AuthContext from '../contexts/AuthContext'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - useAuth() -> object: Provides authentication state and methods
 </details>
@@ -680,11 +955,11 @@
 ---
 
 <details>
-<summary>hooks/useApi.js</summary>
+<summary>src/hooks/useApi.js</summary>
 
-- requiredImports: useState, useEffect, useCallback
+- **Required Imports**: useState, useEffect, useCallback
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - useApi(endpoint, method, body) -> object: Custom hook for API calls with loading and error states
 - fetchData() -> void: Fetches data from API
@@ -697,11 +972,11 @@
 ---
 
 <details>
-<summary>hooks/useForm.js</summary>
+<summary>src/hooks/useForm.js</summary>
 
-- requiredImports: useState, useCallback
+- **Required Imports**: useState, useCallback
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - useForm(initialValues) -> object: Custom hook for form state management
 - handleChange(event) -> void: Handles form field changes
@@ -714,11 +989,11 @@
 ---
 
 <details>
-<summary>hooks/useLocalStorage.js</summary>
+<summary>src/hooks/useLocalStorage.js</summary>
 
-- requiredImports: useState, useEffect
+- **Required Imports**: useState, useEffect
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - useLocalStorage(key, initialValue) -> array: Custom hook for localStorage with state synchronization
 - setValue(value) -> void: Sets value in localStorage and state
@@ -731,14 +1006,14 @@
 ---
 
 <details>
-<summary>utils/</summary>
+<summary>src/utils/</summary>
 
 <details>
-<summary>utils/api.js</summary>
+<summary>src/utils/api.js</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - get(endpoint) -> promise: GET request helper
 - post(endpoint, data) -> promise: POST request helper
@@ -753,11 +1028,11 @@
 ---
 
 <details>
-<summary>utils/formatters.js</summary>
+<summary>src/utils/formatters.js</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - formatTime(minutes) -> string: Formats minutes to hours:minutes
 - formatDate(timestamp) -> string: Formats timestamp to readable date
@@ -770,11 +1045,11 @@
 ---
 
 <details>
-<summary>utils/validators.js</summary>
+<summary>src/utils/validators.js</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - validateEmail(email) -> boolean: Validates email format
 - validatePassword(password) -> boolean: Validates password strength
@@ -787,11 +1062,11 @@
 ---
 
 <details>
-<summary>utils/constants.js</summary>
+<summary>src/utils/constants.js</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - API_BASE_URL() -> string: Returns API base URL based on environment
 - getDifficultyOptions() -> array: Returns difficulty options for forms
@@ -804,11 +1079,11 @@
 ---
 
 <details>
-<summary>utils/helpers.js</summary>
+<summary>src/utils/helpers.js</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - generateId() -> string: Generates unique ID
 - debounce(func, wait) -> function: Creates debounced function
@@ -823,14 +1098,14 @@
 ---
 
 <details>
-<summary>api/</summary>
+<summary>src/api/</summary>
 
 <details>
-<summary>api/auth.js</summary>
+<summary>src/api/auth.js</summary>
 
-- requiredImports: api from ../utils/api
+- **Required Imports**: api from '../utils/api'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - login(email, password) -> promise: Authenticates user
 - register(userData) -> promise: Registers new user
@@ -843,11 +1118,11 @@
 ---
 
 <details>
-<summary>api/users.js</summary>
+<summary>src/api/users.js</summary>
 
-- requiredImports: api from ../utils/api
+- **Required Imports**: api from '../utils/api'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getProfile(userId) -> promise: Gets user profile
 - updateProfile(userId, data) -> promise: Updates user profile
@@ -861,11 +1136,11 @@
 ---
 
 <details>
-<summary>api/recipes.js</summary>
+<summary>src/api/recipes.js</summary>
 
-- requiredImports: api from ../utils/api
+- **Required Imports**: api from '../utils/api'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getAllRecipes(params) -> promise: Gets all recipes with filters
 - getRecipe(recipeId) -> promise: Gets single recipe with details
@@ -881,11 +1156,11 @@
 ---
 
 <details>
-<summary>api/cooking-sessions.js</summary>
+<summary>src/api/cooking-sessions.js</summary>
 
-- requiredImports: api from ../utils/api
+- **Required Imports**: api from '../utils/api'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - createSession(sessionData) -> promise: Creates cooking session
 - getSession(sessionId) -> promise: Gets session details
@@ -900,11 +1175,11 @@
 ---
 
 <details>
-<summary>api/relationships.js</summary>
+<summary>src/api/relationships.js</summary>
 
-- requiredImports: api from ../utils/api
+- **Required Imports**: api from '../utils/api'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - followUser(targetUserId) -> promise: Follows another user
 - unfollowUser(targetUserId) -> promise: Unfollows user
@@ -918,11 +1193,11 @@
 ---
 
 <details>
-<summary>api/cookbooks.js</summary>
+<summary>src/api/cookbooks.js</summary>
 
-- requiredImports: api from ../utils/api
+- **Required Imports**: api from '../utils/api'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getCookbooks() -> promise: Gets user's cookbooks
 - createCookbook(data) -> promise: Creates new cookbook
@@ -935,11 +1210,11 @@
 ---
 
 <details>
-<summary>api/shop.js</summary>
+<summary>src/api/shop.js</summary>
 
-- requiredImports: api from ../utils/api
+- **Required Imports**: api from '../utils/api'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getShopItems() -> promise: Gets available shop items
 - purchaseItem(itemId) -> promise: Purchases shop item
@@ -953,72 +1228,69 @@
 ---
 
 <details>
-<summary>styles/</summary>
+<summary>src/styles/</summary>
 
 <details>
-<summary>styles/index.css</summary>
+<summary>src/styles/index.css</summary>
 
-- requiredImports: None
-- description: Main stylesheet with global styles
+- **Required Imports**: './themes.css', './components.css', './layout.css', './utilities.css'
+- **Description**: Main stylesheet with global styles and gamified theme imports
+- gamified libraries imported:
+  ```css
+  /* Gamified CSS Libraries */
+  @import 'animate.css/animate.min.css';
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap');
+  
+  /* Game-like UI enhancements */
+  .game-button {
+    background: linear-gradient(145deg, #ff6b6b, #ff8a8a);
+    border: 3px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+  
+  .level-badge {
+    background: linear-gradient(45deg, #4CAF50, #FFC107, #FF6B6B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  ```
 </details>
 
 ---
 
 <details>
-<summary>styles/components.css</summary>
+<summary>src/styles/components.css</summary>
 
-- requiredImports: None
-- description: Component-specific styles
+- **Required Imports**: None
+- **Description**: Component-specific styles with gamified elements
 </details>
 
 ---
 
 <details>
-<summary>styles/layout.css</summary>
+<summary>src/styles/layout.css</summary>
 
-- requiredImports: None
-- description: Layout and grid styles
+- **Required Imports**: None
+- **Description**: Layout and grid styles
 </details>
 
 ---
 
 <details>
-<summary>styles/utilities.css</summary>
+<summary>src/styles/utilities.css</summary>
 
-- requiredImports: None
-- description: Utility classes and helper styles
+- **Required Imports**: None
+- **Description**: Utility classes and helper styles
 </details>
 
 ---
 
 <details>
-<summary>styles/themes.css</summary>
+<summary>src/styles/themes.css</summary>
 
-- requiredImports: None
-- description: Theme variables and color schemes
-</details>
-
-</details>
-
----
-
-<details>
-<summary>assets/</summary>
-
-<details>
-<summary>assets/images/</summary>
-
-- icons/
-- illustrations/
-- backgrounds/
-</details>
-
----
-
-<details>
-<summary>assets/fonts/</summary>
-
-- Custom font files
+- **Required Imports**: None
+- **Description**: Theme variables and color schemes from frontend_design.md
 </details>
 
 </details>
@@ -1026,11 +1298,34 @@
 ---
 
 <details>
-<summary>App.jsx</summary>
+<summary>src/assets/</summary>
 
-- requiredImports: React, BrowserRouter, Routes, Route from react-router-dom, AuthContext from ./contexts/AuthContext, DataContext from ./contexts/DataContext, NotificationContext from ./contexts/NotificationContext, all page components from ./pages, Header from ./components/common/Header, Footer from ./components/common/Footer
 <details>
-<summary>functions</summary>
+<summary>src/assets/images/</summary>
+
+- icons/ - Gamified icons (swords, shields, crowns, etc.)
+- illustrations/ - Cooking and gamification illustrations
+- backgrounds/ - Patterned backgrounds for cards and sections
+</details>
+
+---
+
+<details>
+<summary>src/assets/fonts/</summary>
+
+- Custom font files for gamified typography
+</details>
+
+</details>
+
+---
+
+<details>
+<summary>src/App.jsx</summary>
+
+- **Required Imports**: React, BrowserRouter, Routes, Route from 'react-router-dom', AuthContext from './contexts/AuthContext', DataContext from './contexts/DataContext', NotificationContext from './contexts/NotificationContext', all page components from './pages', Header from './components/common/Header', Footer from './components/common/Footer', { FaGamepad, FaCookieBite } from 'react-icons/fa'
+<details>
+<summary>Functions</summary>
 
 - App() -> JSX: Main application component with routing
 - initializeApp() -> void: Initializes application state
@@ -1041,11 +1336,11 @@
 ---
 
 <details>
-<summary>index.js</summary>
+<summary>src/index.js</summary>
 
-- requiredImports: React, ReactDOM from react-dom/client, App from ./App, ./styles/index.css
+- **Required Imports**: React, ReactDOM from 'react-dom/client', App from './App', './styles/index.css'
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - renderApp() -> void: Renders React application to DOM
 </details>
@@ -1054,10 +1349,10 @@
 ---
 
 <details>
-<summary>setupTests.js</summary>
+<summary>src/setupTests.js</summary>
 
-- requiredImports: @testing-library/jest-dom
-- description: Test setup configuration
+- **Required Imports**: '@testing-library/jest-dom'
+- **Description**: Test setup configuration
 </details>
 
 </details>
@@ -1067,8 +1362,20 @@
 <details>
 <summary>package.json</summary>
 
-- requiredImports: None
-- description: Project dependencies and scripts
+- **Required Imports**: None
+- **Description**: Project dependencies and scripts
+- gamified dependencies added:
+  ```json
+  "dependencies": {
+    "react-icons": "^4.11.0",
+    "animate.css": "^4.1.1",
+    "classnames": "^2.3.2",
+    "react-spring": "^9.7.1",
+    "framer-motion": "^10.12.16",
+    "react-confetti": "^6.1.0",
+    "react-progressbar.js": "^1.0.1"
+  }
+  ```
 </details>
 
 ---
@@ -1076,8 +1383,8 @@
 <details>
 <summary>.env</summary>
 
-- requiredImports: None
-- description: Environment variables
+- **Required Imports**: None
+- **Description**: Environment variables
 </details>
 
 ---
@@ -1085,8 +1392,8 @@
 <details>
 <summary>.gitignore</summary>
 
-- requiredImports: None
-- description: Git ignore rules
+- **Required Imports**: None
+- **Description**: Git ignore rules
 </details>
 
 </details>
