@@ -1,415 +1,9 @@
-import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth'; // Authentication hook for user info
-import apiSheets from '../constants/api.js'; // API configuration for SheetDB endpoints
-import { calculateAllUserLimits } from '../utils/userCalculations.js'; // Utility for calculating user limits
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { FaDatabase, FaSync } from 'react-icons/fa';
 
-/**
- * Data Context for managing global application state and data fetching
- * Provides centralized data management, caching, and querying capabilities
- */
+// Create DataContext
 const DataContext = createContext();
 
-/**
- * Data Provider Component
- * Manages global application data state, handles data fetching, and provides query functions
- * Implements optimized data loading with authentication-aware fetching
- * 
- * @param {Object} props - Component props
- * @param {React.ReactNode} props.children - Child components that need access to data context
- * 
- * @example
- * // Wrap your app with DataProvider (inside AuthProvider)
- * <AuthProvider>
- *   <DataProvider>
- *     <App />
- *   </DataProvider>
- * </AuthProvider>
- */
-export function DataProvider({ children }) {
-  // Get authentication state from Auth context
-  const { user, isAuthenticated } = useAuth();
-  
-  // Centralized state for all application data
-  const [data, setData] = useState({
-    users: [],                              // All user profiles
-    usersRelationships: [],                 // Following/follower relationships
-    recipes: [],                           // Recipe metadata and details
-    recipesIngredients: [],                // Ingredients for each recipe
-    recipesSteps: [],                      // Cooking steps for each recipe
-    challengesCookQuota: [],               // Challenge definitions and metadata
-    challengesCookQuotaParticipants: [],   // User participation in challenges
-  });
-  
-  // Loading state for initial data fetch
-  const [loading, setLoading] = useState(true);
-  
-  // Flag to prevent duplicate fetches
-  const [hasFetched, setHasFetched] = useState(false);
-
-  /**
-   * Fetches users data immediately on app load
-   * This is needed for login validation and user lookup
-   * Runs independently of authentication status
-   */
-  const fetchUsersData = async () => {
-    try {
-      const usersRes = await fetch(apiSheets.users);
-      const users = await usersRes.json();
-      setData(prev => ({ ...prev, users }));
-    } catch (error) {
-      console.error('Failed to fetch users data:', error);
-    }
-  };
-
-  /**
-   * Fetches all application data (except users) when user is authenticated
-   * Uses Promise.all for parallel fetching to optimize performance
-   * Only runs once per session unless explicitly refetched
-   */
-  const fetchAllData = async () => {
-    // Prevent duplicate fetches
-    if (hasFetched) return;
-
-    setLoading(true);
-    try {
-      // Fetch all data sheets in parallel for optimal performance
-      const [
-        usersRelationshipsRes,
-        recipesRes,
-        recipesIngredientsRes,
-        recipesStepsRes,
-        challengesCookQuotaRes,
-        challengesCookQuotaParticipantsRes,
-      ] = await Promise.all([
-        fetch(apiSheets.usersRelationships),
-        fetch(apiSheets.recipes),
-        fetch(apiSheets.recipesIngredients),
-        fetch(apiSheets.recipesSteps),
-        fetch(apiSheets.challengesCookQuota),
-        fetch(apiSheets.challengesCookQuotaParticipants),
-      ]);
-
-      // Combine all fetched data into single object
-      const newData = {
-        users: data.users, // Preserve existing users data
-        usersRelationships: await usersRelationshipsRes.json(),
-        recipes: await recipesRes.json(),
-        recipesIngredients: await recipesIngredientsRes.json(),
-        recipesSteps: await recipesStepsRes.json(),
-        challengesCookQuota: await challengesCookQuotaRes.json(),
-        challengesCookQuotaParticipants: await challengesCookQuotaParticipantsRes.json(),
-      };
-
-      setData(newData);
-      setHasFetched(true); // Mark as fetched to prevent duplicates
-    } catch (error) {
-      console.error('Failed to fetch app data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * Initial data fetching effect
-   * Fetches users data immediately on component mount for login purposes
-   */
-  useEffect(() => {
-    fetchUsersData();
-  }, []);
-
-  /**
-   * Authentication-aware data fetching effect
-   * Fetches all application data only when user is authenticated
-   * Prevents unnecessary API calls for anonymous users
-   */
-  useEffect(() => {
-    if (isAuthenticated && !hasFetched) {
-      fetchAllData();
-    }
-  }, [isAuthenticated, hasFetched]);
-
-  /**
-   * Memoized current user data object
-   * Finds and returns the complete user profile for the authenticated user
-   */
-  const currentUserData = useMemo(() => {
-    if (!user?.id || !data.users) return null;
-    return data.users.find((u) => u.id === user.id) || null;
-  }, [user?.id, data.users]);
-
-  /**
-   * Memoized user reward limits calculation
-   * Calculates dynamic limits based on user level, progress, and achievements
-   * Falls back to default limits if user data is unavailable
-   */
-  const userRewardLimits = useMemo(() => {
-    if (!currentUserData) {
-      // Default limits for new/anonymous users
-      return {
-        maxExp: 100,
-        maxGold: 50,
-        maxGem: 5,
-        maxGoldPrice: 100,
-        maxGemPrice: 10,
-      };
-    }
-    // Calculate dynamic limits based on user stats
-    return calculateAllUserLimits(currentUserData);
-  }, [currentUserData]);
-
-  /**
-   * Memoized list of followed user IDs
-   * Extracts the IDs of all users that the current user is following
-   * Used for filtering feed content and social features
-   */
-  const followedUserIds = useMemo(() => {
-    if (!currentUserData?.id || !data.usersRelationships) return [];
-    return data.usersRelationships
-      .filter(
-        (relationship) =>
-          relationship.sourceUserId === currentUserData.id &&
-          relationship.relationship === 'following'
-      )
-      .map((relationship) => relationship.targetUserId);
-  }, [currentUserData?.id, data.usersRelationships]);
-
-  /**
-   * Universal query function for searching and filtering data
-   * Supports multiple pages (feed, discover, my-kitchen) and filters
-   * 
-   * @param {string} page - The page context: '/feed', '/discover', or '/my-kitchen'
-   * @param {string} filter - The data type: 'recipes', 'challenges', 'users', etc.
-   * @param {string} query - Search query string for filtering results
-   * @param {boolean} forceDefault - If true, returns all results ignoring query (for reset)
-   * @returns {Array} Filtered array of data items matching the criteria
-   * 
-   * @example
-   * // Search for pasta recipes in discover page
-   * const pastaRecipes = queryData('/discover', 'recipes', 'pasta');
-   * 
-   * @example
-   * // Get all recipes from followed users in feed
-   * const feedRecipes = queryData('/feed', 'recipes', '');
-   * 
-   * @example  
-   * // Reset to show all user recipes
-   * const allUserRecipes = queryData('/my-kitchen', 'user-recipes', '', true);
-   */
-  const queryData = (page, filter, query, forceDefault = false) => {
-    const lowerQuery = query ? query.toLowerCase().trim() : "";
-
-    const path = `/${page}`;
-
-    switch (path) {
-      case "/feed":
-        // Feed shows content only from followed users
-        if (filter === "recipes") {
-          return data.recipes.filter(
-            (recipe) =>
-              followedUserIds.includes(recipe.userId) &&
-              (forceDefault ||
-                lowerQuery === "" ||
-                recipe.title?.toLowerCase().includes(lowerQuery) ||
-                recipe.description?.toLowerCase().includes(lowerQuery) ||
-                recipe.tags?.toLowerCase().includes(lowerQuery))
-          );
-        }
-        if (filter === "challenges") {
-          return data.challengesCookQuota.filter(
-            (challenge) =>
-              followedUserIds.includes(challenge.author) &&
-              (forceDefault ||
-                lowerQuery === "" ||
-                challenge.title?.toLowerCase().includes(lowerQuery) ||
-                challenge.description?.toLowerCase().includes(lowerQuery) ||
-                challenge.tags?.toLowerCase().includes(lowerQuery))
-          );
-        }
-        if (filter === "users") {
-          return data.users.filter(
-            (user) =>
-              followedUserIds.includes(user.id) &&
-              (forceDefault ||
-                lowerQuery === "" ||
-                user.fullName?.toLowerCase().includes(lowerQuery) ||
-                user.email?.toLowerCase().includes(lowerQuery))
-          );
-        }
-        break;
-
-      case "/discover":
-        // Discover shows all public content
-        if (filter === "recipes") {
-          return data.recipes.filter(
-            (recipe) =>
-              forceDefault ||
-              lowerQuery === "" ||
-              recipe.title?.toLowerCase().includes(lowerQuery) ||
-              recipe.description?.toLowerCase().includes(lowerQuery) ||
-              recipe.tags?.toLowerCase().includes(lowerQuery)
-          );
-        }
-        if (filter === "challenges") {
-          return data.challengesCookQuota.filter(
-            (challenge) =>
-              forceDefault ||
-              lowerQuery === "" ||
-              challenge.title?.toLowerCase().includes(lowerQuery) ||
-              challenge.description?.toLowerCase().includes(lowerQuery) ||
-              challenge.tags?.toLowerCase().includes(lowerQuery)
-          );
-        }
-        if (filter === "users") {
-          return data.users.filter(
-            (user) =>
-              forceDefault ||
-              lowerQuery === "" ||
-              user.fullName?.toLowerCase().includes(lowerQuery) ||
-              user.email?.toLowerCase().includes(lowerQuery)
-          );
-        }
-        break;
-
-      case "/my-kitchen":
-        // My Kitchen shows user's own content and participations
-        if (filter === "user-recipes") {
-          return data.recipes.filter(
-            (recipe) =>
-              recipe.userId === currentUserData?.id &&
-              (forceDefault ||
-                lowerQuery === "" ||
-                recipe.title?.toLowerCase().includes(lowerQuery) ||
-                recipe.description?.toLowerCase().includes(lowerQuery) ||
-                recipe.tags?.toLowerCase().includes(lowerQuery))
-          );
-        }
-        if (filter === "user-challenges") {
-          // Find challenges where user has participated
-          const userChallengeIds = data.challengesCookQuotaParticipants
-            .filter(
-              (participant) =>
-                participant.userId === currentUserData?.id &&
-                participant.status === "joined"
-            )
-            .map((participant) => participant.challengeId);
-
-          return data.challengesCookQuota.filter(
-            (challenge) =>
-              userChallengeIds.includes(challenge.challengeId) &&
-              (forceDefault ||
-                lowerQuery === "" ||
-                challenge.title?.toLowerCase().includes(lowerQuery) ||
-                challenge.description?.toLowerCase().includes(lowerQuery) ||
-                challenge.tags?.toLowerCase().includes(lowerQuery))
-          );
-        }
-        break;
-
-      default:
-        return [];
-    }
-
-    return [];
-  };
-
-  /**
-   * Refetches a specific data sheet from the API
-   * Useful for updating individual data types without refetching everything
-   * 
-   * @param {string} sheetName - The name of the sheet to refetch (must match apiSheets key)
-   * @returns {Promise<void>}
-   * 
-   * @example
-   * // Refetch recipes after adding a new recipe
-   * const { refetchSheet } = useData();
-   * await refetchSheet('recipes');
-   */
-  const refetchSheet = async (sheetName) => {
-    try {
-      const sheetUrl = apiSheets[sheetName];
-      if (!sheetUrl) {
-        console.error(`Sheet name "${sheetName}" does not exist in apiSheets.`);
-        return;
-      }
-
-      const response = await fetch(sheetUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch data from sheet: ${sheetName}`);
-      }
-
-      const newData = await response.json();
-      setData((prev) => ({
-        ...prev,
-        [sheetName]: newData,
-      }));
-    } catch (error) {
-      console.error(`Error refetching sheet "${sheetName}":`, error);
-    }
-  };
-
-  /**
-   * Memoized context value to prevent unnecessary re-renders
-   * Combines all data, derived values, and functions into single context object
-   */
-  const value = useMemo(
-    () => ({
-      // Spread all data arrays for direct access
-      ...data,
-      
-      // State flags
-      loading,
-      
-      // Derived data
-      currentUserData,
-      userRewardLimits,
-      
-      // Query functions
-      queryData,
-      
-      // Data refresh functions
-      refetchAll: () => {
-        setHasFetched(false);
-        fetchAllData();
-      },
-      refetchUsers: fetchUsersData,
-      refetchSheet,
-    }),
-    [data, loading, currentUserData, userRewardLimits, followedUserIds]
-  );
-
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
-}
-
-/**
- * Custom hook to access data context
- * Provides access to global application data and query functions
- * 
- * @returns {Object} Data context value containing:
- *   - All data arrays (users, recipes, challenges, etc.)
- *   - loading: Boolean indicating if initial data is loading
- *   - currentUserData: Complete profile of authenticated user
- *   - userRewardLimits: Calculated reward limits for current user
- *   - queryData: Universal search and filter function
- *   - refetchAll: Function to refetch all application data
- *   - refetchUsers: Function to refetch only users data
- *   - refetchSheet: Function to refetch specific data sheet
- * 
- * @throws {Error} If used outside of DataProvider
- * 
- * @example
- * // Basic usage in components
- * const { recipes, loading, queryData } = useData();
- * 
- * @example
- * // Search functionality
- * const searchResults = queryData('/discover', 'recipes', 'pasta');
- * 
- * @example
- * // Data refresh after mutations
- * const { refetchSheet } = useData();
- * await handleAddRecipe();
- * await refetchSheet('recipes');
- */
 export const useData = () => {
   const context = useContext(DataContext);
   if (!context) {
@@ -417,3 +11,374 @@ export const useData = () => {
   }
   return context;
 };
+
+export const DataProvider = ({ children }) => {
+  // State for different data types
+  const [userData, setUserData] = useState(null);
+  const [recipes, setRecipes] = useState([]);
+  const [relationships, setRelationships] = useState([]);
+  const [cookbooks, setCookbooks] = useState([]);
+  const [cookingSessions, setCookingSessions] = useState([]);
+  
+  // Loading and error states
+  const [loading, setLoading] = useState({
+    user: false,
+    recipes: false,
+    relationships: false,
+    cookbooks: false,
+    sessions: false,
+    all: false
+  });
+  
+  const [errors, setErrors] = useState({});
+  
+  // Cache for storing fetched data
+  const [cache, setCache] = useState({});
+
+  // Check if user is authenticated
+  const isAuthenticated = () => {
+    const token = localStorage.getItem('token');
+    return !!token;
+  };
+
+  // Fetch all data - waits for authentication
+  const fetchAllData = useCallback(async () => {
+    if (!isAuthenticated()) {
+      console.log('Waiting for authentication before fetching data...');
+      return;
+    }
+
+    setLoading(prev => ({ ...prev, all: true }));
+    
+    try {
+      // Wait for auth to be ready (simulated delay)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Fetch all data types in parallel
+      await Promise.all([
+        fetchUserData(),
+        fetchRecipes(),
+        fetchRelationships(),
+        fetchCookbooks(),
+        fetchCookingSessions()
+      ]);
+      
+      setErrors({});
+    } catch (error) {
+      console.error('Error fetching all data:', error);
+      setErrors(prev => ({
+        ...prev,
+        all: error.message || 'Failed to fetch all data'
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, all: false }));
+    }
+  }, []);
+
+  // Fetch user data
+  const fetchUserData = async () => {
+    if (!isAuthenticated()) return;
+    
+    setLoading(prev => ({ ...prev, user: true }));
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/users/profile.php', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setUserData(data.data);
+          setCachedData('userData', data.data);
+        } else {
+          throw new Error(data.message || 'Failed to fetch user data');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch user data`);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setErrors(prev => ({ ...prev, user: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, user: false }));
+    }
+  };
+
+  // Fetch recipes
+  const fetchRecipes = async () => {
+    if (!isAuthenticated()) return;
+    
+    setLoading(prev => ({ ...prev, recipes: true }));
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/recipes/index.php', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setRecipes(data.data.recipes || []);
+          setCachedData('recipes', data.data.recipes);
+        } else {
+          throw new Error(data.message || 'Failed to fetch recipes');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch recipes`);
+      }
+    } catch (error) {
+      console.error('Error fetching recipes:', error);
+      setErrors(prev => ({ ...prev, recipes: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, recipes: false }));
+    }
+  };
+
+  // Fetch relationships
+  const fetchRelationships = async () => {
+    if (!isAuthenticated()) return;
+    
+    setLoading(prev => ({ ...prev, relationships: true }));
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/relationships/list.php?type=following', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setRelationships(data.data.relationships || []);
+          setCachedData('relationships', data.data.relationships);
+        } else {
+          throw new Error(data.message || 'Failed to fetch relationships');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch relationships`);
+      }
+    } catch (error) {
+      console.error('Error fetching relationships:', error);
+      setErrors(prev => ({ ...prev, relationships: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  // Fetch cookbooks
+  const fetchCookbooks = async () => {
+    if (!isAuthenticated()) return;
+    
+    setLoading(prev => ({ ...prev, cookbooks: true }));
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/cookbooks/index.php', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setCookbooks(data.data.cookbooks || []);
+          setCachedData('cookbooks', data.data.cookbooks);
+        } else {
+          throw new Error(data.message || 'Failed to fetch cookbooks');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch cookbooks`);
+      }
+    } catch (error) {
+      console.error('Error fetching cookbooks:', error);
+      setErrors(prev => ({ ...prev, cookbooks: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, cookbooks: false }));
+    }
+  };
+
+  // Fetch cooking sessions
+  const fetchCookingSessions = async () => {
+    if (!isAuthenticated()) return;
+    
+    setLoading(prev => ({ ...prev, sessions: true }));
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/cooking-sessions/index.php', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setCookingSessions(data.data.sessions || []);
+          setCachedData('cookingSessions', data.data.sessions);
+        } else {
+          throw new Error(data.message || 'Failed to fetch cooking sessions');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch cooking sessions`);
+      }
+    } catch (error) {
+      console.error('Error fetching cooking sessions:', error);
+      setErrors(prev => ({ ...prev, sessions: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, sessions: false }));
+    }
+  };
+
+  // Update user data
+  const updateUserData = (data) => {
+    setUserData(prev => ({ ...prev, ...data }));
+    setCachedData('userData', { ...userData, ...data });
+  };
+
+  // Update recipes
+  const updateRecipes = (data) => {
+    setRecipes(data);
+    setCachedData('recipes', data);
+  };
+
+  // Update relationships
+  const updateRelationships = (data) => {
+    setRelationships(data);
+    setCachedData('relationships', data);
+  };
+
+  // Clear all data
+  const clearData = () => {
+    setUserData(null);
+    setRecipes([]);
+    setRelationships([]);
+    setCookbooks([]);
+    setCookingSessions([]);
+    setCache({});
+    setErrors({});
+  };
+
+  // Get cached data
+  const getCachedData = (key) => {
+    return cache[key] || null;
+  };
+
+  // Set data in cache
+  const setCachedData = (key, data) => {
+    setCache(prev => ({
+      ...prev,
+      [key]: {
+        data,
+        timestamp: Date.now()
+      }
+    }));
+  };
+
+  // Check cache validity (5 minutes)
+  const isCacheValid = (key) => {
+    const cached = cache[key];
+    if (!cached) return false;
+    return Date.now() - cached.timestamp < 5 * 60 * 1000; // 5 minutes
+  };
+
+  // Sync all data
+  const syncAllData = async () => {
+    setLoading(prev => ({ ...prev, all: true }));
+    
+    try {
+      await fetchAllData();
+      
+      // Show sync success notification
+      console.log('🔄 Data synced successfully!');
+    } catch (error) {
+      console.error('Sync error:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, all: false }));
+    }
+  };
+
+  // Effect to fetch data on mount if authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      fetchAllData();
+    }
+  }, [fetchAllData]);
+
+  // Context value
+  const value = {
+    // Data
+    userData,
+    recipes,
+    relationships,
+    cookbooks,
+    cookingSessions,
+    
+    // Loading states
+    loading,
+    errors,
+    
+    // Functions
+    fetchAllData,
+    fetchUserData,
+    fetchRecipes,
+    fetchRelationships,
+    fetchCookbooks,
+    fetchCookingSessions,
+    updateUserData,
+    updateRecipes,
+    updateRelationships,
+    clearData,
+    getCachedData,
+    setCachedData,
+    syncAllData,
+    isAuthenticated
+  };
+
+  return (
+    <DataContext.Provider value={value}>
+      {children}
+      
+      {/* Sync status indicator */}
+      {loading.all && (
+        <div className="sync-status-overlay animate__animated animate__fadeIn">
+          <div className="sync-status-content">
+            <FaSync className="spinning-icon" />
+            <span className="sync-text">Syncing data...</span>
+            <div className="sync-progress">
+              <div className="progress-bar">
+                <div className="progress-fill indeterminate"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Database status indicator */}
+      <div className="database-status-fixed">
+        <FaDatabase className={`database-icon ${loading.all ? 'pulsing' : ''}`} />
+        <div className="status-tooltip">
+          Data Context Active
+          {loading.all && <div className="tooltip-status">🔄 Syncing...</div>}
+        </div>
+      </div>
+    </DataContext.Provider>
+  );
+};
+
+export default DataContext;
