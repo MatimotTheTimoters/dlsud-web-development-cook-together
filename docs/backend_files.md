@@ -13,10 +13,10 @@
 <details>
 <summary>config/environment.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - getEnvironment() -> string: Returns current environment (dev/prod)
 - getDatabaseConfig() -> array: Returns database connection parameters
@@ -29,10 +29,10 @@
 <details>
 <summary>config/database.php</summary>
 
-- requiredImports: environment.php
+- **Required Imports**: environment.php
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - connect() -> PDO: Establishes database connection
 - query(string $sql, array $params) -> PDOStatement: Executes prepared statement
@@ -49,10 +49,10 @@
 <details>
 <summary>config/cors.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - setCorsHeaders() -> void: Sets CORS headers for API responses
 - handlePreflight() -> void: Handles OPTIONS preflight requests
@@ -71,10 +71,10 @@
 <details>
 <summary>classes/AuthHelper.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - generateToken(string $user_id, string $email) -> string: Generates JWT token
 - validateToken(string $token) -> array|false: Validates JWT token
@@ -88,10 +88,10 @@
 <details>
 <summary>classes/DatabaseHelper.php</summary>
 
-- requiredImports: ../config/database.php
+- **Required Imports**: ../config/database.php
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 <details>
 <summary>User Operations</summary>
@@ -141,10 +141,10 @@
 <details>
 <summary>classes/ResponseFormatter.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - success(mixed $data, string $message, int $code) -> void: Returns success response
 - error(string $message, int $code, mixed $details) -> void: Returns error response
@@ -159,10 +159,10 @@
 <details>
 <summary>classes/UserCalculations.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - calculateMaxRewards(array $user_data) -> array: Calculates max rewards
 - calculateMaxPrices(array $user_data) -> array: Calculates max prices
@@ -183,10 +183,10 @@
 <details>
 <summary>utils/uuidHelper.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - makeId() -> string: Generates unique ID
 - generateUniqueId(string $table, string $field) -> string: Generates unique ID for table
@@ -198,10 +198,10 @@
 <details>
 <summary>utils/fileUpload.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - uploadImage(array $file, string $type, string $user_id) -> array|false: Uploads image file
 - validateImage(array $file) -> bool: Validates image file
@@ -214,10 +214,10 @@
 <details>
 <summary>utils/validation.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - validateEmail(string $email) -> bool: Validates email format
 - validatePassword(string $password) -> bool: Validates password strength
@@ -230,14 +230,14 @@
 <details>
 <summary>utils/logging.php</summary>
 
-- requiredImports: None
+- **Required Imports**: None
 
 <details>
-<summary>functions</summary>
+<summary>Functions</summary>
 
 - logError(string $message, array $context) -> void: Logs error to file
 - logActivity(string $user_id, string $action, array $details) -> void: Logs user activity
-- logApiRequest(string $method, string $endpoint, int $status) -> void: Logs API request
+- logApiRequest(string $method, string $**Endpoint**, int $status) -> void: Logs API request
 </details>
 </details>
 
@@ -253,8 +253,8 @@
 <details>
 <summary>database/schema.sql</summary>
 
-- requiredImports: None
-- functions: N/A (SQL file)
+- **Required Imports**: None
+- Functions: N/A (SQL file)
 </details>
 
 ---
@@ -262,8 +262,8 @@
 <details>
 <summary>database/seeds.sql</summary>
 
-- requiredImports: None
-- functions: N/A (SQL file)
+- **Required Imports**: None
+- Functions: N/A (SQL file)
 </details>
 
 </details>
@@ -283,8 +283,8 @@
 <details>
 <summary>api/auth/register.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
-- endpoint: POST /api/auth/register
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
+- **Endpoint**: POST /api/auth/register
 </details>
 
 ---
@@ -292,8 +292,8 @@
 <details>
 <summary>api/auth/login.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/auth/login
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/auth/login
 </details>
 
 ---
@@ -301,8 +301,8 @@
 <details>
 <summary>api/auth/me.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/auth/me
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/auth/me
 </details>
 
 ---
@@ -310,8 +310,8 @@
 <details>
 <summary>api/auth/logout.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/auth/logout
+- **Required Imports**: ../../config/database.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/auth/logout
 </details>
 
 ---
@@ -319,8 +319,8 @@
 <details>
 <summary>api/auth/refresh-token.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/auth/refresh-token
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/auth/refresh-token
 </details>
 
 </details>
@@ -335,8 +335,8 @@
 <details>
 <summary>api/users/profile.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/users/profile
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/users/profile
 </details>
 
 ---
@@ -344,8 +344,8 @@
 <details>
 <summary>api/users/update.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/validation.php
-- endpoint: PUT /api/users/update
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/validation.php
+- **Endpoint**: PUT /api/users/update
 </details>
 
 ---
@@ -353,8 +353,8 @@
 <details>
 <summary>api/users/stats.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/users/stats
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/users/stats
 </details>
 
 ---
@@ -362,8 +362,8 @@
 <details>
 <summary>api/users/search.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/users/search
+- **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/users/search
 </details>
 
 </details>
@@ -378,8 +378,8 @@
 <details>
 <summary>api/relationships/follow.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/relationships/follow
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/relationships/follow
 </details>
 
 ---
@@ -387,8 +387,8 @@
 <details>
 <summary>api/relationships/friends.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/relationships/friends
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/relationships/friends
 </details>
 
 ---
@@ -396,8 +396,8 @@
 <details>
 <summary>api/relationships/list.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/relationships/list
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/relationships/list
 </details>
 
 </details>
@@ -412,8 +412,8 @@
 <details>
 <summary>api/recipes/index.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/recipes
+- **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/recipes
 </details>
 
 ---
@@ -421,8 +421,8 @@
 <details>
 <summary>api/recipes/create.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php, ../../utils/validation.php
-- endpoint: POST /api/recipes
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php, ../../utils/validation.php
+- **Endpoint**: POST /api/recipes
 </details>
 
 ---
@@ -430,8 +430,8 @@
 <details>
 <summary>api/recipes/show.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/recipes/{id}
+- **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/recipes/{id}
 </details>
 
 ---
@@ -439,8 +439,8 @@
 <details>
 <summary>api/recipes/update.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/validation.php
-- endpoint: PUT /api/recipes/{id}
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/validation.php
+- **Endpoint**: PUT /api/recipes/{id}
 </details>
 
 ---
@@ -448,8 +448,8 @@
 <details>
 <summary>api/recipes/delete.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: DELETE /api/recipes/{id}
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: DELETE /api/recipes/{id}
 </details>
 
 ---
@@ -457,8 +457,8 @@
 <details>
 <summary>api/recipes/interact.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/recipes/{id}/interact
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/recipes/{id}/interact
 </details>
 
 </details>
@@ -473,8 +473,8 @@
 <details>
 <summary>api/cooking-sessions/index.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/cooking-sessions
+- **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/cooking-sessions
 </details>
 
 ---
@@ -482,8 +482,8 @@
 <details>
 <summary>api/cooking-sessions/create.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
-- endpoint: POST /api/cooking-sessions
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
+- **Endpoint**: POST /api/cooking-sessions
 </details>
 
 ---
@@ -491,8 +491,8 @@
 <details>
 <summary>api/cooking-sessions/show.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/cooking-sessions/{id}
+- **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/cooking-sessions/{id}
 </details>
 
 ---
@@ -500,8 +500,8 @@
 <details>
 <summary>api/cooking-sessions/update.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: PUT /api/cooking-sessions/{id}
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: PUT /api/cooking-sessions/{id}
 </details>
 
 ---
@@ -509,8 +509,8 @@
 <details>
 <summary>api/cooking-sessions/join.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/cooking-sessions/{id}/join
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/cooking-sessions/{id}/join
 </details>
 
 ---
@@ -518,8 +518,8 @@
 <details>
 <summary>api/cooking-sessions/complete-step.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/cooking-sessions/{id}/complete-step
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/cooking-sessions/{id}/complete-step
 </details>
 
 ---
@@ -527,8 +527,8 @@
 <details>
 <summary>api/cooking-sessions/vote.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/cooking-sessions/{id}/vote
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/cooking-sessions/{id}/vote
 </details>
 
 </details>
@@ -543,8 +543,8 @@
 <details>
 <summary>api/cookbooks/index.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/cookbooks
+- **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/cookbooks
 </details>
 
 ---
@@ -552,8 +552,8 @@
 <details>
 <summary>api/cookbooks/create.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
-- endpoint: POST /api/cookbooks
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
+- **Endpoint**: POST /api/cookbooks
 </details>
 
 ---
@@ -561,8 +561,8 @@
 <details>
 <summary>api/cookbooks/show.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: GET /api/cookbooks/{id}
+- **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: GET /api/cookbooks/{id}
 </details>
 
 ---
@@ -570,8 +570,8 @@
 <details>
 <summary>api/cookbooks/add-recipe.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/cookbooks/{id}/add-recipe
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/cookbooks/{id}/add-recipe
 </details>
 
 ---
@@ -579,8 +579,8 @@
 <details>
 <summary>api/cookbooks/remove-recipe.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- endpoint: DELETE /api/cookbooks/{id}/remove-recipe
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: DELETE /api/cookbooks/{id}/remove-recipe
 </details>
 
 </details>
@@ -595,8 +595,8 @@
 <details>
 <summary>api/upload/image.php</summary>
 
-- requiredImports: ../../config/database.php, ../../classes/AuthHelper.php, ../../utils/fileUpload.php, ../../classes/ResponseFormatter.php
-- endpoint: POST /api/upload/image
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../utils/fileUpload.php, ../../classes/ResponseFormatter.php
+- **Endpoint**: POST /api/upload/image
 </details>
 
 </details>
@@ -618,7 +618,7 @@
 <details>
 <summary>.htaccess</summary>
 
-- description: URL rewriting for clean API endpoints
+- description: URL rewriting for clean API **Endpoint**s
 - content: Rewrites all requests to index.php
 </details>
 
@@ -627,8 +627,8 @@
 <details>
 <summary>index.php</summary>
 
-- requiredImports: config/cors.php
-- functionality: Routes requests to appropriate endpoints
+- **Required Imports**: config/cors.php
+- functionality: Routes requests to appropriate **Endpoint**s
 </details>
 
 </details>
