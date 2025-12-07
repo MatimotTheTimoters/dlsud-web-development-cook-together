@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaEdit, FaCamera, FaTrophy, FaChartLine, FaAward, FaCrown, FaStar, FaFire, FaSync } from 'react-icons/fa';
+import { FaEdit, FaCamera, FaTrophy, 
+         FaChartLine, FaAward, FaCrown, 
+         FaStar, FaFire, FaSync } from 'react-icons/fa';
 import { useData } from '../../contexts/DataContext.js';
-import LoadingSpinner from '../common/LoadingSpinner';
+//import LoadingSpinner from '../common/LoadingSpinner';
 // import StatsDisplay from './StatsDisplay';
 
 const UserProfile = ({ userId: propUserId }) => {
   const { id: paramUserId } = useParams();
   const userId = propUserId || paramUserId;
   
-  // Use DataContext instead of direct API calls
   const { 
     userData, 
     currentUserData, 
@@ -273,10 +274,13 @@ const UserProfile = ({ userId: propUserId }) => {
     }
   }, [userId]);
 
+  /*
   // Show loading state
   if (loading.user || loading.recipes) {
     return <LoadingSpinner size="large" text="Loading profile..." />;
   }
+    */
+
 
   // Show error state
   if (errors.user) {
