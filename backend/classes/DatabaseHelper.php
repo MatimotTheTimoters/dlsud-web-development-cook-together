@@ -1355,4 +1355,507 @@ class DatabaseHelper
             ];
         }
     }
+
+    // Add to backend/classes/DatabaseHelper.php
+
+// Add to "Cooking Session Operations" section
+
+    /**
+     * Create a new cooking session
+     * 
+     * @param array $session_data Session data
+     * @return string|false Session ID or false on failure
+     */
+    public static function createCookingSession($session_data)
+    {
+        try {
+            // Generate session ID
+            require_once __DIR__ . '/../utils/uuidHelper.php';
+            $session_id = UUIDHelper::generateUniqueId('cooking_sessions', 'id');
+
+            // Prepare session data
+            $session_data['id'] = $session_id;
+            $session_data['created_at'] = date('Y-m-d H:i:s');
+            $session_data['updated_at'] = date('Y-m-d H:i:s');
+
+            // Insert session
+            $session_inserted = Database::insert('cooking_sessions', $session_data);
+
+            if (!$session_inserted) {
+                return false;
+            }
+
+            // Create session details
+            $details_id = UUIDHelper::generateUniqueId('cooking_session_details', 'id');
+            $details_data = [
+                'id' => $details_id,
+                'cooking_session_id' => $session_id,
+                'current_step_index' => 0,
+                'total_steps' => $session_data['total_steps'] ?? 0,
+                'completed_steps' => 0,
+                'total_duration' => $session_data['total_duration'] ?? 0,
+                'exp_earned' => 0,
+                'gold_earned' => 0,
+                'gems_earned' => 0
+            ];
+
+            Database::insert('cooking_session_details', $details_data);
+
+            // Add host as participant
+            if (isset($session_data['host_id'])) {
+                self::joinCookingSession($session_id, $session_data['host_id'], 'host');
+            }
+
+            return $session_id;
+        } catch (Exception $e) {
+            error_log("Error creating cooking session: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get cooking session with details
+     * 
+     * @param string $session_id Session ID
+     * @return array|false Session data or false on failure
+     */
+    public static function getCookingSession($session_id)
+    {
+        try {
+            // Get session basic info
+            $session_sql = "SELECT 
+                cs.*, 
+                r.title as recipe_title,
+                r.cover_image as recipe_image,
+                r.difficulty as recipe_difficulty,
+                r.preparation_time + r.cooking_time as total_time,
+                u.full_name as host_name,
+                u.profile_picture as host_picture
+            FROM cooking_sessions cs
+            LEFT JOIN recipes r ON cs.recipe_id = r.id
+            LEFT JOIN users u ON cs.host_id = u.id
+            WHERE cs.id = :session_id";
+
+            $session = Database::fetchOne($session_sql, ['session_id' => $session_id]);
+
+            if (!$session) {
+                return false;
+            }
+
+            // Get session details
+            $details_sql = "SELECT * FROM cooking_session_details 
+                       WHERE cooking_session_id = :session_id";
+            $details = Database::fetchOne($details_sql, ['session_id' => $session_id]);
+
+            // Get participants
+            $participants_sql = "SELECT 
+                cp.*,
+                u.full_name,
+                u.profile_picture,
+                u.level
+            FROM cooking_session_participants cp
+            LEFT JOIN users u ON cp.user_id = u.id
+            WHERE cp.cooking_session_id = :session_id
+            ORDER BY 
+                CASE cp.role 
+                    WHEN 'host' THEN 1
+                    WHEN 'participant' THEN 2
+                    WHEN 'spectator' THEN 3
+                END,
+                cp.joined_at";
+
+            $participants = Database::fetchAll($participants_sql, ['session_id' => $session_id]);
+
+            // Get completed steps
+            $completed_steps_sql = "SELECT 
+                csc.*,
+                rs.description as step_description,
+                rs.order_index as step_order
+            FROM cooking_step_completions csc
+            LEFT JOIN recipe_steps rs ON csc.recipe_step_id = rs.id
+            WHERE csc.cooking_session_id = :session_id
+            ORDER BY csc.step_index";
+
+            $completed_steps = Database::fetchAll($completed_steps_sql, ['session_id' => $session_id]);
+
+            // Get votes
+            $votes_sql = "SELECT * FROM cooking_session_votes 
+                     WHERE cooking_session_id = :session_id";
+            $votes = Database::fetchAll($votes_sql, ['session_id' => $session_id]);
+
+            // Get recipe steps for current progress
+            $recipe_steps_sql = "SELECT 
+                id, description, image, timer_duration, timer_unit,
+                order_index, exp_reward, gold_reward, gem_reward
+            FROM recipe_steps 
+            WHERE recipe_id = :recipe_id 
+            ORDER BY order_index";
+
+            $recipe_steps = Database::fetchAll($recipe_steps_sql, ['recipe_id' => $session['recipe_id']]);
+
+            return [
+                'session' => $session,
+                'details' => $details,
+                'participants' => $participants,
+                'completed_steps' => $completed_steps,
+                'votes' => $votes,
+                'recipe_steps' => $recipe_steps
+            ];
+        } catch (Exception $e) {
+            error_log("Error getting cooking session: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update cooking session
+     * 
+     * @param string $session_id Session ID
+     * @param array $updates Update data
+     * @return bool Success status
+     */
+    public static function updateCookingSession($session_id, $updates)
+    {
+        try {
+            $updates['updated_at'] = date('Y-m-d H:i:s');
+            $where = "id = :id";
+            $updates['id'] = $session_id;
+
+            return Database::update('cooking_sessions', $updates, $where) !== false;
+        } catch (Exception $e) {
+            error_log("Error updating cooking session: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update cooking session details
+     * 
+     * @param string $session_id Session ID
+     * @param array $updates Details update data
+     * @return bool Success status
+     */
+    public static function updateCookingSessionDetails($session_id, $updates)
+    {
+        try {
+            $where = "cooking_session_id = :session_id";
+            $updates['cooking_session_id'] = $session_id;
+
+            return Database::update('cooking_session_details', $updates, $where) !== false;
+        } catch (Exception $e) {
+            error_log("Error updating cooking session details: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Join a cooking session
+     * 
+     * @param string $session_id Session ID
+     * @param string $user_id User ID
+     * @param string $role User role (host|participant|spectator)
+     * @return bool Success status
+     */
+    public static function joinCookingSession($session_id, $user_id, $role = 'participant')
+    {
+        try {
+            // Check if already joined
+            $check_sql = "SELECT id FROM cooking_session_participants 
+                     WHERE cooking_session_id = :session_id AND user_id = :user_id";
+            $existing = Database::fetchOne($check_sql, [
+                'session_id' => $session_id,
+                'user_id' => $user_id
+            ]);
+
+            if ($existing) {
+                // Update existing entry
+                $update_data = [
+                    'role' => $role,
+                    'status' => 'joined',
+                    'joined_at' => date('Y-m-d H:i:s'),
+                    'left_at' => null
+                ];
+                $where = "id = :id";
+                $update_data['id'] = $existing['id'];
+
+                return Database::update('cooking_session_participants', $update_data, $where) !== false;
+            }
+
+            // Create new participant entry
+            require_once __DIR__ . '/../utils/uuidHelper.php';
+            $participant_id = UUIDHelper::generateUniqueId('cooking_session_participants', 'id');
+
+            $participant_data = [
+                'id' => $participant_id,
+                'cooking_session_id' => $session_id,
+                'user_id' => $user_id,
+                'role' => $role,
+                'status' => 'joined',
+                'joined_at' => date('Y-m-d H:i:s')
+            ];
+
+            return Database::insert('cooking_session_participants', $participant_data) !== false;
+        } catch (Exception $e) {
+            error_log("Error joining cooking session: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Leave a cooking session
+     * 
+     * @param string $session_id Session ID
+     * @param string $user_id User ID
+     * @return bool Success status
+     */
+    public static function leaveCookingSession($session_id, $user_id)
+    {
+        try {
+            $update_data = [
+                'status' => 'left',
+                'left_at' => date('Y-m-d H:i:s')
+            ];
+            $where = "cooking_session_id = :session_id AND user_id = :user_id";
+
+            return Database::update('cooking_session_participants', $update_data, $where, [
+                'session_id' => $session_id,
+                'user_id' => $user_id
+            ]) !== false;
+        } catch (Exception $e) {
+            error_log("Error leaving cooking session: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Complete a cooking step
+     * 
+     * @param string $session_id Session ID
+     * @param string $step_id Recipe step ID
+     * @param string $user_id User ID who completed the step
+     * @param array $step_data Additional step data
+     * @return bool Success status
+     */
+    public static function completeCookingStep($session_id, $step_id, $user_id, $step_data = [])
+    {
+        try {
+            Database::query("START TRANSACTION");
+
+            // Get step info
+            $step_sql = "SELECT * FROM recipe_steps WHERE id = :step_id";
+            $step = Database::fetchOne($step_sql, ['step_id' => $step_id]);
+
+            if (!$step) {
+                throw new Exception("Step not found");
+            }
+
+            // Check if step already completed for this session
+            $check_sql = "SELECT id FROM cooking_step_completions 
+                     WHERE cooking_session_id = :session_id 
+                     AND recipe_step_id = :step_id";
+            $existing = Database::fetchOne($check_sql, [
+                'session_id' => $session_id,
+                'step_id' => $step_id
+            ]);
+
+            if ($existing) {
+                // Step already completed
+                Database::query("ROLLBACK");
+                return false;
+            }
+
+            // Create completion record
+            require_once __DIR__ . '/../utils/uuidHelper.php';
+            $completion_id = UUIDHelper::generateUniqueId('cooking_step_completions', 'id');
+
+            $completion_data = [
+                'id' => $completion_id,
+                'cooking_session_id' => $session_id,
+                'recipe_step_id' => $step_id,
+                'step_index' => $step['order_index'],
+                'completed_at' => date('Y-m-d H:i:s'),
+                'duration_seconds' => $step_data['duration_seconds'] ?? null,
+                'was_skipped' => $step_data['was_skipped'] ?? false,
+                'notes' => $step_data['notes'] ?? null,
+                'exp_earned' => $step['exp_reward'] ?? 0,
+                'gold_earned' => $step['gold_reward'] ?? 0,
+                'gems_earned' => $step['gem_reward'] ?? 0
+            ];
+
+            Database::insert('cooking_step_completions', $completion_data);
+
+            // Update session details
+            $details_sql = "SELECT * FROM cooking_session_details 
+                       WHERE cooking_session_id = :session_id 
+                       FOR UPDATE";
+            $details = Database::fetchOne($details_sql, ['session_id' => $session_id]);
+
+            if ($details) {
+                $update_details = [
+                    'completed_steps' => $details['completed_steps'] + 1,
+                    'current_step_index' => $step['order_index'],
+                    'exp_earned' => $details['exp_earned'] + ($step['exp_reward'] ?? 0),
+                    'gold_earned' => $details['gold_earned'] + ($step['gold_reward'] ?? 0),
+                    'gems_earned' => $details['gems_earned'] + ($step['gem_reward'] ?? 0)
+                ];
+
+                // If this is the last step, mark session as completed
+                if (
+                    $details['total_steps'] > 0 &&
+                    ($details['completed_steps'] + 1) >= $details['total_steps']
+                ) {
+
+                    self::updateCookingSession($session_id, [
+                        'status' => 'completed',
+                        'completed_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+
+                self::updateCookingSessionDetails($session_id, $update_details);
+            }
+
+            // Update user stats
+            self::incrementUserStat($user_id, 'recipes_cooked', 1);
+
+            Database::query("COMMIT");
+            return true;
+        } catch (Exception $e) {
+            Database::query("ROLLBACK");
+            error_log("Error completing cooking step: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Vote in a cooking session
+     * 
+     * @param string $session_id Session ID
+     * @param string $user_id User ID
+     * @param string $vote_type Vote type
+     * @param bool $vote_value Vote value
+     * @return bool Success status
+     */
+    public static function voteInCookingSession($session_id, $user_id, $vote_type, $vote_value)
+    {
+        try {
+            // Check for existing vote
+            $check_sql = "SELECT id FROM cooking_session_votes 
+                     WHERE cooking_session_id = :session_id 
+                     AND user_id = :user_id 
+                     AND vote_type = :vote_type";
+
+            $existing = Database::fetchOne($check_sql, [
+                'session_id' => $session_id,
+                'user_id' => $user_id,
+                'vote_type' => $vote_type
+            ]);
+
+            if ($existing) {
+                // Update existing vote
+                $update_data = [
+                    'vote_value' => $vote_value,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+                $where = "id = :id";
+                $update_data['id'] = $existing['id'];
+
+                return Database::update('cooking_session_votes', $update_data, $where) !== false;
+            }
+
+            // Create new vote
+            require_once __DIR__ . '/../utils/uuidHelper.php';
+            $vote_id = UUIDHelper::generateUniqueId('cooking_session_votes', 'id');
+
+            $vote_data = [
+                'id' => $vote_id,
+                'cooking_session_id' => $session_id,
+                'user_id' => $user_id,
+                'vote_type' => $vote_type,
+                'vote_value' => $vote_value,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            return Database::insert('cooking_session_votes', $vote_data) !== false;
+        } catch (Exception $e) {
+            error_log("Error voting in cooking session: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get user's active cooking sessions
+     * 
+     * @param string $user_id User ID
+     * @return array|false Array of sessions or false on failure
+     */
+    public static function getUserCookingSessions($user_id, $status = null)
+    {
+        try {
+            $sql = "SELECT 
+                cs.*,
+                r.title as recipe_title,
+                r.cover_image as recipe_image,
+                csd.completed_steps,
+                csd.total_steps,
+                csd.exp_earned,
+                csd.gold_earned,
+                csd.gems_earned
+            FROM cooking_sessions cs
+            INNER JOIN cooking_session_participants csp ON cs.id = csp.cooking_session_id
+            LEFT JOIN recipes r ON cs.recipe_id = r.id
+            LEFT JOIN cooking_session_details csd ON cs.id = csd.cooking_session_id
+            WHERE csp.user_id = :user_id 
+            AND csp.status = 'joined'";
+
+            $params = ['user_id' => $user_id];
+
+            if ($status) {
+                $sql .= " AND cs.status = :status";
+                $params['status'] = $status;
+            }
+
+            $sql .= " ORDER BY cs.created_at DESC";
+
+            return Database::fetchAll($sql, $params);
+        } catch (Exception $e) {
+            error_log("Error getting user cooking sessions: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get public cooking sessions
+     * 
+     * @param int $limit Maximum number of sessions to return
+     * @return array|false Array of sessions or false on failure
+     */
+    public static function getPublicCookingSessions($limit = 20)
+    {
+        try {
+            $sql = "SELECT 
+                cs.*,
+                r.title as recipe_title,
+                r.cover_image as recipe_image,
+                u.full_name as host_name,
+                COUNT(csp.id) as participant_count,
+                csd.completed_steps,
+                csd.total_steps
+            FROM cooking_sessions cs
+            LEFT JOIN recipes r ON cs.recipe_id = r.id
+            LEFT JOIN users u ON cs.host_id = u.id
+            LEFT JOIN cooking_session_participants csp ON cs.id = csp.cooking_session_id 
+                AND csp.status = 'joined'
+            LEFT JOIN cooking_session_details csd ON cs.id = csd.cooking_session_id
+            WHERE cs.visibility = 'public'
+            AND cs.status IN ('planned', 'preparing', 'cooking')
+            GROUP BY cs.id
+            ORDER BY cs.created_at DESC
+            LIMIT :limit";
+
+            return Database::fetchAll($sql, ['limit' => $limit]);
+        } catch (Exception $e) {
+            error_log("Error getting public cooking sessions: " . $e->getMessage());
+            return false;
+        }
+    }
 }
