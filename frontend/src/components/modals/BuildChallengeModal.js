@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useData } from '../../contexts/DataContext.js';
 import { makeId } from '../../hooks/uuidHelper.js';
-import apiSheets from '../../constants/api.js';
 
 export default function BuildChallengeModal({ show, onHide, onCreated }) {
   const { currentUserData, userRewardLimits, refetchSheet } = useData();
@@ -127,41 +126,44 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
 
       // Prepare payload
       const payload = {
-        data: [
-          {
-            ...values,
-            // ensure numeric types for rewards
-            expReward: Number(values.expReward) || 0,
-            goldReward: Number(values.goldReward) || 0,
-            gemReward: Number(values.gemReward) || 0,
-            tags: values.tags
-              .split(',')
-              .map((tag) => tag.trim())
-              .filter((tag) => tag)
-              .join(','),
-            author: userId,
-            participantCount: 0,
-            status: 'active',
-            createdBy: userId,
-          },
-        ],
-      };
+        title: values.title,
+        description: values.description,
+        challenge_id: values.challengeId,
+        cover_image: values.coverImage,
+        tags: values.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        total_cook_quota: values.totalCookQuota,
+        start_date: values.startDate,
+        end_date: values.endDate,
+        exp_reward: Number(values.expReward) || 0,
+        gold_reward: Number(values.goldReward) || 0,
+        gem_reward: Number(values.gemReward) || 0,
+        author_id: userId,
+        status: 'active'
+    };
+
 
       console.log('📦 Challenge Payload:', payload);
 
-      // Post challenge to SheetDB
-      const res = await fetch(apiSheets.challengesCookQuota, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      // Post challenge to PHP backend
+    const token = localStorage.getItem('token');
+    const res = await fetch('http://localhost/api/challenges/create.php', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload),
+    });
 
-      if (!res.ok) {
-        const txt = await res.text().catch(() => '');
-        throw new Error(`Failed to create challenge: ${res.status} ${txt}`);
-      }
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(`Failed to create challenge: ${res.status} ${txt}`);
+    }
 
-      // refresh challenges data so UI reflects the new challenge (like CreateRecipeModal)
+    const result = await res.json();
+    
+    if (result.success) {
+      // Call the refetchSheet function (which now maps to appropriate fetch functions)
       try {
         await refetchSheet('challengesCookQuota');
       } catch (err) {
@@ -180,13 +182,16 @@ export default function BuildChallengeModal({ show, onHide, onCreated }) {
       }
 
       onHide();
-    } catch (err) {
-      console.error('Challenge creation error:', err);
-      alert('Failed to create challenge: ' + err.message);
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error(result.message || 'Failed to create challenge');
     }
-  };
+  } catch (err) {
+    console.error('Challenge creation error:', err);
+    alert('Failed to create challenge: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Modal show={show} onHide={onHide} centered className="modal-ct" size="lg">
