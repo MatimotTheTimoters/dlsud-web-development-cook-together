@@ -1858,4 +1858,428 @@ class DatabaseHelper
             return false;
         }
     }
-}
+
+
+    /**
+    *  Relationship 
+    */
+
+    /**
+    * Follow a user
+    */
+    public static function followUser($source_user_id, $target_user_id) {
+        try {
+            $pdo = Database::getConnection();
+        
+            // Check if relationship already exists
+            $checkStmt = $pdo->prepare("
+                SELECT id FROM user_relationships 
+                WHERE source_user_id = ? 
+                AND target_user_id = ? 
+                AND relationship_type = 'following'
+            ");
+        
+            $checkStmt->execute([$source_user_id, $target_user_id]);
+        
+            if ($checkStmt->fetch()) {
+            return false; // Already following
+            }
+        
+            // Insert new relationship
+            $stmt = $pdo->prepare("
+            INSERT INTO user_relationships (id, source_user_id, target_user_id, relationship_type, status, created_at)
+            VALUES (?, ?, ?, 'following', 'accepted', NOW())
+            ");
+        
+            $relationship_id = uniqid('rel_', true);
+            return $stmt->execute([$relationship_id, $source_user_id, $target_user_id]);
+        
+        }catch (PDOException $e) {
+            error_log("Follow user error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Unfollow a user
+     */
+    public static function unfollowUser($source_user_id, $target_user_id) {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+                DELETE FROM user_relationships 
+                WHERE source_user_id = ? 
+                AND target_user_id = ? 
+                AND relationship_type = 'following'
+            ");
+
+            return $stmt->execute([$source_user_id, $target_user_id]);
+
+        } catch (PDOException $e) {
+            error_log("Unfollow user error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get friend requests for a user
+     */
+    public static function getFriendRequests($user_id, $type = 'received') {
+        try {
+            $pdo = Database::getConnection();
+
+            if ($type === 'received') {
+                // Requests received by the user
+                $stmt = $pdo->prepare("
+                    SELECT 
+                        ur.id,
+                        ur.source_user_id,
+                        u.full_name,
+                        u.profile_picture,
+                        ur.message,
+                        ur.created_at,
+                        ur.updated_at
+                    FROM user_relationships ur
+                    JOIN users u ON ur.source_user_id = u.id
+                    WHERE ur.target_user_id = ? 
+                    AND ur.relationship_type = 'friend' 
+                    AND ur.status = 'pending'
+                    ORDER BY ur.created_at DESC
+                ");
+            } else {
+                // Requests sent by the user
+                $stmt = $pdo->prepare("
+                    SELECT 
+                        ur.id,
+                        ur.target_user_id as source_user_id,
+                        u.full_name,
+                        u.profile_picture,
+                        ur.message,
+                        ur.created_at,
+                        ur.updated_at
+                    FROM user_relationships ur
+                    JOIN users u ON ur.target_user_id = u.id
+                    WHERE ur.source_user_id = ? 
+                    AND ur.relationship_type = 'friend' 
+                    AND ur.status = 'pending'
+                    ORDER BY ur.created_at DESC
+                ");
+            }
+
+            $stmt->execute([$user_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            error_log("Get friend requests error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Manage friend relationships (send/accept/reject/cancel/remove)
+     */
+    public static function manageFriendRelationships($action, $source_user_id, $target_user_id, $message = null) {
+        try {
+            $pdo = Database::getConnection();
+
+            switch ($action) {
+                case 'send_request':
+                    // Check if request already exists
+                    $checkStmt = $pdo->prepare("
+                        SELECT id FROM user_relationships 
+                        WHERE source_user_id = ? 
+                        AND target_user_id = ? 
+                        AND relationship_type = 'friend'
+                    ");
+
+                    $checkStmt->execute([$source_user_id, $target_user_id]);
+
+                    if ($checkStmt->fetch()) {
+                        return false; // Request already exists
+                    }
+
+                    // Send new friend request
+                    $stmt = $pdo->prepare("
+                        INSERT INTO user_relationships (id, source_user_id, target_user_id, relationship_type, status, message, created_at)
+                        VALUES (?, ?, ?, 'friend', 'pending', ?, NOW())
+                    ");
+
+                    $relationship_id = uniqid('rel_', true);
+                    return $stmt->execute([$relationship_id, $source_user_id, $target_user_id, $message]);
+
+                case 'accept_request':
+                    // Accept friend request (source sent to target, so we need to find that record)
+                    $stmt = $pdo->prepare("
+                        UPDATE user_relationships 
+                        SET status = 'accepted', 
+                            responded_at = NOW(),
+                            updated_at = NOW()
+                        WHERE source_user_id = ? 
+                        AND target_user_id = ? 
+                        AND relationship_type = 'friend'
+                        AND status = 'pending'
+                    ");
+
+                    return $stmt->execute([$target_user_id, $source_user_id]);
+
+                case 'reject_request':
+                    // Reject friend request
+                    $stmt = $pdo->prepare("
+                        UPDATE user_relationships 
+                        SET status = 'rejected', 
+                            responded_at = NOW(),
+                            updated_at = NOW()
+                        WHERE source_user_id = ? 
+                        AND target_user_id = ? 
+                        AND relationship_type = 'friend'
+                        AND status = 'pending'
+                    ");
+
+                    return $stmt->execute([$target_user_id, $source_user_id]);
+
+                case 'cancel_request':
+                    // Cancel a sent friend request
+                    $stmt = $pdo->prepare("
+                        UPDATE user_relationships 
+                        SET status = 'cancelled', 
+                            updated_at = NOW()
+                        WHERE source_user_id = ? 
+                        AND target_user_id = ? 
+                        AND relationship_type = 'friend'
+                        AND status = 'pending'
+                    ");
+
+                    return $stmt->execute([$source_user_id, $target_user_id]);
+
+                case 'remove_friend':
+                    // Remove a friend (delete the relationship)
+                    $stmt = $pdo->prepare("
+                        DELETE FROM user_relationships 
+                        WHERE (
+                            (source_user_id = ? AND target_user_id = ?) 
+                            OR (source_user_id = ? AND target_user_id = ?)
+                        ) 
+                        AND relationship_type = 'friend'
+                    ");
+
+                    return $stmt->execute([$source_user_id, $target_user_id, $target_user_id, $source_user_id]);
+
+                default:
+                    return false;
+            }
+
+        } catch (PDOException $e) {
+            error_log("Manage friend relationships error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get user's friends list
+     */
+    public static function getFriendsList($user_id, $limit = 50, $offset = 0) {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+                SELECT 
+                    CASE 
+                        WHEN ur.source_user_id = ? THEN ur.target_user_id
+                        ELSE ur.source_user_id
+                    END as friend_id,
+                    u.full_name,
+                    u.profile_picture,
+                    ur.updated_at as friends_since
+                FROM user_relationships ur
+                JOIN users u ON (
+                    CASE 
+                        WHEN ur.source_user_id = ? THEN ur.target_user_id
+                        ELSE ur.source_user_id
+                    END = u.id
+                )
+                WHERE (
+                    (ur.source_user_id = ? OR ur.target_user_id = ?)
+                    AND ur.relationship_type = 'friend'
+                    AND ur.status = 'accepted'
+                )
+                ORDER BY ur.updated_at DESC
+                LIMIT ? OFFSET ?
+            ");
+
+            $stmt->execute([$user_id, $user_id, $user_id, $user_id, $limit, $offset]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            error_log("Get friends list error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get user's followers
+     */
+    public static function getFollowersList($user_id, $limit = 50, $offset = 0) {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+                SELECT 
+                    ur.source_user_id as follower_id,
+                    u.full_name,
+                    u.profile_picture,
+                    ur.created_at as followed_at
+                FROM user_relationships ur
+                JOIN users u ON ur.source_user_id = u.id
+                WHERE ur.target_user_id = ? 
+                AND ur.relationship_type = 'following' 
+                AND ur.status = 'accepted'
+                ORDER BY ur.created_at DESC
+                LIMIT ? OFFSET ?
+            ");
+
+            $stmt->execute([$user_id, $limit, $offset]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            error_log("Get followers list error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get users that a user is following
+     */
+    public static function getFollowingList($user_id, $limit = 50, $offset = 0) {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+                SELECT 
+                    ur.target_user_id as following_id,
+                    u.full_name,
+                    u.profile_picture,
+                    ur.created_at as followed_at
+                FROM user_relationships ur
+                JOIN users u ON ur.target_user_id = u.id
+                WHERE ur.source_user_id = ? 
+                AND ur.relationship_type = 'following' 
+                AND ur.status = 'accepted'
+                ORDER BY ur.created_at DESC
+                LIMIT ? OFFSET ?
+            ");
+
+            $stmt->execute([$user_id, $limit, $offset]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            error_log("Get following list error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Check if two users are friends
+     */
+    public static function areFriends($user1_id, $user2_id) {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as count 
+                FROM user_relationships 
+                WHERE (
+                    (source_user_id = ? AND target_user_id = ?)
+                    OR (source_user_id = ? AND target_user_id = ?)
+                )
+                AND relationship_type = 'friend'
+                AND status = 'accepted'
+            ");
+
+            $stmt->execute([$user1_id, $user2_id, $user2_id, $user1_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result && $result['count'] > 0;
+        } catch (PDOException $e) {
+            error_log("Check friends error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get follower count for a user
+     */
+    public static function getFollowerCount($user_id) {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as count 
+                FROM user_relationships 
+                WHERE target_user_id = ? 
+                AND relationship_type = 'following' 
+                AND status = 'accepted'
+            ");
+
+            $stmt->execute([$user_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result ? (int)$result['count'] : 0;
+        } catch (PDOException $e) {
+            error_log("Get follower count error: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get following count for a user
+     */
+    public static function getFollowingCount($user_id) {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as count 
+                FROM user_relationships 
+                WHERE source_user_id = ? 
+                AND relationship_type = 'following' 
+                AND status = 'accepted'
+            ");
+
+            $stmt->execute([$user_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result ? (int)$result['count'] : 0;
+        } catch (PDOException $e) {
+            error_log("Get following count error: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get friends count for a user
+     */
+    public static function getFriendsCount($user_id) {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as count 
+                FROM user_relationships 
+                WHERE (
+                    (source_user_id = ? OR target_user_id = ?)
+                    AND relationship_type = 'friend'
+                    AND status = 'accepted'
+                )
+            ");
+
+            $stmt->execute([$user_id, $user_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result ? (int)$result['count'] : 0;
+        } catch (PDOException $e) {
+            error_log("Get friends count error: " . $e->getMessage());
+            return 0;
+        }
+    }
+    }
