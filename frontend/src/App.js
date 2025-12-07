@@ -4,7 +4,7 @@ import './styles/index.css';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './contexts/DataContext';
-import { AuthProvider } from './hooks/useAuth';
+import { AuthProvider } from './contexts/AuthContext';
 
 import NavbarComponent from './components/NavbarComponent';
 import FooterComponent from './components/FooterComponent';
@@ -30,6 +30,7 @@ import UserCardPage from './pages/card-pages/UserCardPage';
 
 function App() {
   return (
+    <AuthProvider>
     <DataProvider>
       <Router>
         <div className="app-container d-flex flex-column min-vh-100">
@@ -73,6 +74,7 @@ function App() {
         </div>
       </Router>
     </DataProvider>
+    </AuthProvider>
   );
 }
 
