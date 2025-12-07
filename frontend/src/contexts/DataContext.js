@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { FaDatabase, FaSync } from 'react-icons/fa';
 import * as recipeApi from '../api/recipes';
+import * as relationshipsApi from '../api/relationships';
 
 // Create DataContext
 const DataContext = createContext();
