@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { FaDatabase, FaSync } from 'react-icons/fa';
 import * as recipeApi from '../api/recipes';
+import * as relationshipsApi from '../api/relationships';
 
 // Create DataContext
 const DataContext = createContext();
@@ -446,6 +447,90 @@ export const DataProvider = ({ children }) => {
     purchaseRecipe: async (recipeId) => {
       const result = await recipeApi.purchaseRecipe(recipeId);
       return result;
+    },
+    // Add these functions inside the value object (around line 348-400)
+
+    // Relationship management functions
+    followUser: async (targetUserId) => {
+      try {
+        const result = await relationshipsApi.followUser(targetUserId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+          return result;
+        }
+        return result;
+      } catch (error) {
+        console.error('Error following user:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    unfollowUser: async (targetUserId) => {
+      try {
+        const result = await relationshipsApi.unfollowUser(targetUserId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+          return result;
+        }
+        return result;
+      } catch (error) {
+        console.error('Error unfollowing user:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    getFriendRequests: async () => {
+      try {
+        const result = await relationshipsApi.getFriendRequests();
+        return result;
+      } catch (error) {
+        console.error('Error getting friend requests:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    acceptFriendRequest: async (requestId) => {
+      try {
+        const result = await relationshipsApi.acceptFriendRequest(requestId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+        }
+        return result;
+      } catch (error) {
+        console.error('Error accepting friend request:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    rejectFriendRequest: async (requestId) => {
+      try {
+        const result = await relationshipsApi.rejectFriendRequest(requestId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+        }
+        return result;
+      } catch (error) {
+        console.error('Error rejecting friend request:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    removeFriend: async (friendId) => {
+      try {
+        const result = await relationshipsApi.removeFriend(friendId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+        }
+        return result;
+      } catch (error) {
+        console.error('Error removing friend:', error);
+        return { success: false, error: error.message };
+      }
     }
   };
 };
