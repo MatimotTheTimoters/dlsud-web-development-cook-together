@@ -1,4 +1,3 @@
-// frontend/src/components/cooking/StepProgress.jsx
 import React from 'react';
 import { FaFlagCheckered, FaRoute, FaCheckCircle, FaCircle } from 'react-icons/fa';
 

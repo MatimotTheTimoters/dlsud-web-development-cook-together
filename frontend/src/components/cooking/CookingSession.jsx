@@ -1,4 +1,3 @@
-// frontend/src/components/cooking/CookingSession.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaPlay, FaPause, FaStop, FaStepForward, FaUsers, FaTrophy, FaCheckCircle, FaHourglassHalf, FaCoins, FaGem, FaFire } from 'react-icons/fa';

@@ -1,4 +1,3 @@
-// frontend/src/components/cooking/ParticipantList.jsx
 import React, { useState, useEffect } from 'react';
 import { FaUser, FaCrown, FaEye, FaPlus, FaTimes, FaUserCheck, FaUserClock } from 'react-icons/fa';
 import { getSession, joinSession } from '../../api/cooking-sessions';

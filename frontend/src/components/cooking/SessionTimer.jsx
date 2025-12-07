@@ -1,4 +1,3 @@
-// frontend/src/components/cooking/SessionTimer.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { FaPlay, FaPause, FaRedo, FaHourglassHalf, FaClock } from 'react-icons/fa';
 
