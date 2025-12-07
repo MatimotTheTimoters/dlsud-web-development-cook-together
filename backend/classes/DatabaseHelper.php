@@ -582,4 +582,777 @@ class DatabaseHelper
             return false;
         }
     }
+
+    /**
+     * Create a new recipe with ingredients and steps
+     * 
+     * @param array $recipe_data Recipe data
+     * @param array $ingredients List of ingredients
+     * @param array $steps List of steps
+     * @return string|false Recipe ID if successful, false otherwise
+     */
+    public static function createRecipe($recipe_data, $ingredients, $steps)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Start transaction
+            $pdo->beginTransaction();
+
+            // Generate recipe ID
+            require_once __DIR__ . '/../utils/uuidHelper.php';
+            $recipe_id = UUIDHelper::generateUniqueId('recipes', 'id');
+
+            // Prepare recipe data
+            $recipe_record = [
+                'id' => $recipe_id,
+                'title' => $recipe_data['title'],
+                'description' => $recipe_data['description'] ?? null,
+                'origin' => $recipe_data['origin'] ?? null,
+                'preparation_time' => $recipe_data['preparation_time'] ?? null,
+                'cooking_time' => $recipe_data['cooking_time'] ?? null,
+                'serving_size' => $recipe_data['serving_size'] ?? null,
+                'difficulty' => $recipe_data['difficulty'] ?? 'medium',
+                'cover_image' => $recipe_data['cover_image'] ?? null,
+                'is_paid' => $recipe_data['is_paid'] ?? false,
+                'is_public' => $recipe_data['is_public'] ?? true,
+                'user_id' => $recipe_data['user_id'],
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            // Insert recipe
+            $recipe_result = Database::insert('recipes', $recipe_record);
+
+            if (!$recipe_result) {
+                throw new Exception('Failed to insert recipe');
+            }
+
+            // Insert metadata
+            $metadata_id = UUIDHelper::generateUniqueId('recipe_metadata', 'id');
+            $metadata_data = [
+                'id' => $metadata_id,
+                'recipe_id' => $recipe_id,
+                'tags' => $recipe_data['tags'] ?? null,
+                'exp_reward' => $recipe_data['exp_reward'] ?? 0,
+                'gold_reward' => $recipe_data['gold_reward'] ?? 0,
+                'gem_reward' => $recipe_data['gem_reward'] ?? 0,
+                'gold_price' => $recipe_data['gold_price'] ?? 0,
+                'gem_price' => $recipe_data['gem_price'] ?? 0,
+                'purchase_count' => 0,
+                'like_count' => 0,
+                'dislike_count' => 0,
+                'cook_count' => 0,
+                'total_calories' => $recipe_data['total_calories'] ?? 0,
+                'total_protein' => $recipe_data['total_protein'] ?? 0,
+                'total_carbs' => $recipe_data['total_carbs'] ?? 0,
+                'total_fat' => $recipe_data['total_fat'] ?? 0,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $metadata_result = Database::insert('recipe_metadata', $metadata_data);
+
+            if (!$metadata_result) {
+                throw new Exception('Failed to insert recipe metadata');
+            }
+
+            // Insert ingredients
+            if (!empty($ingredients)) {
+                $ingredient_order = 0;
+                foreach ($ingredients as $ingredient) {
+                    $ingredient_id = UUIDHelper::generateUniqueId('recipe_ingredients', 'id');
+                    $ingredient_record = [
+                        'id' => $ingredient_id,
+                        'recipe_id' => $recipe_id,
+                        'name' => $ingredient['name'],
+                        'amount' => $ingredient['amount'] ?? null,
+                        'unit' => $ingredient['unit'] ?? null,
+                        'notes' => $ingredient['notes'] ?? null,
+                        'order_index' => $ingredient_order++,
+                        'calories_per_unit' => $ingredient['calories_per_unit'] ?? 0,
+                        'protein_per_unit' => $ingredient['protein_per_unit'] ?? 0,
+                        'carbs_per_unit' => $ingredient['carbs_per_unit'] ?? 0,
+                        'fat_per_unit' => $ingredient['fat_per_unit'] ?? 0,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+
+                    $ingredient_result = Database::insert('recipe_ingredients', $ingredient_record);
+
+                    if (!$ingredient_result) {
+                        throw new Exception('Failed to insert ingredient: ' . $ingredient['name']);
+                    }
+                }
+            }
+
+            // Insert steps
+            if (!empty($steps)) {
+                $step_order = 0;
+                foreach ($steps as $step) {
+                    $step_id = UUIDHelper::generateUniqueId('recipe_steps', 'id');
+                    $step_record = [
+                        'id' => $step_id,
+                        'recipe_id' => $recipe_id,
+                        'description' => $step['description'],
+                        'image' => $step['image'] ?? null,
+                        'read_timer_duration' => $step['read_timer_duration'] ?? 10,
+                        'timer_duration' => $step['timer_duration'] ?? null,
+                        'timer_unit' => $step['timer_unit'] ?? 'seconds',
+                        'exp_reward' => $step['exp_reward'] ?? 0,
+                        'gold_reward' => $step['gold_reward'] ?? 0,
+                        'gem_reward' => $step['gem_reward'] ?? 0,
+                        'order_index' => $step_order++,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+
+                    $step_result = Database::insert('recipe_steps', $step_record);
+
+                    if (!$step_result) {
+                        throw new Exception('Failed to insert step: ' . ($step_order - 1));
+                    }
+                }
+            }
+
+            // Increment user's recipes_created stat
+            self::incrementUserStat($recipe_data['user_id'], 'recipes_created', 1);
+
+            // Commit transaction
+            $pdo->commit();
+
+            return $recipe_id;
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Create recipe failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get full recipe with details, ingredients, and steps
+     * 
+     * @param string $recipe_id Recipe ID
+     * @return array|false Full recipe data if found, false otherwise
+     */
+    public static function getRecipe($recipe_id)
+    {
+        try {
+            // Get recipe basic info
+            $recipe_sql = "SELECT r.*, u.full_name as creator_name, u.profile_picture as creator_avatar,
+                                  rm.tags, rm.exp_reward, rm.gold_reward, rm.gem_reward,
+                                  rm.gold_price, rm.gem_price, rm.purchase_count,
+                                  rm.like_count, rm.dislike_count, rm.cook_count,
+                                  rm.total_calories, rm.total_protein, rm.total_carbs, rm.total_fat
+                           FROM recipes r
+                           LEFT JOIN users u ON r.user_id = u.id
+                           LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id
+                           WHERE r.id = :recipe_id";
+
+            $recipe = Database::fetchOne($recipe_sql, ['recipe_id' => $recipe_id]);
+
+            if (!$recipe) {
+                return false;
+            }
+
+            // Get ingredients
+            $ingredients_sql = "SELECT * FROM recipe_ingredients 
+                                WHERE recipe_id = :recipe_id 
+                                ORDER BY order_index ASC";
+            $ingredients = Database::fetchAll($ingredients_sql, ['recipe_id' => $recipe_id]);
+
+            // Get steps
+            $steps_sql = "SELECT * FROM recipe_steps 
+                          WHERE recipe_id = :recipe_id 
+                          ORDER BY order_index ASC";
+            $steps = Database::fetchAll($steps_sql, ['recipe_id' => $recipe_id]);
+
+            // Calculate total cooking time
+            $total_time = ($recipe['preparation_time'] ?? 0) + ($recipe['cooking_time'] ?? 0);
+
+            // Get user interaction status (if user is logged in)
+            $user_has_interacted = [];
+            if (isset($_SESSION['user_id'])) {
+                $interaction_sql = "SELECT interaction_type FROM recipe_interactions 
+                                    WHERE user_id = :user_id AND recipe_id = :recipe_id";
+                $user_interactions = Database::fetchAll($interaction_sql, [
+                    'user_id' => $_SESSION['user_id'],
+                    'recipe_id' => $recipe_id
+                ]);
+
+                foreach ($user_interactions as $interaction) {
+                    $user_has_interacted[$interaction['interaction_type']] = true;
+                }
+            }
+
+            // Build response
+            return [
+                'recipe' => $recipe,
+                'ingredients' => $ingredients,
+                'steps' => $steps,
+                'total_time' => $total_time,
+                'user_has_interacted' => $user_has_interacted,
+                'stats' => [
+                    'rating' => self::calculateRecipeRating($recipe_id),
+                    'difficulty_label' => self::getDifficultyLabel($recipe['difficulty']),
+                    'popularity_score' => self::calculatePopularityScore($recipe_id)
+                ]
+            ];
+        } catch (Exception $e) {
+            error_log('Get recipe failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update recipe with ingredients and steps
+     * 
+     * @param string $recipe_id Recipe ID
+     * @param array $recipe_data Updated recipe data
+     * @param array $ingredients Updated ingredients list
+     * @param array $steps Updated steps list
+     * @return bool True if successful, false otherwise
+     */
+    public static function updateRecipe($recipe_id, $recipe_data, $ingredients, $steps)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Start transaction
+            $pdo->beginTransaction();
+
+            // Update recipe basic info
+            $recipe_data['updated_at'] = date('Y-m-d H:i:s');
+            $recipe_result = Database::update('recipes', $recipe_data, 'id = :recipe_id', ['recipe_id' => $recipe_id]);
+
+            if (!$recipe_result) {
+                throw new Exception('Failed to update recipe');
+            }
+
+            // Update metadata if provided
+            if (isset($recipe_data['metadata'])) {
+                $recipe_data['metadata']['updated_at'] = date('Y-m-d H:i:s');
+                $metadata_result = Database::update(
+                    'recipe_metadata',
+                    $recipe_data['metadata'],
+                    'recipe_id = :recipe_id',
+                    ['recipe_id' => $recipe_id]
+                );
+
+                if (!$metadata_result) {
+                    throw new Exception('Failed to update recipe metadata');
+                }
+            }
+
+            // Handle ingredients - delete existing and insert new
+            if ($ingredients !== null) {
+                // Delete existing ingredients
+                $delete_ingredients = Database::delete('recipe_ingredients', 'recipe_id = :recipe_id', ['recipe_id' => $recipe_id]);
+
+                // Insert new ingredients
+                if (!empty($ingredients)) {
+                    $ingredient_order = 0;
+                    foreach ($ingredients as $ingredient) {
+                        $ingredient_id = UUIDHelper::generateUniqueId('recipe_ingredients', 'id');
+                        $ingredient_record = [
+                            'id' => $ingredient_id,
+                            'recipe_id' => $recipe_id,
+                            'name' => $ingredient['name'],
+                            'amount' => $ingredient['amount'] ?? null,
+                            'unit' => $ingredient['unit'] ?? null,
+                            'notes' => $ingredient['notes'] ?? null,
+                            'order_index' => $ingredient_order++,
+                            'calories_per_unit' => $ingredient['calories_per_unit'] ?? 0,
+                            'protein_per_unit' => $ingredient['protein_per_unit'] ?? 0,
+                            'carbs_per_unit' => $ingredient['carbs_per_unit'] ?? 0,
+                            'fat_per_unit' => $ingredient['fat_per_unit'] ?? 0,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ];
+
+                        $ingredient_result = Database::insert('recipe_ingredients', $ingredient_record);
+
+                        if (!$ingredient_result) {
+                            throw new Exception('Failed to insert ingredient: ' . $ingredient['name']);
+                        }
+                    }
+                }
+            }
+
+            // Handle steps - delete existing and insert new
+            if ($steps !== null) {
+                // Delete existing steps
+                $delete_steps = Database::delete('recipe_steps', 'recipe_id = :recipe_id', ['recipe_id' => $recipe_id]);
+
+                // Insert new steps
+                if (!empty($steps)) {
+                    $step_order = 0;
+                    foreach ($steps as $step) {
+                        $step_id = UUIDHelper::generateUniqueId('recipe_steps', 'id');
+                        $step_record = [
+                            'id' => $step_id,
+                            'recipe_id' => $recipe_id,
+                            'description' => $step['description'],
+                            'image' => $step['image'] ?? null,
+                            'read_timer_duration' => $step['read_timer_duration'] ?? 10,
+                            'timer_duration' => $step['timer_duration'] ?? null,
+                            'timer_unit' => $step['timer_unit'] ?? 'seconds',
+                            'exp_reward' => $step['exp_reward'] ?? 0,
+                            'gold_reward' => $step['gold_reward'] ?? 0,
+                            'gem_reward' => $step['gem_reward'] ?? 0,
+                            'order_index' => $step_order++,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ];
+
+                        $step_result = Database::insert('recipe_steps', $step_record);
+
+                        if (!$step_result) {
+                            throw new Exception('Failed to insert step: ' . ($step_order - 1));
+                        }
+                    }
+                }
+            }
+
+            // Commit transaction
+            $pdo->commit();
+
+            return true;
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Update recipe failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Delete recipe and all related data
+     * 
+     * @param string $recipe_id Recipe ID
+     * @return bool True if successful, false otherwise
+     */
+    public static function deleteRecipe($recipe_id)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Start transaction
+            $pdo->beginTransaction();
+
+            // Get user_id for stat decrement
+            $recipe_sql = "SELECT user_id FROM recipes WHERE id = :recipe_id";
+            $recipe = Database::fetchOne($recipe_sql, ['recipe_id' => $recipe_id]);
+
+            if (!$recipe) {
+                throw new Exception('Recipe not found');
+            }
+
+            // Delete recipe (cascades to ingredients, steps, metadata, interactions)
+            $result = Database::delete('recipes', 'id = :recipe_id', ['recipe_id' => $recipe_id]);
+
+            // Decrement user's recipes_created stat
+            if ($result > 0) {
+                self::incrementUserStat($recipe['user_id'], 'recipes_created', -1);
+            }
+
+            // Commit transaction
+            $pdo->commit();
+
+            return $result > 0;
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Delete recipe failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Record recipe interaction (like, dislike, save, purchase)
+     * 
+     * @param string $user_id User ID
+     * @param string $recipe_id Recipe ID
+     * @param string $interaction_type Type of interaction
+     * @param array $metadata Additional metadata
+     * @return bool True if successful, false otherwise
+     */
+    public static function recordRecipeInteraction($user_id, $recipe_id, $interaction_type, $metadata = [])
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Start transaction
+            $pdo->beginTransaction();
+
+            // Generate interaction ID
+            require_once __DIR__ . '/../utils/uuidHelper.php';
+            $interaction_id = UUIDHelper::generateUniqueId('recipe_interactions', 'id');
+
+            // Check if interaction already exists
+            $check_sql = "SELECT id FROM recipe_interactions 
+                          WHERE user_id = :user_id 
+                            AND recipe_id = :recipe_id 
+                            AND interaction_type = :interaction_type";
+
+            $existing = Database::fetchOne($check_sql, [
+                'user_id' => $user_id,
+                'recipe_id' => $recipe_id,
+                'interaction_type' => $interaction_type
+            ]);
+
+            if ($existing) {
+                // Update existing interaction
+                $update_data = [
+                    'metadata' => json_encode($metadata),
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+
+                $result = Database::update(
+                    'recipe_interactions',
+                    $update_data,
+                    'id = :id',
+                    ['id' => $existing['id']]
+                );
+            } else {
+                // Insert new interaction
+                $interaction_data = [
+                    'id' => $interaction_id,
+                    'user_id' => $user_id,
+                    'recipe_id' => $recipe_id,
+                    'interaction_type' => $interaction_type,
+                    'metadata' => json_encode($metadata),
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+
+                $result = Database::insert('recipe_interactions', $interaction_data);
+            }
+
+            // Update recipe metadata counts
+            if ($result) {
+                self::updateRecipeInteractionCount($recipe_id, $interaction_type);
+
+                // Handle purchase interaction
+                if ($interaction_type === 'purchase') {
+                    self::handleRecipePurchase($user_id, $recipe_id, $metadata);
+                }
+            }
+
+            // Commit transaction
+            $pdo->commit();
+
+            return true;
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Record recipe interaction failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update recipe interaction count in metadata
+     * 
+     * @param string $recipe_id Recipe ID
+     * @param string $interaction_type Type of interaction
+     * @return bool True if successful, false otherwise
+     */
+    private static function updateRecipeInteractionCount($recipe_id, $interaction_type)
+    {
+        try {
+            $field_map = [
+                'like' => 'like_count',
+                'dislike' => 'dislike_count',
+                'save' => 'save_count', // Note: save_count might not exist in schema
+                'purchase' => 'purchase_count'
+            ];
+
+            if (!isset($field_map[$interaction_type])) {
+                return false;
+            }
+
+            $field = $field_map[$interaction_type];
+            $sql = "UPDATE recipe_metadata 
+                    SET $field = $field + 1, 
+                        updated_at = :updated_at 
+                    WHERE recipe_id = :recipe_id";
+
+            $params = [
+                'updated_at' => date('Y-m-d H:i:s'),
+                'recipe_id' => $recipe_id
+            ];
+
+            $stmt = Database::getConnection()->prepare($sql);
+            return $stmt->execute($params);
+        } catch (Exception $e) {
+            error_log('Update recipe interaction count failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Handle recipe purchase
+     * 
+     * @param string $user_id User ID
+     * @param string $recipe_id Recipe ID
+     * @param array $metadata Purchase metadata
+     * @return bool True if successful, false otherwise
+     */
+    private static function handleRecipePurchase($user_id, $recipe_id, $metadata)
+    {
+        try {
+            // Get recipe price
+            $recipe_sql = "SELECT rm.gold_price, rm.gem_price, r.user_id as seller_id
+                           FROM recipes r
+                           LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id
+                           WHERE r.id = :recipe_id";
+
+            $recipe = Database::fetchOne($recipe_sql, ['recipe_id' => $recipe_id]);
+
+            if (!$recipe || (!$recipe['gold_price'] && !$recipe['gem_price'])) {
+                return false;
+            }
+
+            // Deduct currency from buyer
+            if ($recipe['gold_price'] > 0) {
+                self::incrementUserStat($user_id, 'gold_count', -$recipe['gold_price']);
+            }
+            if ($recipe['gem_price'] > 0) {
+                self::incrementUserStat($user_id, 'gem_count', -$recipe['gem_price']);
+            }
+
+            // Add currency to seller (if different from buyer)
+            if ($recipe['seller_id'] && $recipe['seller_id'] !== $user_id) {
+                if ($recipe['gold_price'] > 0) {
+                    self::incrementUserStat($recipe['seller_id'], 'gold_count', $recipe['gold_price']);
+                }
+                if ($recipe['gem_price'] > 0) {
+                    self::incrementUserStat($recipe['seller_id'], 'gem_count', $recipe['gem_price']);
+                }
+
+                // Increment seller's recipes_sold count
+                self::incrementUserStat($recipe['seller_id'], 'recipes_sold', 1);
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log('Handle recipe purchase failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Calculate recipe rating
+     * 
+     * @param string $recipe_id Recipe ID
+     * @return float Calculated rating (0-5)
+     */
+    private static function calculateRecipeRating($recipe_id)
+    {
+        try {
+            $sql = "SELECT like_count, dislike_count FROM recipe_metadata WHERE recipe_id = :recipe_id";
+            $counts = Database::fetchOne($sql, ['recipe_id' => $recipe_id]);
+
+            if (!$counts) {
+                return 0;
+            }
+
+            $likes = $counts['like_count'] ?? 0;
+            $dislikes = $counts['dislike_count'] ?? 0;
+            $total = $likes + $dislikes;
+
+            if ($total === 0) {
+                return 0;
+            }
+
+            // Simple rating calculation: percentage of likes * 5
+            $rating = ($likes / $total) * 5;
+            return round($rating, 1);
+        } catch (Exception $e) {
+            error_log('Calculate recipe rating failed: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get difficulty label
+     * 
+     * @param string $difficulty Difficulty value
+     * @return string Human-readable difficulty label
+     */
+    private static function getDifficultyLabel($difficulty)
+    {
+        $labels = [
+            'easy' => 'Easy',
+            'medium' => 'Medium',
+            'hard' => 'Hard'
+        ];
+
+        return $labels[$difficulty] ?? 'Medium';
+    }
+
+    /**
+     * Calculate recipe popularity score
+     * 
+     * @param string $recipe_id Recipe ID
+     * @return int Popularity score
+     */
+    private static function calculatePopularityScore($recipe_id)
+    {
+        try {
+            $sql = "SELECT 
+                    (like_count * 3) + 
+                    (cook_count * 2) + 
+                    (purchase_count * 5) + 
+                    (FLOOR(DATEDIFF(NOW(), created_at) / 7) * -1) as score
+                    FROM recipe_metadata 
+                    WHERE recipe_id = :recipe_id";
+
+            $result = Database::fetchOne($sql, ['recipe_id' => $recipe_id]);
+
+            return max(0, $result['score'] ?? 0);
+        } catch (Exception $e) {
+            error_log('Calculate popularity score failed: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get user's recipe interactions
+     * 
+     * @param string $user_id User ID
+     * @param string $recipe_id Recipe ID
+     * @return array User's interactions with the recipe
+     */
+    public static function getUserRecipeInteractions($user_id, $recipe_id)
+    {
+        try {
+            $sql = "SELECT interaction_type, metadata, created_at 
+                    FROM recipe_interactions 
+                    WHERE user_id = :user_id AND recipe_id = :recipe_id";
+
+            $interactions = Database::fetchAll($sql, [
+                'user_id' => $user_id,
+                'recipe_id' => $recipe_id
+            ]);
+
+            $result = [];
+            foreach ($interactions as $interaction) {
+                $result[$interaction['interaction_type']] = [
+                    'metadata' => json_decode($interaction['metadata'], true),
+                    'created_at' => $interaction['created_at']
+                ];
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            error_log('Get user recipe interactions failed: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get multiple recipes with pagination and filtering
+     * 
+     * @param array $filters Filter criteria
+     * @param int $page Page number
+     * @param int $limit Results per page
+     * @return array Paginated recipes
+     */
+    public static function getRecipes($filters = [], $page = 1, $limit = 20)
+    {
+        try {
+            $offset = ($page - 1) * $limit;
+            $where_clauses = [];
+            $params = ['limit' => $limit, 'offset' => $offset];
+
+            // Build WHERE clauses based on filters
+            if (isset($filters['user_id'])) {
+                $where_clauses[] = "r.user_id = :user_id";
+                $params['user_id'] = $filters['user_id'];
+            }
+
+            if (isset($filters['difficulty'])) {
+                $where_clauses[] = "r.difficulty = :difficulty";
+                $params['difficulty'] = $filters['difficulty'];
+            }
+
+            if (isset($filters['is_public'])) {
+                $where_clauses[] = "r.is_public = :is_public";
+                $params['is_public'] = $filters['is_public'];
+            }
+
+            if (isset($filters['is_paid'])) {
+                $where_clauses[] = "r.is_paid = :is_paid";
+                $params['is_paid'] = $filters['is_paid'];
+            }
+
+            if (isset($filters['search'])) {
+                $where_clauses[] = "(r.title LIKE :search OR r.description LIKE :search OR rm.tags LIKE :search)";
+                $params['search'] = "%{$filters['search']}%";
+            }
+
+            $where_sql = empty($where_clauses) ? '' : 'WHERE ' . implode(' AND ', $where_clauses);
+
+            // Base query
+            $sql = "SELECT r.*, u.full_name as creator_name, u.profile_picture as creator_avatar,
+                           rm.like_count, rm.dislike_count, rm.cook_count, rm.purchase_count,
+                           rm.exp_reward, rm.gold_reward, rm.gem_reward,
+                           rm.gold_price, rm.gem_price
+                    FROM recipes r
+                    LEFT JOIN users u ON r.user_id = u.id
+                    LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id
+                    $where_sql
+                    ORDER BY r.created_at DESC
+                    LIMIT :limit OFFSET :offset";
+
+            $recipes = Database::fetchAll($sql, $params);
+
+            // Count total for pagination
+            $count_sql = "SELECT COUNT(*) as total 
+                          FROM recipes r
+                          LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id
+                          $where_sql";
+
+            $count_params = array_diff_key($params, ['limit' => '', 'offset' => '']);
+            $count_result = Database::fetchOne($count_sql, $count_params);
+            $total = $count_result['total'] ?? 0;
+
+            // Calculate ratings for each recipe
+            foreach ($recipes as &$recipe) {
+                $recipe['rating'] = self::calculateRecipeRating($recipe['id']);
+                $recipe['difficulty_label'] = self::getDifficultyLabel($recipe['difficulty']);
+            }
+
+            return [
+                'recipes' => $recipes,
+                'pagination' => [
+                    'page' => $page,
+                    'limit' => $limit,
+                    'total' => $total,
+                    'pages' => ceil($total / $limit)
+                ]
+            ];
+        } catch (Exception $e) {
+            error_log('Get recipes failed: ' . $e->getMessage());
+            return [
+                'recipes' => [],
+                'pagination' => [
+                    'page' => $page,
+                    'limit' => $limit,
+                    'total' => 0,
+                    'pages' => 0
+                ]
+            ];
+        }
+    }
 }
