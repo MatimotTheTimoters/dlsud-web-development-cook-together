@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import RecipeCard from './RecipeCard';
+import RecipeCard from '../cards/RecipeCard';
 import { 
   FaFilter, FaSort, FaSearch, FaTimes,
   FaClock, FaFire, FaStar, FaUtensils
