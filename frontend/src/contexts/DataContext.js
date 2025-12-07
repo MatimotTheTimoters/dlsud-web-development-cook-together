@@ -1,3 +1,4 @@
+// src/contexts/DataContext.js
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { FaDatabase, FaSync } from 'react-icons/fa';
 import * as recipeApi from '../api/recipes';
@@ -20,6 +21,9 @@ export const DataProvider = ({ children }) => {
   const [relationships, setRelationships] = useState([]);
   const [cookbooks, setCookbooks] = useState([]);
   const [cookingSessions, setCookingSessions] = useState([]);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
 
   // Loading and error states
   const [loading, setLoading] = useState({
@@ -42,6 +46,15 @@ export const DataProvider = ({ children }) => {
     return !!token;
   };
 
+  // Get auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    };
+  };
+
   // Fetch all data - waits for authentication
   const fetchAllData = useCallback(async () => {
     if (!isAuthenticated()) {
@@ -61,7 +74,10 @@ export const DataProvider = ({ children }) => {
         fetchRecipes(),
         fetchRelationships(),
         fetchCookbooks(),
-        fetchCookingSessions()
+        fetchCookingSessions(),
+        fetchFriendRequests(),
+        fetchFollowers(),
+        fetchFollowing()
       ]);
 
       setErrors({});
@@ -76,7 +92,10 @@ export const DataProvider = ({ children }) => {
     }
   }, []);
 
-  // Fetch user data
+  // ====================
+  // USER METHODS
+  // ====================
+
   const fetchUserData = async () => {
     if (!isAuthenticated()) return;
 
@@ -110,7 +129,10 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // Fetch recipes
+  // ====================
+  // RECIPE METHODS
+  // ====================
+
   const fetchRecipes = async (params = {}) => {
     if (!isAuthenticated()) return;
 
@@ -200,7 +222,10 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // Fetch relationships
+  // ====================
+  // RELATIONSHIP METHODS
+  // ====================
+
   const fetchRelationships = async () => {
     if (!isAuthenticated()) return;
 
@@ -218,8 +243,8 @@ export const DataProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setRelationships(data.data.relationships || []);
-          setCachedData('relationships', data.data.relationships);
+          setRelationships(data.data.items || []);
+          setCachedData('relationships', data.data.items);
         } else {
           throw new Error(data.message || 'Failed to fetch relationships');
         }
@@ -234,7 +259,171 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // Fetch cookbooks
+  const fetchFriendRequests = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, relationships: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/relationships/list.php?type=friend_requests&request_type=received', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setFriendRequests(data.data.items || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch friend requests');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch friend requests`);
+      }
+    } catch (error) {
+      console.error('Error fetching friend requests:', error);
+      setErrors(prev => ({ ...prev, friendRequests: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const fetchFollowers = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, relationships: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/relationships/list.php?type=followers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setFollowers(data.data.items || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch followers');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch followers`);
+      }
+    } catch (error) {
+      console.error('Error fetching followers:', error);
+      setErrors(prev => ({ ...prev, followers: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const fetchFollowing = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, relationships: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/relationships/list.php?type=following', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setFollowing(data.data.items || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch following');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch following`);
+      }
+    } catch (error) {
+      console.error('Error fetching following:', error);
+      setErrors(prev => ({ ...prev, following: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const followUser = async (targetUserId, action = 'toggle') => {
+    try {
+      setLoading(prev => ({ ...prev, relationships: true }));
+      
+      const response = await fetch('http://localhost/api/relationships/follow.php', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          target_user_id: targetUserId,
+          action: action
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to follow user');
+      }
+
+      // Refresh relationships data
+      await fetchFollowing();
+      await fetchFollowers();
+
+      return data;
+    } catch (err) {
+      console.error('Follow user error:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const manageFriendRequest = async (targetUserId, action, message = null) => {
+    try {
+      setLoading(prev => ({ ...prev, relationships: true }));
+      
+      const response = await fetch('http://localhost/api/relationships/friends.php', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          target_user_id: targetUserId,
+          action: action,
+          message: message
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to manage friend request');
+      }
+
+      // Refresh friend requests
+      await fetchFriendRequests();
+      await fetchFollowing();
+
+      return data;
+    } catch (err) {
+      console.error('Manage friend request error:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  // ====================
+  // COOKBOOK METHODS
+  // ====================
+
   const fetchCookbooks = async () => {
     if (!isAuthenticated()) return;
 
@@ -268,7 +457,10 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // Fetch cooking sessions
+  // ====================
+  // COOKING SESSION METHODS
+  // ====================
+
   const fetchCookingSessions = async () => {
     if (!isAuthenticated()) return;
 
@@ -302,6 +494,10 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  // ====================
+  // UTILITY METHODS
+  // ====================
+
   // Update user data
   const updateUserData = (data) => {
     setUserData(prev => ({ ...prev, ...data }));
@@ -327,6 +523,9 @@ export const DataProvider = ({ children }) => {
     setRelationships([]);
     setCookbooks([]);
     setCookingSessions([]);
+    setFriendRequests([]);
+    setFollowers([]);
+    setFollowing([]);
     setCache({});
     setErrors({});
   };
@@ -377,7 +576,10 @@ export const DataProvider = ({ children }) => {
     }
   }, [fetchAllData]);
 
-  // Context value
+  // ====================
+  // CONTEXT VALUE
+  // ====================
+
   const value = {
     // Data
     userData,
@@ -385,6 +587,9 @@ export const DataProvider = ({ children }) => {
     relationships,
     cookbooks,
     cookingSessions,
+    friendRequests,
+    followers,
+    following,
 
     // Loading states
     loading,
@@ -446,38 +651,72 @@ export const DataProvider = ({ children }) => {
     purchaseRecipe: async (recipeId) => {
       const result = await recipeApi.purchaseRecipe(recipeId);
       return result;
+    },
+
+    // Relationship functions
+    followUser,
+    manageFriendRequest,
+    fetchFriendRequests,
+    fetchFollowers,
+    fetchFollowing,
+
+    // Alias for compatibility with BuildChallengeModal
+    currentUserData: userData,
+    userRewardLimits: userData?.stats ? {
+      maxExp: userData.stats.max_exp_reward || 100,
+      maxGold: userData.stats.max_gold_reward || 50,
+      maxGem: userData.stats.max_gem_reward || 5
+    } : { maxExp: 100, maxGold: 50, maxGem: 5 },
+    
+    // Legacy method for compatibility
+    refetchSheet: (sheetName) => {
+      // Map old sheet names to new API calls
+      switch (sheetName) {
+        case 'challengesCookQuota':
+          return Promise.resolve(); // Not implemented yet
+        case 'recipes':
+          return fetchRecipes();
+        case 'users':
+          return fetchUserData();
+        case 'relationships':
+          return fetchRelationships();
+        default:
+          console.warn(`Unknown sheet name: ${sheetName}`);
+          return Promise.resolve();
+      }
     }
   };
-};
 
-return (
-  <DataContext.Provider value={value}>
-    {children}
+  // THE RETURN STATEMENT MUST BE INSIDE THE DataProvider FUNCTION
+  return (
+    <DataContext.Provider value={value}>
+      {children}
 
-    {/* Sync status indicator */}
-    {loading.all && (
-      <div className="sync-status-overlay animate__animated animate__fadeIn">
-        <div className="sync-status-content">
-          <FaSync className="spinning-icon" />
-          <span className="sync-text">Syncing data...</span>
-          <div className="sync-progress">
-            <div className="progress-bar">
-              <div className="progress-fill indeterminate"></div>
+      {/* Sync status indicator */}
+      {loading.all && (
+        <div className="sync-status-overlay animate__animated animate__fadeIn">
+          <div className="sync-status-content">
+            <FaSync className="spinning-icon" />
+            <span className="sync-text">Syncing data...</span>
+            <div className="sync-progress">
+              <div className="progress-bar">
+                <div className="progress-fill indeterminate"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
-    {/* Database status indicator */}
-    <div className="database-status-fixed">
-      <FaDatabase className={`database-icon ${loading.all ? 'pulsing' : ''}`} />
-      <div className="status-tooltip">
-        Data Context Active
-        {loading.all && <div className="tooltip-status">🔄 Syncing...</div>}
+      {/* Database status indicator */}
+      <div className="database-status-fixed">
+        <FaDatabase className={`database-icon ${loading.all ? 'pulsing' : ''}`} />
+        <div className="status-tooltip">
+          Data Context Active
+          {loading.all && <div className="tooltip-status">🔄 Syncing...</div>}
+        </div>
       </div>
-    </div>
-  </DataContext.Provider>
-);
+    </DataContext.Provider>
+  );
+};
 
 export default DataContext;
