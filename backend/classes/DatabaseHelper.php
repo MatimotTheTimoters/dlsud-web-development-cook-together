@@ -1858,4 +1858,281 @@ class DatabaseHelper
             return false;
         }
     }
+
+    /**
+     * Follow a user
+     * 
+     * @param string $source_user_id User who is following
+     * @param string $target_user_id User being followed
+     * @param string $message Optional message for friend request
+     * @return bool Success status
+     */
+    public static function followUser($source_user_id, $target_user_id, $message = null)
+    {
+        try {
+            // Check if relationship already exists
+            $existing_sql = "SELECT id, status FROM user_relationships 
+                            WHERE source_user_id = :source_user_id 
+                            AND target_user_id = :target_user_id 
+                            AND relationship_type IN ('following', 'friend')";
+
+            $existing = Database::fetchOne($existing_sql, [
+                'source_user_id' => $source_user_id,
+                'target_user_id' => $target_user_id
+            ]);
+
+            if ($existing) {
+                // Update existing relationship
+                $sql = "UPDATE user_relationships 
+                        SET relationship_type = 'following', 
+                            status = 'accepted',
+                            message = :message,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE id = :id";
+
+                return Database::query($sql, [
+                    'id' => $existing['id'],
+                    'message' => $message
+                ]);
+            } else {
+                // Create new following relationship
+                $sql = "INSERT INTO user_relationships (id, source_user_id, target_user_id, 
+                         relationship_type, status, message)
+                        VALUES (:id, :source_user_id, :target_user_id, 
+                                'following', 'accepted', :message)";
+
+                require_once __DIR__ . '/../utils/uuidHelper.php';
+                $id = UUIDHelper::makeId();
+
+                return Database::query($sql, [
+                    'id' => $id,
+                    'source_user_id' => $source_user_id,
+                    'target_user_id' => $target_user_id,
+                    'message' => $message
+                ]);
+            }
+        } catch (Exception $e) {
+            error_log('Follow user failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Unfollow a user
+     * 
+     * @param string $source_user_id User who is unfollowing
+     * @param string $target_user_id User being unfollowed
+     * @return bool Success status
+     */
+    public static function unfollowUser($source_user_id, $target_user_id)
+    {
+        try {
+            $sql = "DELETE FROM user_relationships 
+                    WHERE source_user_id = :source_user_id 
+                    AND target_user_id = :target_user_id 
+                    AND relationship_type = 'following'";
+
+            return Database::query($sql, [
+                'source_user_id' => $source_user_id,
+                'target_user_id' => $target_user_id
+            ]);
+        } catch (Exception $e) {
+            error_log('Unfollow user failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get friend requests for a user
+     * 
+     * @param string $user_id User ID
+     * @param string $type 'received' or 'sent'
+     * @return array List of friend requests
+     */
+    public static function getFriendRequests($user_id, $type = 'received')
+    {
+        try {
+            if ($type === 'received') {
+                // Requests received by the user
+                $sql = "SELECT ur.id, ur.source_user_id, ur.target_user_id, ur.message, 
+                               ur.created_at, ur.responded_at, ur.status,
+                               u.full_name, u.profile_picture, u.email,
+                               us.level
+                        FROM user_relationships ur
+                        JOIN users u ON ur.source_user_id = u.id
+                        LEFT JOIN user_stats us ON u.id = us.user_id
+                        WHERE ur.target_user_id = :user_id 
+                          AND ur.relationship_type = 'friend' 
+                          AND ur.status = 'pending'
+                        ORDER BY ur.created_at DESC";
+            } else {
+                // Requests sent by the user
+                $sql = "SELECT ur.id, ur.source_user_id, ur.target_user_id, ur.message, 
+                               ur.created_at, ur.responded_at, ur.status,
+                               u.full_name, u.profile_picture, u.email,
+                               us.level
+                        FROM user_relationships ur
+                        JOIN users u ON ur.target_user_id = u.id
+                        LEFT JOIN user_stats us ON u.id = us.user_id
+                        WHERE ur.source_user_id = :user_id 
+                          AND ur.relationship_type = 'friend' 
+                          AND ur.status = 'pending'
+                        ORDER BY ur.created_at DESC";
+            }
+
+            return Database::fetchAll($sql, ['user_id' => $user_id]);
+        } catch (Exception $e) {
+            error_log('Get friend requests failed: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Send friend request
+     * 
+     * @param string $source_user_id User sending request
+     * @param string $target_user_id User receiving request
+     * @param string $message Optional message
+     * @return bool Success status
+     */
+    public static function sendFriendRequest($source_user_id, $target_user_id, $message = null)
+    {
+        try {
+            // Check if request already exists
+            $existing_sql = "SELECT id FROM user_relationships 
+                            WHERE ((source_user_id = :source_user_id 
+                                    AND target_user_id = :target_user_id)
+                                OR (source_user_id = :target_user_id 
+                                    AND target_user_id = :source_user_id))
+                            AND relationship_type = 'friend'";
+
+            $existing = Database::fetchOne($existing_sql, [
+                'source_user_id' => $source_user_id,
+                'target_user_id' => $target_user_id
+            ]);
+
+            if ($existing) {
+                // Request already exists
+                return false;
+            }
+
+            // Create new friend request
+            $sql = "INSERT INTO user_relationships (id, source_user_id, target_user_id, 
+                     relationship_type, status, message)
+                    VALUES (:id, :source_user_id, :target_user_id, 
+                            'friend', 'pending', :message)";
+
+            require_once __DIR__ . '/../utils/uuidHelper.php';
+            $id = UUIDHelper::makeId();
+
+            return Database::query($sql, [
+                'id' => $id,
+                'source_user_id' => $source_user_id,
+                'target_user_id' => $target_user_id,
+                'message' => $message
+            ]);
+        } catch (Exception $e) {
+            error_log('Send friend request failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Respond to friend request
+     * 
+     * @param string $request_id Relationship ID
+     * @param string $status 'accepted' or 'rejected'
+     * @return bool Success status
+     */
+    public static function respondToFriendRequest($request_id, $status)
+    {
+        try {
+            // Get the request first
+            $sql = "SELECT source_user_id, target_user_id, status 
+                    FROM user_relationships 
+                    WHERE id = :id AND relationship_type = 'friend'";
+
+            $request = Database::fetchOne($sql, ['id' => $request_id]);
+
+            if (!$request || $request['status'] !== 'pending') {
+                return false;
+            }
+
+            if ($status === 'accepted') {
+                // Update to accepted status
+                $update_sql = "UPDATE user_relationships 
+                              SET status = 'accepted', 
+                                  responded_at = CURRENT_TIMESTAMP
+                              WHERE id = :id";
+
+                return Database::query($update_sql, ['id' => $request_id]);
+            } else {
+                // Update to rejected status
+                $update_sql = "UPDATE user_relationships 
+                              SET status = 'rejected', 
+                                  responded_at = CURRENT_TIMESTAMP
+                              WHERE id = :id";
+
+                return Database::query($update_sql, ['id' => $request_id]);
+            }
+        } catch (Exception $e) {
+            error_log('Respond to friend request failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get user's friends
+     * 
+     * @param string $user_id User ID
+     * @return array List of friends
+     */
+    public static function getFriends($user_id)
+    {
+        try {
+            $sql = "SELECT u.id, u.full_name, u.profile_picture, u.email, 
+                           us.level, ur.created_at as friends_since
+                    FROM user_relationships ur
+                    JOIN users u ON (
+                        (ur.source_user_id = :user_id AND ur.target_user_id = u.id)
+                        OR 
+                        (ur.target_user_id = :user_id AND ur.source_user_id = u.id)
+                    )
+                    LEFT JOIN user_stats us ON u.id = us.user_id
+                    WHERE ur.relationship_type = 'friend' 
+                      AND ur.status = 'accepted'
+                    ORDER BY ur.created_at DESC";
+
+            return Database::fetchAll($sql, ['user_id' => $user_id]);
+        } catch (Exception $e) {
+            error_log('Get friends failed: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Remove friend
+     * 
+     * @param string $user_id User ID
+     * @param string $friend_id Friend's user ID
+     * @return bool Success status
+     */
+    public static function removeFriend($user_id, $friend_id)
+    {
+        try {
+            $sql = "DELETE FROM user_relationships 
+                    WHERE relationship_type = 'friend' 
+                    AND status = 'accepted'
+                    AND ((source_user_id = :user_id AND target_user_id = :friend_id)
+                         OR (source_user_id = :friend_id AND target_user_id = :user_id))";
+
+            return Database::query($sql, [
+                'user_id' => $user_id,
+                'friend_id' => $friend_id
+            ]);
+        } catch (Exception $e) {
+            error_log('Remove friend failed: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
