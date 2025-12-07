@@ -107,6 +107,7 @@ export default function RegistrationPage() {
 
       console.log('📦 Registration Payload:', payload);
 
+      /*
       // Post new user to the API
       const res = await fetch(apiSheets.users, {
         method: "POST",
@@ -123,6 +124,7 @@ export default function RegistrationPage() {
       }
 
       console.log('✅ Registration successful');
+      */
 
       // Auto-login after successful registration
       await login({
