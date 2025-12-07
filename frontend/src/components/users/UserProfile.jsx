@@ -525,7 +525,7 @@ const UserProfile = ({ userId: propUserId }) => {
         {activeTab === 'recipes' && (
           <div className="recipes-grid">
             {loading.recipes ? (
-              <LoadingSpinner text="Loading recipes..." />
+              <div className="loading-text">Loading recipes...</div>
             ) : userRecipes.length === 0 ? (
               <div className="empty-state">
                 <FaTrophy size={48} />
