@@ -1859,127 +1859,288 @@ class DatabaseHelper
         }
     }
 
-
     /**
-    *  Relationship 
-    */
-
-    /**
-    * Follow a user
-    */
-    public static function followUser($source_user_id, $target_user_id) {
+     * Follow a user
+     * 
+     * @param string $source_user_id User who is following
+     * @param string $target_user_id User being followed
+     * @param string $message Optional message for friend request
+     * @return bool Success status
+     */
+    public static function followUser($source_user_id, $target_user_id, $message = null)
+    {
         try {
-            $pdo = Database::getConnection();
-        
             // Check if relationship already exists
-            $checkStmt = $pdo->prepare("
-                SELECT id FROM user_relationships 
-                WHERE source_user_id = ? 
-                AND target_user_id = ? 
-                AND relationship_type = 'following'
-            ");
-        
-            $checkStmt->execute([$source_user_id, $target_user_id]);
-        
-            if ($checkStmt->fetch()) {
-            return false; // Already following
+            $existing_sql = "SELECT id, status FROM user_relationships 
+                            WHERE source_user_id = :source_user_id 
+                            AND target_user_id = :target_user_id 
+                            AND relationship_type IN ('following', 'friend')";
+
+            $existing = Database::fetchOne($existing_sql, [
+                'source_user_id' => $source_user_id,
+                'target_user_id' => $target_user_id
+            ]);
+
+            if ($existing) {
+                // Update existing relationship
+                $sql = "UPDATE user_relationships 
+                        SET relationship_type = 'following', 
+                            status = 'accepted',
+                            message = :message,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE id = :id";
+
+                return Database::query($sql, [
+                    'id' => $existing['id'],
+                    'message' => $message
+                ]);
+            } else {
+                // Create new following relationship
+                $sql = "INSERT INTO user_relationships (id, source_user_id, target_user_id, 
+                         relationship_type, status, message)
+                        VALUES (:id, :source_user_id, :target_user_id, 
+                                'following', 'accepted', :message)";
+
+                require_once __DIR__ . '/../utils/uuidHelper.php';
+                $id = UUIDHelper::makeId();
+
+                return Database::query($sql, [
+                    'id' => $id,
+                    'source_user_id' => $source_user_id,
+                    'target_user_id' => $target_user_id,
+                    'message' => $message
+                ]);
             }
-        
-            // Insert new relationship
-            $stmt = $pdo->prepare("
-            INSERT INTO user_relationships (id, source_user_id, target_user_id, relationship_type, status, created_at)
-            VALUES (?, ?, ?, 'following', 'accepted', NOW())
-            ");
-        
-            $relationship_id = uniqid('rel_', true);
-            return $stmt->execute([$relationship_id, $source_user_id, $target_user_id]);
-        
-        }catch (PDOException $e) {
-            error_log("Follow user error: " . $e->getMessage());
+        } catch (Exception $e) {
+            error_log('Follow user failed: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
      * Unfollow a user
+     * 
+     * @param string $source_user_id User who is unfollowing
+     * @param string $target_user_id User being unfollowed
+     * @return bool Success status
      */
-    public static function unfollowUser($source_user_id, $target_user_id) {
+    public static function unfollowUser($source_user_id, $target_user_id)
+    {
         try {
-            $pdo = Database::getConnection();
+            $sql = "DELETE FROM user_relationships 
+                    WHERE source_user_id = :source_user_id 
+                    AND target_user_id = :target_user_id 
+                    AND relationship_type = 'following'";
 
-            $stmt = $pdo->prepare("
-                DELETE FROM user_relationships 
-                WHERE source_user_id = ? 
-                AND target_user_id = ? 
-                AND relationship_type = 'following'
-            ");
-
-            return $stmt->execute([$source_user_id, $target_user_id]);
-
-        } catch (PDOException $e) {
-            error_log("Unfollow user error: " . $e->getMessage());
+            return Database::query($sql, [
+                'source_user_id' => $source_user_id,
+                'target_user_id' => $target_user_id
+            ]);
+        } catch (Exception $e) {
+            error_log('Unfollow user failed: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
      * Get friend requests for a user
+     * 
+     * @param string $user_id User ID
+     * @param string $type 'received' or 'sent'
+     * @return array List of friend requests
      */
-    public static function getFriendRequests($user_id, $type = 'received') {
+    public static function getFriendRequests($user_id, $type = 'received')
+    {
         try {
-            $pdo = Database::getConnection();
-
             if ($type === 'received') {
                 // Requests received by the user
-                $stmt = $pdo->prepare("
-                    SELECT 
-                        ur.id,
-                        ur.source_user_id,
-                        u.full_name,
-                        u.profile_picture,
-                        ur.message,
-                        ur.created_at,
-                        ur.updated_at
-                    FROM user_relationships ur
-                    JOIN users u ON ur.source_user_id = u.id
-                    WHERE ur.target_user_id = ? 
-                    AND ur.relationship_type = 'friend' 
-                    AND ur.status = 'pending'
-                    ORDER BY ur.created_at DESC
-                ");
+                $sql = "SELECT ur.id, ur.source_user_id, ur.target_user_id, ur.message, 
+                               ur.created_at, ur.responded_at, ur.status,
+                               u.full_name, u.profile_picture, u.email,
+                               us.level
+                        FROM user_relationships ur
+                        JOIN users u ON ur.source_user_id = u.id
+                        LEFT JOIN user_stats us ON u.id = us.user_id
+                        WHERE ur.target_user_id = :user_id 
+                          AND ur.relationship_type = 'friend' 
+                          AND ur.status = 'pending'
+                        ORDER BY ur.created_at DESC";
             } else {
                 // Requests sent by the user
-                $stmt = $pdo->prepare("
-                    SELECT 
-                        ur.id,
-                        ur.target_user_id as source_user_id,
-                        u.full_name,
-                        u.profile_picture,
-                        ur.message,
-                        ur.created_at,
-                        ur.updated_at
-                    FROM user_relationships ur
-                    JOIN users u ON ur.target_user_id = u.id
-                    WHERE ur.source_user_id = ? 
-                    AND ur.relationship_type = 'friend' 
-                    AND ur.status = 'pending'
-                    ORDER BY ur.created_at DESC
-                ");
+                $sql = "SELECT ur.id, ur.source_user_id, ur.target_user_id, ur.message, 
+                               ur.created_at, ur.responded_at, ur.status,
+                               u.full_name, u.profile_picture, u.email,
+                               us.level
+                        FROM user_relationships ur
+                        JOIN users u ON ur.target_user_id = u.id
+                        LEFT JOIN user_stats us ON u.id = us.user_id
+                        WHERE ur.source_user_id = :user_id 
+                          AND ur.relationship_type = 'friend' 
+                          AND ur.status = 'pending'
+                        ORDER BY ur.created_at DESC";
             }
 
-            $stmt->execute([$user_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        } catch (PDOException $e) {
-            error_log("Get friend requests error: " . $e->getMessage());
+            return Database::fetchAll($sql, ['user_id' => $user_id]);
+        } catch (Exception $e) {
+            error_log('Get friend requests failed: ' . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Send friend request
+     * 
+     * @param string $source_user_id User sending request
+     * @param string $target_user_id User receiving request
+     * @param string $message Optional message
+     * @return bool Success status
+     */
+    public static function sendFriendRequest($source_user_id, $target_user_id, $message = null)
+    {
+        try {
+            // Check if request already exists
+            $existing_sql = "SELECT id FROM user_relationships 
+                            WHERE ((source_user_id = :source_user_id 
+                                    AND target_user_id = :target_user_id)
+                                OR (source_user_id = :target_user_id 
+                                    AND target_user_id = :source_user_id))
+                            AND relationship_type = 'friend'";
+
+            $existing = Database::fetchOne($existing_sql, [
+                'source_user_id' => $source_user_id,
+                'target_user_id' => $target_user_id
+            ]);
+
+            if ($existing) {
+                // Request already exists
+                return false;
+            }
+
+            // Create new friend request
+            $sql = "INSERT INTO user_relationships (id, source_user_id, target_user_id, 
+                     relationship_type, status, message)
+                    VALUES (:id, :source_user_id, :target_user_id, 
+                            'friend', 'pending', :message)";
+
+            require_once __DIR__ . '/../utils/uuidHelper.php';
+            $id = UUIDHelper::makeId();
+
+            return Database::query($sql, [
+                'id' => $id,
+                'source_user_id' => $source_user_id,
+                'target_user_id' => $target_user_id,
+                'message' => $message
+            ]);
+        } catch (Exception $e) {
+            error_log('Send friend request failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Respond to friend request
+     * 
+     * @param string $request_id Relationship ID
+     * @param string $status 'accepted' or 'rejected'
+     * @return bool Success status
+     */
+    public static function respondToFriendRequest($request_id, $status)
+    {
+        try {
+            // Get the request first
+            $sql = "SELECT source_user_id, target_user_id, status 
+                    FROM user_relationships 
+                    WHERE id = :id AND relationship_type = 'friend'";
+
+            $request = Database::fetchOne($sql, ['id' => $request_id]);
+
+            if (!$request || $request['status'] !== 'pending') {
+                return false;
+            }
+
+            if ($status === 'accepted') {
+                // Update to accepted status
+                $update_sql = "UPDATE user_relationships 
+                              SET status = 'accepted', 
+                                  responded_at = CURRENT_TIMESTAMP
+                              WHERE id = :id";
+
+                return Database::query($update_sql, ['id' => $request_id]);
+            } else {
+                // Update to rejected status
+                $update_sql = "UPDATE user_relationships 
+                              SET status = 'rejected', 
+                                  responded_at = CURRENT_TIMESTAMP
+                              WHERE id = :id";
+
+                return Database::query($update_sql, ['id' => $request_id]);
+            }
+        } catch (Exception $e) {
+            error_log('Respond to friend request failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get user's friends
+     * 
+     * @param string $user_id User ID
+     * @return array List of friends
+     */
+    public static function getFriends($user_id)
+    {
+        try {
+            $sql = "SELECT u.id, u.full_name, u.profile_picture, u.email, 
+                           us.level, ur.created_at as friends_since
+                    FROM user_relationships ur
+                    JOIN users u ON (
+                        (ur.source_user_id = :user_id AND ur.target_user_id = u.id)
+                        OR 
+                        (ur.target_user_id = :user_id AND ur.source_user_id = u.id)
+                    )
+                    LEFT JOIN user_stats us ON u.id = us.user_id
+                    WHERE ur.relationship_type = 'friend' 
+                      AND ur.status = 'accepted'
+                    ORDER BY ur.created_at DESC";
+
+            return Database::fetchAll($sql, ['user_id' => $user_id]);
+        } catch (Exception $e) {
+            error_log('Get friends failed: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Remove friend
+     * 
+     * @param string $user_id User ID
+     * @param string $friend_id Friend's user ID
+     * @return bool Success status
+     */
+    public static function removeFriend($user_id, $friend_id)
+    {
+        try {
+            $sql = "DELETE FROM user_relationships 
+                    WHERE relationship_type = 'friend' 
+                    AND status = 'accepted'
+                    AND ((source_user_id = :user_id AND target_user_id = :friend_id)
+                         OR (source_user_id = :friend_id AND target_user_id = :user_id))";
+
+            return Database::query($sql, [
+                'user_id' => $user_id,
+                'friend_id' => $friend_id
+            ]);
+        } catch (Exception $e) {
+            error_log('Remove friend failed: ' . $e->getMessage());
+            return false;
         }
     }
 
     /**
      * Manage friend relationships (send/accept/reject/cancel/remove)
      */
-    public static function manageFriendRelationships($action, $source_user_id, $target_user_id, $message = null) {
+    public static function manageFriendRelationships($action, $source_user_id, $target_user_id, $message = null)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2068,7 +2229,6 @@ class DatabaseHelper
                 default:
                     return false;
             }
-
         } catch (PDOException $e) {
             error_log("Manage friend relationships error: " . $e->getMessage());
             return false;
@@ -2078,7 +2238,8 @@ class DatabaseHelper
     /**
      * Get user's friends list
      */
-    public static function getFriendsList($user_id, $limit = 50, $offset = 0) {
+    public static function getFriendsList($user_id, $limit = 50, $offset = 0)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2109,7 +2270,6 @@ class DatabaseHelper
 
             $stmt->execute([$user_id, $user_id, $user_id, $user_id, $limit, $offset]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
             error_log("Get friends list error: " . $e->getMessage());
             return [];
@@ -2119,7 +2279,8 @@ class DatabaseHelper
     /**
      * Get user's followers
      */
-    public static function getFollowersList($user_id, $limit = 50, $offset = 0) {
+    public static function getFollowersList($user_id, $limit = 50, $offset = 0)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2140,7 +2301,6 @@ class DatabaseHelper
 
             $stmt->execute([$user_id, $limit, $offset]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
             error_log("Get followers list error: " . $e->getMessage());
             return [];
@@ -2150,7 +2310,8 @@ class DatabaseHelper
     /**
      * Get users that a user is following
      */
-    public static function getFollowingList($user_id, $limit = 50, $offset = 0) {
+    public static function getFollowingList($user_id, $limit = 50, $offset = 0)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2171,7 +2332,6 @@ class DatabaseHelper
 
             $stmt->execute([$user_id, $limit, $offset]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
             error_log("Get following list error: " . $e->getMessage());
             return [];
@@ -2181,7 +2341,8 @@ class DatabaseHelper
     /**
      * Check if two users are friends
      */
-    public static function areFriends($user1_id, $user2_id) {
+    public static function areFriends($user1_id, $user2_id)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2209,7 +2370,8 @@ class DatabaseHelper
     /**
      * Get follower count for a user
      */
-    public static function getFollowerCount($user_id) {
+    public static function getFollowerCount($user_id)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2234,7 +2396,8 @@ class DatabaseHelper
     /**
      * Get following count for a user
      */
-    public static function getFollowingCount($user_id) {
+    public static function getFollowingCount($user_id)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2259,7 +2422,8 @@ class DatabaseHelper
     /**
      * Get friends count for a user
      */
-    public static function getFriendsCount($user_id) {
+    public static function getFriendsCount($user_id)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2282,4 +2446,218 @@ class DatabaseHelper
             return 0;
         }
     }
+
+    /**
+     * Shop Operations
+     */
+
+    /**
+     * Get available shop items
+     */
+    public static function getShopItems($filters = [])
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $whereConditions = [];
+            $params = [];
+
+            // Build filter conditions
+            if (isset($filters['category']) && $filters['category']) {
+                $whereConditions[] = "category = ?";
+                $params[] = $filters['category'];
+            }
+
+            if (isset($filters['is_available']) && $filters['is_available']) {
+                $whereConditions[] = "is_available = ?";
+                $params[] = $filters['is_available'];
+            }
+
+            if (isset($filters['min_price']) && $filters['min_price'] > 0) {
+                $whereConditions[] = "(gold_price >= ? OR gem_price >= ?)";
+                $params[] = $filters['min_price'];
+                $params[] = $filters['min_price'];
+            }
+
+            if (isset($filters['max_price']) && $filters['max_price'] > 0) {
+                $whereConditions[] = "(gold_price <= ? OR gem_price <= ?)";
+                $params[] = $filters['max_price'];
+                $params[] = $filters['max_price'];
+            }
+
+            // Build WHERE clause
+            $whereClause = '';
+            if (!empty($whereConditions)) {
+                $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
+            }
+
+            $sql = "SELECT * FROM shop_items $whereClause ORDER BY category, gold_price, gem_price";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get shop items error: " . $e->getMessage());
+            return false;
+        }
     }
+
+    /**
+     * Purchase a shop item for a user
+     */
+    public static function purchaseItem($user_id, $item_id)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Start transaction
+            $pdo->beginTransaction();
+
+            // Get item details
+            $itemStmt = $pdo->prepare("SELECT * FROM shop_items WHERE id = ? AND is_available = 1");
+            $itemStmt->execute([$item_id]);
+            $item = $itemStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$item) {
+                throw new Exception("Item not available or not found");
+            }
+
+            // Get user stats
+            $userStmt = $pdo->prepare("SELECT gold_count, gem_count FROM user_stats WHERE user_id = ?");
+            $userStmt->execute([$user_id]);
+            $userStats = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$userStats) {
+                throw new Exception("User stats not found");
+            }
+
+            // Check if user can afford the item
+            $canAfford = false;
+            $currencyType = '';
+            $price = 0;
+
+            if ($item['gold_price'] > 0 && $userStats['gold_count'] >= $item['gold_price']) {
+                $canAfford = true;
+                $currencyType = 'gold';
+                $price = $item['gold_price'];
+            } elseif ($item['gem_price'] > 0 && $userStats['gem_count'] >= $item['gem_price']) {
+                $canAfford = true;
+                $currencyType = 'gem';
+                $price = $item['gem_price'];
+            }
+
+            if (!$canAfford) {
+                throw new Exception("Insufficient funds");
+            }
+
+            // Deduct currency
+            if ($currencyType === 'gold') {
+                $updateStmt = $pdo->prepare("UPDATE user_stats SET gold_count = gold_count - ? WHERE user_id = ?");
+            } else {
+                $updateStmt = $pdo->prepare("UPDATE user_stats SET gem_count = gem_count - ? WHERE user_id = ?");
+            }
+            $updateStmt->execute([$price, $user_id]);
+
+            // Record purchase
+            $purchaseId = UUIDHelper::makeId();
+            $purchaseStmt = $pdo->prepare("
+            INSERT INTO user_purchases (id, user_id, item_id, currency_type, price, purchased_at) 
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+            $purchaseStmt->execute([$purchaseId, $user_id, $item_id, $currencyType, $price]);
+
+            // Update item purchase count
+            $itemUpdateStmt = $pdo->prepare("UPDATE shop_items SET purchase_count = purchase_count + 1 WHERE id = ?");
+            $itemUpdateStmt->execute([$item_id]);
+
+            // Commit transaction
+            $pdo->commit();
+
+            return [
+                'purchase_id' => $purchaseId,
+                'item' => $item,
+                'currency_type' => $currencyType,
+                'price' => $price,
+                'remaining_balance' => [
+                    'gold_count' => $currencyType === 'gold' ? $userStats['gold_count'] - $price : $userStats['gold_count'],
+                    'gem_count' => $currencyType === 'gem' ? $userStats['gem_count'] - $price : $userStats['gem_count']
+                ]
+            ];
+        } catch (Exception $e) {
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log("Purchase item error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get user's purchased items
+     */
+    public static function getUserPurchases($user_id, $limit = 50, $offset = 0)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+            SELECT 
+                up.*,
+                si.name as item_name,
+                si.description as item_description,
+                si.item_type,
+                si.category,
+                si.effect_value,
+                si.duration_days,
+                si.image_url
+            FROM user_purchases up
+            JOIN shop_items si ON up.item_id = si.id
+            WHERE up.user_id = ?
+            ORDER BY up.purchased_at DESC
+            LIMIT ? OFFSET ?
+        ");
+
+            $stmt->execute([$user_id, $limit, $offset]);
+            $purchases = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Get total count for pagination
+            $countStmt = $pdo->prepare("SELECT COUNT(*) as total FROM user_purchases WHERE user_id = ?");
+            $countStmt->execute([$user_id]);
+            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+            return [
+                'purchases' => $purchases,
+                'total' => $total,
+                'limit' => $limit,
+                'offset' => $offset
+            ];
+        } catch (PDOException $e) {
+            error_log("Get user purchases error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get shop item categories
+     */
+    public static function getItemCategories()
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+            SELECT DISTINCT category, COUNT(*) as item_count 
+            FROM shop_items 
+            WHERE is_available = 1 
+            GROUP BY category 
+            ORDER BY category
+        ");
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get item categories error: " . $e->getMessage());
+            return false;
+        }
+    }
+}
