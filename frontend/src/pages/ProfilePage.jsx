@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UserProfile from '../components/users/UserProfile';
-import UserRecipes from '../components/users/UserRecipes';
-import LoadingSpinner from '../components/common/LoadingSpinner';
-import * as userAPI from '../api/users';
-import * as recipeAPI from '../api/recipes';
-import * as cookbookAPI from '../api/cookbooks';
+// import UserRecipes from '../components/users/UserRecipes';
+// import LoadingSpinner from '../components/common/LoadingSpinner';
 import { 
   FaUserCircle, FaCog, FaChartLine, FaArrowLeft,
   FaTrophy, FaBook, FaUsers 
 } from 'react-icons/fa';
+import RecipeList from '../components/recipes/RecipeList';
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -19,18 +17,37 @@ const ProfilePage = () => {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('profile');
 
-  // Load user data
+  // Load user data - UPDATED TO USE PHP BACKEND
   const loadUserData = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // Load profile data
-      const profileResponse = await userAPI.getProfile(id);
-      if (profileResponse.success) {
-        setUserData(profileResponse.data);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch(`http://localhost/backend/api/users/profile.php?user_id=${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+
+        setUserData({
+          profile: result.data?.profile || result.profile,
+          stats: result.data?.stats || result.stats,
+          level_progress: result.data?.level_progress,
+          is_following: result.data?.is_following,
+          is_friend: result.data?.is_friend
+        });
       } else {
-        throw new Error(profileResponse.message || 'Failed to load profile');
+        throw new Error(result.message || 'Failed to load profile');
       }
     } catch (err) {
       setError(err.message || 'Failed to load user data');
@@ -51,13 +68,12 @@ const ProfilePage = () => {
     }
   }, [id]);
 
+  //<LoadingSpinner size="large" text={`Loading profile data...`}/>
+  // from between loading divs wont comment out down there
   if (loading) {
     return (
       <div className="profile-page-loading">
-        <LoadingSpinner 
-          size="large" 
-          text={`Loading profile data...`}
-        />
+
         <div className="loading-bonus">
           <FaTrophy /> +10 EXP for patience!
         </div>
@@ -106,7 +122,7 @@ const ProfilePage = () => {
           <FaUserCircle /> Profile
           {userData && (
             <span className="profile-title-user">
-              {userData.full_name}
+              {userData.profile?.full_name || userData.full_name}
             </span>
           )}
         </h1>
@@ -132,12 +148,15 @@ const ProfilePage = () => {
         >
           <FaBook /> Recipes
         </button>
-        <button 
+
+        {/* Cookbooks commmented out*/}
+        {/* <button 
           className={`section-button ${activeSection === 'cookbooks' ? 'active' : ''}`}
           onClick={() => setActiveSection('cookbooks')}
         >
           <FaBook /> Cookbooks
-        </button>
+        </button> */}
+
         <button 
           className={`section-button ${activeSection === 'stats' ? 'active' : ''}`}
           onClick={() => setActiveSection('stats')}
@@ -155,27 +174,59 @@ const ProfilePage = () => {
       {/* Main Content */}
       <div className="profile-page-content">
         {activeSection === 'profile' && (
-          <UserProfile userId={id} />
+          <UserProfile userId={id} onUpdate={handleProfileUpdate} />
         )}
         
         {activeSection === 'recipes' && userData && (
           <div className="profile-recipes-section">
             <h2>
-              <FaBook /> {userData.full_name}'s Recipes
+              <FaBook /> {userData.profile?.full_name || userData.full_name}'s Recipes
             </h2>
-            <UserRecipes userId={id} />
+
+            <RecipeList 
+              userId={id}
+              title=""
+              showFilters={false}
+              showSearch={false}
+              limit={12}
+            />
           </div>
         )}
         
         {activeSection === 'stats' && userData && (
           <div className="profile-stats-section">
             <h2>
-              <FaChartLine /> {userData.full_name}'s Statistics
+              <FaChartLine /> {userData.profile?.full_name || userData.full_name}'s Statistics
             </h2>
             {/* StatsDisplay component would go here */}
             <div className="stats-placeholder">
               <FaTrophy size={64} />
               <p>Detailed statistics coming soon!</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Cookbooks commented out */}
+        {/* {activeSection === 'cookbooks' && userData && (
+          <div className="profile-cookbooks-section">
+            <h2>
+              <FaBook /> {userData.full_name}'s Cookbooks
+            </h2>
+            <div className="cookbooks-placeholder">
+              <FaBook size={64} />
+              <p>Cookbooks feature coming soon!</p>
+            </div>
+          </div>
+        )} */}
+        
+        {activeSection === 'following' && userData && (
+          <div className="profile-following-section">
+            <h2>
+              <FaUsers /> {userData.profile?.full_name || userData.full_name}'s Following
+            </h2>
+            <div className="following-placeholder">
+              <FaUsers size={64} />
+              <p>Following list coming soon!</p>
             </div>
           </div>
         )}
