@@ -3,8 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/index.css';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { DataProvider } from './contexts/DataContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { DataProvider } from './contexts/DataContext';
 
 import NavbarComponent from './components/NavbarComponent';
 import FooterComponent from './components/FooterComponent';

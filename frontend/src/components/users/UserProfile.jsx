@@ -6,12 +6,15 @@ import {
   FaStar, FaFire, FaSync
 } from 'react-icons/fa';
 import { useData } from '../../contexts/DataContext.js';
+import { useAuth } from '../../hooks/useAuth.js';
 //import LoadingSpinner from '../common/LoadingSpinner';
 // import StatsDisplay from './StatsDisplay';
 
 const UserProfile = ({ userId: propUserId }) => {
   const { id: paramUserId } = useParams();
   const userId = propUserId || paramUserId;
+
+  const { updateProfile, user: currentUser } = useAuth(); // Use current user from auth
 
   const {
     userData,
@@ -165,40 +168,76 @@ const UserProfile = ({ userId: propUserId }) => {
 
   // Handle profile update
   const handleProfileUpdate = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      // Use DataContext update method
-      const result = await updateUserProfile(editForm);
-
-      if (result.success) {
-        // DataContext will automatically refresh user data
-        setIsEditing(false);
-      } else {
-        throw new Error(result.error || 'Failed to update profile');
-      }
-    } catch (err) {
-      console.error('Error updating profile:', err);
-      alert(err.message);
+  try {
+    await updateProfile(editForm);
+    
+    // Update local state
+    if (profileData) {
+      setProfileData({
+        ...profileData,
+        ...editForm
+      });
     }
-  };
+    
+    setIsEditing(false);
+    
+    // Show success message
+    alert('Profile updated successfully!');
+  } catch (err) {
+    console.error('Error updating profile:', err);
+    alert(err.message || 'Failed to update profile. Please try again.');
+  }
+};
 
   // Handle profile picture upload
-  const handleProfilePictureUpload = async (file) => {
-    try {
-      // Use DataContext upload method
-      const result = await uploadProfilePicture(file);
+  // Handle profile picture upload
+const handleProfilePictureUpload = async (file) => {
+  try {
+    // Create FormData
+    const formData = new FormData();
+    formData.append('profile_picture', file);
+    
+    // Get token
+    const token = localStorage.getItem('token');
+    
+    // Upload the file
+    const response = await fetch('http://localhost/api/users/upload-profile-picture.php', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
 
-      if (result.success) {
-        // DataContext will automatically refresh user data
-      } else {
-        throw new Error(result.error || 'Failed to upload profile picture');
-      }
-    } catch (err) {
-      console.error('Error uploading profile picture:', err);
-      alert(err.message);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to upload profile picture');
     }
-  };
+
+    if (data.success) {
+      // Update the profile with new picture URL
+      await updateProfile({ profile_picture: data.data.url });
+      
+      // Update local state
+      if (profileData) {
+        setProfileData({
+          ...profileData,
+          profile_picture: data.data.url
+        });
+      }
+      
+      alert('Profile picture updated successfully!');
+    } else {
+      throw new Error(data.message || 'Failed to upload profile picture');
+    }
+  } catch (err) {
+    console.error('Error uploading profile picture:', err);
+    alert(err.message || 'Failed to upload profile picture. Please try again.');
+  }
+};
 
   // Handle follow/unfollow
   const handleFollow = async () => {

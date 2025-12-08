@@ -6,7 +6,7 @@ import * as relationshipsApi from '../api/relationships';
 import * as cookbooksApi from '../api/cookbooks';
 import * as userApi from '../api/users';
 import * as cookingSessionApi from '../api/cooking-sessions';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 const DataContext = createContext();
 
