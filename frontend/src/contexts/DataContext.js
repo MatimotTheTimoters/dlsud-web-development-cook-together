@@ -1028,6 +1028,5 @@ return (
     </div>
   </DataContext.Provider>
 );
-};
 
 export default DataContext;
