@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaUserPlus, FaUserCheck, FaUserTimes } from 'react-icons/fa';
 import * as relationshipsApi from '../../api/relationships';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/AuthContext';
 
 /**
  * FollowButton Component

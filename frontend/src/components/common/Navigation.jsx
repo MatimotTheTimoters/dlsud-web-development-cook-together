@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/AuthContext';
 import { FaBell, FaEnvelope, FaUserFriends, FaChevronDown } from 'react-icons/fa';
 import * as relationshipsApi from '../../api/relationships';
 
