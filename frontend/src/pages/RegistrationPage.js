@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-//import apiSheets from '../constants/api.js';
-import { generateBatchIds } from '../hooks/uuidHelper.js';
 import { useAuth } from '../hooks/useAuth.js';
-import { calculateAllUserLimits, calculateLevelUpRequirements } from '../utils/userCalculations.js';
 
 export default function RegistrationPage() {
   const navigate = useNavigate();
-  const { login } = useAuth(); // For auto-login after registration
+  const { register } = useAuth(); 
 
   const [form, setForm] = useState({
     fullName: '',
@@ -56,86 +53,24 @@ export default function RegistrationPage() {
     }
 
     try {
-      // Generate user ID locally
-      const [id] = await generateBatchIds(1, 'user');
-
-      // Set default values for the new user
-      const currentDate = new Date().toISOString();
-      const defaultLevel = 1;
-      const defaultEXP = 0;
-      const levelRequirements = calculateLevelUpRequirements(defaultLevel, defaultEXP);
-      const defaultLimits = calculateAllUserLimits({
-        level: defaultLevel,
-        recipesCreated: 0,
-        recipesCooked: 0,
-        successfulCooks: 0,
-        failedCooks: 0,
-        loginStreak: 0,
-        challengesCompleted: 0,
-        recipesSold: 0,
-        totalRevenue: 0,
-        premiumSubscriber: false,
-      });
-
-      const newUser = {
-        id,
-        createdAt: currentDate,
-        lastUpdated: currentDate,
-        profilePicture: '/src/assets/placeholders/user-avatar.png',
-        fullName: form.fullName.trim(),
+      // Prepare user data for registration
+      const userData = {
+        full_name: form.fullName.trim(),
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        age: String(Number(form.age) || 18),
+        age: Number(form.age) || 18,
         gender: form.gender,
-        loginStreak: "0",
-        level: String(defaultLevel),
-        currentEXP: String(defaultEXP),
-        currentLevelCeiling: String(levelRequirements.expNeeded),
-        goldCount: "50",
-        gemCount: "5",
-        friends: "0",
-        recipesCreated: "0",
-        recipesCooked: "0",
-        maxExpReward: String(defaultLimits.maxExp),
-        maxGoldReward: String(defaultLimits.maxGold),
-        maxGemReward: String(defaultLimits.maxGem),
-        maxGoldPrice: String(defaultLimits.maxGoldPrice),
-        maxGemPrice: String(defaultLimits.maxGemPrice),
+        profile_picture: '/src/assets/placeholders/user-avatar.png' // Default avatar
       };
 
-      const payload = { data: [newUser] };
+      console.log('📦 Registration Payload:', userData);
 
-      console.log('📦 Registration Payload:', payload);
+      // Register user using AuthContext
+      const result = await register(userData);
+      
+      console.log('✅ Registration successful:', result);
 
-      /*
-      // Post new user to the API
-      const res = await fetch(apiSheets.users, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Registration failed: ${res.status} ${text}`);
-      }
-
-      console.log('✅ Registration successful');
-      */
-
-      // Auto-login after successful registration
-      await login({
-        id,
-        fullName: form.fullName,
-        email: form.email,
-        level: defaultLevel,
-        goldCount: 50,
-        gemCount: 5,
-      });
-
+      // Show success message and redirect
       alert(`Welcome to Cook Together, ${form.fullName}! You've received 50 Gold and 5 Gems to get started.`);
       navigate("/feed");
     } catch (err) {
