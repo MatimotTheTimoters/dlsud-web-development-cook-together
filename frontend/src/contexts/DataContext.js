@@ -1,13 +1,10 @@
+// src/contexts/DataContext.js
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { FaDatabase, FaSync } from 'react-icons/fa';
-// Import API modules - The "Messengers"
 import * as recipeApi from '../api/recipes';
 import * as relationshipsApi from '../api/relationships';
-import * as cookbooksApi from '../api/cookbooks';
-import * as userApi from '../api/users';
-import * as cookingSessionApi from '../api/cooking-sessions';
-import { useAuth } from '../hooks/useAuth';
 
+// Create DataContext
 const DataContext = createContext();
 
 export const useData = () => {
@@ -19,136 +16,790 @@ export const useData = () => {
 };
 
 export const DataProvider = ({ children }) => {
-  // Access Auth Context to check login status
-  const { isAuthenticated } = useAuth();
-
-  // State
+  // State for different data types
   const [userData, setUserData] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [relationships, setRelationships] = useState([]);
   const [cookbooks, setCookbooks] = useState([]);
   const [cookingSessions, setCookingSessions] = useState([]);
-  
-  // Loading & Error States
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+
+  // Loading and error states
   const [loading, setLoading] = useState({
     user: false,
     recipes: false,
     relationships: false,
+    cookbooks: false,
+    sessions: false,
     all: false
   });
+
   const [errors, setErrors] = useState({});
 
-  // ==========================================
-  // 1. DATA FETCHING (Delegates to API files)
-  // ==========================================
+  // Cache for storing fetched data
+  const [cache, setCache] = useState({});
 
-  const fetchUserData = useCallback(async () => {
-    if (!isAuthenticated()) return; // Auth Check
-    setLoading(prev => ({ ...prev, user: true }));
+  // Check if user is authenticated
+  const isAuthenticated = () => {
+    const token = localStorage.getItem('token');
+    return !!token;
+  };
+
+  // Get auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    };
+  };
+
+  // Fetch all data - waits for authentication
+  const fetchAllData = useCallback(async () => {
+    if (!isAuthenticated()) {
+      console.log('Waiting for authentication before fetching data...');
+      return;
+    }
+
+    setLoading(prev => ({ ...prev, all: true }));
+
     try {
-      // CALL API FILE, NOT FETCH DIRECTLY
-      const response = await userApi.getProfile(); 
-      if (response.success) {
-        setUserData(response.data.profile || response.data.user); // Handle response structure
+      // Wait for auth to be ready (simulated delay)
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Fetch all data types in parallel
+      await Promise.all([
+        fetchUserData(),
+        fetchRecipes(),
+        fetchRelationships(),
+        fetchCookbooks(),
+        fetchCookingSessions(),
+        fetchFriendRequests(),
+        fetchFollowers(),
+        fetchFollowing()
+      ]);
+
+      setErrors({});
+    } catch (error) {
+      console.error('Error fetching all data:', error);
+      setErrors(prev => ({
+        ...prev,
+        all: error.message || 'Failed to fetch all data'
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, all: false }));
+    }
+  }, []);
+
+  // ====================
+  // USER METHODS
+  // ====================
+
+  const fetchUserData = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, user: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/users/profile.php', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setUserData(data.data);
+          setCachedData('userData', data.data);
+        } else {
+          throw new Error(data.message || 'Failed to fetch user data');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch user data`);
       }
     } catch (error) {
-      console.error('User fetch error:', error);
+      console.error('Error fetching user data:', error);
       setErrors(prev => ({ ...prev, user: error.message }));
     } finally {
       setLoading(prev => ({ ...prev, user: false }));
     }
-  }, [isAuthenticated]);
+  };
 
-  const fetchRecipes = useCallback(async (params = {}) => {
+  // ====================
+  // RECIPE METHODS
+  // ====================
+
+  const fetchRecipes = async (params = {}) => {
     if (!isAuthenticated()) return;
+
     setLoading(prev => ({ ...prev, recipes: true }));
+
     try {
-      const response = await recipeApi.getAllRecipes(params);
-      if (response.success) {
-        setRecipes(response.data.recipes || []);
+      const result = await recipeApi.getAllRecipes(params);
+
+      if (result.success) {
+        setRecipes(result.data.recipes || []);
+        setCachedData('recipes', result.data.recipes);
+      } else {
+        throw new Error(result.message || 'Failed to fetch recipes');
       }
     } catch (error) {
+      console.error('Error fetching recipes:', error);
       setErrors(prev => ({ ...prev, recipes: error.message }));
     } finally {
       setLoading(prev => ({ ...prev, recipes: false }));
     }
-  }, [isAuthenticated]);
-
-  // ==========================================
-  // 2. MASTER SYNC FUNCTION
-  // ==========================================
-  
-  const fetchAllData = useCallback(async () => {
-    // STOP if not logged in. This matches your checklist "Update DataContext for auth dependency"
-    if (!isAuthenticated()) {
-      return; 
-    }
-
-    setLoading(prev => ({ ...prev, all: true }));
-    try {
-      await Promise.all([
-        fetchUserData(),
-        fetchRecipes(),
-        // Add others as you implement their API files:
-        // fetchRelationships(),
-        // fetchCookbooks()
-      ]);
-    } catch (error) {
-      console.error("Sync error:", error);
-    } finally {
-      setLoading(prev => ({ ...prev, all: false }));
-    }
-  }, [isAuthenticated, fetchUserData, fetchRecipes]);
-
-  // Trigger fetch when auth state changes
-  useEffect(() => {
-    if (isAuthenticated()) {
-      fetchAllData();
-    } else {
-      // Clear data on logout
-      setUserData(null);
-      setRecipes([]);
-    }
-  }, [isAuthenticated, fetchAllData]);
-
-  // ==========================================
-  // 3. ACTION METHODS (Update State & Call API)
-  // ==========================================
+  };
 
   const addRecipe = async (recipeData) => {
     setLoading(prev => ({ ...prev, recipes: true }));
+
     try {
       const result = await recipeApi.createRecipe(recipeData);
+
       if (result.success) {
-        // Optimistic update or refetch
-        fetchRecipes(); 
+        // Add new recipe to state
+        setRecipes(prev => [result.data.recipe, ...prev]);
+        // Refresh recipes list
+        await fetchRecipes();
         return { success: true, data: result.data };
+      } else {
+        throw new Error(result.message || 'Failed to create recipe');
       }
-      return { success: false, message: result.message };
     } catch (error) {
+      console.error('Error adding recipe:', error);
       return { success: false, error: error.message };
     } finally {
       setLoading(prev => ({ ...prev, recipes: false }));
     }
   };
 
+  const removeRecipe = async (recipeId) => {
+    setLoading(prev => ({ ...prev, recipes: true }));
+
+    try {
+      const result = await recipeApi.deleteRecipe(recipeId);
+
+      if (result.success) {
+        // Remove recipe from state
+        setRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
+        return { success: true, data: result.data };
+      } else {
+        throw new Error(result.message || 'Failed to delete recipe');
+      }
+    } catch (error) {
+      console.error('Error removing recipe:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(prev => ({ ...prev, recipes: false }));
+    }
+  };
+
+  const updateRecipeInContext = async (recipeId, updates) => {
+    setLoading(prev => ({ ...prev, recipes: true }));
+
+    try {
+      const result = await recipeApi.updateRecipe(recipeId, updates);
+
+      if (result.success) {
+        // Update recipe in state
+        setRecipes(prev => prev.map(recipe =>
+          recipe.id === recipeId ? { ...recipe, ...result.data.recipe } : recipe
+        ));
+        return { success: true, data: result.data };
+      } else {
+        throw new Error(result.message || 'Failed to update recipe');
+      }
+    } catch (error) {
+      console.error('Error updating recipe:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(prev => ({ ...prev, recipes: false }));
+    }
+  };
+
+  // ====================
+  // RELATIONSHIP METHODS
+  // ====================
+
+  const fetchRelationships = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, relationships: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/relationships/list.php?type=following', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setRelationships(data.data.items || []);
+          setCachedData('relationships', data.data.items);
+        } else {
+          throw new Error(data.message || 'Failed to fetch relationships');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch relationships`);
+      }
+    } catch (error) {
+      console.error('Error fetching relationships:', error);
+      setErrors(prev => ({ ...prev, relationships: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const fetchFriendRequests = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, relationships: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/relationships/list.php?type=friend_requests&request_type=received', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setFriendRequests(data.data.items || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch friend requests');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch friend requests`);
+      }
+    } catch (error) {
+      console.error('Error fetching friend requests:', error);
+      setErrors(prev => ({ ...prev, friendRequests: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const fetchFollowers = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, relationships: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/relationships/list.php?type=followers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setFollowers(data.data.items || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch followers');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch followers`);
+      }
+    } catch (error) {
+      console.error('Error fetching followers:', error);
+      setErrors(prev => ({ ...prev, followers: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const fetchFollowing = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, relationships: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/relationships/list.php?type=following', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setFollowing(data.data.items || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch following');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch following`);
+      }
+    } catch (error) {
+      console.error('Error fetching following:', error);
+      setErrors(prev => ({ ...prev, following: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const followUser = async (targetUserId, action = 'toggle') => {
+    try {
+      setLoading(prev => ({ ...prev, relationships: true }));
+      
+      const response = await fetch('http://localhost/api/relationships/follow.php', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          target_user_id: targetUserId,
+          action: action
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to follow user');
+      }
+
+      // Refresh relationships data
+      await fetchFollowing();
+      await fetchFollowers();
+
+      return data;
+    } catch (err) {
+      console.error('Follow user error:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  const manageFriendRequest = async (targetUserId, action, message = null) => {
+    try {
+      setLoading(prev => ({ ...prev, relationships: true }));
+      
+      const response = await fetch('http://localhost/api/relationships/friends.php', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          target_user_id: targetUserId,
+          action: action,
+          message: message
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to manage friend request');
+      }
+
+      // Refresh friend requests
+      await fetchFriendRequests();
+      await fetchFollowing();
+
+      return data;
+    } catch (err) {
+      console.error('Manage friend request error:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
+  };
+
+  // ====================
+  // COOKBOOK METHODS
+  // ====================
+
+  const fetchCookbooks = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, cookbooks: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/cookbooks/index.php', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setCookbooks(data.data.cookbooks || []);
+          setCachedData('cookbooks', data.data.cookbooks);
+        } else {
+          throw new Error(data.message || 'Failed to fetch cookbooks');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch cookbooks`);
+      }
+    } catch (error) {
+      console.error('Error fetching cookbooks:', error);
+      setErrors(prev => ({ ...prev, cookbooks: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, cookbooks: false }));
+    }
+  };
+
+  // ====================
+  // COOKING SESSION METHODS
+  // ====================
+
+  const fetchCookingSessions = async () => {
+    if (!isAuthenticated()) return;
+
+    setLoading(prev => ({ ...prev, sessions: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/cooking-sessions/index.php', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setCookingSessions(data.data.sessions || []);
+          setCachedData('cookingSessions', data.data.sessions);
+        } else {
+          throw new Error(data.message || 'Failed to fetch cooking sessions');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: Failed to fetch cooking sessions`);
+      }
+    } catch (error) {
+      console.error('Error fetching cooking sessions:', error);
+      setErrors(prev => ({ ...prev, sessions: error.message }));
+    } finally {
+      setLoading(prev => ({ ...prev, sessions: false }));
+    }
+  };
+
+  // ====================
+  // UTILITY METHODS
+  // ====================
+
+  // Update user data
+  const updateUserData = (data) => {
+    setUserData(prev => ({ ...prev, ...data }));
+    setCachedData('userData', { ...userData, ...data });
+  };
+
+  // Update recipes
+  const updateRecipes = (data) => {
+    setRecipes(data);
+    setCachedData('recipes', data);
+  };
+
+  // Update relationships
+  const updateRelationships = (data) => {
+    setRelationships(data);
+    setCachedData('relationships', data);
+  };
+
+  // Clear all data
+  const clearData = () => {
+    setUserData(null);
+    setRecipes([]);
+    setRelationships([]);
+    setCookbooks([]);
+    setCookingSessions([]);
+    setFriendRequests([]);
+    setFollowers([]);
+    setFollowing([]);
+    setCache({});
+    setErrors({});
+  };
+
+  // Get cached data
+  const getCachedData = (key) => {
+    return cache[key] || null;
+  };
+
+  // Set data in cache
+  const setCachedData = (key, data) => {
+    setCache(prev => ({
+      ...prev,
+      [key]: {
+        data,
+        timestamp: Date.now()
+      }
+    }));
+  };
+
+  // Check cache validity (5 minutes)
+  const isCacheValid = (key) => {
+    const cached = cache[key];
+    if (!cached) return false;
+    return Date.now() - cached.timestamp < 5 * 60 * 1000; // 5 minutes
+  };
+
+  // Sync all data
+  const syncAllData = async () => {
+    setLoading(prev => ({ ...prev, all: true }));
+
+    try {
+      await fetchAllData();
+
+      // Show sync success notification
+      console.log('🔄 Data synced successfully!');
+    } catch (error) {
+      console.error('Sync error:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, all: false }));
+    }
+  };
+
+  // Effect to fetch data on mount if authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      fetchAllData();
+    }
+  }, [fetchAllData]);
+
+  // ====================
+  // CONTEXT VALUE
+  // ====================
+
   const value = {
+    // Data
     userData,
     recipes,
+    relationships,
+    cookbooks,
+    cookingSessions,
+    friendRequests,
+    followers,
+    following,
+
+    // Loading states
     loading,
     errors,
+
+    // Functions
     fetchAllData,
     fetchUserData,
     fetchRecipes,
-    addRecipe
-    // Add other methods as you build Features 3, 4, 5
+    fetchRelationships,
+    fetchCookbooks,
+    fetchCookingSessions,
+    updateUserData,
+    updateRecipes,
+    updateRelationships,
+    clearData,
+    getCachedData,
+    setCachedData,
+    syncAllData,
+    isAuthenticated,
+
+    // Recipe management functions
+    addRecipe,
+    removeRecipe,
+    updateRecipeInContext,
+    searchRecipes: async (query, filters) => {
+      const result = await recipeApi.searchRecipes(query, filters);
+      return result;
+    },
+    getTrendingRecipes: async (limit) => {
+      const result = await recipeApi.getTrendingRecipes(limit);
+      return result;
+    },
+    getUserRecipes: async (userId, params) => {
+      const result = await recipeApi.getUserRecipes(userId, params);
+      return result;
+    },
+    likeRecipe: async (recipeId) => {
+      const result = await recipeApi.likeRecipe(recipeId);
+      if (result.success) {
+        // Update recipe in context
+        setRecipes(prev => prev.map(recipe => {
+          if (recipe.id === recipeId) {
+            return {
+              ...recipe,
+              like_count: result.data.counts?.like_count || recipe.like_count,
+              dislike_count: result.data.counts?.dislike_count || recipe.dislike_count
+            };
+          }
+          return recipe;
+        }));
+      }
+      return result;
+    },
+    saveRecipe: async (recipeId, cookbookId) => {
+      const result = await recipeApi.saveRecipe(recipeId, cookbookId);
+      return result;
+    },
+    purchaseRecipe: async (recipeId) => {
+      const result = await recipeApi.purchaseRecipe(recipeId);
+      return result;
+    },
+    // Add these functions inside the value object (around line 348-400)
+
+    // Relationship management functions
+    followUser: async (targetUserId) => {
+      try {
+        const result = await relationshipsApi.followUser(targetUserId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+          return result;
+        }
+        return result;
+      } catch (error) {
+        console.error('Error following user:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    unfollowUser: async (targetUserId) => {
+      try {
+        const result = await relationshipsApi.unfollowUser(targetUserId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+          return result;
+        }
+        return result;
+      } catch (error) {
+        console.error('Error unfollowing user:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    getFriendRequests: async () => {
+      try {
+        const result = await relationshipsApi.getFriendRequests();
+        return result;
+      } catch (error) {
+        console.error('Error getting friend requests:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    acceptFriendRequest: async (requestId) => {
+      try {
+        const result = await relationshipsApi.acceptFriendRequest(requestId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+        }
+        return result;
+      } catch (error) {
+        console.error('Error accepting friend request:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    rejectFriendRequest: async (requestId) => {
+      try {
+        const result = await relationshipsApi.rejectFriendRequest(requestId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+        }
+        return result;
+      } catch (error) {
+        console.error('Error rejecting friend request:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    removeFriend: async (friendId) => {
+      try {
+        const result = await relationshipsApi.removeFriend(friendId);
+        if (result.success) {
+          // Update relationships in context
+          await fetchRelationships();
+        }
+        return result;
+      } catch (error) {
+        console.error('Error removing friend:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    // Relationship functions
+    followUser,
+    manageFriendRequest,
+    fetchFriendRequests,
+    fetchFollowers,
+    fetchFollowing,
+
+    // Alias for compatibility with BuildChallengeModal
+    currentUserData: userData,
+    userRewardLimits: userData?.stats ? {
+      maxExp: userData.stats.max_exp_reward || 100,
+      maxGold: userData.stats.max_gold_reward || 50,
+      maxGem: userData.stats.max_gem_reward || 5
+    } : { maxExp: 100, maxGold: 50, maxGem: 5 },
+    
+    // Legacy method for compatibility
+    refetchSheet: (sheetName) => {
+      // Map old sheet names to new API calls
+      switch (sheetName) {
+        case 'challengesCookQuota':
+          return Promise.resolve(); // Not implemented yet
+        case 'recipes':
+          return fetchRecipes();
+        case 'users':
+          return fetchUserData();
+        case 'relationships':
+          return fetchRelationships();
+        default:
+          console.warn(`Unknown sheet name: ${sheetName}`);
+          return Promise.resolve();
+      }
+    }
   };
 
+  // THE RETURN STATEMENT MUST BE INSIDE THE DataProvider FUNCTION
   return (
     <DataContext.Provider value={value}>
       {children}
-      {/* Visual loaders can go here */}
-      {loading.all && <div className="sync-indicator">Syncing...</div>}
+
+      {/* Sync status indicator */}
+      {loading.all && (
+        <div className="sync-status-overlay animate__animated animate__fadeIn">
+          <div className="sync-status-content">
+            <FaSync className="spinning-icon" />
+            <span className="sync-text">Syncing data...</span>
+            <div className="sync-progress">
+              <div className="progress-bar">
+                <div className="progress-fill indeterminate"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Database status indicator */}
+      <div className="database-status-fixed">
+        <FaDatabase className={`database-icon ${loading.all ? 'pulsing' : ''}`} />
+        <div className="status-tooltip">
+          Data Context Active
+          {loading.all && <div className="tooltip-status">🔄 Syncing...</div>}
+        </div>
+      </div>
     </DataContext.Provider>
   );
 };
