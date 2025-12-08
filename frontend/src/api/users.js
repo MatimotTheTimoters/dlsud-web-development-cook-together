@@ -16,7 +16,7 @@ export const getProfile = async (userId = null) => {
     if (userId) {
       params.user_id = userId;
     }
-    
+
     const response = await api.get('/users/profile', { params });
     return response.data;
   } catch (error) {
@@ -26,14 +26,26 @@ export const getProfile = async (userId = null) => {
 };
 
 /**
- * Update user profile
+ * Update user profile with optional file upload
  * @param {Object} profileData - Profile data to update
+ * @param {File} profilePicture - Optional profile picture file
  * @returns {Promise} Updated user data
  */
-export const updateProfile = async (profileData) => {
+export const updateProfile = async (profileData, profilePicture = null) => {
   try {
-    // Handle file upload separately if needed
-    const response = await api.put('/users/update', profileData);
+    // If there's a profile picture, upload it first
+    if (profilePicture && profilePicture instanceof File) {
+      const userId = profileData.id || localStorage.getItem('user_id');
+      const uploadResponse = await uploadProfilePicture(profilePicture, userId);
+
+      if (uploadResponse.success) {
+        profileData.profile_picture = uploadResponse.data.url;
+      } else {
+        throw new Error(uploadResponse.message || 'Failed to upload profile picture');
+      }
+    }
+
+    const response = await api.put('/users/update.php', profileData); // Added .php extension
     return response.data;
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -52,7 +64,7 @@ export const getUserStats = async (userId = null) => {
     if (userId) {
       params.user_id = userId;
     }
-    
+
     const response = await api.get('/users/stats', { params });
     return response.data;
   } catch (error) {
@@ -123,11 +135,11 @@ export const getFollowing = async (userId) => {
 export const uploadProfilePicture = async (file, userId) => {
   try {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('image', file); // Changed from 'file' to 'image' to match backend expectations
     formData.append('type', 'profile_picture');
     formData.append('user_id', userId);
-    
-    const response = await api.post('/upload/image', formData, {
+
+    const response = await api.post('/upload/image.php', formData, { // Added .php extension
       headers: {
         'Content-Type': 'multipart/form-data'
       }
