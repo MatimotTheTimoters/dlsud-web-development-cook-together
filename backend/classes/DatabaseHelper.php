@@ -2660,4 +2660,206 @@ class DatabaseHelper
             return false;
         }
     }
+
+    /**
+     * Get user's cookbooks
+     */
+    public static function getCookbooks($user_id, $include_public = false)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $params = [$user_id];
+            $visibilityCondition = "user_id = ?";
+
+            if ($include_public) {
+                $visibilityCondition = "(user_id = ? OR is_public = 1)";
+            }
+
+            $sql = "
+            SELECT cb.*, 
+                   u.full_name as owner_name,
+                   u.profile_picture as owner_picture,
+                   (SELECT COUNT(*) FROM cookbook_recipes cr WHERE cr.cookbook_id = cb.id) as recipe_count
+            FROM cookbooks cb
+            JOIN users u ON cb.user_id = u.id
+            WHERE $visibilityCondition
+            ORDER BY cb.updated_at DESC
+        ";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
+            $cookbooks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Get recipe previews for each cookbook
+            foreach ($cookbooks as &$cookbook) {
+                $previewStmt = $pdo->prepare("
+                SELECT r.id, r.title, r.cover_image
+                FROM cookbook_recipes cr
+                JOIN recipes r ON cr.recipe_id = r.id
+                WHERE cr.cookbook_id = ?
+                ORDER BY cr.added_at DESC
+                LIMIT 3
+            ");
+                $previewStmt->execute([$cookbook['id']]);
+                $cookbook['recipe_previews'] = $previewStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            return $cookbooks;
+        } catch (PDOException $e) {
+            error_log("Get cookbooks error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Create a new cookbook
+     */
+    public static function createCookbook($cookbook_data)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Generate ID
+            $cookbook_id = UUIDHelper::makeId();
+
+            // Insert cookbook
+            $sql = "INSERT INTO cookbooks (id, user_id, name, description, is_public, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $cookbook_id,
+                $cookbook_data['user_id'],
+                $cookbook_data['name'],
+                $cookbook_data['description'] ?? null,
+                $cookbook_data['is_public'] ?? false
+            ]);
+
+            return $cookbook_id;
+        } catch (PDOException $e) {
+            error_log("Create cookbook error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Add recipe to cookbook
+     */
+    public static function addRecipeToCookbook($cookbook_id, $recipe_id, $user_id)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Check if cookbook exists and belongs to user
+            $checkStmt = $pdo->prepare("SELECT user_id FROM cookbooks WHERE id = ?");
+            $checkStmt->execute([$cookbook_id]);
+            $cookbook = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cookbook) {
+                throw new Exception("Cookbook not found");
+            }
+
+            if ($cookbook['user_id'] != $user_id) {
+                throw new Exception("You don't have permission to add recipes to this cookbook");
+            }
+
+            // Check if recipe exists
+            $recipeStmt = $pdo->prepare("SELECT id FROM recipes WHERE id = ?");
+            $recipeStmt->execute([$recipe_id]);
+
+            if (!$recipeStmt->fetch()) {
+                throw new Exception("Recipe not found");
+            }
+
+            // Check if recipe already in cookbook
+            $duplicateStmt = $pdo->prepare("SELECT id FROM cookbook_recipes WHERE cookbook_id = ? AND recipe_id = ?");
+            $duplicateStmt->execute([$cookbook_id, $recipe_id]);
+
+            if ($duplicateStmt->fetch()) {
+                throw new Exception("Recipe already in cookbook");
+            }
+
+            // Add recipe to cookbook
+            $entry_id = UUIDHelper::makeId();
+            $insertStmt = $pdo->prepare("
+            INSERT INTO cookbook_recipes (id, cookbook_id, recipe_id, added_by, added_at) 
+            VALUES (?, ?, ?, ?, NOW())
+        ");
+            $insertStmt->execute([$entry_id, $cookbook_id, $recipe_id, $user_id]);
+
+            // Update cookbook's updated_at timestamp
+            $updateStmt = $pdo->prepare("UPDATE cookbooks SET updated_at = NOW() WHERE id = ?");
+            $updateStmt->execute([$cookbook_id]);
+
+            return $entry_id;
+        } catch (Exception $e) {
+            error_log("Add recipe to cookbook error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get recipes in a cookbook
+     */
+    public static function getCookbookRecipes($cookbook_id, $limit = 50, $offset = 0)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Get cookbook info
+            $cookbookStmt = $pdo->prepare("
+            SELECT cb.*, u.full_name as owner_name, u.profile_picture as owner_picture
+            FROM cookbooks cb
+            JOIN users u ON cb.user_id = u.id
+            WHERE cb.id = ?
+        ");
+            $cookbookStmt->execute([$cookbook_id]);
+            $cookbook = $cookbookStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cookbook) {
+                throw new Exception("Cookbook not found");
+            }
+
+            // Get recipes in cookbook with details
+            $recipesStmt = $pdo->prepare("
+            SELECT 
+                r.*,
+                u.full_name as author_name,
+                u.profile_picture as author_picture,
+                rm.like_count,
+                rm.dislike_count,
+                rm.cook_count,
+                cr.added_at as added_to_cookbook_at,
+                cr.notes as cookbook_notes
+            FROM cookbook_recipes cr
+            JOIN recipes r ON cr.recipe_id = r.id
+            JOIN users u ON r.user_id = u.id
+            LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id
+            WHERE cr.cookbook_id = ?
+            ORDER BY cr.added_at DESC
+            LIMIT ? OFFSET ?
+        ");
+
+            $recipesStmt->execute([$cookbook_id, $limit, $offset]);
+            $recipes = $recipesStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Get total count for pagination
+            $countStmt = $pdo->prepare("SELECT COUNT(*) as total FROM cookbook_recipes WHERE cookbook_id = ?");
+            $countStmt->execute([$cookbook_id]);
+            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+            return [
+                'cookbook' => $cookbook,
+                'recipes' => $recipes,
+                'total' => $total,
+                'limit' => $limit,
+                'offset' => $offset
+            ];
+        } catch (Exception $e) {
+            error_log("Get cookbook recipes error: " . $e->getMessage());
+            return false;
+        }
+    }
 }
