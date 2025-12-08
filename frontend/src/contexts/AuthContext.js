@@ -373,7 +373,7 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     );
 };
-
+/* commenting out dupe of useAuth hook
 // Export a hook for easy access to context
 export const useAuth = () => {
     const context = useContext(AuthContext);
@@ -387,3 +387,5 @@ export const useAuth = () => {
 
 // Export as default for backward compatibility
 export default AuthContext;
+
+*/
