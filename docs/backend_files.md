@@ -100,6 +100,37 @@
 - validateUserLogin(string $email, string $password) -> array|false: Validates login credentials
 - getUserById(string $user_id) -> array|false: Gets user by ID
 - updateUserProfile(string $user_id, array $data) -> bool: Updates user profile
+- getUserStats(string $user_id) -> array|false: Gets user stats
+- updateUserStats(string $user_id, array $updates) -> bool: Updates user stats
+- incrementUserStat(string $user_id, string $field, int $amount) -> bool: Increments user stat
+- searchUsers(string $query, array $filters) -> array: Searches users with pagination (mentioned as needed for api/users/search.php)
+- createRecipe(array $recipe_data, array $ingredients, array $steps) -> string|false: Creates recipe with ingredients and steps
+- getRecipe(string $recipe_id) -> array|false: Gets full recipe with details
+- updateRecipe(string $recipe_id, array $recipe_data, array $ingredients, array $steps) -> bool: Updates recipe
+- deleteRecipe(string $recipe_id) -> bool: Deletes recipe and related data
+- createCookingSession(array $session_data) -> string|false: Creates cooking session
+- getCookingSession(string $session_id) -> array|false: Gets cooking session with details
+- updateCookingSession(string $session_id, array $updates) -> bool: Updates cooking session
+- joinCookingSession(string $session_id, string $user_id) -> bool: Joins user to cooking session
+- followUser(string $source_user_id, string $target_user_id, string $relationship_type) -> bool: Follows/unfollows user
+- unfollowUser(string $source_user_id, string $target_user_id) -> bool: Removes relationship
+- getFriendRequests(string $user_id) -> array: Gets pending friend requests
+- acceptFriendRequest(string $relationship_id) -> bool: Accepts friend request
+- rejectFriendRequest(string $relationship_id) -> bool: Rejects friend request
+- removeFriend(string $relationship_id) -> bool: Removes friend relationship
+- getRelationships(string $user_id, string $type = 'following') -> array: Gets user relationships
+- getCookbooks(string $user_id, bool $include_public = false) -> array: Gets user's cookbooks
+- createCookbook(array $cookbook_data) -> string|false: Creates new cookbook
+- getCookbook(string $cookbook_id) -> array|false: Gets cookbook with recipes
+- updateCookbook(string $cookbook_id, array $updates) -> bool: Updates cookbook
+- deleteCookbook(string $cookbook_id) -> bool: Deletes cookbook
+- addRecipeToCookbook(string $cookbook_id, string $recipe_id, string $user_id) -> bool: Adds recipe to cookbook
+- removeRecipeFromCookbook(string $cookbook_id, string $recipe_id) -> bool: Removes recipe from cookbook
+- getCookbookRecipes(string $cookbook_id) -> array: Gets recipes in cookbook
+- getShopItems(array $filters = []) -> array: Gets available shop items
+- purchaseItem(string $user_id, string $item_id) -> array|false: Purchases shop item
+- getUserPurchases(string $user_id) -> array: Gets user's purchased items
+- getItemCategories() -> array: Gets shop item categories
 </details>
 
 ---
@@ -611,6 +642,41 @@
 - profile-pictures/
 - recipe-images/
 - step-images/
+</details>
+
+---
+
+<details>
+<summary>api/shop/</summary>
+
+---
+
+<details>
+<summary>api/shop/items.php</summary>
+
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../config/cors.php
+- **Endpoint**: GET /api/shop/items
+<details>
+<summary>Functions</summary>
+
+- getAuthorizationToken() -> string|null: Extracts Bearer token from Authorization header
+</details>
+</details>
+
+---
+
+<details>
+<summary>api/shop/purchase.php</summary>
+
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../config/cors.php
+- **Endpoint**: POST /api/shop/purchase
+<details>
+<summary>Functions</summary>
+
+- getAuthorizationToken() -> string|null: Extracts Bearer token from Authorization header
+</details>
+</details>
+
 </details>
 
 ---

@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import { 
-  FaHeart, FaBookmark, FaShare, FaClock, FaFire, 
+import {
+  FaHeart, FaBookmark, FaShare, FaClock, FaFire,
   FaUtensils, FaUsers, FaStar, FaCoins, FaGem,
   FaCheck, FaPlay, FaPause, FaArrowLeft, FaShoppingCart,
-  FaThumbsUp, FaThumbsDown, FaBook, FaPlus
+  FaThumbsUp, FaThumbsDown, FaBook, FaPlus, FaTimes
 } from 'react-icons/fa';
 import { getRecipe, likeRecipe, saveRecipe, purchaseRecipe } from '../../api/recipes';
+import { getCookbooks, addRecipeToCookbook } from '../../api/cookbooks';
 import formatTime from '../../utils/formatters';
 
 const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { userData, likeRecipe: likeRecipeInContext } = useData();
-  
+
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,20 +26,28 @@ const RecipeDetail = () => {
   const [interactionLoading, setInteractionLoading] = useState({
     like: false,
     save: false,
-    purchase: false
+    purchase: false,
+    addToCookbook: false
   });
-  
+
+  // Cookbook related states
+  const [cookbooks, setCookbooks] = useState([]);
+  const [showCookbookModal, setShowCookbookModal] = useState(false);
+  const [selectedCookbookId, setSelectedCookbookId] = useState('');
+  const [cookbookLoading, setCookbookLoading] = useState(false);
+  const [cookbookError, setCookbookError] = useState(null);
+
   // Load recipe data
   const loadRecipe = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await getRecipe(id);
-      
+
       if (result.success) {
         setRecipe(result.data);
-        
+
         // Check if user has interacted with this recipe
         if (result.data.user_interaction) {
           // Update UI based on user interactions
@@ -55,19 +64,82 @@ const RecipeDetail = () => {
       setLoading(false);
     }
   };
-  
+
+  // Load user's cookbooks
+  const loadCookbooks = async () => {
+    if (!userData) {
+      navigate('/login');
+      return;
+    }
+
+    setCookbookLoading(true);
+    setCookbookError(null);
+
+    try {
+      const result = await getCookbooks();
+      if (result.success) {
+        setCookbooks(result.data);
+      } else {
+        setCookbookError(result.message || 'Failed to load cookbooks');
+      }
+    } catch (err) {
+      console.error('Error loading cookbooks:', err);
+      setCookbookError(err.message || 'Failed to load cookbooks');
+    } finally {
+      setCookbookLoading(false);
+    }
+  };
+
+  // Add recipe to cookbook
+  const handleAddToCookbook = async (cookbookId) => {
+    if (!userData) {
+      navigate('/login');
+      return;
+    }
+
+    setInteractionLoading(prev => ({ ...prev, addToCookbook: true }));
+
+    try {
+      const result = await addRecipeToCookbook(cookbookId, id);
+
+      if (result.success) {
+        alert('✅ Recipe added to cookbook successfully!');
+        setShowCookbookModal(false);
+        setSelectedCookbookId('');
+      } else {
+        alert(result.message || 'Failed to add recipe to cookbook');
+      }
+    } catch (err) {
+      console.error('Error adding recipe to cookbook:', err);
+      alert(`Failed to add recipe to cookbook: ${err.message}`);
+    } finally {
+      setInteractionLoading(prev => ({ ...prev, addToCookbook: false }));
+    }
+  };
+
+  // Open cookbook modal
+  const openCookbookModal = async () => {
+    if (!userData) {
+      navigate('/login');
+      return;
+    }
+
+    setShowCookbookModal(true);
+    await loadCookbooks();
+  };
+
   // Handle recipe interactions
   const handleInteraction = async (type) => {
     if (!userData) {
       navigate('/login');
       return;
     }
-    
+
     setInteractionLoading(prev => ({ ...prev, [type]: true }));
-    
+
     try {
       let result;
-      
+
       switch (type) {
         case 'like':
           result = await likeRecipe(id);
@@ -81,7 +153,7 @@ const RecipeDetail = () => {
         default:
           return;
       }
-      
+
       if (result.success) {
         // Update recipe data with new counts
         if (recipe) {
@@ -99,7 +171,7 @@ const RecipeDetail = () => {
             }
           }));
         }
-        
+
         // Show success notification
         if (type === 'purchase' && result.success) {
           alert('🎉 Recipe purchased successfully!');
@@ -114,40 +186,40 @@ const RecipeDetail = () => {
       setInteractionLoading(prev => ({ ...prev, [type]: false }));
     }
   };
-  
+
   // Start cooking session
   const startCookingSession = () => {
     if (!userData) {
       navigate('/login');
       return;
     }
-    
+
     if (recipe?.recipe?.is_paid && !recipe?.user_interaction?.purchase) {
       alert('🔒 This is a premium recipe. Please purchase it first.');
       return;
     }
-    
+
     navigate(`/cooking-session/new?recipe=${id}`);
   };
-  
+
   // Format timer display
   const formatTimer = (duration, unit) => {
     if (!duration) return 'No timer';
-    
-    const totalSeconds = unit === 'minutes' ? duration * 60 : 
-                        unit === 'hours' ? duration * 3600 : duration;
-    
+
+    const totalSeconds = unit === 'minutes' ? duration * 60 :
+      unit === 'hours' ? duration * 3600 : duration;
+
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     } else {
       return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
   };
-  
+
   // Toggle step completion
   const toggleStepCompletion = (stepIndex) => {
     if (completedSteps.includes(stepIndex)) {
@@ -156,23 +228,23 @@ const RecipeDetail = () => {
       setCompletedSteps(prev => [...prev, stepIndex]);
     }
   };
-  
+
   // Start/stop timer
   const toggleTimer = () => {
     if (timerActive) {
       setTimerActive(false);
     } else if (recipe?.steps?.[0]?.timer_duration) {
       setTimerActive(true);
-      setTimerSeconds(recipe.steps[0].timer_duration * 
-        (recipe.steps[0].timer_unit === 'minutes' ? 60 : 
-         recipe.steps[0].timer_unit === 'hours' ? 3600 : 1));
+      setTimerSeconds(recipe.steps[0].timer_duration *
+        (recipe.steps[0].timer_unit === 'minutes' ? 60 :
+          recipe.steps[0].timer_unit === 'hours' ? 3600 : 1));
     }
   };
-  
+
   // Timer effect
   useEffect(() => {
     let interval;
-    
+
     if (timerActive && timerSeconds > 0) {
       interval = setInterval(() => {
         setTimerSeconds(prev => {
@@ -185,17 +257,17 @@ const RecipeDetail = () => {
         });
       }, 1000);
     }
-    
+
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [timerActive, timerSeconds]);
-  
+
   // Load recipe on component mount
   useEffect(() => {
     loadRecipe();
   }, [id]);
-  
+
   if (loading) {
     return (
       <div className="recipe-detail-loading animate__animated animate__fadeIn">
@@ -209,7 +281,7 @@ const RecipeDetail = () => {
       </div>
     );
   }
-  
+
   if (error || !recipe) {
     return (
       <div className="recipe-detail-error animate__animated animate__shakeX">
@@ -217,7 +289,7 @@ const RecipeDetail = () => {
           <span className="error-icon">❌</span>
           <h3 className="error-title">Recipe Not Found</h3>
           <p className="error-message">{error || 'The recipe you are looking for does not exist.'}</p>
-          <button 
+          <button
             className="back-button"
             onClick={() => navigate('/recipes')}
           >
@@ -227,57 +299,177 @@ const RecipeDetail = () => {
       </div>
     );
   }
-  
-  const { 
-    recipe: recipeData, 
-    ingredients, 
-    steps, 
-    user_interaction 
+
+  const {
+    recipe: recipeData,
+    ingredients,
+    steps,
+    user_interaction
   } = recipe;
-  
+
   const totalTime = (recipeData.preparation_time || 0) + (recipeData.cooking_time || 0);
   const isOwnRecipe = userData && userData.id === recipeData.user_id;
   const canCook = !recipeData.is_paid || user_interaction?.purchase || isOwnRecipe;
-  
+
   return (
     <div className="recipe-detail-container animate__animated animate__fadeIn">
       {/* Header */}
       <div className="recipe-detail-header">
-        <button 
+        <button
           className="back-button"
           onClick={() => navigate(-1)}
         >
           <FaArrowLeft /> Back
         </button>
-        
+
         <div className="recipe-actions">
-          <button 
+          <button
             className={`action-btn ${user_interaction?.like ? 'active' : ''}`}
             onClick={() => handleInteraction('like')}
             disabled={interactionLoading.like}
           >
             <FaHeart /> {recipeData.like_count || 0}
           </button>
-          
-          <button 
+
+          <button
+            className="action-btn"
+            onClick={openCookbookModal}
+            disabled={interactionLoading.addToCookbook}
+          >
+            <FaBook /> Add to Cookbook
+          </button>
+
+          <button
             className={`action-btn ${user_interaction?.save ? 'active' : ''}`}
             onClick={() => handleInteraction('save')}
             disabled={interactionLoading.save}
           >
             <FaBookmark />
           </button>
-          
+
           <button className="action-btn">
             <FaShare />
           </button>
         </div>
       </div>
-      
+
+      {/* Cookbook Modal */}
+      {showCookbookModal && (
+        <div className="modal-overlay">
+          <div className="modal-content cookbook-modal">
+            <div className="modal-header">
+              <h3 className="modal-title">
+                <FaBook /> Add to Cookbook
+              </h3>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setShowCookbookModal(false);
+                  setCookbookError(null);
+                }}
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {cookbookLoading ? (
+                <div className="loading-state">
+                  <div className="loading-spinner small">
+                    <FaBook className="spinning-icon" />
+                  </div>
+                  <p>Loading your cookbooks...</p>
+                </div>
+              ) : cookbookError ? (
+                <div className="error-state">
+                  <span className="error-icon">❌</span>
+                  <p className="error-message">{cookbookError}</p>
+                  <button
+                    className="btn-secondary"
+                    onClick={loadCookbooks}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : cookbooks.length === 0 ? (
+                <div className="empty-state">
+                  <FaBook />
+                  <p>You don't have any cookbooks yet.</p>
+                  <Link
+                    to="/cookbooks"
+                    className="btn-primary"
+                    onClick={() => setShowCookbookModal(false)}
+                  >
+                    <FaPlus /> Create Cookbook
+                  </Link>
+                </div>
+              ) : (
+                <div className="cookbooks-selector">
+                  <p className="modal-subtitle">
+                    Select a cookbook to add "<strong>{recipeData.title}</strong>" to:
+                  </p>
+
+                  <div className="cookbooks-list">
+                    {cookbooks.map(cookbook => (
+                      <div
+                        key={cookbook.id}
+                        className={`cookbook-option ${selectedCookbookId === cookbook.id ? 'selected' : ''}`}
+                        onClick={() => setSelectedCookbookId(cookbook.id)}
+                      >
+                        <div className="cookbook-option-info">
+                          <h4 className="cookbook-name">{cookbook.name}</h4>
+                          <p className="cookbook-description">
+                            {cookbook.description || 'No description'}
+                          </p>
+                          <div className="cookbook-meta">
+                            <span className={`visibility-badge ${cookbook.is_public ? 'public' : 'private'}`}>
+                              {cookbook.is_public ? 'Public' : 'Private'}
+                            </span>
+                            <span className="recipe-count">
+                              {cookbook.recipe_count || 0} recipes
+                            </span>
+                          </div>
+                        </div>
+                        <div className="cookbook-option-check">
+                          {selectedCookbookId === cookbook.id && (
+                            <FaCheck className="check-icon" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {selectedCookbookId && (
+                    <div className="modal-actions">
+                      <button
+                        className="btn-primary"
+                        onClick={() => handleAddToCookbook(selectedCookbookId)}
+                        disabled={interactionLoading.addToCookbook}
+                      >
+                        {interactionLoading.addToCookbook ? (
+                          <>
+                            <div className="spinner-small"></div> Adding...
+                          </>
+                        ) : (
+                          <>
+                            <FaPlus /> Add to Selected Cookbook
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Image */}
       <div className="recipe-hero">
         {recipeData.cover_image ? (
-          <img 
-            src={recipeData.cover_image} 
+          <img
+            src={recipeData.cover_image}
             alt={recipeData.title}
             className="recipe-cover-image"
           />
@@ -287,7 +479,7 @@ const RecipeDetail = () => {
             <span>No image available</span>
           </div>
         )}
-        
+
         <div className="recipe-hero-overlay">
           <h1 className="recipe-title">{recipeData.title}</h1>
           <div className="recipe-meta">
@@ -303,13 +495,13 @@ const RecipeDetail = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Author Info */}
       <div className="recipe-author-section">
         <div className="author-info">
           {recipeData.author_picture ? (
-            <img 
-              src={recipeData.author_picture} 
+            <img
+              src={recipeData.author_picture}
               alt={recipeData.author_name}
               className="author-avatar"
             />
@@ -318,7 +510,7 @@ const RecipeDetail = () => {
               {recipeData.author_name?.charAt(0) || '?'}
             </div>
           )}
-          
+
           <div className="author-details">
             <h4 className="author-name">👨‍🍳 {recipeData.author_name}</h4>
             <div className="author-stats">
@@ -328,7 +520,7 @@ const RecipeDetail = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="recipe-pricing">
           {recipeData.is_paid ? (
             <div className="price-tags">
@@ -338,9 +530,9 @@ const RecipeDetail = () => {
               <span className="price-tag gem">
                 <FaGem /> {recipeData.gem_price} Gems
               </span>
-              
+
               {!user_interaction?.purchase && !isOwnRecipe && (
-                <button 
+                <button
                   className="purchase-btn"
                   onClick={() => handleInteraction('purchase')}
                   disabled={interactionLoading.purchase}
@@ -354,7 +546,7 @@ const RecipeDetail = () => {
           )}
         </div>
       </div>
-      
+
       {/* Recipe Stats */}
       <div className="recipe-stats-grid">
         <div className="stat-card">
@@ -364,7 +556,7 @@ const RecipeDetail = () => {
             <div className="stat-label">EXP Reward</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">💰</div>
           <div className="stat-info">
@@ -372,7 +564,7 @@ const RecipeDetail = () => {
             <div className="stat-label">Gold Reward</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">💎</div>
           <div className="stat-info">
@@ -380,7 +572,7 @@ const RecipeDetail = () => {
             <div className="stat-label">Gem Reward</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">👥</div>
           <div className="stat-info">
@@ -389,38 +581,38 @@ const RecipeDetail = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Tabs */}
       <div className="recipe-tabs">
-        <button 
+        <button
           className={`tab-btn ${activeTab === 'ingredients' ? 'active' : ''}`}
           onClick={() => setActiveTab('ingredients')}
         >
           📋 Ingredients
         </button>
-        
-        <button 
+
+        <button
           className={`tab-btn ${activeTab === 'steps' ? 'active' : ''}`}
           onClick={() => setActiveTab('steps')}
         >
           📝 Steps
         </button>
-        
-        <button 
+
+        <button
           className={`tab-btn ${activeTab === 'nutrition' ? 'active' : ''}`}
           onClick={() => setActiveTab('nutrition')}
         >
           🥗 Nutrition
         </button>
-        
-        <button 
+
+        <button
           className={`tab-btn ${activeTab === 'rewards' ? 'active' : ''}`}
           onClick={() => setActiveTab('rewards')}
         >
           🏆 Rewards
         </button>
       </div>
-      
+
       {/* Tab Content */}
       <div className="tab-content">
         {/* Ingredients Tab */}
@@ -428,19 +620,19 @@ const RecipeDetail = () => {
           <div className="ingredients-tab animate__animated animate__fadeIn">
             <h3 className="tab-title">Ingredients</h3>
             <p className="tab-subtitle">For {recipeData.serving_size} servings</p>
-            
+
             <div className="ingredients-list">
               {ingredients?.map((ingredient, index) => (
                 <div key={index} className="ingredient-item">
                   <label className="ingredient-checkbox">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={completedSteps.includes(`ingredient-${index}`)}
                       onChange={() => toggleStepCompletion(`ingredient-${index}`)}
                     />
                     <span className="checkmark"></span>
                   </label>
-                  
+
                   <div className="ingredient-details">
                     <span className="ingredient-name">{ingredient.name}</span>
                     <span className="ingredient-amount">
@@ -453,7 +645,7 @@ const RecipeDetail = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="shopping-list-actions">
               <button className="secondary-btn">
                 <FaPlus /> Add to Shopping List
@@ -461,29 +653,29 @@ const RecipeDetail = () => {
             </div>
           </div>
         )}
-        
+
         {/* Steps Tab */}
         {activeTab === 'steps' && (
           <div className="steps-tab animate__animated animate__fadeIn">
             <h3 className="tab-title">Cooking Steps</h3>
-            
+
             <div className="steps-list">
               {steps?.map((step, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`step-item ${completedSteps.includes(index) ? 'completed' : ''}`}
                 >
                   <div className="step-number">{index + 1}</div>
-                  
+
                   <div className="step-content">
                     <p className="step-description">{step.description}</p>
-                    
+
                     {step.image && (
                       <div className="step-image">
                         <img src={step.image} alt={`Step ${index + 1}`} />
                       </div>
                     )}
-                    
+
                     {step.timer_duration && (
                       <div className="step-timer">
                         <span className="timer-icon">⏱️</span>
@@ -492,7 +684,7 @@ const RecipeDetail = () => {
                         </span>
                       </div>
                     )}
-                    
+
                     <div className="step-rewards">
                       {step.exp_reward > 0 && (
                         <span className="reward-badge exp">+{step.exp_reward} EXP</span>
@@ -505,8 +697,8 @@ const RecipeDetail = () => {
                       )}
                     </div>
                   </div>
-                  
-                  <button 
+
+                  <button
                     className={`complete-btn ${completedSteps.includes(index) ? 'completed' : ''}`}
                     onClick={() => toggleStepCompletion(index)}
                   >
@@ -523,7 +715,7 @@ const RecipeDetail = () => {
                 </div>
               ))}
             </div>
-            
+
             {/* Timer Display */}
             {timerSeconds > 0 && (
               <div className="active-timer">
@@ -532,7 +724,7 @@ const RecipeDetail = () => {
                   <div className="timer-time">
                     {formatTimer(timerSeconds, 'seconds')}
                   </div>
-                  <button 
+                  <button
                     className="timer-control"
                     onClick={toggleTimer}
                   >
@@ -543,12 +735,12 @@ const RecipeDetail = () => {
             )}
           </div>
         )}
-        
+
         {/* Nutrition Tab */}
         {activeTab === 'nutrition' && (
           <div className="nutrition-tab animate__animated animate__fadeIn">
             <h3 className="tab-title">Nutrition Facts</h3>
-            
+
             <div className="nutrition-facts">
               <div className="nutrition-main">
                 <div className="nutrition-item large">
@@ -556,25 +748,25 @@ const RecipeDetail = () => {
                   <span className="nutrition-value">{recipeData.total_calories || 0} kcal</span>
                 </div>
               </div>
-              
+
               <div className="nutrition-details">
                 <div className="nutrition-item">
                   <span className="nutrition-label">Protein</span>
                   <span className="nutrition-value">{recipeData.total_protein || 0} g</span>
                 </div>
-                
+
                 <div className="nutrition-item">
                   <span className="nutrition-label">Carbohydrates</span>
                   <span className="nutrition-value">{recipeData.total_carbs || 0} g</span>
                 </div>
-                
+
                 <div className="nutrition-item">
                   <span className="nutrition-label">Fat</span>
                   <span className="nutrition-value">{recipeData.total_fat || 0} g</span>
                 </div>
               </div>
             </div>
-            
+
             <div className="nutrition-per-serving">
               <p className="serving-note">
                 * Per serving ({recipeData.serving_size || 1} serving{recipeData.serving_size !== 1 ? 's' : ''})
@@ -582,12 +774,12 @@ const RecipeDetail = () => {
             </div>
           </div>
         )}
-        
+
         {/* Rewards Tab */}
         {activeTab === 'rewards' && (
           <div className="rewards-tab animate__animated animate__fadeIn">
             <h3 className="tab-title">Cooking Rewards</h3>
-            
+
             <div className="rewards-summary">
               <div className="reward-card primary">
                 <div className="reward-icon">🏆</div>
@@ -600,7 +792,7 @@ const RecipeDetail = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="step-rewards-list">
                 <h4 className="section-title">Step-by-Step Rewards</h4>
                 {steps?.map((step, index) => (
@@ -620,7 +812,7 @@ const RecipeDetail = () => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="bonus-rewards">
                 <h4 className="section-title">Bonus Opportunities</h4>
                 <div className="bonus-list">
@@ -642,18 +834,18 @@ const RecipeDetail = () => {
           </div>
         )}
       </div>
-      
+
       {/* Action Buttons */}
       <div className="recipe-action-buttons">
         {canCook ? (
-          <button 
+          <button
             className="primary-action-btn"
             onClick={startCookingSession}
           >
             <FaPlay /> Start Cooking Session
           </button>
         ) : (
-          <button 
+          <button
             className="primary-action-btn purchase"
             onClick={() => handleInteraction('purchase')}
             disabled={interactionLoading.purchase}
@@ -661,11 +853,19 @@ const RecipeDetail = () => {
             <FaShoppingCart /> Purchase to Cook ({recipeData.gold_price} Gold)
           </button>
         )}
-        
+
+        <button
+          className="secondary-action-btn"
+          onClick={openCookbookModal}
+          disabled={interactionLoading.addToCookbook}
+        >
+          <FaBook /> Add to Cookbook
+        </button>
+
         <button className="secondary-action-btn">
           <FaUsers /> Cook with Friends
         </button>
-        
+
         {isOwnRecipe && (
           <Link to={`/recipes/${id}/edit`} className="edit-btn">
             ✏️ Edit Recipe

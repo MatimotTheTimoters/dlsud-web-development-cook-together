@@ -2136,127 +2136,11 @@ class DatabaseHelper
         }
     }
 
-
-    /**
-    *  Relationship 
-    */
-
-    /**
-    * Follow a user
-    */
-    public static function followUser($source_user_id, $target_user_id) {
-        try {
-            $pdo = Database::getConnection();
-        
-            // Check if relationship already exists
-            $checkStmt = $pdo->prepare("
-                SELECT id FROM user_relationships 
-                WHERE source_user_id = ? 
-                AND target_user_id = ? 
-                AND relationship_type = 'following'
-            ");
-        
-            $checkStmt->execute([$source_user_id, $target_user_id]);
-        
-            if ($checkStmt->fetch()) {
-            return false; // Already following
-            }
-        
-            // Insert new relationship
-            $stmt = $pdo->prepare("
-            INSERT INTO user_relationships (id, source_user_id, target_user_id, relationship_type, status, created_at)
-            VALUES (?, ?, ?, 'following', 'accepted', NOW())
-            ");
-        
-            $relationship_id = uniqid('rel_', true);
-            return $stmt->execute([$relationship_id, $source_user_id, $target_user_id]);
-        
-        }catch (PDOException $e) {
-            error_log("Follow user error: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Unfollow a user
-     */
-    public static function unfollowUser($source_user_id, $target_user_id) {
-        try {
-            $pdo = Database::getConnection();
-
-            $stmt = $pdo->prepare("
-                DELETE FROM user_relationships 
-                WHERE source_user_id = ? 
-                AND target_user_id = ? 
-                AND relationship_type = 'following'
-            ");
-
-            return $stmt->execute([$source_user_id, $target_user_id]);
-
-        } catch (PDOException $e) {
-            error_log("Unfollow user error: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Get friend requests for a user
-     */
-    public static function getFriendRequests($user_id, $type = 'received') {
-        try {
-            $pdo = Database::getConnection();
-
-            if ($type === 'received') {
-                // Requests received by the user
-                $stmt = $pdo->prepare("
-                    SELECT 
-                        ur.id,
-                        ur.source_user_id,
-                        u.full_name,
-                        u.profile_picture,
-                        ur.message,
-                        ur.created_at,
-                        ur.updated_at
-                    FROM user_relationships ur
-                    JOIN users u ON ur.source_user_id = u.id
-                    WHERE ur.target_user_id = ? 
-                    AND ur.relationship_type = 'friend' 
-                    AND ur.status = 'pending'
-                    ORDER BY ur.created_at DESC
-                ");
-            } else {
-                // Requests sent by the user
-                $stmt = $pdo->prepare("
-                    SELECT 
-                        ur.id,
-                        ur.target_user_id as source_user_id,
-                        u.full_name,
-                        u.profile_picture,
-                        ur.message,
-                        ur.created_at,
-                        ur.updated_at
-                    FROM user_relationships ur
-                    JOIN users u ON ur.target_user_id = u.id
-                    WHERE ur.source_user_id = ? 
-                    AND ur.relationship_type = 'friend' 
-                    AND ur.status = 'pending'
-                    ORDER BY ur.created_at DESC
-                ");
-            }
-
-            $stmt->execute([$user_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        } catch (PDOException $e) {
-            error_log("Get friend requests error: " . $e->getMessage());
-            return [];
-        }
-    }
-
     /**
      * Manage friend relationships (send/accept/reject/cancel/remove)
      */
-    public static function manageFriendRelationships($action, $source_user_id, $target_user_id, $message = null) {
+    public static function manageFriendRelationships($action, $source_user_id, $target_user_id, $message = null)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2345,7 +2229,6 @@ class DatabaseHelper
                 default:
                     return false;
             }
-
         } catch (PDOException $e) {
             error_log("Manage friend relationships error: " . $e->getMessage());
             return false;
@@ -2355,7 +2238,8 @@ class DatabaseHelper
     /**
      * Get user's friends list
      */
-    public static function getFriendsList($user_id, $limit = 50, $offset = 0) {
+    public static function getFriendsList($user_id, $limit = 50, $offset = 0)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2386,7 +2270,6 @@ class DatabaseHelper
 
             $stmt->execute([$user_id, $user_id, $user_id, $user_id, $limit, $offset]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
             error_log("Get friends list error: " . $e->getMessage());
             return [];
@@ -2396,7 +2279,8 @@ class DatabaseHelper
     /**
      * Get user's followers
      */
-    public static function getFollowersList($user_id, $limit = 50, $offset = 0) {
+    public static function getFollowersList($user_id, $limit = 50, $offset = 0)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2417,7 +2301,6 @@ class DatabaseHelper
 
             $stmt->execute([$user_id, $limit, $offset]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
             error_log("Get followers list error: " . $e->getMessage());
             return [];
@@ -2427,7 +2310,8 @@ class DatabaseHelper
     /**
      * Get users that a user is following
      */
-    public static function getFollowingList($user_id, $limit = 50, $offset = 0) {
+    public static function getFollowingList($user_id, $limit = 50, $offset = 0)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2448,7 +2332,6 @@ class DatabaseHelper
 
             $stmt->execute([$user_id, $limit, $offset]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
             error_log("Get following list error: " . $e->getMessage());
             return [];
@@ -2458,7 +2341,8 @@ class DatabaseHelper
     /**
      * Check if two users are friends
      */
-    public static function areFriends($user1_id, $user2_id) {
+    public static function areFriends($user1_id, $user2_id)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2486,7 +2370,8 @@ class DatabaseHelper
     /**
      * Get follower count for a user
      */
-    public static function getFollowerCount($user_id) {
+    public static function getFollowerCount($user_id)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2511,7 +2396,8 @@ class DatabaseHelper
     /**
      * Get following count for a user
      */
-    public static function getFollowingCount($user_id) {
+    public static function getFollowingCount($user_id)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2536,7 +2422,8 @@ class DatabaseHelper
     /**
      * Get friends count for a user
      */
-    public static function getFriendsCount($user_id) {
+    public static function getFriendsCount($user_id)
+    {
         try {
             $pdo = Database::getConnection();
 
@@ -2559,4 +2446,420 @@ class DatabaseHelper
             return 0;
         }
     }
+
+    /**
+     * Shop Operations
+     */
+
+    /**
+     * Get available shop items
+     */
+    public static function getShopItems($filters = [])
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $whereConditions = [];
+            $params = [];
+
+            // Build filter conditions
+            if (isset($filters['category']) && $filters['category']) {
+                $whereConditions[] = "category = ?";
+                $params[] = $filters['category'];
+            }
+
+            if (isset($filters['is_available']) && $filters['is_available']) {
+                $whereConditions[] = "is_available = ?";
+                $params[] = $filters['is_available'];
+            }
+
+            if (isset($filters['min_price']) && $filters['min_price'] > 0) {
+                $whereConditions[] = "(gold_price >= ? OR gem_price >= ?)";
+                $params[] = $filters['min_price'];
+                $params[] = $filters['min_price'];
+            }
+
+            if (isset($filters['max_price']) && $filters['max_price'] > 0) {
+                $whereConditions[] = "(gold_price <= ? OR gem_price <= ?)";
+                $params[] = $filters['max_price'];
+                $params[] = $filters['max_price'];
+            }
+
+            // Build WHERE clause
+            $whereClause = '';
+            if (!empty($whereConditions)) {
+                $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
+            }
+
+            $sql = "SELECT * FROM shop_items $whereClause ORDER BY category, gold_price, gem_price";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get shop items error: " . $e->getMessage());
+            return false;
+        }
     }
+
+    /**
+     * Purchase a shop item for a user
+     */
+    public static function purchaseItem($user_id, $item_id)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Start transaction
+            $pdo->beginTransaction();
+
+            // Get item details
+            $itemStmt = $pdo->prepare("SELECT * FROM shop_items WHERE id = ? AND is_available = 1");
+            $itemStmt->execute([$item_id]);
+            $item = $itemStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$item) {
+                throw new Exception("Item not available or not found");
+            }
+
+            // Get user stats
+            $userStmt = $pdo->prepare("SELECT gold_count, gem_count FROM user_stats WHERE user_id = ?");
+            $userStmt->execute([$user_id]);
+            $userStats = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$userStats) {
+                throw new Exception("User stats not found");
+            }
+
+            // Check if user can afford the item
+            $canAfford = false;
+            $currencyType = '';
+            $price = 0;
+
+            if ($item['gold_price'] > 0 && $userStats['gold_count'] >= $item['gold_price']) {
+                $canAfford = true;
+                $currencyType = 'gold';
+                $price = $item['gold_price'];
+            } elseif ($item['gem_price'] > 0 && $userStats['gem_count'] >= $item['gem_price']) {
+                $canAfford = true;
+                $currencyType = 'gem';
+                $price = $item['gem_price'];
+            }
+
+            if (!$canAfford) {
+                throw new Exception("Insufficient funds");
+            }
+
+            // Deduct currency
+            if ($currencyType === 'gold') {
+                $updateStmt = $pdo->prepare("UPDATE user_stats SET gold_count = gold_count - ? WHERE user_id = ?");
+            } else {
+                $updateStmt = $pdo->prepare("UPDATE user_stats SET gem_count = gem_count - ? WHERE user_id = ?");
+            }
+            $updateStmt->execute([$price, $user_id]);
+
+            // Record purchase
+            $purchaseId = UUIDHelper::makeId();
+            $purchaseStmt = $pdo->prepare("
+            INSERT INTO user_purchases (id, user_id, item_id, currency_type, price, purchased_at) 
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+            $purchaseStmt->execute([$purchaseId, $user_id, $item_id, $currencyType, $price]);
+
+            // Update item purchase count
+            $itemUpdateStmt = $pdo->prepare("UPDATE shop_items SET purchase_count = purchase_count + 1 WHERE id = ?");
+            $itemUpdateStmt->execute([$item_id]);
+
+            // Commit transaction
+            $pdo->commit();
+
+            return [
+                'purchase_id' => $purchaseId,
+                'item' => $item,
+                'currency_type' => $currencyType,
+                'price' => $price,
+                'remaining_balance' => [
+                    'gold_count' => $currencyType === 'gold' ? $userStats['gold_count'] - $price : $userStats['gold_count'],
+                    'gem_count' => $currencyType === 'gem' ? $userStats['gem_count'] - $price : $userStats['gem_count']
+                ]
+            ];
+        } catch (Exception $e) {
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log("Purchase item error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get user's purchased items
+     */
+    public static function getUserPurchases($user_id, $limit = 50, $offset = 0)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+            SELECT 
+                up.*,
+                si.name as item_name,
+                si.description as item_description,
+                si.item_type,
+                si.category,
+                si.effect_value,
+                si.duration_days,
+                si.image_url
+            FROM user_purchases up
+            JOIN shop_items si ON up.item_id = si.id
+            WHERE up.user_id = ?
+            ORDER BY up.purchased_at DESC
+            LIMIT ? OFFSET ?
+        ");
+
+            $stmt->execute([$user_id, $limit, $offset]);
+            $purchases = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Get total count for pagination
+            $countStmt = $pdo->prepare("SELECT COUNT(*) as total FROM user_purchases WHERE user_id = ?");
+            $countStmt->execute([$user_id]);
+            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+            return [
+                'purchases' => $purchases,
+                'total' => $total,
+                'limit' => $limit,
+                'offset' => $offset
+            ];
+        } catch (PDOException $e) {
+            error_log("Get user purchases error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get shop item categories
+     */
+    public static function getItemCategories()
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $stmt = $pdo->prepare("
+            SELECT DISTINCT category, COUNT(*) as item_count 
+            FROM shop_items 
+            WHERE is_available = 1 
+            GROUP BY category 
+            ORDER BY category
+        ");
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get item categories error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get user's cookbooks
+     */
+    public static function getCookbooks($user_id, $include_public = false)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $params = [$user_id];
+            $visibilityCondition = "user_id = ?";
+
+            if ($include_public) {
+                $visibilityCondition = "(user_id = ? OR is_public = 1)";
+            }
+
+            $sql = "
+            SELECT cb.*, 
+                   u.full_name as owner_name,
+                   u.profile_picture as owner_picture,
+                   (SELECT COUNT(*) FROM cookbook_recipes cr WHERE cr.cookbook_id = cb.id) as recipe_count
+            FROM cookbooks cb
+            JOIN users u ON cb.user_id = u.id
+            WHERE $visibilityCondition
+            ORDER BY cb.updated_at DESC
+        ";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
+            $cookbooks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Get recipe previews for each cookbook
+            foreach ($cookbooks as &$cookbook) {
+                $previewStmt = $pdo->prepare("
+                SELECT r.id, r.title, r.cover_image
+                FROM cookbook_recipes cr
+                JOIN recipes r ON cr.recipe_id = r.id
+                WHERE cr.cookbook_id = ?
+                ORDER BY cr.added_at DESC
+                LIMIT 3
+            ");
+                $previewStmt->execute([$cookbook['id']]);
+                $cookbook['recipe_previews'] = $previewStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            return $cookbooks;
+        } catch (PDOException $e) {
+            error_log("Get cookbooks error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Create a new cookbook
+     */
+    public static function createCookbook($cookbook_data)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Generate ID
+            $cookbook_id = UUIDHelper::makeId();
+
+            // Insert cookbook
+            $sql = "INSERT INTO cookbooks (id, user_id, name, description, is_public, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $cookbook_id,
+                $cookbook_data['user_id'],
+                $cookbook_data['name'],
+                $cookbook_data['description'] ?? null,
+                $cookbook_data['is_public'] ?? false
+            ]);
+
+            return $cookbook_id;
+        } catch (PDOException $e) {
+            error_log("Create cookbook error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Add recipe to cookbook
+     */
+    public static function addRecipeToCookbook($cookbook_id, $recipe_id, $user_id)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Check if cookbook exists and belongs to user
+            $checkStmt = $pdo->prepare("SELECT user_id FROM cookbooks WHERE id = ?");
+            $checkStmt->execute([$cookbook_id]);
+            $cookbook = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cookbook) {
+                throw new Exception("Cookbook not found");
+            }
+
+            if ($cookbook['user_id'] != $user_id) {
+                throw new Exception("You don't have permission to add recipes to this cookbook");
+            }
+
+            // Check if recipe exists
+            $recipeStmt = $pdo->prepare("SELECT id FROM recipes WHERE id = ?");
+            $recipeStmt->execute([$recipe_id]);
+
+            if (!$recipeStmt->fetch()) {
+                throw new Exception("Recipe not found");
+            }
+
+            // Check if recipe already in cookbook
+            $duplicateStmt = $pdo->prepare("SELECT id FROM cookbook_recipes WHERE cookbook_id = ? AND recipe_id = ?");
+            $duplicateStmt->execute([$cookbook_id, $recipe_id]);
+
+            if ($duplicateStmt->fetch()) {
+                throw new Exception("Recipe already in cookbook");
+            }
+
+            // Add recipe to cookbook
+            $entry_id = UUIDHelper::makeId();
+            $insertStmt = $pdo->prepare("
+            INSERT INTO cookbook_recipes (id, cookbook_id, recipe_id, added_by, added_at) 
+            VALUES (?, ?, ?, ?, NOW())
+        ");
+            $insertStmt->execute([$entry_id, $cookbook_id, $recipe_id, $user_id]);
+
+            // Update cookbook's updated_at timestamp
+            $updateStmt = $pdo->prepare("UPDATE cookbooks SET updated_at = NOW() WHERE id = ?");
+            $updateStmt->execute([$cookbook_id]);
+
+            return $entry_id;
+        } catch (Exception $e) {
+            error_log("Add recipe to cookbook error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get recipes in a cookbook
+     */
+    public static function getCookbookRecipes($cookbook_id, $limit = 50, $offset = 0)
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Get cookbook info
+            $cookbookStmt = $pdo->prepare("
+            SELECT cb.*, u.full_name as owner_name, u.profile_picture as owner_picture
+            FROM cookbooks cb
+            JOIN users u ON cb.user_id = u.id
+            WHERE cb.id = ?
+        ");
+            $cookbookStmt->execute([$cookbook_id]);
+            $cookbook = $cookbookStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cookbook) {
+                throw new Exception("Cookbook not found");
+            }
+
+            // Get recipes in cookbook with details
+            $recipesStmt = $pdo->prepare("
+            SELECT 
+                r.*,
+                u.full_name as author_name,
+                u.profile_picture as author_picture,
+                rm.like_count,
+                rm.dislike_count,
+                rm.cook_count,
+                cr.added_at as added_to_cookbook_at,
+                cr.notes as cookbook_notes
+            FROM cookbook_recipes cr
+            JOIN recipes r ON cr.recipe_id = r.id
+            JOIN users u ON r.user_id = u.id
+            LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id
+            WHERE cr.cookbook_id = ?
+            ORDER BY cr.added_at DESC
+            LIMIT ? OFFSET ?
+        ");
+
+            $recipesStmt->execute([$cookbook_id, $limit, $offset]);
+            $recipes = $recipesStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Get total count for pagination
+            $countStmt = $pdo->prepare("SELECT COUNT(*) as total FROM cookbook_recipes WHERE cookbook_id = ?");
+            $countStmt->execute([$cookbook_id]);
+            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+            return [
+                'cookbook' => $cookbook,
+                'recipes' => $recipes,
+                'total' => $total,
+                'limit' => $limit,
+                'offset' => $offset
+            ];
+        } catch (Exception $e) {
+            error_log("Get cookbook recipes error: " . $e->getMessage());
+            return false;
+        }
+    }
+}
