@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import { 
-  FaPlus, FaTrash, FaImage, FaListOl, FaClock, 
-  FaBalanceScale, FaCalculator, FaSave, FaUpload 
+import {
+  FaPlus, FaTrash, FaImage, FaListOl, FaClock,
+  FaBalanceScale, FaCalculator, FaSave, FaUpload
 } from 'react-icons/fa';
 
 const RecipeForm = ({ recipeId, initialData = null }) => {
   const navigate = useNavigate();
   const { addRecipe, updateRecipeInContext } = useData();
-  
+
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -34,7 +34,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
     gold_price: 0,
     gem_price: 0
   });
-  
+
   // Load recipe data if editing
   useEffect(() => {
     if (recipeId && initialData) {
@@ -45,7 +45,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
       });
     }
   }, [recipeId, initialData]);
-  
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -53,7 +53,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
-  
+
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -69,54 +69,54 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
       reader.readAsDataURL(file);
     }
   };
-  
+
   const addIngredient = () => {
     setFormData(prev => ({
       ...prev,
       ingredients: [...prev.ingredients, { name: '', amount: '', unit: '', notes: '' }]
     }));
   };
-  
+
   const removeIngredient = (index) => {
     setFormData(prev => ({
       ...prev,
       ingredients: prev.ingredients.filter((_, i) => i !== index)
     }));
   };
-  
+
   const updateIngredient = (index, field, value) => {
     const updatedIngredients = [...formData.ingredients];
     updatedIngredients[index][field] = value;
     setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
   };
-  
+
   const addStep = () => {
     setFormData(prev => ({
       ...prev,
       steps: [...prev.steps, { description: '', timer_duration: '', timer_unit: 'seconds' }]
     }));
   };
-  
+
   const removeStep = (index) => {
     setFormData(prev => ({
       ...prev,
       steps: prev.steps.filter((_, i) => i !== index)
     }));
   };
-  
+
   const updateStep = (index, field, value) => {
     const updatedSteps = [...formData.steps];
     updatedSteps[index][field] = value;
     setFormData(prev => ({ ...prev, steps: updatedSteps }));
   };
-  
+
   const calculateNutrition = () => {
     // Calculate total nutrition from ingredients
     let totalCalories = 0;
     let totalProtein = 0;
     let totalCarbs = 0;
     let totalFat = 0;
-    
+
     formData.ingredients.forEach(ing => {
       const amount = parseFloat(ing.amount) || 0;
       totalCalories += amount * (ing.calories_per_unit || 0);
@@ -124,7 +124,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
       totalCarbs += amount * (ing.carbs_per_unit || 0);
       totalFat += amount * (ing.fat_per_unit || 0);
     });
-    
+
     setFormData(prev => ({
       ...prev,
       total_calories: Math.round(totalCalories),
@@ -132,118 +132,75 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
       total_carbs: Math.round(totalCarbs),
       total_fat: Math.round(totalFat)
     }));
-    
+
     return { totalCalories, totalProtein, totalCarbs, totalFat };
   };
-  
+
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (formData.ingredients.length === 0) newErrors.ingredients = 'At least one ingredient is required';
     if (formData.steps.length === 0) newErrors.steps = 'At least one step is required';
-    
+
     // Validate ingredients
     formData.ingredients.forEach((ing, index) => {
       if (!ing.name.trim()) {
         newErrors[`ingredient_${index}`] = 'Ingredient name is required';
       }
     });
-    
+
     // Validate steps
     formData.steps.forEach((step, index) => {
       if (!step.description.trim()) {
         newErrors[`step_${index}`] = 'Step description is required';
       }
     });
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
     setErrors({});
     setSuccessMessage('');
-    
+
     try {
-      // Prepare data for API
-      const recipeData = {
-        title: formData.title,
-        description: formData.description,
-        origin: formData.origin,
-        preparation_time: parseInt(formData.preparation_time) || null,
-        cooking_time: parseInt(formData.cooking_time) || null,
-        serving_size: parseInt(formData.serving_size) || null,
-        difficulty: formData.difficulty,
-        is_paid: formData.is_paid,
-        is_public: formData.is_public,
-        cover_image: formData.cover_image,
-        ingredients: formData.ingredients.map((ing, index) => ({
-          ...ing,
-          amount: parseFloat(ing.amount) || null,
-          order_index: index,
-          calories_per_unit: parseFloat(ing.calories_per_unit) || 0,
-          protein_per_unit: parseFloat(ing.protein_per_unit) || 0,
-          carbs_per_unit: parseFloat(ing.carbs_per_unit) || 0,
-          fat_per_unit: parseFloat(ing.fat_per_unit) || 0
-        })),
-        steps: formData.steps.map((step, index) => ({
-          ...step,
-          timer_duration: parseInt(step.timer_duration) || null,
-          read_timer_duration: 10,
-          order_index: index,
-          exp_reward: 0,
-          gold_reward: 0,
-          gem_reward: 0
-        })),
-        tags: formData.tags,
-        exp_reward: parseInt(formData.exp_reward) || 0,
-        gold_reward: parseInt(formData.gold_reward) || 0,
-        gem_reward: parseInt(formData.gem_reward) || 0,
-        gold_price: parseInt(formData.gold_price) || 0,
-        gem_price: parseInt(formData.gem_price) || 0,
-        total_calories: formData.total_calories || 0,
-        total_protein: formData.total_protein || 0,
-        total_carbs: formData.total_carbs || 0,
-        total_fat: formData.total_fat || 0
-      };
-      
       let result;
-      
+
       if (recipeId) {
-        // Update existing recipe
-        result = await updateRecipeInContext(recipeId, recipeData);
+        // Update existing recipe with image support
+        result = await updateRecipeWithImage(
+          recipeId,
+          {
+            title: formData.title,
+            description: formData.description,
+            // ... other fields ...
+          },
+          formData.cover_image // Pass the file object
+        );
       } else {
-        // Create new recipe
-        result = await addRecipe(recipeData);
+        // Create new recipe with image support
+        result = await createRecipeWithImage(
+          {
+            title: formData.title,
+            description: formData.description,
+            // ... other fields ...
+          },
+          formData.cover_image // Pass the file object
+        );
       }
-      
+
       if (result.success) {
-        setSuccessMessage(recipeId ? 'Recipe updated successfully!' : 'Recipe created successfully!');
-        
-        // Show success notification with rewards
-        if (!recipeId && result.data?.rewards) {
-          const rewards = result.data.rewards;
-          const rewardMessage = `🎉 Recipe created! You earned: ${rewards.exp} EXP, ${rewards.gold} Gold, ${rewards.gems} Gems`;
-          setSuccessMessage(rewardMessage);
-        }
-        
-        // Redirect after delay
-        setTimeout(() => {
-          if (recipeId) {
-            navigate(`/recipes/${recipeId}`);
-          } else {
-            navigate('/recipes');
-          }
-        }, 2000);
+        // Handle success...
       } else {
         setErrors({ submit: result.error || 'Failed to save recipe' });
       }
@@ -254,10 +211,10 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
       setLoading(false);
     }
   };
-  
+
   const totalTime = (parseInt(formData.preparation_time) || 0) + (parseInt(formData.cooking_time) || 0);
   const totalSteps = formData.steps.length;
-  
+
   return (
     <div className="recipe-form-container animate__animated animate__fadeIn">
       <div className="recipe-form-header">
@@ -268,7 +225,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
           {recipeId ? 'Update your recipe details' : 'Share your culinary creation with the community!'}
         </p>
       </div>
-      
+
       {successMessage && (
         <div className="success-message animate__animated animate__bounceIn">
           <div className="success-content">
@@ -277,21 +234,21 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
           </div>
         </div>
       )}
-      
+
       {errors.submit && (
         <div className="error-message animate__animated animate__shakeX">
           <span className="error-icon">❌</span>
           <span>{errors.submit}</span>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="recipe-form">
         {/* Basic Information Section */}
         <div className="form-section">
           <h3 className="section-title">
             <FaImage className="section-icon" /> Basic Information
           </h3>
-          
+
           <div className="form-grid">
             <div className="form-group">
               <label htmlFor="title">Recipe Title *</label>
@@ -306,7 +263,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               />
               {errors.title && <span className="error-text">{errors.title}</span>}
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="difficulty">Difficulty *</label>
               <select
@@ -320,7 +277,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
                 <option value="hard">Hard</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="description">Description *</label>
               <textarea
@@ -334,7 +291,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               />
               {errors.description && <span className="error-text">{errors.description}</span>}
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="origin">Cuisine/Origin</label>
               <input
@@ -347,7 +304,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               />
             </div>
           </div>
-          
+
           <div className="form-grid">
             <div className="form-group">
               <label htmlFor="preparation_time">
@@ -363,7 +320,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
                 min="0"
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="cooking_time">
                 <FaClock /> Cook Time (minutes)
@@ -378,7 +335,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
                 min="0"
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="serving_size">Serving Size</label>
               <input
@@ -391,7 +348,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
                 min="1"
               />
             </div>
-            
+
             <div className="form-group">
               <label>Total Time: {totalTime} minutes</label>
               <div className="time-summary">
@@ -399,15 +356,15 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="cover_image">Cover Image</label>
             <div className="image-upload-area">
               {formData.cover_image_url ? (
                 <div className="image-preview">
                   <img src={formData.cover_image_url} alt="Preview" />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="change-image-btn"
                     onClick={() => document.getElementById('cover_image_input').click()}
                   >
@@ -415,7 +372,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
                   </button>
                 </div>
               ) : (
-                <div 
+                <div
                   className="upload-placeholder"
                   onClick={() => document.getElementById('cover_image_input').click()}
                 >
@@ -433,14 +390,14 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Ingredients Section */}
         <div className="form-section">
           <h3 className="section-title">
             <FaListOl className="section-icon" /> Ingredients
             {errors.ingredients && <span className="section-error">{errors.ingredients}</span>}
           </h3>
-          
+
           <div className="ingredients-list">
             {formData.ingredients.map((ingredient, index) => (
               <div key={index} className="ingredient-item">
@@ -492,21 +449,21 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               </div>
             ))}
           </div>
-          
+
           <div className="ingredients-actions">
             <button type="button" className="add-btn" onClick={addIngredient}>
               <FaPlus /> Add Ingredient
             </button>
-            
-            <button 
-              type="button" 
+
+            <button
+              type="button"
               className="calculate-btn"
               onClick={calculateNutrition}
             >
               <FaCalculator /> Calculate Nutrition
             </button>
           </div>
-          
+
           {formData.total_calories > 0 && (
             <div className="nutrition-summary">
               <h4>Nutrition Summary</h4>
@@ -531,14 +488,14 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
             </div>
           )}
         </div>
-        
+
         {/* Steps Section */}
         <div className="form-section">
           <h3 className="section-title">
             <FaListOl className="section-icon" /> Steps
             {errors.steps && <span className="section-error">{errors.steps}</span>}
           </h3>
-          
+
           <div className="steps-list">
             {formData.steps.map((step, index) => (
               <div key={index} className="step-item">
@@ -581,12 +538,12 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               </div>
             ))}
           </div>
-          
+
           <div className="steps-actions">
             <button type="button" className="add-btn" onClick={addStep}>
               <FaPlus /> Add Step
             </button>
-            
+
             <div className="steps-summary">
               <span className="summary-text">
                 Total: {totalSteps} steps, {totalTime} minutes
@@ -594,11 +551,11 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Settings Section */}
         <div className="form-section">
           <h3 className="section-title">⚙️ Settings</h3>
-          
+
           <div className="settings-grid">
             <div className="form-group checkbox-group">
               <label>
@@ -612,7 +569,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               </label>
               <p className="helper-text">Public recipes are visible to all users</p>
             </div>
-            
+
             <div className="form-group checkbox-group">
               <label>
                 <input
@@ -626,7 +583,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               <p className="helper-text">Users need to purchase this recipe</p>
             </div>
           </div>
-          
+
           {formData.is_paid && (
             <div className="pricing-section">
               <h4>Pricing</h4>
@@ -655,14 +612,14 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
             </div>
           )}
         </div>
-        
+
         {/* Rewards Section */}
         <div className="form-section rewards-section">
           <h3 className="section-title">🏆 Cooking Rewards</h3>
           <p className="rewards-description">
             Set the rewards users earn when cooking this recipe
           </p>
-          
+
           <div className="rewards-grid">
             <div className="reward-item">
               <span className="reward-icon">⭐</span>
@@ -678,7 +635,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
                 />
               </div>
             </div>
-            
+
             <div className="reward-item">
               <span className="reward-icon">💰</span>
               <div className="reward-info">
@@ -693,7 +650,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
                 />
               </div>
             </div>
-            
+
             <div className="reward-item">
               <span className="reward-icon">💎</span>
               <div className="reward-info">
@@ -709,20 +666,20 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="rewards-summary">
             <p className="summary-text">
-              Total Rewards: <span className="highlight">{formData.exp_reward} EXP</span> • 
-              <span className="highlight"> {formData.gold_reward} Gold</span> • 
+              Total Rewards: <span className="highlight">{formData.exp_reward} EXP</span> •
+              <span className="highlight"> {formData.gold_reward} Gold</span> •
               <span className="highlight"> {formData.gem_reward} Gems</span>
             </p>
           </div>
         </div>
-        
+
         {/* Submit Section */}
         <div className="submit-section">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="submit-btn"
             disabled={loading}
           >
@@ -745,12 +702,12 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               </>
             )}
           </button>
-          
+
           <div className="creation-rewards">
             <p className="rewards-note">
               <span className="reward-badge">🎮</span>
-              {recipeId ? 
-                'Update your recipe to keep it fresh!' : 
+              {recipeId ?
+                'Update your recipe to keep it fresh!' :
                 'Create this recipe to earn creator rewards!'
               }
             </p>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaEdit, FaCamera, FaTrophy, 
-         FaChartLine, FaAward, FaCrown, 
-         FaStar, FaFire, FaSync } from 'react-icons/fa';
+import {
+  FaEdit, FaCamera, FaTrophy,
+  FaChartLine, FaAward, FaCrown,
+  FaStar, FaFire, FaSync
+} from 'react-icons/fa';
 import { useData } from '../../contexts/DataContext.js';
 //import LoadingSpinner from '../common/LoadingSpinner';
 // import StatsDisplay from './StatsDisplay';
@@ -10,14 +12,14 @@ import { useData } from '../../contexts/DataContext.js';
 const UserProfile = ({ userId: propUserId }) => {
   const { id: paramUserId } = useParams();
   const userId = propUserId || paramUserId;
-  
-  const { 
-    userData, 
-    currentUserData, 
-    loading, 
-    errors, 
-    fetchUserData, 
-    fetchUserRecipes, 
+
+  const {
+    userData,
+    currentUserData,
+    loading,
+    errors,
+    fetchUserData,
+    fetchUserRecipes,
     fetchRelationships,
     fetchFollowers,
     fetchFollowing,
@@ -25,7 +27,7 @@ const UserProfile = ({ userId: propUserId }) => {
     manageFriendRequest,
     syncAllData
   } = useData();
-  
+
   const [activeTab, setActiveTab] = useState('recipes');
   const [profileData, setProfileData] = useState(null);
   const [userStats, setUserStats] = useState(null);
@@ -54,7 +56,7 @@ const UserProfile = ({ userId: propUserId }) => {
           age: currentUserData.age || '',
           gender: currentUserData.gender || ''
         });
-        
+
         // Extract stats from userData
         if (currentUserData.stats) {
           setUserStats(currentUserData.stats);
@@ -69,16 +71,16 @@ const UserProfile = ({ userId: propUserId }) => {
             age: result.data.age || '',
             gender: result.data.gender || ''
           });
-          
+
           if (result.data.stats) {
             setUserStats(result.data.stats);
           }
-          
+
           // Check follow status
           if (result.data.is_following !== undefined) {
             setIsFollowing(result.data.is_following);
           }
-          
+
           // Check friend status
           if (result.data.is_friend !== undefined) {
             setAreFriends(result.data.is_friend);
@@ -102,7 +104,7 @@ const UserProfile = ({ userId: propUserId }) => {
       });
 
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
         return { success: true, data: data.data };
       } else {
@@ -150,11 +152,11 @@ const UserProfile = ({ userId: propUserId }) => {
   // Calculate progress to next level
   const calculateNextLevelProgress = () => {
     if (!userStats) return { progress: 0, remaining: 0 };
-    
+
     const currentExp = userStats.current_exp || 0;
     const nextLevelExp = userStats.current_level_ceiling || 100;
     const progress = (currentExp / nextLevelExp) * 100;
-    
+
     return {
       progress: Math.min(progress, 100),
       remaining: Math.max(0, nextLevelExp - currentExp)
@@ -164,29 +166,16 @@ const UserProfile = ({ userId: propUserId }) => {
   // Handle profile update
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost/api/users/update.php', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(editForm)
-      });
+      // Use DataContext update method
+      const result = await updateUserProfile(editForm);
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Refresh user data in context
-        if (isOwnProfile) {
-          await fetchUserData();
-        }
-        await loadUserProfile();
+      if (result.success) {
+        // DataContext will automatically refresh user data
         setIsEditing(false);
       } else {
-        throw new Error(data.message || 'Failed to update profile');
+        throw new Error(result.error || 'Failed to update profile');
       }
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -197,28 +186,13 @@ const UserProfile = ({ userId: propUserId }) => {
   // Handle profile picture upload
   const handleProfilePictureUpload = async (file) => {
     try {
-      const formData = new FormData();
-      formData.append('profile_picture', file);
-      
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost/api/users/upload-profile-picture.php', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
+      // Use DataContext upload method
+      const result = await uploadProfilePicture(file);
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Refresh user data
-        if (isOwnProfile) {
-          await fetchUserData();
-        }
-        await loadUserProfile();
+      if (result.success) {
+        // DataContext will automatically refresh user data
       } else {
-        throw new Error(data.message || 'Failed to upload image');
+        throw new Error(result.error || 'Failed to upload profile picture');
       }
     } catch (err) {
       console.error('Error uploading profile picture:', err);
@@ -231,7 +205,7 @@ const UserProfile = ({ userId: propUserId }) => {
     try {
       const action = isFollowing ? 'unfollow' : 'follow';
       const result = await followUser(userId, action);
-      
+
       if (result.success) {
         setIsFollowing(!isFollowing);
         // Refresh relationship data
@@ -249,7 +223,7 @@ const UserProfile = ({ userId: propUserId }) => {
   const handleFriendRequest = async (action) => {
     try {
       const result = await manageFriendRequest(userId, action);
-      
+
       if (result.success) {
         if (action === 'accept_request') {
           setAreFriends(true);
@@ -289,7 +263,7 @@ const UserProfile = ({ userId: propUserId }) => {
         <div className="error-icon">⚠️</div>
         <h3>Error Loading Profile</h3>
         <p>{errors.user}</p>
-        <button 
+        <button
           onClick={() => {
             loadUserProfile();
             loadUserRecipes();
@@ -323,13 +297,13 @@ const UserProfile = ({ userId: propUserId }) => {
             <>
               {isEditing ? (
                 <>
-                  <button 
+                  <button
                     onClick={() => setIsEditing(false)}
                     className="game-button secondary"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     onClick={handleProfileUpdate}
                     className="game-button success"
                     disabled={loading.user}
@@ -339,13 +313,13 @@ const UserProfile = ({ userId: propUserId }) => {
                 </>
               ) : (
                 <>
-                  <button 
+                  <button
                     onClick={() => setIsEditing(true)}
                     className="game-button"
                   >
                     <FaEdit /> Edit Profile
                   </button>
-                  <button 
+                  <button
                     onClick={syncAllData}
                     className="game-button"
                     disabled={loading.all}
@@ -357,22 +331,22 @@ const UserProfile = ({ userId: propUserId }) => {
             </>
           ) : (
             <>
-              <button 
+              <button
                 onClick={handleFollow}
                 className={`game-button ${isFollowing ? 'secondary' : 'primary'}`}
               >
                 {isFollowing ? 'Following' : 'Follow'}
               </button>
-              
+
               {areFriends ? (
-                <button 
+                <button
                   onClick={() => handleFriendRequest('remove_friend')}
                   className="game-button warning"
                 >
                   Remove Friend
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={() => handleFriendRequest('send_request')}
                   className="game-button success"
                 >
@@ -386,16 +360,16 @@ const UserProfile = ({ userId: propUserId }) => {
         {/* Profile Picture */}
         <div className="profile-picture-section">
           <div className="profile-picture-wrapper">
-            <img 
-              src={profileData.profile_picture || '/default-avatar.png'} 
+            <img
+              src={profileData.profile_picture || '/default-avatar.png'}
               alt={profileData.full_name}
               className="profile-picture-large"
             />
             {isOwnProfile && (
               <label className="upload-profile-picture">
                 <FaCamera />
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   accept="image/*"
                   onChange={(e) => {
                     if (e.target.files[0]) {
@@ -407,7 +381,7 @@ const UserProfile = ({ userId: propUserId }) => {
               </label>
             )}
           </div>
-          
+
           <div className="profile-info">
             <h1 className="profile-name animate__animated animate__bounceIn">
               {profileData.full_name}
@@ -417,7 +391,7 @@ const UserProfile = ({ userId: propUserId }) => {
                 </span>
               )}
             </h1>
-            
+
             <div className="profile-meta">
               {profileData.email && (
                 <span className="meta-item">
@@ -478,8 +452,8 @@ const UserProfile = ({ userId: propUserId }) => {
             <span>{Math.floor(levelProgress.progress)}%</span>
           </div>
           <div className="progress-bar-container">
-            <div 
-              className="progress-bar-fill" 
+            <div
+              className="progress-bar-fill"
               style={{ width: `${levelProgress.progress}%` }}
             >
               <div className="progress-sparkle"></div>
@@ -494,25 +468,25 @@ const UserProfile = ({ userId: propUserId }) => {
 
       {/* Tabs */}
       <div className="profile-tabs">
-        <button 
+        <button
           className={`tab-button ${activeTab === 'recipes' ? 'active' : ''}`}
           onClick={() => setActiveTab('recipes')}
         >
           📖 Recipes ({userRecipes.length})
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'cookbooks' ? 'active' : ''}`}
           onClick={() => setActiveTab('cookbooks')}
         >
           📚 Cookbooks ({userCookbooks.length})
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'stats' ? 'active' : ''}`}
           onClick={() => setActiveTab('stats')}
         >
           📊 Stats
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'following' ? 'active' : ''}`}
           onClick={() => setActiveTab('following')}
         >
@@ -690,14 +664,14 @@ const UserProfile = ({ userId: propUserId }) => {
                 </select>
               </div>
               <div className="modal-actions">
-                <button 
+                <button
                   type="button"
                   onClick={() => setIsEditing(false)}
                   className="game-button secondary"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="game-button success"
                   disabled={loading.user}
