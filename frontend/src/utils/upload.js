@@ -1,4 +1,3 @@
-// frontend/src/utils/upload.js
 /**
  * Utility functions for handling file uploads
  */

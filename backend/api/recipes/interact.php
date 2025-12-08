@@ -1,5 +1,4 @@
 <?php
-// backend/api/recipes/interact.php
 
 // Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
