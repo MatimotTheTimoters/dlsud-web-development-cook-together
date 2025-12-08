@@ -311,3 +311,46 @@ ___
 | **UNIQUE KEY** | `(cookbook_id, recipe_id)` | `UNIQUE` | Prevent duplicate additions |
 
 </details>
+
+<details>
+<summary>Shop_Items Table</summary>
+
+___
+
+| **Column Name** | **Data Type** | **Constraint** | **Description** |
+|-----------------|---------------|----------------|-----------------|
+| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Item unique identifier |
+| **name** | `VARCHAR(255)` | `NOT NULL` | Item name |
+| **description** | `TEXT` | `NULL` | Item description |
+| **item_type** | `ENUM('cosmetic','tool','recipe','boost','other')` | `NOT NULL` | Type of shop item |
+| **category** | `VARCHAR(100)` | `NOT NULL` | Item category (e.g., 'avatar', 'tool', 'recipe', 'boost') |
+| **gold_price** | `INT` | `DEFAULT 0` | Price in gold coins |
+| **gem_price** | `INT` | `DEFAULT 0` | Price in gems |
+| **effect_value** | `INT` | `DEFAULT 0` | Effect value (e.g., EXP boost percentage) |
+| **duration_days** | `INT` | `NULL` | Effect duration in days (NULL for permanent) |
+| **image_url** | `VARCHAR(500)` | `NULL` | Item image URL |
+| **is_available** | `BOOLEAN` | `DEFAULT TRUE` | Whether item is available for purchase |
+| **purchase_count** | `INT` | `DEFAULT 0` | Number of times purchased |
+| **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Creation timestamp |
+| **updated_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP` | Last update timestamp |
+
+</details>
+
+<details>
+<summary>User_Purchases Table</summary>
+
+___
+
+| **Column Name** | **Data Type** | **Constraint** | **Description** |
+|-----------------|---------------|----------------|-----------------|
+| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Purchase unique identifier |
+| **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE` | User who made purchase |
+| **item_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES shop_items(id) ON DELETE CASCADE` | Purchased item |
+| **currency_type** | `ENUM('gold','gem')` | `NOT NULL` | Currency used for purchase |
+| **price** | `INT` | `NOT NULL` | Price paid |
+| **purchased_at** | `DATETIME` | `DEFAULT CURRENT_TIMESTAMP` | Purchase timestamp |
+| **expires_at** | `DATETIME` | `NULL` | When item expires (NULL for permanent) |
+| **is_active** | `BOOLEAN` | `DEFAULT TRUE` | Whether purchase is currently active |
+| **UNIQUE KEY** | `(user_id, item_id, is_active)` | `UNIQUE` | Prevent duplicate active purchases of same item |
+
+</details>

@@ -647,6 +647,41 @@
 ---
 
 <details>
+<summary>api/shop/</summary>
+
+---
+
+<details>
+<summary>api/shop/items.php</summary>
+
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../config/cors.php
+- **Endpoint**: GET /api/shop/items
+<details>
+<summary>Functions</summary>
+
+- getAuthorizationToken() -> string|null: Extracts Bearer token from Authorization header
+</details>
+</details>
+
+---
+
+<details>
+<summary>api/shop/purchase.php</summary>
+
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../config/cors.php
+- **Endpoint**: POST /api/shop/purchase
+<details>
+<summary>Functions</summary>
+
+- getAuthorizationToken() -> string|null: Extracts Bearer token from Authorization header
+</details>
+</details>
+
+</details>
+
+---
+
+<details>
 <summary>.htaccess</summary>
 
 - description: URL rewriting for clean API **Endpoint**s

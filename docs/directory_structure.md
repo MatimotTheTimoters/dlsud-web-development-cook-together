@@ -131,6 +131,9 @@ backend/
 │   │   ├── follow.php
 │   │   ├── friends.php
 │   │   └── list.php
+│   ├── shop/
+│   │    ├── items.php
+│   │    └── purchase.php
 │   ├── upload/
 │   │   └── image.php
 │   └── users/

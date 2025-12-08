@@ -1,4 +1,3 @@
-// src/contexts/DataContext.js
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { FaDatabase, FaSync } from 'react-icons/fa';
 import * as recipeApi from '../api/recipes';
@@ -33,6 +32,7 @@ export const DataProvider = ({ children }) => {
     relationships: false,
     cookbooks: false,
     sessions: false,
+    upload: false,
     all: false
   });
 
@@ -359,7 +359,7 @@ export const DataProvider = ({ children }) => {
   const followUser = async (targetUserId, action = 'toggle') => {
     try {
       setLoading(prev => ({ ...prev, relationships: true }));
-      
+
       const response = await fetch('http://localhost/api/relationships/follow.php', {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -391,7 +391,7 @@ export const DataProvider = ({ children }) => {
   const manageFriendRequest = async (targetUserId, action, message = null) => {
     try {
       setLoading(prev => ({ ...prev, relationships: true }));
-      
+
       const response = await fetch('http://localhost/api/relationships/friends.php', {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -567,6 +567,222 @@ export const DataProvider = ({ children }) => {
       console.error('Sync error:', error);
     } finally {
       setLoading(prev => ({ ...prev, all: false }));
+    }
+  };
+
+  // ====================
+  // FILE UPLOAD METHODS
+  // ====================
+
+  /**
+   * Uploads an image to the server
+   * @param {File} file - Image file to upload
+   * @param {string} type - Type of image ('profile_picture', 'recipe_cover', 'step_image')
+   * @param {string} userId - User ID
+   * @param {Object} options - Upload options
+   * @returns {Promise<Object>} Upload result
+   */
+  const uploadImage = async (file, type, userId = null, options = {}) => {
+    setLoading(prev => ({ ...prev, upload: true }));
+
+    try {
+      // Validate image
+      const validation = uploadUtils.validateImageFile(file, options);
+      if (!validation.isValid) {
+        throw new Error(validation.message);
+      }
+
+      // Prepare form data
+      const formData = uploadUtils.prepareFormData(file, 'image', {
+        type,
+        user_id: userId,
+        ...options.additionalData
+      });
+
+      // Get auth token
+      const token = localStorage.getItem('token');
+
+      // Upload to backend API
+      const response = await fetch('http://localhost/api/upload/image.php', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // Note: Don't set Content-Type header for FormData
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to upload image');
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Image upload error:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(prev => ({ ...prev, upload: false }));
+    }
+  };
+
+  /**
+ * Uploads profile picture
+ * @param {File} file - Profile picture file
+ * @returns {Promise<Object>} Upload result with image URL
+ */
+  const uploadProfilePicture = async (file) => {
+    try {
+      // Upload image using the general uploadImage function
+      const uploadResult = await uploadImage(file, 'profile_picture', userData?.id);
+
+      return uploadResult;
+    } catch (error) {
+      console.error('Profile picture upload error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  /**
+   * Uploads recipe cover image
+   * @param {File} file - Recipe cover image file
+   * @param {string} recipeId - Recipe ID (optional, for existing recipes)
+   * @returns {Promise<Object>} Upload result with image URL
+   */
+  const uploadRecipeCoverImage = async (file, recipeId = null) => {
+    try {
+      const uploadResult = await uploadImage(file, 'recipe_cover', userData?.id, {
+        additionalData: { recipe_id: recipeId }
+      });
+
+      return uploadResult;
+    } catch (error) {
+      console.error('Recipe cover upload error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  /**
+ * Updates user profile (with file upload support)
+ * @param {Object} updates - Profile updates
+ * @param {File} profilePictureFile - New profile picture file (optional)
+ * @returns {Promise<Object>} Update result
+ */
+  const updateUserProfile = async (updates, profilePictureFile = null) => {
+    setLoading(prev => ({ ...prev, user: true }));
+
+    try {
+      let imageUrl = updates.profile_picture;
+
+      // Upload new profile picture if provided
+      if (profilePictureFile) {
+        const uploadResult = await uploadImage(profilePictureFile, 'profile_picture', userData?.id);
+        if (!uploadResult.success) {
+          return uploadResult;
+        }
+        imageUrl = uploadResult.data?.image_url || uploadResult.data?.url;
+      }
+
+      // Prepare update data
+      const updateData = {
+        ...updates,
+        ...(imageUrl && { profile_picture: imageUrl })
+      };
+
+      // Send update request
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost/api/users/update.php', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update profile');
+      }
+
+      // Refresh user data
+      await fetchUserData();
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Update profile error:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(prev => ({ ...prev, user: false }));
+    }
+  };
+
+  /**
+   * Creates recipe with image upload support
+   * @param {Object} recipeData - Recipe data
+   * @param {File} coverImageFile - Cover image file (optional)
+   * @returns {Promise<Object>} Create result
+   */
+  const createRecipeWithImage = async (recipeData, coverImageFile = null) => {
+    try {
+      // Upload cover image if provided
+      let coverImageUrl = recipeData.cover_image;
+
+      if (coverImageFile) {
+        const uploadResult = await uploadRecipeCoverImage(coverImageFile);
+        if (!uploadResult.success) {
+          return uploadResult;
+        }
+        coverImageUrl = uploadResult.data.image_url;
+      }
+
+      // Prepare recipe data with image URL
+      const recipeWithImage = {
+        ...recipeData,
+        ...(coverImageUrl && { cover_image: coverImageUrl })
+      };
+
+      // Create recipe using existing addRecipe function
+      return await addRecipe(recipeWithImage);
+    } catch (error) {
+      console.error('Create recipe with image error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  /**
+   * Updates recipe with image upload support
+   * @param {string} recipeId - Recipe ID
+   * @param {Object} updates - Recipe updates
+   * @param {File} coverImageFile - New cover image file (optional)
+   * @returns {Promise<Object>} Update result
+   */
+  const updateRecipeWithImage = async (recipeId, updates, coverImageFile = null) => {
+    try {
+      // Upload new cover image if provided
+      let coverImageUrl = updates.cover_image;
+
+      if (coverImageFile) {
+        const uploadResult = await uploadRecipeCoverImage(coverImageFile, recipeId);
+        if (!uploadResult.success) {
+          return uploadResult;
+        }
+        coverImageUrl = uploadResult.data.image_url;
+      }
+
+      // Prepare update data with image URL
+      const recipeUpdates = {
+        ...updates,
+        ...(coverImageUrl && { cover_image: coverImageUrl })
+      };
+
+      // Update recipe using existing updateRecipeInContext function
+      return await updateRecipeInContext(recipeId, recipeUpdates);
+    } catch (error) {
+      console.error('Update recipe with image error:', error);
+      return { success: false, error: error.message };
     }
   };
 
@@ -752,7 +968,7 @@ export const DataProvider = ({ children }) => {
       maxGold: userData.stats.max_gold_reward || 50,
       maxGem: userData.stats.max_gem_reward || 5
     } : { maxExp: 100, maxGold: 50, maxGem: 5 },
-    
+
     // Legacy method for compatibility
     refetchSheet: (sheetName) => {
       // Map old sheet names to new API calls
@@ -769,39 +985,49 @@ export const DataProvider = ({ children }) => {
           console.warn(`Unknown sheet name: ${sheetName}`);
           return Promise.resolve();
       }
-    }
+    },
+
+    // Upload functions
+    uploadImage,
+    uploadProfilePicture,
+    uploadRecipeCoverImage,
+    updateUserProfile,
+    createRecipeWithImage,
+    updateRecipeWithImage,
+    addRecipe,
+    updateRecipeInContext
   };
+};
 
-  // THE RETURN STATEMENT MUST BE INSIDE THE DataProvider FUNCTION
-  return (
-    <DataContext.Provider value={value}>
-      {children}
+return (
+  <DataContext.Provider value={value}>
+    {children}
 
-      {/* Sync status indicator */}
-      {loading.all && (
-        <div className="sync-status-overlay animate__animated animate__fadeIn">
-          <div className="sync-status-content">
-            <FaSync className="spinning-icon" />
-            <span className="sync-text">Syncing data...</span>
-            <div className="sync-progress">
-              <div className="progress-bar">
-                <div className="progress-fill indeterminate"></div>
-              </div>
+    {/* Sync status indicator */}
+    {loading.all && (
+      <div className="sync-status-overlay animate__animated animate__fadeIn">
+        <div className="sync-status-content">
+          <FaSync className="spinning-icon" />
+          <span className="sync-text">Syncing data...</span>
+          <div className="sync-progress">
+            <div className="progress-bar">
+              <div className="progress-fill indeterminate"></div>
             </div>
           </div>
         </div>
-      )}
-
-      {/* Database status indicator */}
-      <div className="database-status-fixed">
-        <FaDatabase className={`database-icon ${loading.all ? 'pulsing' : ''}`} />
-        <div className="status-tooltip">
-          Data Context Active
-          {loading.all && <div className="tooltip-status">🔄 Syncing...</div>}
-        </div>
       </div>
-    </DataContext.Provider>
-  );
+    )}
+
+    {/* Database status indicator */}
+    <div className="database-status-fixed">
+      <FaDatabase className={`database-icon ${loading.all ? 'pulsing' : ''}`} />
+      <div className="status-tooltip">
+        Data Context Active
+        {loading.all && <div className="tooltip-status">🔄 Syncing...</div>}
+      </div>
+    </div>
+  </DataContext.Provider>
+);
 };
 
 export default DataContext;
