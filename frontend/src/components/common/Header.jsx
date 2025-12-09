@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useData } from '../../contexts/DataContext';
 import * as userAPI from '../../api/users';
-import { 
-  FaHome, FaUtensils, FaUsers, FaBook, 
+import {
+  FaHome, FaUtensils, FaUsers, FaBook,
   FaUser, FaCoins, FaGem, FaSignOutAlt,
-  FaSearch, FaBell, FaStore, FaTrophy
+  FaSearch, FaBell, FaStore, FaTrophy,
+  FaChevronDown, FaBars
 } from 'react-icons/fa';
 
 const Header = () => {
-  const { logout, user } = useAuth();
+  const { logout, user, isAuthenticated } = useAuth();
   const { userData, fetchUserData } = useData();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState([]);
   const [userStats, setUserStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Load user stats
   const loadUserStats = async () => {
     if (!user) return;
-    
+
     setLoadingStats(true);
     try {
       const response = await userAPI.getUserStats();
@@ -35,7 +36,6 @@ const Header = () => {
     }
   };
 
-  // Handle logout
   const handleLogout = async () => {
     try {
       await logout();
@@ -45,7 +45,6 @@ const Header = () => {
     }
   };
 
-  // Get time-based greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good Morning';
@@ -53,7 +52,6 @@ const Header = () => {
     return 'Good Evening';
   };
 
-  // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -62,7 +60,6 @@ const Header = () => {
     }
   };
 
-  // Load user data on mount
   useEffect(() => {
     if (user) {
       fetchUserData();
@@ -70,53 +67,58 @@ const Header = () => {
     }
   }, [user]);
 
-  if (!user) {
+  if (!isAuthenticated()) {
     return (
-      <header className="header-container">
-        <div className="header-content">
-          <div className="header-logo">
-            <Link to="/" className="logo-link">
-              <span className="logo-icon">🍳</span>
-              <span className="logo-text">CookTogether</span>
-            </Link>
-          </div>
-          <div className="header-actions">
-            <Link to="/login" className="game-button">
+      <header className="page-header">
+        <nav className="nav-main">
+          <Link to="/" className="nav-brand">
+            <span className="nav-brand-icon">🍳</span>
+            <span className="nav-brand-text">CookTogether</span>
+          </Link>
+
+          <div className="nav-menu">
+            <Link to="/login" className="nav-link">
               Login
             </Link>
-            <Link to="/register" className="game-button primary">
+            <Link to="/register" className="btn-rpg btn-rpg-primary">
               Register
             </Link>
           </div>
-        </div>
+
+          <button
+            className="nav-toggle"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <FaBars />
+          </button>
+        </nav>
       </header>
     );
   }
 
   return (
-    <header className="header-container gamified-header">
+    <header className="page-header">
       {/* Top Bar */}
-      <div className="header-top-bar">
-        <div className="header-logo">
-          <Link to="/" className="logo-link animate__animated animate__pulse">
-            <span className="logo-icon">🍳</span>
-            <span className="logo-text">CookTogether</span>
-            <span className="logo-subtitle">Level up your cooking!</span>
+      <div className="header-top-bar nav-main">
+        <div className="nav-brand">
+          <Link to="/" className="nav-brand">
+            <span className="nav-brand-icon animate__animated animate__pulse">🍳</span>
+            <span className="nav-brand-text">CookTogether</span>
           </Link>
         </div>
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="search-container">
-          <div className="search-input-wrapper">
-            <FaSearch className="search-icon" />
+          <div className="form-with-icon">
+            <FaSearch className="form-icon" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search recipes, users, cookbooks..."
-              className="search-input"
+              className="form-control"
             />
-            <button type="submit" className="search-button">
+            <button type="submit" className="btn-rpg btn-rpg-sm">
               Search
             </button>
           </div>
@@ -125,14 +127,14 @@ const Header = () => {
         {/* User Info */}
         <div className="user-info-container">
           <div className="currency-display">
-            <div className="currency-item">
-              <FaCoins className="currency-icon gold" />
+            <div className="currency-item currency-gold">
+              <FaCoins className="currency-icon" />
               <span className="currency-amount">
                 {loadingStats ? '...' : (userStats?.gold_count || 0).toLocaleString()}G
               </span>
             </div>
-            <div className="currency-item">
-              <FaGem className="currency-icon gem" />
+            <div className="currency-item currency-gem">
+              <FaGem className="currency-icon" />
               <span className="currency-amount">
                 {loadingStats ? '...' : userStats?.gem_count || 0}
               </span>
@@ -141,48 +143,55 @@ const Header = () => {
 
           <div className="user-profile-mini">
             <Link to="/profile" className="profile-link">
-              <img 
-                src={userData?.profile_picture || '/default-avatar.png'} 
+              <img
+                src={userData?.profile_picture || '/default-avatar.png'}
                 alt={userData?.full_name || 'User'}
-                className="profile-picture-mini"
+                className="card-user-avatar"
               />
               <div className="profile-info">
                 <span className="profile-greeting">{getGreeting()},</span>
                 <span className="profile-name">
                   {userData?.full_name || 'Chef'}
                 </span>
-                <div className="level-badge-mini">
+                <div className="level-badge badge">
                   <FaTrophy /> Lvl {userStats?.level || 1}
                 </div>
               </div>
             </Link>
           </div>
         </div>
+
+        <button
+          className="nav-toggle"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <FaBars />
+        </button>
       </div>
 
       {/* Navigation Bar */}
-      <nav className="header-navigation">
+      <nav className={`header-navigation nav-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="nav-links">
           <Link to="/" className="nav-link">
-            <FaHome /> Home
+            <FaHome className="nav-icon" /> Home
           </Link>
           <Link to="/recipes" className="nav-link">
-            <FaUtensils /> Recipes
+            <FaUtensils className="nav-icon" /> Recipes
           </Link>
           <Link to="/cooking-sessions" className="nav-link">
-            <FaUsers /> Sessions
+            <FaUsers className="nav-icon" /> Sessions
           </Link>
           <Link to="/cookbooks" className="nav-link">
-            <FaBook /> Cookbooks
+            <FaBook className="nav-icon" /> Cookbooks
           </Link>
           <Link to="/discover" className="nav-link">
-            <FaUsers /> Discover
+            <FaUsers className="nav-icon" /> Discover
           </Link>
           <Link to="/shop" className="nav-link">
-            <FaStore /> Shop
+            <FaStore className="nav-icon" /> Shop
           </Link>
           <Link to="/profile" className="nav-link">
-            <FaUser /> Profile
+            <FaUser className="nav-icon" /> Profile
           </Link>
         </div>
 
@@ -190,12 +199,14 @@ const Header = () => {
           <button className="nav-action-button notification-button">
             <FaBell />
             {notifications.length > 0 && (
-              <span className="notification-badge">{notifications.length}</span>
+              <span className="badge badge-primary notification-badge">
+                {notifications.length}
+              </span>
             )}
           </button>
-          <button 
+          <button
             onClick={handleLogout}
-            className="nav-action-button logout-button"
+            className="btn-rpg btn-rpg-secondary logout-button"
           >
             <FaSignOutAlt /> Logout
           </button>
@@ -205,17 +216,17 @@ const Header = () => {
       {/* Progress Bar */}
       {userStats && (
         <div className="header-progress-bar">
-          <div className="progress-info">
+          <div className="progress-label">
             <span>Level {userStats.level}</span>
-            <span>
+            <span className="progress-value">
               {userStats.current_exp || 0} / {userStats.current_level_ceiling || 100} EXP
             </span>
           </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill"
-              style={{ 
-                width: `${((userStats.current_exp || 0) / (userStats.current_level_ceiling || 100)) * 100}%` 
+          <div className="progress-container">
+            <div
+              className="progress-bar progress-bar-exp"
+              style={{
+                width: `${((userStats.current_exp || 0) / (userStats.current_level_ceiling || 100)) * 100}%`
               }}
             >
               <div className="progress-sparkle"></div>
