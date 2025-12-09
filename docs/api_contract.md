@@ -501,7 +501,7 @@ Authorization: Bearer {token}
 ---
 
 <details>
-<summary>POST /api/relationships/follow</summary>
+<summary>POST /api/relationships/follow.php</summary>
 
 **Description:** Follow or unfollow a user
 
@@ -718,7 +718,7 @@ Authorization: Bearer {token}
 ---
 
 <details>
-<summary>GET /api/recipes/{id}</summary>
+<summary>GET /api/recipes/show.php?id={id}</summary>
 
 **Description:** Get detailed recipe information including ingredients, steps, and gamification data
 
@@ -823,7 +823,7 @@ Authorization: Bearer {token}
 ---
 
 <details>
-<summary>POST /api/recipes</summary>
+<summary>POST /api/recipes/create.php</summary>
 
 **Description:** Create a new recipe with gamification rewards
 
@@ -922,7 +922,7 @@ Authorization: Bearer {token}
 Content-Type: multipart/form-data
 ```
 
-**Request Body:** Same as POST /api/recipes, but all fields are optional
+**Request Body:** Same as POST /api/recipes/create.php, but all fields are optional
 
 **Response (Success - 200 OK):**
 ```json
@@ -963,7 +963,7 @@ Authorization: Bearer {token}
 ---
 
 <details>
-<summary>POST /api/recipes/{id}/interact</summary>
+<summary>POST /api/recipes/create.php/{id}/interact</summary>
 
 **Description:** Interact with a recipe (like, dislike, save, purchase) with gamification
 
@@ -1437,7 +1437,7 @@ Authorization: Bearer {token}
 ---
 
 <details>
-<summary>GET /api/cookbooks</summary>
+<summary>GET /api/cookbooks/index.php</summary>
 
 **Description:** Get user's cookbooks with gamification stats
 
@@ -1553,7 +1553,7 @@ Authorization: Bearer {token}
 ---
 
 <details>
-<summary>GET /api/cookbooks/{id}</summary>
+<summary>GET /api/cookbooks/index.php/{id}</summary>
 
 **Description:** Get cookbook details with recipes and gamification data
 

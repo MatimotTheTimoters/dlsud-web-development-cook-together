@@ -410,7 +410,7 @@
 <summary>api/relationships/follow.php</summary>
 
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/relationships/follow
+- **Endpoint**: POST /api/relationships/follow.php
 </details>
 
 ---
@@ -453,7 +453,7 @@
 <summary>api/recipes/create.php</summary>
 
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php, ../../utils/validation.php
-- **Endpoint**: POST /api/recipes
+- **Endpoint**: POST /api/recipes/create.php
 </details>
 
 ---
@@ -462,7 +462,7 @@
 <summary>api/recipes/show.php</summary>
 
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/recipes/{id}
+- **Endpoint**: GET /api/recipes/show.php?id={id}
 </details>
 
 ---
@@ -489,7 +489,7 @@
 <summary>api/recipes/interact.php</summary>
 
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/recipes/{id}/interact
+- **Endpoint**: POST /api/recipes/create.php/{id}/interact
 </details>
 
 </details>
@@ -575,7 +575,7 @@
 <summary>api/cookbooks/index.php</summary>
 
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/cookbooks
+- **Endpoint**: GET /api/cookbooks/index.php
 </details>
 
 ---
@@ -593,7 +593,7 @@
 <summary>api/cookbooks/show.php</summary>
 
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/cookbooks/{id}
+- **Endpoint**: GET /api/cookbooks/index.php/{id}
 </details>
 
 ---

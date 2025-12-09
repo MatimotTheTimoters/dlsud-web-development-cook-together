@@ -1,7 +1,7 @@
 <?php
 
 /**
- * POST /api/relationships/follow
+ * POST /api/relationships/follow.php
  * Follow or unfollow a user
  */
 require_once __DIR__ . '/../../config/cors.php';
