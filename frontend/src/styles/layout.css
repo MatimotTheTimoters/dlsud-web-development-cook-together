@@ -1,0 +1,447 @@
+/* frontend/src/styles/layout.css */
+/* CookTogether - Layout Styles */
+
+/* ============================================
+   Grid Layout System
+   ============================================ */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+.col-span-1 {
+    grid-column: span 1;
+}
+
+.col-span-2 {
+    grid-column: span 2;
+}
+
+.col-span-3 {
+    grid-column: span 3;
+}
+
+.col-span-4 {
+    grid-column: span 4;
+}
+
+.col-span-5 {
+    grid-column: span 5;
+}
+
+.col-span-6 {
+    grid-column: span 6;
+}
+
+.col-span-7 {
+    grid-column: span 7;
+}
+
+.col-span-8 {
+    grid-column: span 8;
+}
+
+.col-span-9 {
+    grid-column: span 9;
+}
+
+.col-span-10 {
+    grid-column: span 10;
+}
+
+.col-span-11 {
+    grid-column: span 11;
+}
+
+.col-span-12 {
+    grid-column: span 12;
+}
+
+@media (min-width: 768px) {
+    .md\:col-span-1 {
+        grid-column: span 1;
+    }
+
+    .md\:col-span-2 {
+        grid-column: span 2;
+    }
+
+    .md\:col-span-3 {
+        grid-column: span 3;
+    }
+
+    .md\:col-span-4 {
+        grid-column: span 4;
+    }
+
+    .md\:col-span-5 {
+        grid-column: span 5;
+    }
+
+    .md\:col-span-6 {
+        grid-column: span 6;
+    }
+
+    .md\:col-span-7 {
+        grid-column: span 7;
+    }
+
+    .md\:col-span-8 {
+        grid-column: span 8;
+    }
+
+    .md\:col-span-9 {
+        grid-column: span 9;
+    }
+
+    .md\:col-span-10 {
+        grid-column: span 10;
+    }
+
+    .md\:col-span-11 {
+        grid-column: span 11;
+    }
+
+    .md\:col-span-12 {
+        grid-column: span 12;
+    }
+}
+
+/* ============================================
+   Page Layout Templates
+   ============================================ */
+.page-layout {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+}
+
+.page-header {
+    grid-row: 1;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    z-index: var(--z-sticky);
+    position: sticky;
+    top: 0;
+}
+
+.page-content {
+    grid-row: 2;
+    padding: var(--spacing-lg) 0;
+}
+
+.page-footer {
+    grid-row: 3;
+    background: var(--warm-gray-dark);
+    color: white;
+    padding: var(--spacing-lg) 0;
+}
+
+/* ============================================
+   Card Grid Layouts
+   ============================================ */
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.cookbook-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+/* ============================================
+   Sidebar Layout
+   ============================================ */
+.sidebar-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: var(--spacing-lg);
+    min-height: calc(100vh - 120px);
+}
+
+@media (max-width: 1024px) {
+    .sidebar-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar-layout aside {
+        order: 2;
+    }
+
+    .sidebar-layout main {
+        order: 1;
+    }
+}
+
+/* ============================================
+   Two-Column Layout
+   ============================================ */
+.two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+    .two-column-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   Three-Column Layout
+   ============================================ */
+.three-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+@media (max-width: 1024px) {
+    .three-column-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   Split Panel Layout (for cooking sessions)
+   ============================================ */
+.split-panel-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--spacing-lg);
+    height: calc(100vh - 120px);
+}
+
+.split-panel-left {
+    border-right: 2px solid var(--border-light);
+    padding-right: var(--spacing-lg);
+    overflow-y: auto;
+}
+
+.split-panel-right {
+    overflow-y: auto;
+    padding-left: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+    .split-panel-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .split-panel-left {
+        border-right: none;
+        border-bottom: 2px solid var(--border-light);
+        padding-right: 0;
+        padding-bottom: var(--spacing-lg);
+        overflow-y: visible;
+    }
+
+    .split-panel-right {
+        padding-left: 0;
+        padding-top: var(--spacing-lg);
+    }
+}
+
+/* ============================================
+   Masonry Layout (for Discover page)
+   ============================================ */
+.masonry-grid {
+    column-count: 3;
+    column-gap: var(--spacing-lg);
+}
+
+.masonry-item {
+    break-inside: avoid;
+    margin-bottom: var(--spacing-lg);
+}
+
+@media (max-width: 1024px) {
+    .masonry-grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 640px) {
+    .masonry-grid {
+        column-count: 1;
+    }
+}
+
+/* ============================================
+   Hero Section Layout
+   ============================================ */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-3xl) var(--spacing-md);
+    background: linear-gradient(135deg, var(--chef-red) 0%, var(--sizzling-orange) 100%);
+    color: white;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   Form Layouts
+   ============================================ */
+.form-layout {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+    background: var(--card-bg);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+@media (max-width: 640px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* ============================================
+   Tab Content Layout
+   ============================================ */
+.tab-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tab-header {
+    display: flex;
+    border-bottom: 2px solid var(--border-light);
+    margin-bottom: var(--spacing-lg);
+}
+
+.tab-button {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: none;
+    border: none;
+    font-weight: var(--font-semibold);
+    color: var(--warm-gray-medium);
+    border-bottom: 3px solid transparent;
+    transition: all var(--transition-fast);
+}
+
+.tab-button.active {
+    color: var(--chef-red);
+    border-bottom-color: var(--chef-red);
+}
+
+.tab-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* ============================================
+   List Layouts
+   ============================================ */
+.list-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.list-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-fast);
+}
+
+.list-item:hover {
+    border-color: var(--chef-red);
+    transform: translateX(4px);
+}
+
+.list-icon {
+    margin-right: var(--spacing-md);
+    color: var(--chef-red);
+    font-size: 1.25rem;
+}
+
+.list-content {
+    flex: 1;
+}
+
+/* ============================================
+   Centered Layouts
+   ============================================ */
+.center-layout {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.center-content {
+    max-width: 500px;
+    width: 100%;
+}
+
+/* ============================================
+   Responsive Breakpoints
+   ============================================ */
+@media (max-width: 640px) {
+    .page-content {
+        padding: var(--spacing-md) 0;
+    }
+
+    .hero-section {
+        padding: var(--spacing-2xl) var(--spacing-md);
+    }
+
+    .form-layout {
+        padding: var(--spacing-lg);
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+    .page-content {
+        padding: var(--spacing-lg) 0;
+    }
+}
