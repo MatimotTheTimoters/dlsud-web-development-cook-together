@@ -3,6 +3,11 @@ import { FaGift, FaCoins, FaGem, FaStar, FaTrophy, FaTimes } from 'react-icons/f
 import { getUserStats } from '../../api/users';
 import { useAuth } from '../../hooks/useAuth';
 import './RewardNotification.css';
+import {
+    calculateDailyLoginBonus,
+    checkLevelUp,
+    calculateRecipeRewards
+} from '../../utils/userCalculations';
 
 /**
  * RewardNotification component for displaying reward notifications
@@ -60,7 +65,7 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
     const detectRewardChanges = (oldStats, newStats) => {
         const rewards = [];
 
-        // Check for EXP gain
+        // Original EXP/gold/gem detection (KEEP THIS!)
         if (newStats.current_exp > (oldStats.current_exp || 0)) {
             const expGain = newStats.current_exp - (oldStats.current_exp || 0);
             if (expGain > 0) {
@@ -75,7 +80,6 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
             }
         }
 
-        // Check for gold gain
         if (newStats.gold_count > (oldStats.gold_count || 0)) {
             const goldGain = newStats.gold_count - (oldStats.gold_count || 0);
             if (goldGain > 0) {
@@ -90,7 +94,6 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
             }
         }
 
-        // Check for gem gain
         if (newStats.gem_count > (oldStats.gem_count || 0)) {
             const gemGain = newStats.gem_count - (oldStats.gem_count || 0);
             if (gemGain > 0) {
@@ -105,13 +108,28 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
             }
         }
 
-        // Check for level up
-        if (newStats.level > (oldStats.level || 1)) {
+        // Enhanced daily login bonus
+        if (newStats.login_streak > (oldStats.login_streak || 0)) {
+            const bonus = calculateDailyLoginBonus(newStats.login_streak);
+            rewards.push({
+                id: `daily-${Date.now()}`,
+                type: 'daily_bonus',
+                message: `Daily Login Bonus! +${bonus.exp_bonus} EXP, +${bonus.gold_bonus} Gold`,
+                amount: bonus.gold_bonus + bonus.gem_bonus,
+                streak: bonus.streak,
+                icon: <FaGift />,
+                color: '#FF6B6B'
+            });
+        }
+
+        // Enhanced level up detection
+        const levelUpCheck = checkLevelUp(oldStats.level || 1, newStats.current_exp);
+        if (levelUpCheck.should_level_up) {
             rewards.push({
                 id: `level-${Date.now()}`,
-                type: 'level',
-                level: newStats.level,
-                message: `Level Up! You're now Level ${newStats.level}!`,
+                type: 'level_up',
+                message: `Level ${levelUpCheck.new_level} Unlocked! (+${levelUpCheck.levels_gained} levels)`,
+                amount: levelUpCheck.levels_gained,
                 icon: <FaTrophy />,
                 color: '#FF6B6B'
             });

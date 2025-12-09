@@ -3,6 +3,7 @@ import { FaShoppingCart, FaLock, FaCheck, FaCoins, FaGem, FaExclamationTriangle 
 import { purchaseItem } from '../../api/shop';
 import { useAuth } from '../../hooks/useAuth';
 import './ShopItem.css';
+import { calculateItemAffordability } from '../../utils/userCalculations';
 
 /**
  * ShopItem component for displaying and purchasing shop items
@@ -15,13 +16,26 @@ const ShopItem = ({ item, onPurchaseSuccess }) => {
     const [isPurchased, setIsPurchased] = useState(false);
 
     const canAfford = () => {
-        if (!user?.stats) return false;
+        if (!user?.stats || !item) return false;
 
-        const canBuyWithGold = item.gold_price <= (user.stats.gold_count || 0);
-        const canBuyWithGems = item.gem_price <= (user.stats.gem_count || 0);
+        const affordability = calculateItemAffordability(user.stats, item);
+        return affordability.can_afford;
+    };
 
-        // Item can be purchased with either currency
-        return canBuyWithGold || canBuyWithGems;
+    // Add detailed affordability display
+    const getAffordabilityDetails = () => {
+        if (!user?.stats) return null;
+
+        const affordability = calculateItemAffordability(user.stats, item);
+
+        if (!affordability.can_afford) {
+            return (
+                <div className="affordability-details">
+                    Need {affordability.gold_shortfall} more gold or {affordability.gem_shortfall} more gems
+                </div>
+            );
+        }
+        return null;
     };
 
     const hasRequiredLevel = () => {
@@ -211,6 +225,9 @@ const ShopItem = ({ item, onPurchaseSuccess }) => {
                 <div className="item-pricing">
                     {getPriceDisplay()}
                 </div>
+
+                {/* ADD THIS: */}
+                {getAffordabilityDetails()}
 
                 {purchaseError && (
                     <div className="purchase-error">

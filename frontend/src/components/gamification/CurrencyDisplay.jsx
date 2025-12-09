@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaCoins, FaGem, FaMoneyBillWave } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 import { getUserStats } from '../../api/users';
 import './CurrencyDisplay.css';
+import { calculateMaxRewards } from '../../utils/userCalculations';
 
 /**
  * CurrencyDisplay component for showing user's currency balances
@@ -12,8 +13,16 @@ const CurrencyDisplay = ({ showLabels = true, compact = false }) => {
     const { user } = useAuth();
     const [stats, setStats] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
+    const [earningPotential, setEarningPotential] = useState(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
+        if (stats) {
+            const potential = calculateMaxRewards(stats);
+            setEarningPotential(potential);
+        }
+    }, [stats]);
+
+    useEffect(() => {
         const fetchUserStats = async () => {
             if (!user?.id) return;
 
@@ -34,6 +43,16 @@ const CurrencyDisplay = ({ showLabels = true, compact = false }) => {
         const interval = setInterval(fetchUserStats, 30000);
         return () => clearInterval(interval);
     }, [user?.id]);
+
+    const renderEarningPotential = () => {
+        if (!earningPotential || compact) return null;
+
+        return (
+            <div className="earning-potential">
+                <small>Can earn up to {earningPotential.max_gold_reward}G per recipe</small>
+            </div>
+        );
+    };
 
     const formatCurrency = (amount, type) => {
         if (amount === null || amount === undefined) return '0';
