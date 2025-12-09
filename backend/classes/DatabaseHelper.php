@@ -2862,4 +2862,44 @@ class DatabaseHelper
             return false;
         }
     }
+
+    // Add this method to DatabaseHelper.php to calculate and update user limits
+    public static function updateUserLimits($user_id)
+    {
+        try {
+            // Get user data including stats
+            $user_data = self::getUserById($user_id);
+
+            if (!$user_data) {
+                return false;
+            }
+
+            // Include UserCalculations class
+            require_once __DIR__ . '/UserCalculations.php';
+
+            // Calculate all limits using UserCalculations
+            $limits = UserCalculations::calculateAllUserLimits([
+                'level' => $user_data['level'] ?? 1,
+                'recipes_created' => $user_data['recipes_created'] ?? 0,
+                'recipes_cooked' => $user_data['recipes_cooked'] ?? 0,
+                'recipes_sold' => $user_data['recipes_sold'] ?? 0
+            ]);
+
+            // Update user stats with new limits
+            $update_data = [
+                'max_exp_reward' => $limits['max_exp_reward'],
+                'max_gold_reward' => $limits['max_gold_reward'],
+                'max_gem_reward' => $limits['max_gem_reward'],
+                'max_gold_price' => $limits['max_gold_price'],
+                'max_gem_price' => $limits['max_gem_price'],
+                'last_limit_update' => $limits['last_limit_update'],
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            return self::updateUserStats($user_id, $update_data);
+        } catch (Exception $e) {
+            error_log('Update user limits failed: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
