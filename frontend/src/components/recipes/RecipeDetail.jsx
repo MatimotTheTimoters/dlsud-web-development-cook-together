@@ -314,17 +314,17 @@ const RecipeDetail = () => {
   return (
     <div className="recipe-detail-container animate__animated animate__fadeIn">
       {/* Header */}
-      <div className="recipe-detail-header">
+      <div className="card-header flex justify-between items-center">
         <button
-          className="back-button"
+          className="btn-rpg btn-rpg-secondary"
           onClick={() => navigate(-1)}
         >
           <FaArrowLeft /> Back
         </button>
 
-        <div className="recipe-actions">
+        <div className="flex gap-2">
           <button
-            className={`action-btn ${user_interaction?.like ? 'active' : ''}`}
+            className={`btn-rpg btn-rpg-sm ${user_interaction?.like ? 'btn-rpg-success' : 'btn-rpg-secondary'}`}
             onClick={() => handleInteraction('like')}
             disabled={interactionLoading.like}
           >
@@ -332,7 +332,7 @@ const RecipeDetail = () => {
           </button>
 
           <button
-            className="action-btn"
+            className="btn-rpg btn-rpg-sm btn-rpg-primary"
             onClick={openCookbookModal}
             disabled={interactionLoading.addToCookbook}
           >
@@ -340,29 +340,25 @@ const RecipeDetail = () => {
           </button>
 
           <button
-            className={`action-btn ${user_interaction?.save ? 'active' : ''}`}
+            className={`btn-rpg btn-rpg-sm ${user_interaction?.save ? 'btn-rpg-gold' : 'btn-rpg-secondary'}`}
             onClick={() => handleInteraction('save')}
             disabled={interactionLoading.save}
           >
             <FaBookmark />
-          </button>
-
-          <button className="action-btn">
-            <FaShare />
           </button>
         </div>
       </div>
 
       {/* Cookbook Modal */}
       {showCookbookModal && (
-        <div className="modal-overlay">
-          <div className="modal-content cookbook-modal">
-            <div className="modal-header">
+        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="modal-content card max-w-md w-full mx-4">
+            <div className="card-header flex justify-between items-center">
               <h3 className="modal-title">
                 <FaBook /> Add to Cookbook
               </h3>
               <button
-                className="modal-close"
+                className="modal-close text-xl"
                 onClick={() => {
                   setShowCookbookModal(false);
                   setCookbookError(null);
@@ -372,32 +368,30 @@ const RecipeDetail = () => {
               </button>
             </div>
 
-            <div className="modal-body">
+            <div className="card-body">
               {cookbookLoading ? (
-                <div className="loading-state">
-                  <div className="loading-spinner small">
-                    <FaBook className="spinning-icon" />
-                  </div>
+                <div className="loading-spinner text-center">
+                  <FaBook className="spinner-icon" />
                   <p>Loading your cookbooks...</p>
                 </div>
               ) : cookbookError ? (
-                <div className="error-state">
-                  <span className="error-icon">❌</span>
-                  <p className="error-message">{cookbookError}</p>
+                <div className="text-center">
+                  <span className="text-3xl text-chef-red mb-2">❌</span>
+                  <p className="text-gray-600 mb-4">{cookbookError}</p>
                   <button
-                    className="btn-secondary"
+                    className="btn-rpg btn-rpg-secondary"
                     onClick={loadCookbooks}
                   >
                     Try Again
                   </button>
                 </div>
               ) : cookbooks.length === 0 ? (
-                <div className="empty-state">
-                  <FaBook />
-                  <p>You don't have any cookbooks yet.</p>
+                <div className="text-center">
+                  <FaBook className="text-4xl text-gray-400 mb-2 mx-auto" />
+                  <p className="text-gray-600 mb-4">You don't have any cookbooks yet.</p>
                   <Link
                     to="/cookbooks"
-                    className="btn-primary"
+                    className="btn-rpg btn-rpg-primary"
                     onClick={() => setShowCookbookModal(false)}
                   >
                     <FaPlus /> Create Cookbook
@@ -405,50 +399,48 @@ const RecipeDetail = () => {
                 </div>
               ) : (
                 <div className="cookbooks-selector">
-                  <p className="modal-subtitle">
+                  <p className="modal-subtitle text-gray-600 mb-4">
                     Select a cookbook to add "<strong>{recipeData.title}</strong>" to:
                   </p>
 
-                  <div className="cookbooks-list">
+                  <div className="cookbooks-list list-layout max-h-64 overflow-y-auto">
                     {cookbooks.map(cookbook => (
                       <div
                         key={cookbook.id}
-                        className={`cookbook-option ${selectedCookbookId === cookbook.id ? 'selected' : ''}`}
+                        className={`list-item cursor-pointer ${selectedCookbookId === cookbook.id ? 'border-chef-red bg-red-50' : ''}`}
                         onClick={() => setSelectedCookbookId(cookbook.id)}
                       >
-                        <div className="cookbook-option-info">
-                          <h4 className="cookbook-name">{cookbook.name}</h4>
-                          <p className="cookbook-description">
+                        <div className="list-content flex-1">
+                          <h4 className="font-bold">{cookbook.name}</h4>
+                          <p className="text-sm text-gray-600">
                             {cookbook.description || 'No description'}
                           </p>
-                          <div className="cookbook-meta">
-                            <span className={`visibility-badge ${cookbook.is_public ? 'public' : 'private'}`}>
+                          <div className="flex gap-2 mt-2">
+                            <span className={`badge ${cookbook.is_public ? 'badge-success' : 'badge-secondary'}`}>
                               {cookbook.is_public ? 'Public' : 'Private'}
                             </span>
-                            <span className="recipe-count">
+                            <span className="text-sm text-gray-500">
                               {cookbook.recipe_count || 0} recipes
                             </span>
                           </div>
                         </div>
-                        <div className="cookbook-option-check">
-                          {selectedCookbookId === cookbook.id && (
-                            <FaCheck className="check-icon" />
-                          )}
-                        </div>
+                        {selectedCookbookId === cookbook.id && (
+                          <FaCheck className="text-chef-red" />
+                        )}
                       </div>
                     ))}
                   </div>
 
                   {selectedCookbookId && (
-                    <div className="modal-actions">
+                    <div className="mt-4">
                       <button
-                        className="btn-primary"
+                        className="btn-rpg btn-rpg-primary w-full"
                         onClick={() => handleAddToCookbook(selectedCookbookId)}
                         disabled={interactionLoading.addToCookbook}
                       >
                         {interactionLoading.addToCookbook ? (
                           <>
-                            <div className="spinner-small"></div> Adding...
+                            <div className="spinner-icon inline-block mr-2"></div> Adding...
                           </>
                         ) : (
                           <>
@@ -466,387 +458,314 @@ const RecipeDetail = () => {
       )}
 
       {/* Hero Image */}
-      <div className="recipe-hero">
+      <div className="card-recipe">
         {recipeData.cover_image ? (
           <img
             src={recipeData.cover_image}
             alt={recipeData.title}
-            className="recipe-cover-image"
+            className="card-recipe-image"
           />
         ) : (
-          <div className="recipe-cover-placeholder">
-            <FaUtensils className="placeholder-icon" />
-            <span>No image available</span>
+          <div className="card-recipe-image bg-gray-200 flex items-center justify-center">
+            <FaUtensils className="text-6xl text-gray-400" />
           </div>
         )}
-
-        <div className="recipe-hero-overlay">
-          <h1 className="recipe-title">{recipeData.title}</h1>
-          <div className="recipe-meta">
-            <span className="meta-item">
+        <div className="card-body relative">
+          <h1 className="recipe-title text-3xl md:text-4xl font-bold mb-2">{recipeData.title}</h1>
+          <div className="flex flex-wrap gap-4 mb-4">
+            <span className="flex items-center gap-1">
               <FaClock /> {totalTime} min
             </span>
-            <span className="meta-item">
+            <span className={`badge ${recipeData.difficulty === 'easy' ? 'badge-success' : recipeData.difficulty === 'medium' ? 'badge-warning' : 'badge-error'}`}>
               <FaFire /> {recipeData.difficulty}
             </span>
-            <span className="meta-item">
+            <span className="flex items-center gap-1">
               <FaUtensils /> {recipeData.serving_size} servings
             </span>
           </div>
         </div>
       </div>
 
-      {/* Author Info */}
-      <div className="recipe-author-section">
-        <div className="author-info">
-          {recipeData.author_picture ? (
-            <img
-              src={recipeData.author_picture}
-              alt={recipeData.author_name}
-              className="author-avatar"
-            />
-          ) : (
-            <div className="author-avatar-placeholder">
-              {recipeData.author_name?.charAt(0) || '?'}
-            </div>
-          )}
-
-          <div className="author-details">
-            <h4 className="author-name">👨‍🍳 {recipeData.author_name}</h4>
-            <div className="author-stats">
-              <span className="author-stat">
-                <FaStar /> {recipeData.author_level || 'Level 1'}
-              </span>
+      {/* Author Info & Pricing */}
+      <div className="two-column-layout mt-6">
+        <div className="card">
+          <div className="card-body">
+            <div className="flex items-center gap-3">
+              {recipeData.author_picture ? (
+                <img
+                  src={recipeData.author_picture}
+                  alt={recipeData.author_name}
+                  className="w-12 h-12 rounded-full"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-chef-red text-white flex items-center justify-center font-bold">
+                  {recipeData.author_name?.charAt(0) || '?'}
+                </div>
+              )}
+              <div>
+                <h4 className="font-bold">👨‍🍳 {recipeData.author_name}</h4>
+                <div className="text-sm text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <FaStar /> Level {recipeData.author_level || 1}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="recipe-pricing">
-          {recipeData.is_paid ? (
-            <div className="price-tags">
-              <span className="price-tag gold">
-                <FaCoins /> {recipeData.gold_price} Gold
-              </span>
-              <span className="price-tag gem">
-                <FaGem /> {recipeData.gem_price} Gems
-              </span>
-
-              {!user_interaction?.purchase && !isOwnRecipe && (
-                <button
-                  className="purchase-btn"
-                  onClick={() => handleInteraction('purchase')}
-                  disabled={interactionLoading.purchase}
-                >
-                  <FaShoppingCart /> Purchase Recipe
-                </button>
-              )}
-            </div>
-          ) : (
-            <span className="free-badge">FREE</span>
-          )}
+        <div className="card">
+          <div className="card-body">
+            {recipeData.is_paid ? (
+              <div>
+                <div className="flex gap-4 mb-3">
+                  <span className="currency-display currency-gold">
+                    <FaCoins className="currency-icon" />
+                    <span className="currency-amount">{recipeData.gold_price}</span>
+                  </span>
+                  <span className="currency-display currency-gem">
+                    <FaGem className="currency-icon" />
+                    <span className="currency-amount">{recipeData.gem_price}</span>
+                  </span>
+                </div>
+                {!user_interaction?.purchase && !isOwnRecipe && (
+                  <button
+                    className="btn-rpg btn-rpg-gem w-full"
+                    onClick={() => handleInteraction('purchase')}
+                    disabled={interactionLoading.purchase}
+                  >
+                    <FaShoppingCart /> Purchase Recipe
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="text-center">
+                <span className="badge badge-success text-lg">FREE</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Recipe Stats */}
-      <div className="recipe-stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-info">
-            <div className="stat-value">{recipeData.exp_reward || 0}</div>
-            <div className="stat-label">EXP Reward</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+        <div className="card text-center">
+          <div className="card-body">
+            <div className="text-2xl mb-1">⭐</div>
+            <div className="text-2xl font-bold text-xp-purple">{recipeData.exp_reward || 0}</div>
+            <div className="text-sm text-gray-600">EXP Reward</div>
           </div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">💰</div>
-          <div className="stat-info">
-            <div className="stat-value">{recipeData.gold_reward || 0}</div>
-            <div className="stat-label">Gold Reward</div>
+        <div className="card text-center">
+          <div className="card-body">
+            <div className="text-2xl mb-1">💰</div>
+            <div className="text-2xl font-bold text-gold-coin">{recipeData.gold_reward || 0}</div>
+            <div className="text-sm text-gray-600">Gold Reward</div>
           </div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">💎</div>
-          <div className="stat-info">
-            <div className="stat-value">{recipeData.gem_reward || 0}</div>
-            <div className="stat-label">Gem Reward</div>
+        <div className="card text-center">
+          <div className="card-body">
+            <div className="text-2xl mb-1">💎</div>
+            <div className="text-2xl font-bold text-rare-gem">{recipeData.gem_reward || 0}</div>
+            <div className="text-sm text-gray-600">Gem Reward</div>
           </div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">👥</div>
-          <div className="stat-info">
-            <div className="stat-value">{recipeData.cook_count || 0}</div>
-            <div className="stat-label">Times Cooked</div>
+        <div className="card text-center">
+          <div className="card-body">
+            <div className="text-2xl mb-1">👥</div>
+            <div className="text-2xl font-bold">{recipeData.cook_count || 0}</div>
+            <div className="text-sm text-gray-600">Times Cooked</div>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="recipe-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'ingredients' ? 'active' : ''}`}
-          onClick={() => setActiveTab('ingredients')}
-        >
-          📋 Ingredients
-        </button>
+      <div className="tab-container mt-6">
+        <div className="tab-header">
+          <button
+            className={`tab-button ${activeTab === 'ingredients' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ingredients')}
+          >
+            📋 Ingredients
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'steps' ? 'active' : ''}`}
+            onClick={() => setActiveTab('steps')}
+          >
+            📝 Steps
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'nutrition' ? 'active' : ''}`}
+            onClick={() => setActiveTab('nutrition')}
+          >
+            🥗 Nutrition
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'rewards' ? 'active' : ''}`}
+            onClick={() => setActiveTab('rewards')}
+          >
+            🏆 Rewards
+          </button>
+        </div>
 
-        <button
-          className={`tab-btn ${activeTab === 'steps' ? 'active' : ''}`}
-          onClick={() => setActiveTab('steps')}
-        >
-          📝 Steps
-        </button>
+        <div className="tab-content card-body">
+          {/* Ingredients Tab */}
+          {activeTab === 'ingredients' && (
+            <div className="animate__animated animate__fadeIn">
+              <h3 className="text-xl font-bold mb-2">Ingredients</h3>
+              <p className="text-gray-600 mb-4">For {recipeData.serving_size} servings</p>
 
-        <button
-          className={`tab-btn ${activeTab === 'nutrition' ? 'active' : ''}`}
-          onClick={() => setActiveTab('nutrition')}
-        >
-          🥗 Nutrition
-        </button>
-
-        <button
-          className={`tab-btn ${activeTab === 'rewards' ? 'active' : ''}`}
-          onClick={() => setActiveTab('rewards')}
-        >
-          🏆 Rewards
-        </button>
-      </div>
-
-      {/* Tab Content */}
-      <div className="tab-content">
-        {/* Ingredients Tab */}
-        {activeTab === 'ingredients' && (
-          <div className="ingredients-tab animate__animated animate__fadeIn">
-            <h3 className="tab-title">Ingredients</h3>
-            <p className="tab-subtitle">For {recipeData.serving_size} servings</p>
-
-            <div className="ingredients-list">
-              {ingredients?.map((ingredient, index) => (
-                <div key={index} className="ingredient-item">
-                  <label className="ingredient-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={completedSteps.includes(`ingredient-${index}`)}
-                      onChange={() => toggleStepCompletion(`ingredient-${index}`)}
-                    />
-                    <span className="checkmark"></span>
-                  </label>
-
-                  <div className="ingredient-details">
-                    <span className="ingredient-name">{ingredient.name}</span>
-                    <span className="ingredient-amount">
-                      {ingredient.amount} {ingredient.unit}
-                    </span>
-                    {ingredient.notes && (
-                      <span className="ingredient-notes">{ingredient.notes}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="shopping-list-actions">
-              <button className="secondary-btn">
-                <FaPlus /> Add to Shopping List
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Steps Tab */}
-        {activeTab === 'steps' && (
-          <div className="steps-tab animate__animated animate__fadeIn">
-            <h3 className="tab-title">Cooking Steps</h3>
-
-            <div className="steps-list">
-              {steps?.map((step, index) => (
-                <div
-                  key={index}
-                  className={`step-item ${completedSteps.includes(index) ? 'completed' : ''}`}
-                >
-                  <div className="step-number">{index + 1}</div>
-
-                  <div className="step-content">
-                    <p className="step-description">{step.description}</p>
-
-                    {step.image && (
-                      <div className="step-image">
-                        <img src={step.image} alt={`Step ${index + 1}`} />
+              <div className="list-layout">
+                {ingredients?.map((ingredient, index) => (
+                  <div key={index} className="list-item">
+                    <label className="form-check flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={completedSteps.includes(`ingredient-${index}`)}
+                        onChange={() => toggleStepCompletion(`ingredient-${index}`)}
+                        className="form-check-input"
+                      />
+                    </label>
+                    <div className="list-content">
+                      <div className="font-medium">{ingredient.name}</div>
+                      <div className="text-gray-600">
+                        {ingredient.amount} {ingredient.unit}
+                        {ingredient.notes && ` (${ingredient.notes})`}
                       </div>
-                    )}
-
-                    {step.timer_duration && (
-                      <div className="step-timer">
-                        <span className="timer-icon">⏱️</span>
-                        <span className="timer-text">
-                          Timer: {formatTimer(step.timer_duration, step.timer_unit)}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="step-rewards">
-                      {step.exp_reward > 0 && (
-                        <span className="reward-badge exp">+{step.exp_reward} EXP</span>
-                      )}
-                      {step.gold_reward > 0 && (
-                        <span className="reward-badge gold">+{step.gold_reward} Gold</span>
-                      )}
-                      {step.gem_reward > 0 && (
-                        <span className="reward-badge gem">+{step.gem_reward} Gem</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    className={`complete-btn ${completedSteps.includes(index) ? 'completed' : ''}`}
-                    onClick={() => toggleStepCompletion(index)}
-                  >
-                    {completedSteps.includes(index) ? (
-                      <>
-                        <FaCheck /> Completed
-                      </>
-                    ) : (
-                      <>
-                        <FaCheck /> Mark Complete
-                      </>
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Timer Display */}
-            {timerSeconds > 0 && (
-              <div className="active-timer">
-                <h4 className="timer-title">Active Timer</h4>
-                <div className="timer-display">
-                  <div className="timer-time">
-                    {formatTimer(timerSeconds, 'seconds')}
-                  </div>
-                  <button
-                    className="timer-control"
-                    onClick={toggleTimer}
-                  >
-                    {timerActive ? <FaPause /> : <FaPlay />}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Nutrition Tab */}
-        {activeTab === 'nutrition' && (
-          <div className="nutrition-tab animate__animated animate__fadeIn">
-            <h3 className="tab-title">Nutrition Facts</h3>
-
-            <div className="nutrition-facts">
-              <div className="nutrition-main">
-                <div className="nutrition-item large">
-                  <span className="nutrition-label">Calories</span>
-                  <span className="nutrition-value">{recipeData.total_calories || 0} kcal</span>
-                </div>
-              </div>
-
-              <div className="nutrition-details">
-                <div className="nutrition-item">
-                  <span className="nutrition-label">Protein</span>
-                  <span className="nutrition-value">{recipeData.total_protein || 0} g</span>
-                </div>
-
-                <div className="nutrition-item">
-                  <span className="nutrition-label">Carbohydrates</span>
-                  <span className="nutrition-value">{recipeData.total_carbs || 0} g</span>
-                </div>
-
-                <div className="nutrition-item">
-                  <span className="nutrition-label">Fat</span>
-                  <span className="nutrition-value">{recipeData.total_fat || 0} g</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="nutrition-per-serving">
-              <p className="serving-note">
-                * Per serving ({recipeData.serving_size || 1} serving{recipeData.serving_size !== 1 ? 's' : ''})
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Rewards Tab */}
-        {activeTab === 'rewards' && (
-          <div className="rewards-tab animate__animated animate__fadeIn">
-            <h3 className="tab-title">Cooking Rewards</h3>
-
-            <div className="rewards-summary">
-              <div className="reward-card primary">
-                <div className="reward-icon">🏆</div>
-                <div className="reward-details">
-                  <h4 className="reward-title">Complete Recipe</h4>
-                  <div className="reward-values">
-                    <span className="reward-value exp">+{recipeData.exp_reward || 0} EXP</span>
-                    <span className="reward-value gold">+{recipeData.gold_reward || 0} Gold</span>
-                    <span className="reward-value gem">+{recipeData.gem_reward || 0} Gem</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="step-rewards-list">
-                <h4 className="section-title">Step-by-Step Rewards</h4>
-                {steps?.map((step, index) => (
-                  <div key={index} className="step-reward-item">
-                    <span className="step-number">Step {index + 1}</span>
-                    <div className="step-rewards">
-                      {step.exp_reward > 0 && (
-                        <span className="mini-reward exp">+{step.exp_reward} EXP</span>
-                      )}
-                      {step.gold_reward > 0 && (
-                        <span className="mini-reward gold">+{step.gold_reward} Gold</span>
-                      )}
-                      {step.gem_reward > 0 && (
-                        <span className="mini-reward gem">+{step.gem_reward} Gem</span>
-                      )}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="bonus-rewards">
-                <h4 className="section-title">Bonus Opportunities</h4>
-                <div className="bonus-list">
-                  <div className="bonus-item">
-                    <span className="bonus-icon">⚡</span>
-                    <span className="bonus-text">Complete under target time: +20% Bonus</span>
+              <div className="mt-4">
+                <button className="btn-rpg btn-rpg-secondary">
+                  <FaPlus /> Add to Shopping List
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Steps Tab */}
+          {activeTab === 'steps' && (
+            <div className="animate__animated animate__fadeIn">
+              <h3 className="text-xl font-bold mb-4">Cooking Steps</h3>
+
+              <div className="list-layout">
+                {steps?.map((step, index) => (
+                  <div
+                    key={index}
+                    className={`list-item ${completedSteps.includes(index) ? 'border-success-green' : ''}`}
+                  >
+                    <div className="list-icon font-bold text-lg">{index + 1}</div>
+                    <div className="list-content flex-1">
+                      <p className="mb-2">{step.description}</p>
+                      {step.image && (
+                        <div className="my-2">
+                          <img src={step.image} alt={`Step ${index + 1}`} className="rounded-lg max-w-xs" />
+                        </div>
+                      )}
+                      {step.timer_duration && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span>⏱️</span>
+                          <span>Timer: {formatTimer(step.timer_duration, step.timer_unit)}</span>
+                        </div>
+                      )}
+                      <div className="flex gap-2 mt-2">
+                        {step.exp_reward > 0 && (
+                          <span className="badge badge-primary">+{step.exp_reward} EXP</span>
+                        )}
+                        {step.gold_reward > 0 && (
+                          <span className="badge badge-warning">+{step.gold_reward} Gold</span>
+                        )}
+                        {step.gem_reward > 0 && (
+                          <span className="badge badge-info">+{step.gem_reward} Gem</span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      className={`btn-rpg btn-rpg-sm ${completedSteps.includes(index) ? 'btn-rpg-success' : 'btn-rpg-secondary'}`}
+                      onClick={() => toggleStepCompletion(index)}
+                    >
+                      {completedSteps.includes(index) ? (
+                        <>
+                          <FaCheck /> Completed
+                        </>
+                      ) : (
+                        <>
+                          <FaCheck /> Mark Complete
+                        </>
+                      )}
+                    </button>
                   </div>
-                  <div className="bonus-item">
-                    <span className="bonus-icon">👥</span>
-                    <span className="bonus-text">Cook with friends: +50% Bonus</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Nutrition Tab */}
+          {activeTab === 'nutrition' && (
+            <div className="animate__animated animate__fadeIn">
+              <h3 className="text-xl font-bold mb-4">Nutrition Facts</h3>
+              <div className="card">
+                <div className="card-body">
+                  <div className="text-center mb-4">
+                    <div className="text-3xl font-bold text-chef-red">{recipeData.total_calories || 0}</div>
+                    <div className="text-gray-600">Calories</div>
                   </div>
-                  <div className="bonus-item">
-                    <span className="bonus-icon">🔥</span>
-                    <span className="bonus-text">Daily streak bonus: +10% per day</span>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-lg font-bold">{recipeData.total_protein || 0}g</div>
+                      <div className="text-sm text-gray-600">Protein</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold">{recipeData.total_carbs || 0}g</div>
+                      <div className="text-sm text-gray-600">Carbs</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold">{recipeData.total_fat || 0}g</div>
+                      <div className="text-sm text-gray-600">Fat</div>
+                    </div>
+                  </div>
+                  <div className="text-center mt-4 text-sm text-gray-500">
+                    Per serving ({recipeData.serving_size || 1} serving{recipeData.serving_size !== 1 ? 's' : ''})
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Rewards Tab */}
+          {activeTab === 'rewards' && (
+            <div className="animate__animated animate__fadeIn">
+              <h3 className="text-xl font-bold mb-4">Cooking Rewards</h3>
+              <div className="card bg-gradient-to-r from-yellow-50 to-orange-50">
+                <div className="card-body text-center">
+                  <div className="text-4xl mb-2">🏆</div>
+                  <h4 className="font-bold text-lg">Complete Recipe</h4>
+                  <div className="flex justify-center gap-4 mt-2">
+                    <span className="text-xp-purple font-bold">+{recipeData.exp_reward || 0} EXP</span>
+                    <span className="text-gold-coin font-bold">+{recipeData.gold_reward || 0} Gold</span>
+                    <span className="text-rare-gem font-bold">+{recipeData.gem_reward || 0} Gem</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="recipe-action-buttons">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
         {canCook ? (
           <button
-            className="primary-action-btn"
+            className="btn-rpg btn-rpg-primary btn-rpg-lg"
             onClick={startCookingSession}
           >
             <FaPlay /> Start Cooking Session
           </button>
         ) : (
           <button
-            className="primary-action-btn purchase"
+            className="btn-rpg btn-rpg-gem btn-rpg-lg"
             onClick={() => handleInteraction('purchase')}
             disabled={interactionLoading.purchase}
           >
@@ -854,23 +773,20 @@ const RecipeDetail = () => {
           </button>
         )}
 
-        <button
-          className="secondary-action-btn"
-          onClick={openCookbookModal}
-          disabled={interactionLoading.addToCookbook}
-        >
-          <FaBook /> Add to Cookbook
-        </button>
-
-        <button className="secondary-action-btn">
-          <FaUsers /> Cook with Friends
-        </button>
-
-        {isOwnRecipe && (
-          <Link to={`/recipes/${id}/edit`} className="edit-btn">
-            ✏️ Edit Recipe
-          </Link>
-        )}
+        <div className="flex flex-col gap-2">
+          <button
+            className="btn-rpg btn-rpg-secondary"
+            onClick={openCookbookModal}
+            disabled={interactionLoading.addToCookbook}
+          >
+            <FaBook /> Add to Cookbook
+          </button>
+          {isOwnRecipe && (
+            <Link to={`/recipes/${id}/edit`} className="btn-rpg btn-rpg-secondary">
+              ✏️ Edit Recipe
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
