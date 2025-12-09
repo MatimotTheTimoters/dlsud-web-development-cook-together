@@ -18,13 +18,13 @@ const uploadImage = async (file, type, userId) => {
     formData.append('image', file);
     formData.append('type', type);
     formData.append('user_id', userId);
-    
+
     const response = await api.post('/upload/image.php', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-    
+
     return response;
   } catch (error) {
     console.error(`Error uploading ${type} image:`, error);
@@ -36,9 +36,9 @@ const uploadImage = async (file, type, userId) => {
 export const getAllRecipes = async (params = {}) => {
   try {
     const queryParams = new URLSearchParams(params).toString();
-    const endpoint = queryParams ? `/recipes/index.php?${queryParams}` : '/recipes/index.php'; // Updated endpoint
+    const endpoint = queryParams ? `/recipes/index.php?${queryParams}` : '/recipes/index.php';
     const response = await api.get(endpoint);
-    
+
     if (response.success) {
       return {
         success: true,
@@ -65,8 +65,8 @@ export const getAllRecipes = async (params = {}) => {
 // Get single recipe by ID with full details
 export const getRecipe = async (recipeId) => {
   try {
-    const response = await api.get(`/recipes/show.php?id=${recipeId}`); // Updated endpoint
-    
+    const response = await api.get(`/recipes/show.php?id=${recipeId}`);
+
     if (response.success) {
       return {
         success: true,
@@ -97,11 +97,11 @@ export const createRecipe = async (recipeData) => {
     if (recipeData.cover_image && recipeData.cover_image instanceof File) {
       // Upload image first
       const uploadResponse = await uploadImage(
-        recipeData.cover_image, 
-        'recipe', 
+        recipeData.cover_image,
+        'recipe',
         localStorage.getItem('user_id')
       );
-      
+
       if (uploadResponse.success) {
         recipeData.cover_image = uploadResponse.data.url;
       } else {
@@ -112,28 +112,28 @@ export const createRecipe = async (recipeData) => {
         };
       }
     }
-    
+
     // Upload step images if present
     if (recipeData.steps && Array.isArray(recipeData.steps)) {
       for (let i = 0; i < recipeData.steps.length; i++) {
         const step = recipeData.steps[i];
         if (step.image && step.image instanceof File) {
           const uploadResponse = await uploadImage(
-            step.image, 
-            'step', 
+            step.image,
+            'step',
             localStorage.getItem('user_id')
           );
-          
+
           if (uploadResponse.success) {
             recipeData.steps[i].image = uploadResponse.data.url;
           }
         }
       }
     }
-    
+
     // Create recipe
-    const response = await api.post('/recipes/create.php', recipeData); // Updated endpoint
-    
+    const response = await api.post('/recipes/create.php', recipeData);
+
     if (response.success) {
       return {
         success: true,
@@ -163,11 +163,11 @@ export const updateRecipe = async (recipeId, recipeData) => {
     // Handle file uploads if present
     if (recipeData.cover_image && recipeData.cover_image instanceof File) {
       const uploadResponse = await uploadImage(
-        recipeData.cover_image, 
-        'recipe', 
+        recipeData.cover_image,
+        'recipe',
         localStorage.getItem('user_id')
       );
-      
+
       if (uploadResponse.success) {
         recipeData.cover_image = uploadResponse.data.url;
       } else {
@@ -178,30 +178,30 @@ export const updateRecipe = async (recipeId, recipeData) => {
         };
       }
     }
-    
+
     // Upload step images if present
     if (recipeData.steps && Array.isArray(recipeData.steps)) {
       for (let i = 0; i < recipeData.steps.length; i++) {
         const step = recipeData.steps[i];
         if (step.image && step.image instanceof File) {
           const uploadResponse = await uploadImage(
-            step.image, 
-            'step', 
+            step.image,
+            'step',
             localStorage.getItem('user_id')
           );
-          
+
           if (uploadResponse.success) {
             recipeData.steps[i].image = uploadResponse.data.url;
           }
         }
       }
     }
-    
-    const response = await api.put(`/recipes/update.php`, { // Updated endpoint
+
+    const response = await api.put(`/recipes/update.php`, {
       ...recipeData,
       recipe_id: recipeId
     });
-    
+
     if (response.success) {
       return {
         success: true,
@@ -228,7 +228,7 @@ export const updateRecipe = async (recipeId, recipeData) => {
 // Delete recipe
 export const deleteRecipe = async (recipeId) => {
   try {
-    const response = await api.delete(`/api/recipes/${recipeId}`);
+    const response = await api.delete(`/recipes/delete.php?id=${recipeId}`);
 
     if (response.success) {
       return {
@@ -256,7 +256,8 @@ export const deleteRecipe = async (recipeId) => {
 // Like a recipe
 export const likeRecipe = async (recipeId) => {
   try {
-    const response = await api.post(`/api/recipes/${recipeId}/interact`, {
+    const response = await api.post(`/recipes/interact.php`, {
+      recipe_id: recipeId,
       interaction_type: 'like'
     });
 
@@ -286,7 +287,8 @@ export const likeRecipe = async (recipeId) => {
 // Save recipe to cookbook
 export const saveRecipe = async (recipeId, cookbookId = null) => {
   try {
-    const response = await api.post(`/api/recipes/${recipeId}/interact`, {
+    const response = await api.post(`/recipes/interact.php`, {
+      recipe_id: recipeId,
       interaction_type: 'save',
       metadata: cookbookId ? { cookbook_id: cookbookId } : null
     });
@@ -317,7 +319,7 @@ export const saveRecipe = async (recipeId, cookbookId = null) => {
 // Get recipe interactions
 export const getRecipeInteractions = async (recipeId) => {
   try {
-    const response = await api.get(`/api/recipes/${recipeId}`);
+    const response = await api.get(`/recipes/show.php?id=${recipeId}`);
 
     if (response.success) {
       const { counts, user_interaction } = response.data;
@@ -349,7 +351,8 @@ export const getRecipeInteractions = async (recipeId) => {
 // Purchase recipe
 export const purchaseRecipe = async (recipeId) => {
   try {
-    const response = await api.post(`/api/recipes/${recipeId}/interact`, {
+    const response = await api.post(`/recipes/interact.php`, {
+      recipe_id: recipeId,
       interaction_type: 'purchase'
     });
 
@@ -384,7 +387,7 @@ export const getUserRecipes = async (userId, params = {}) => {
       user_id: userId
     }).toString();
 
-    const endpoint = `/api/recipes?${queryParams}`;
+    const endpoint = `/recipes/index.php?${queryParams}`;
     const response = await api.get(endpoint);
 
     if (response.success) {
@@ -418,7 +421,7 @@ export const searchRecipes = async (query, filters = {}) => {
       ...filters
     }).toString();
 
-    const endpoint = `/api/recipes?${queryParams}`;
+    const endpoint = `/recipes/index.php?${queryParams}`;
     const response = await api.get(endpoint);
 
     if (response.success) {
@@ -447,7 +450,7 @@ export const searchRecipes = async (query, filters = {}) => {
 // Get trending recipes
 export const getTrendingRecipes = async (limit = 10) => {
   try {
-    const response = await api.get(`/api/recipes?limit=${limit}&sort=recent`);
+    const response = await api.get(`/recipes/index.php?limit=${limit}&sort=popular`);
 
     if (response.success) {
       return {

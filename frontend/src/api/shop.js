@@ -22,7 +22,7 @@ export const getShopItems = async (filters = {}, limit = 50, offset = 0) => {
         params.append('offset', offset.toString());
 
         const queryString = params.toString() ? `?${params.toString()}` : '';
-        const response = await api.get(`/shop/items${queryString}`);
+        const response = await api.get(`/shop/items.php${queryString}`);
 
         if (response.success) {
             return response.data;
@@ -45,7 +45,7 @@ export const purchaseItem = async (itemId) => {
             throw new Error('Item ID is required');
         }
 
-        const response = await api.post('/shop/purchase', { item_id: itemId });
+        const response = await api.post('/shop/purchase.php', { item_id: itemId });
 
         if (response.success) {
             return response.data;

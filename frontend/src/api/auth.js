@@ -12,7 +12,7 @@ import api from '../utils/api';
  */
 export const register = async (userData) => {
     try {
-        const response = await api.post('/auth/register', userData);
+        const response = await api.post('/auth/register.php', userData);
         return response.data;
     } catch (error) {
         console.error('Error registering user:', error);
@@ -28,7 +28,7 @@ export const register = async (userData) => {
  */
 export const login = async (email, password) => {
     try {
-        const response = await api.post('/auth/login', { email, password });
+        const response = await api.post('/auth/login.php', { email, password });
         return response.data;
     } catch (error) {
         console.error('Error logging in:', error);
@@ -42,7 +42,7 @@ export const login = async (email, password) => {
  */
 export const getCurrentUser = async () => {
     try {
-        const response = await api.get('/auth/me');
+        const response = await api.get('/auth/me.php');
         return response.data;
     } catch (error) {
         console.error('Error getting current user:', error);
@@ -56,7 +56,7 @@ export const getCurrentUser = async () => {
  */
 export const logout = async () => {
     try {
-        const response = await api.post('/auth/logout');
+        const response = await api.post('/auth/logout.php');
         return response.data;
     } catch (error) {
         console.error('Error logging out:', error);
@@ -70,7 +70,7 @@ export const logout = async () => {
  */
 export const refreshToken = async () => {
     try {
-        const response = await api.post('/auth/refresh-token');
+        const response = await api.post('/auth/refresh-token.php');
         return response.data;
     } catch (error) {
         console.error('Error refreshing token:', error);

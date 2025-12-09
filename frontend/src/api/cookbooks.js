@@ -14,7 +14,7 @@ import api from '../utils/api';
  */
 export const getCookbooks = async (userId, includePublic = false, limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/api/cookbooks', {
+        const response = await api.get('/cookbooks/index.php', {
             params: {
                 user_id: userId,
                 include_public: includePublic,
@@ -39,7 +39,7 @@ export const getCookbooks = async (userId, includePublic = false, limit = 50, of
  */
 export const createCookbook = async (cookbookData) => {
     try {
-        const response = await api.post('/api/cookbooks', cookbookData);
+        const response = await api.post('/cookbooks/create.php', cookbookData);
         return response;
     } catch (error) {
         console.error('Error creating cookbook:', error);
@@ -56,7 +56,7 @@ export const createCookbook = async (cookbookData) => {
  */
 export const getCookbookRecipes = async (cookbookId, limit = 50, offset = 0) => {
     try {
-        const response = await api.get(`/api/cookbooks/${cookbookId}`, {
+        const response = await api.get(`/cookbooks/show.php?id=${cookbookId}`, {
             params: { limit, offset }
         });
         return response;
@@ -74,7 +74,8 @@ export const getCookbookRecipes = async (cookbookId, limit = 50, offset = 0) => 
  */
 export const addRecipeToCookbook = async (cookbookId, recipeId) => {
     try {
-        const response = await api.post(`/api/cookbooks/${cookbookId}/add-recipe`, {
+        const response = await api.post(`/cookbooks/add-recipe.php`, {
+            cookbook_id: cookbookId,
             recipe_id: recipeId
         });
         return response;
@@ -92,8 +93,11 @@ export const addRecipeToCookbook = async (cookbookId, recipeId) => {
  */
 export const removeRecipeFromCookbook = async (cookbookId, recipeId) => {
     try {
-        const response = await api.delete(`/api/cookbooks/${cookbookId}/remove-recipe`, {
-            params: { recipe_id: recipeId }
+        const response = await api.delete(`/cookbooks/remove-recipe.php`, {
+            params: {
+                cookbook_id: cookbookId,
+                recipe_id: recipeId
+            }
         });
         return response;
     } catch (error) {
