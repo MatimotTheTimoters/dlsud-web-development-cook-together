@@ -1,6 +1,3 @@
-/* frontend/src/styles/index.css */
-/* CookTogether - Main Stylesheet */
-
 /* Import Theme and Component Styles */
 @import './themes.css';
 @import './components.css';
@@ -10,6 +7,7 @@
 /* Import Gamified CSS Libraries */
 @import 'animate.css/animate.min.css';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap');
+@import 'bootstrap/dist/css/bootstrap.min.css';
 
 /* ============================================
    CSS Reset & Base Styles
