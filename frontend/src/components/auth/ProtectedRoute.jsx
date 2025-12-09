@@ -58,24 +58,32 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="auth-loading-container animate__animated animate__fadeIn">
-        <div className="auth-shield-icon">
-          <FaShieldAlt size={64} color="#4CAF50" />
-          <div className="spinner-container">
-            <FaSpinner className="spinner-icon" size={32} />
-          </div>
-        </div>
-        <h2 className="auth-loading-title">Authentication Check</h2>
-        <p className="auth-loading-text">
-          🔒 Verifying your credentials...
-        </p>
-        <div className="loading-progress">
-          <div className="progress-bar">
-            <div className="progress-fill"></div>
-          </div>
-          <div className="loading-tip">
-            <FaShieldAlt className="tip-icon" />
-            <span>Checking JWT token validity...</span>
+      <div className="center-layout loading-spinner">
+        <div className="center-content card p-5">
+          <div className="flex flex-column items-center gap-4">
+            <div className="relative">
+              <FaShieldAlt size={64} className="text-chef-red" />
+              <div className="absolute -bottom-2 -right-2">
+                <FaSpinner className="spinner-icon" size={32} />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-warm-gray-dark">Authentication Check</h2>
+            <p className="text-warm-gray-medium text-center">
+              🔒 Verifying your credentials...
+            </p>
+            <div className="w-full mt-4">
+              <div className="progress-label">
+                <span>Progress</span>
+                <span className="progress-value">Loading...</span>
+              </div>
+              <div className="progress-container">
+                <div className="progress-bar progress-bar-exp" style={{ width: '70%' }}></div>
+              </div>
+              <div className="flex items-center gap-2 mt-3 text-sm text-warm-gray-medium">
+                <FaShieldAlt className="text-xs" />
+                <span>Checking JWT token validity...</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
