@@ -948,19 +948,30 @@
 <details>
 <summary>src/contexts/DataContext.jsx</summary>
 
-- **Required Imports**: React, createContext, useState, useContext, { FaDatabase, FaSync } from 'react-icons/fa'
-- **Backend Endpoint**: Various API endpoints for data fetching
+- **Required Imports**: React, createContext, useState, useContext
+- **Backend Endpoint**: None (frontend-only state management)
 <details>
 <summary>Functions</summary>
 
-- updateUserData(data) -> void: Updates user data in context
-- updateRecipes(data) -> void: Updates recipes in context
-- updateRelationships(data) -> void: Updates relationships in context
-- clearData() -> void: Clears all context data
-- getCachedData(key) -> mixed: Retrieves cached data
-- setCachedData(key, data) -> void: Sets data in cache
+### **Public API Functions (Used by Components):**
+- `useData() -> object`: Custom hook to access DataContext from any component
+- `DataProvider({ children }) -> JSX`: Wraps application to provide context to all components
+
+### **State Management Functions:**
+- `updateUserData(data) -> void`: Updates user data in context (alias: `updateUsers`)
+- `updateRecipes(data) -> void`: Updates recipes in context
+- `updateRelationships(data) -> void`: Updates relationships in context
+- `clearData() -> void`: Clears all context data
+
+### **Cache Management Functions:**
+- `getCachedData(key) -> mixed`: Retrieves cached data with timestamp validation
+- `setCachedData(key, data) -> void`: Sets data in cache with current timestamp
+
+### **Convenience Properties:**
+- `currentUserData`: Alias for userData (commonly accessed property)
+- `userRewardLimits`: Pre-calculated reward limits derived from user stats
 </details>
-</details>
+<details>
 
 ---
 
