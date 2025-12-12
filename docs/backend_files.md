@@ -16,6 +16,7 @@
 - `getEnvironment() -> string`: Returns current environment (dev/prod)
 - `getDatabaseConfig() -> array`: Returns database connection parameters
 - `getApiConfig() -> array`: Returns API configuration settings
+- `setEnvironment(string $env) -> void`: Sets environment (dev/prod) - useful for testing
 
 ---
 
@@ -33,6 +34,7 @@
 - `insert(string $table, array $data) -> string|false`: Inserts record
 - `update(string $table, array $data, string $where) -> int`: Updates record
 - `delete(string $table, string $where) -> int`: Deletes record
+- `getConnection() -> PDO`: Returns PDO connection for direct database operations
 
 ---
 
@@ -45,6 +47,15 @@
 **Functions**:
 - `setCorsHeaders() -> void`: Sets CORS headers for API responses
 - `handlePreflight() -> void`: Handles OPTIONS preflight requests
+
+**CORS Configuration Details**:
+- **Allowed Origins**: Localhost ports 3000, 8080 for React development
+- **Allowed Methods**: GET, POST, PUT, DELETE, OPTIONS
+- **Allowed Headers**: Authorization, Content-Type, X-Requested-With
+- **Credentials**: Allowed (Access-Control-Allow-Credentials: true)
+- **Max Age**: 86400 seconds (1 day cache for preflight)
+- **Preflight Handling**: Automatic OPTIONS request handling
+- **Development Support**: Wildcard origin support with specific React dev ports
 
 ---
 
@@ -63,6 +74,21 @@
 - `validateToken(string $token) -> array|false`: Validates JWT token
 - `hashPassword(string $password) -> string`: Hashes password
 - `verifyPassword(string $password, string $hash) -> bool`: Verifies password
+- `generateRefreshToken(string $user_id) -> string`: Generates refresh token for long-term sessions
+- `getBearerToken() -> string|null`: Extracts Bearer token from Authorization header
+- `getUserIdFromToken(string $token) -> string|null`: Convenience method to extract user ID from token
+- `isTokenAboutToExpire(string $token, int $threshold) -> bool`: Checks if token is about to expire
+- `refreshToken(string $old_token, array $user_data) -> array|false`: Refreshes expired token
+- `validatePasswordStrength(string $password) -> array`: Validates password strength with rules
+- `generateRandomToken(int $length) -> string`: Generates secure random token
+- `getAuthorizationHeader() -> string|null`: Gets authorization header from request
+- `setSecretKey(string $secret_key) -> void`: Sets custom JWT secret key
+- `setTokenExpiry(int $seconds) -> void`: Sets token expiry time
+- `getConfig() -> array`: Returns current JWT configuration
+- `validate_jwt_token(string $token) -> array|false`: Validates JWT token
+- `get_bearer_token() -> string|null`: Gets Bearer token from headers
+- `hash_password(string $password) -> string`: Hashes password with bcrypt
+- `verify_password(string $password, string $hash) -> bool`: Verifies password against hash
 
 ---
 
@@ -137,6 +163,25 @@
 - `validationError(array $errors) -> void`: Returns validation error
 - `unauthorized(string $message) -> void`: Returns unauthorized error
 - `notFound(string $message) -> void`: Returns not found error
+- `forbidden(string $message) -> void`: Returns 403 Forbidden error
+- `badRequest(string $message, mixed $details) -> void`: Returns 400 Bad Request error
+- `conflict(string $message, mixed $details) -> void`: Returns 409 Conflict error
+- `created(mixed $data, string $message) -> void`: Returns 201 Created success
+- `accepted(mixed $data, string $message) -> void`: Returns 202 Accepted success
+- `noContent() -> void`: Returns 204 No Content
+- `paginated(array $data, int $total, int $page, int $limit, string $message) -> void`: Returns paginated response
+- `custom(array $data, int $code) -> void`: Returns custom response structure
+- `maintenance(string $message, string $estimated_time) -> void`: Returns 503 Maintenance mode
+- `rateLimit(string $message, int $retry_after) -> void`: Returns 429 Rate limit exceeded
+- `setCorsHeaders(array $allowed_origins, array $allowed_methods, array $allowed_headers) -> void`: Sets CORS headers
+- `handlePreflight() -> void`: Handles OPTIONS preflight requests
+- `expectsJson() -> bool`: Checks if client expects JSON response
+- `logError(string $message, mixed $details, string $level) -> void`: Logs errors (private)
+- `json_success(mixed $data, string $message, int $code) -> void`: Quick success response
+- `json_error(string $message, int $code, mixed $details) -> void`: Quick error response
+- `json_validation_error(array $errors, string $message) -> void`: Quick validation error
+- `json_unauthorized(string $message) -> void`: Quick unauthorized error
+- `json_not_found(string $message) -> void`: Quick not found error
 
 ---
 
@@ -151,6 +196,12 @@
 - `calculateMaxPrices(array $user_data) -> array`: Calculates max prices
 - `calculateAllUserLimits(array $user_data) -> array`: Calculates all limits
 - `calculateLevelUpRequirements(int $current_level, int $current_exp) -> array`: Calculates level up requirements
+- `calculateExpForLevel(int $level) -> int`: Calculates total EXP needed for specific level (private)
+- `getLevelTitle(int $level) -> string`: Returns title based on user level
+- `calculateRecipeRewards(string $difficulty, array $user_limits) -> array`: Calculates rewards for recipe completion
+- `calculateStepRewards(int $step_index, int $total_steps, array $recipe_rewards) -> array`: Calculates step completion rewards
+- `checkLevelUp(int $current_level, int $current_exp) -> array`: Checks if user should level up
+- `calculateDailyLoginBonus(int $login_streak) -> array`: Calculates daily login bonus rewards
 
 ---
 
