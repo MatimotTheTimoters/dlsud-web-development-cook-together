@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { FaExclamationTriangle, FaRedo, FaHome } from 'react-icons/fa';
+import { FaExclamationTriangle, FaRedo, FaHome, FaUser, FaCooking } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 class ErrorBoundary extends Component {
     constructor(props) {
@@ -12,12 +13,11 @@ class ErrorBoundary extends Component {
     }
 
     static getDerivedStateFromError(error) {
-        return { hasError: true };
+        return { hasError: true, error };
     }
 
     componentDidCatch(error, errorInfo) {
         this.setState({
-            error: error,
             errorInfo: errorInfo
         });
 
@@ -25,7 +25,28 @@ class ErrorBoundary extends Component {
         if (window.errorReportingService) {
             window.errorReportingService.logError(error, errorInfo);
         }
+
+        // You can also log to your backend API here
+        this.logErrorToBackend(error, errorInfo);
     }
+
+    logErrorToBackend = async (error, errorInfo) => {
+        try {
+            // This would be implemented when error logging API is available
+            // await fetch('http://localhost/backend/api/errors/log.php', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         error: error.toString(),
+            //         stack: errorInfo.componentStack,
+            //         url: window.location.href,
+            //         user: localStorage.getItem('user')
+            //     })
+            // });
+        } catch (logError) {
+            console.error('Failed to log error:', logError);
+        }
+    };
 
     handleReload = () => {
         window.location.reload();
@@ -35,8 +56,35 @@ class ErrorBoundary extends Component {
         window.location.href = '/';
     };
 
+    handleGoProfile = () => {
+        window.location.href = '/profile';
+    };
+
+    getUserSpecificTips = () => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const tips = [
+            'Refresh the page to try again',
+            'Check your internet connection',
+            'Clear browser cache if problem persists',
+            'Contact support if you need help'
+        ];
+
+        if (user.level > 10) {
+            tips.push('As an experienced chef, try creating the recipe from scratch');
+        }
+
+        if (user.recipes_created > 5) {
+            tips.push('Your created recipes are safe in the database');
+        }
+
+        return tips;
+    };
+
     render() {
         if (this.state.hasError) {
+            const userTips = this.getUserSpecificTips();
+            const isUserAuthenticated = localStorage.getItem('token');
+
             return (
                 <div className="error-boundary notification-error">
                     <div className="error-container">
@@ -46,12 +94,15 @@ class ErrorBoundary extends Component {
                         </div>
 
                         <div className="error-content">
-                            <h1 className="error-title">Oops! Something went wrong in the kitchen!</h1>
+                            <h1 className="error-title">
+                                <FaCooking className="inline mr-2" />
+                                Kitchen Malfunction!
+                            </h1>
 
                             <div className="error-message">
                                 <p className="error-description">
-                                    Our chefs are working to fix this recipe error.
-                                    Don't worry, your progress is saved!
+                                    Something burned in the oven! Our culinary wizards are investigating.
+                                    {isUserAuthenticated && " Your progress has been auto-saved!"}
                                 </p>
 
                                 {this.state.error && (
@@ -80,15 +131,27 @@ class ErrorBoundary extends Component {
                                     <FaHome className="button-icon" />
                                     Go Home
                                 </button>
+
+                                {isUserAuthenticated && (
+                                    <button
+                                        onClick={this.handleGoProfile}
+                                        className="btn-rpg btn-rpg-success error-action-button"
+                                    >
+                                        <FaUser className="button-icon" />
+                                        My Profile
+                                    </button>
+                                )}
                             </div>
 
                             <div className="error-tips">
-                                <h4 className="tips-title">Quick Tips:</h4>
+                                <h4 className="tips-title">
+                                    <FaCooking className="inline mr-2" />
+                                    Chef's Tips:
+                                </h4>
                                 <ul className="tips-list">
-                                    <li>Refresh the page to try again</li>
-                                    <li>Check your internet connection</li>
-                                    <li>Clear browser cache if problem persists</li>
-                                    <li>Contact support if you need help</li>
+                                    {userTips.map((tip, index) => (
+                                        <li key={index}>{tip}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -101,4 +164,10 @@ class ErrorBoundary extends Component {
     }
 }
 
-export default ErrorBoundary;
+// Higher-order component to add navigation capability
+const ErrorBoundaryWithNavigation = (props) => {
+    const navigate = useNavigate();
+    return <ErrorBoundary {...props} navigate={navigate} />;
+};
+
+export default ErrorBoundaryWithNavigation;

@@ -1,45 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { FaUserPlus, FaUserCheck, FaUserTimes } from 'react-icons/fa';
 import * as relationshipsApi from '../../api/relationships';
-import { useAuth } from '../../hooks/AuthContext';
+import { useAuth } from '../../hooks/useAuth'; // Fixed import path
 
-/**
- * FollowButton Component
- * Allows users to follow/unfollow other users
- * 
- * @param {Object} props
- * @param {string} props.targetUserId - ID of user to follow/unfollow
- * @param {string} props.initialFollowing - Initial following state
- * @param {function} props.onFollowChange - Callback when follow state changes
- */
 const FollowButton = ({ targetUserId, initialFollowing = false, onFollowChange }) => {
     const [isFollowing, setIsFollowing] = useState(initialFollowing);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const { currentUser } = useAuth();
 
-    // Check initial following state on mount
-    useEffect(() => {
-        const checkFollowingStatus = async () => {
-            try {
-                // Use the API to check if following
-                const following = await relationshipsApi.isFollowing(targetUserId);
-                setIsFollowing(following);
-            } catch (err) {
-                console.error('Error checking following status:', err);
-                // Keep the initialFollowing prop as fallback
-            }
-        };
+    const checkFollowingStatus = async () => {
+        if (!currentUser || targetUserId === currentUser.id) return false;
 
-        if (currentUser && targetUserId !== currentUser.id) {
-            checkFollowingStatus();
+        try {
+            // This function needs to be implemented in relationships API
+            const response = await relationshipsApi.getFriendRequests();
+            const isFollowing = response.some(req =>
+                req.target_user_id === targetUserId &&
+                req.relationship_type === 'following' &&
+                req.status === 'accepted'
+            );
+            return isFollowing;
+        } catch (error) {
+            console.error('Error checking following status:', error);
+            return initialFollowing;
         }
-    }, [targetUserId, currentUser]);
+    };
 
-    // Don't show follow button for own profile
-    if (!currentUser || targetUserId === currentUser.id) {
-        return null;
-    }
+    useEffect(() => {
+        const init = async () => {
+            const followingStatus = await checkFollowingStatus();
+            setIsFollowing(followingStatus);
+        };
+        init();
+    }, [targetUserId, currentUser]);
 
     const toggleFollow = async () => {
         setIsLoading(true);
@@ -47,12 +41,10 @@ const FollowButton = ({ targetUserId, initialFollowing = false, onFollowChange }
 
         try {
             if (isFollowing) {
-                // Unfollow user
                 await relationshipsApi.unfollowUser(targetUserId);
                 setIsFollowing(false);
                 if (onFollowChange) onFollowChange(false);
             } else {
-                // Follow user
                 await relationshipsApi.followUser(targetUserId);
                 setIsFollowing(true);
                 if (onFollowChange) onFollowChange(true);
@@ -60,65 +52,39 @@ const FollowButton = ({ targetUserId, initialFollowing = false, onFollowChange }
         } catch (err) {
             console.error('Error toggling follow:', err);
             setError(err.response?.data?.message || 'Failed to update follow status');
-
-            // Revert UI state on error
-            setIsFollowing(!isFollowing);
+            setIsFollowing(!isFollowing); // Revert on error
         } finally {
             setIsLoading(false);
         }
     };
 
-    const getButtonText = () => {
-        if (isLoading) {
-            return isFollowing ? 'Unfollowing...' : 'Following...';
-        }
-        return isFollowing ? 'Following' : 'Follow';
-    };
-
-    const getButtonIcon = () => {
-        if (isLoading) {
-            return null; // Or a loading spinner
-        }
-        return isFollowing ? <FaUserCheck /> : <FaUserPlus />;
-    };
-
-    const getButtonClass = () => {
-        const baseClass = 'flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200';
-
-        if (isFollowing) {
-            return `${baseClass} bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300`;
-        } else {
-            return `${baseClass} bg-blue-500 text-white hover:bg-blue-600`;
-        }
-    };
+    if (!currentUser || targetUserId === currentUser.id) {
+        return null;
+    }
 
     return (
-        <div className="flex flex-col gap-1">
+        <div className="follow-button-container">
             <button
                 onClick={toggleFollow}
                 disabled={isLoading}
-                className={getButtonClass()}
+                className={`btn-rpg ${isFollowing ? 'btn-rpg-secondary' : 'btn-rpg-primary'}`}
             >
-                {getButtonIcon()}
-                {getButtonText()}
+                {isLoading ? (
+                    <>
+                        <span className="spinner"></span>
+                        {isFollowing ? 'Unfollowing...' : 'Following...'}
+                    </>
+                ) : (
+                    <>
+                        {isFollowing ? <FaUserCheck /> : <FaUserPlus />}
+                        {isFollowing ? 'Following' : 'Follow'}
+                    </>
+                )}
             </button>
 
             {error && (
-                <p className="text-red-500 text-sm mt-1">{error}</p>
+                <p className="text-error text-sm mt-1">{error}</p>
             )}
-
-            {/* Friend request option could be added here */}
-            <div className="text-xs text-gray-500 mt-1">
-                {isFollowing ? (
-                    <span className="flex items-center gap-1">
-                        <FaUserCheck className="text-green-500" /> Following
-                    </span>
-                ) : (
-                    <span className="flex items-center gap-1">
-                        <FaUserPlus className="text-blue-500" /> Not following
-                    </span>
-                )}
-            </div>
         </div>
     );
 };
