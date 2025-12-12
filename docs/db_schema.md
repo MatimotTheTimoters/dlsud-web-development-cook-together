@@ -354,3 +354,57 @@ ___
 | **UNIQUE KEY** | `(user_id, item_id, is_active)` | `UNIQUE` | Prevent duplicate active purchases of same item |
 
 </details>
+
+<details>
+<summary>Session_Chat_Messages Table</summary>
+
+___
+
+| **Column Name** | **Data Type** | **Constraint** | **Description** |
+|-----------------|---------------|----------------|-----------------|
+| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Message ID |
+| **cooking_session_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES cooking_sessions(id) ON DELETE CASCADE` | Reference to session |
+| **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id)` | Message sender |
+| **message** | `TEXT` | `NOT NULL` | Chat message content |
+| **message_type** | `ENUM('text','system','vote')` | `DEFAULT 'text'` | Type of message |
+| **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Message timestamp |
+| **is_read** | `BOOLEAN` | `DEFAULT FALSE` | Whether message was read |
+
+</details>
+
+<details>
+<summary>User_Recipe_Access Table</summary>
+
+___
+
+| **Column Name** | **Data Type** | **Constraint** | **Description** |
+|-----------------|---------------|----------------|-----------------|
+| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Access entry ID |
+| **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE` | User who has access |
+| **recipe_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES recipes(id) ON DELETE CASCADE` | Accessible recipe |
+| **access_type** | `ENUM('purchased','created','gifted','free')` | `NOT NULL` | How access was obtained |
+| **purchased_at** | `DATETIME` | `NULL` | When recipe was purchased |
+| **currency_used** | `ENUM('gold','gem')` | `NULL` | Currency used for purchase |
+| **price_paid** | `INT` | `NULL` | Amount paid |
+| **expires_at** | `DATETIME` | `NULL` | When access expires (NULL for permanent) |
+| **UNIQUE KEY** | `(user_id, recipe_id)` | `UNIQUE` | Prevent duplicate access |
+
+</details>
+
+<details>
+<summary>User_Inventory Table</summary>
+
+___
+
+| **Column Name** | **Data Type** | **Constraint** | **Description** |
+|-----------------|---------------|----------------|-----------------|
+| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Inventory entry ID |
+| **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE` | Inventory owner |
+| **item_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES shop_items(id)` | Purchased item |
+| **quantity** | `INT` | `DEFAULT 1` | Number of items owned |
+| **purchased_at** | `DATETIME` | `DEFAULT CURRENT_TIMESTAMP` | Purchase timestamp |
+| **is_equipped** | `BOOLEAN` | `DEFAULT FALSE` | Whether item is currently equipped |
+| **expires_at** | `DATETIME` | `NULL` | When item expires |
+| **UNIQUE KEY** | `(user_id, item_id)` | `UNIQUE` | Prevent duplicate inventory entries |
+
+</details>

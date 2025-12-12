@@ -1,4 +1,4 @@
-<details> 
+    <details> 
 <summary>Frontend</summary>
 frontend/
 ├── .env
@@ -14,6 +14,7 @@ frontend/
     ├── setupTests.js
     ├── api/
     │   ├── auth.js
+    │   ├── chat.js
     │   ├── cookbooks.js
     │   ├── cooking-sessions.js
     │   ├── recipes.js
@@ -41,12 +42,15 @@ frontend/
     │   │   ├── CookingSession.jsx
     │   │   ├── ParticipantList.jsx
     │   │   ├── SessionTimer.jsx
+    │   │   ├── SessionChat.jsx
     │   │   └── StepProgress.jsx
     │   ├── gamification/
     │   │   ├── CurrencyDisplay.jsx
     │   │   ├── LevelProgress.jsx
     │   │   ├── RewardNotification.jsx
     │   │   └── ShopItem.jsx
+    |   ├── purchase/
+|   |   |    └── PurchaseModal.php
     │   ├── recipes/
     │   │   ├── IngredientList.jsx
     │   │   ├── RecipeCard.jsx
@@ -79,6 +83,7 @@ frontend/
     │   ├── RecipeDetailPage.jsx
     │   ├── RecipesPage.jsx
     │   ├── RegisterPage.jsx
+    │   ├── SessionHistoryPage.jsx
     │   └── ShopPage.jsx
     ├── styles/
     │   ├── components.css
@@ -108,6 +113,8 @@ backend/
 │   │   ├── me.php
 │   │   ├── refresh-token.php
 │   │   └── register.php
+|   ├── chat/
+|   |   └── messages.php
 │   ├── cookbooks/
 │   │   ├── add-recipe.php
 │   │   ├── create.php
@@ -133,6 +140,8 @@ backend/
 │   │   ├── follow.php
 │   │   ├── friends.php
 │   │   └── list.php
+|   ├── sessions/
+|   |   └── history.php
 │   ├── shop/
 │   │    ├── items.php
 │   │    └── purchase.php

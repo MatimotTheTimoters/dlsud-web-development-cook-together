@@ -445,6 +445,26 @@ Here's the updated `frontend_files.md` with all your requested changes:
 - **Functions**:
   - `calculateProgress(current, total) -> number`: Calculates progress percentage
 
+#### **src/components/cooking/SessionChat.jsx**
+- **Description**: Real-time chat for multiplayer cooking sessions
+- **Required Imports**: React, useState, useEffect, useRef, { FaPaperPlane, FaUser } from 'react-icons/fa'
+- **Backend Endpoint**: api/chat/messages.php
+- **Layout**:
+┌─────────────────────────────────────┐
+│ SESSION CHAT │
+├─────────────────────────────────────┤
+│ 👤 Chef John: Let's start step 3 │
+│ 👤 Sarah: Timer set for 5 min │
+│ 👤 You: Adding sauce now │
+│ 👤 Mike: Vote to skip? │
+├─────────────────────────────────────┤
+│ [💬 Type message...] [📤 Send] │
+└─────────────────────────────────────┘
+- **Functions**:
+- `sendMessage(message) -> void`: Sends chat message
+- `receiveMessages() -> void`: Polls for new messages
+- `formatMessageTime(timestamp) -> string`: Formats message timestamp
+
 ---
 
 ### **src/components/users/**
@@ -559,6 +579,33 @@ Here's the updated `frontend_files.md` with all your requested changes:
 - **Functions**:
   - `canAfford() -> boolean`: Checks if user can afford item
   - `purchaseItem() -> void`: Handles item purchase
+
+---
+
+### src/components/purchase/
+
+---
+
+#### **src/components/purchase/PurchaseModal.jsx**
+- **Description**: Modal for purchasing recipes or shop items
+- **Required Imports**: React, useState, api from '../../api/recipes' or '../../api/shop', { FaCoins, FaGem, FaLock, FaCheck } from 'react-icons/fa'
+- **Backend Endpoint**: api/purchase/recipe.php, api/purchase/item.php
+- **Layout**:
+┌─────────────────────────────────────┐
+│ PURCHASE CONFIRMATION │
+│ 🍕 Recipe: Margherita Pizza │
+│ --------------------------------- │
+│ Price: 💰 50 Gold OR 💎 5 Gems │
+│ Your Balance: 💰 1250 | 💎 45 │
+│ --------------------------------- │
+│ [💰 Purchase with Gold] │
+│ [💎 Purchase with Gems] │
+│ [❌ Cancel] │
+└─────────────────────────────────────┘
+- **Functions**:
+- `checkAffordability() -> boolean`: Checks if user can afford
+- `processPurchase(currencyType) -> void`: Handles purchase transaction
+- `showSuccessMessage() -> void`: Shows purchase confirmation
 
 ---
 
@@ -746,6 +793,35 @@ Here's the updated `frontend_files.md` with all your requested changes:
   - `loadCookbooks() -> void`: Loads user's cookbooks
   - `createCookbook() -> void`: Creates new cookbook
   - `addRecipeToCookbook() -> void`: Adds recipe to cookbook
+
+---
+
+#### **src/pages/SessionHistoryPage.jsx**
+- **Description**: Displays user's past cooking sessions with statistics
+- **Required Imports**: React, useState, useEffect, api from '../api/cooking-sessions', { FaHistory, FaChartBar, FaClock, FaCalendar } from 'react-icons/fa'
+- **Backend Endpoint**: api/sessions/history.php
+- **Layout**:
+┌─────────────────────────────────────┐
+│ COOKING HISTORY │
+│ 📊 Stats: 42 Sessions | 65h Total │
+├─────────────────────────────────────┤
+│ FILTERS: [📅 This Month] [🔥 All] │
+│ [✅ Completed] [❌ Failed] │
+├─────────────────────────────────────┤
+│ SESSION LIST: │
+│ ┌─────────────────────────────┐ │
+│ │ 🍕 Pizza | ⏱️ 45min | ✅ │ │
+│ │ 📅 Jan 15 | 🏆 +150 EXP │ │
+│ └─────────────────────────────┘ │
+│ ┌─────────────────────────────┐ │
+│ │ 🍝 Pasta | ⏱️ 30min | ✅ │ │
+│ │ 📅 Jan 14 | 🏆 +120 EXP │ │
+│ └─────────────────────────────┘ │
+└─────────────────────────────────────┘
+- **Functions**:
+- `loadSessionHistory() -> void`: Loads user's cooking history
+- `filterSessions(filterType) -> array`: Filters sessions by criteria
+- `calculateStatistics() -> object`: Calculates cooking stats
 
 ---
 
@@ -1035,6 +1111,29 @@ Here's the updated `frontend_files.md` with all your requested changes:
   - `purchaseItem(itemId) -> promise`: Purchases shop item
   - `getUserPurchases() -> promise`: Gets user's purchased items
   - `getItemCategories() -> promise`: Gets shop item categories
+
+---
+
+#### **src/api/purchase.js**
+- **Description**: API functions for purchase operations
+- **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/purchase/recipe.php, api/purchase/item.php
+- **Functions**:
+  - `purchaseRecipe(recipeId, currencyType) -> promise`: Purchases a recipe
+  - `purchaseItem(itemId, currencyType) -> promise`: Purchases a shop item
+  - `getPurchaseHistory() -> promise`: Gets user's purchase history
+  - `checkRecipeAccess(recipeId) -> promise`: Checks if user has access to recipe
+
+---
+
+#### **src/api/chat.js**
+- **Description**: API functions for chat operations
+- **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/chat/messages.php
+- **Functions**:
+  - `sendChatMessage(sessionId, message) -> promise`: Sends chat message
+  - `getChatMessages(sessionId, limit) -> promise`: Gets chat history
+  - `markMessagesAsRead(sessionId) -> promise`: Marks messages as read
 
 ---
 

@@ -506,6 +506,30 @@
 
 ---
 
+### **api/sessions/history.php**
+- **Description**: Retrieves user's cooking session history
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Backend Endpoint**: GET /api/sessions/history
+- **Functions**:
+  - `getUserSessionHistory(user_id, limit, offset) -> array`: Gets paginated session history
+  - `getSessionStatistics(user_id) -> array`: Gets cooking stats (total sessions, time, etc.)
+
+---
+
+## **api/chat/**
+
+---
+
+### **api/chat/messages.php**
+- **Description**: Handles cooking session chat messages (for multiplayer)
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Backend Endpoint**: POST /api/chat/messages (send), GET /api/chat/messages (retrieve)
+- **Functions**:
+  - `sendSessionMessage(session_id, user_id, message) -> bool`: Saves chat message
+  - `getSessionMessages(session_id, limit) -> array`: Retrieves session chat history
+
+---
+
 ## **api/cookbooks/**
 
 ---
@@ -577,14 +601,13 @@
 
 ---
 
-### **api/shop/purchase.php**
-
-- **Description**: Handles shop item purchases
-- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../config/cors.php
+### **api/shop/purchase.php** (UPDATE)
+- **Description**: Handles shop item purchases (redirects to /api/purchase/item.php)
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../purchase/item.php
 - **Backend Endpoint**: POST /api/shop/purchase
-
-**Functions**:
-- `getAuthorizationToken() -> string|null`: Extracts Bearer token from Authorization header
+- **Functions**:
+  - `validateShopPurchase(user_id, item_id) -> bool`: Validates purchase request
+  - `getAuthorizationToken() -> string|null`: Extracts Bearer token
 
 ---
 
