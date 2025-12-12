@@ -91,6 +91,8 @@ frontend/
         ├── constants.js
         ├── formatters.js
         ├── helpers.js
+        ├── upload.js
+        ├── userCalculations.js
         └── validators.js
 </details>
 

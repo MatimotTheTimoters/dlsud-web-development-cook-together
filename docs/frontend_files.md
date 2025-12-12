@@ -1,18 +1,21 @@
-<details>
-<summary>frontend/</summary>
+Here's the updated `frontend_files.md` with all your requested changes:
+
+# Frontend Files Documentation
 
 ---
 
-<details>
-<summary>public/</summary>
+## **frontend/**
 
-<details>
-<summary>public/index.html</summary>
+---
 
-- **Description**: Main HTML template with gamified libraries
+### **public/**
+
+#### **public/index.html**
+- **Description**: Main HTML template with gamified UI libraries and basic layout structure
 - **Required Imports**: None
 - **Backend Endpoint**: None
-- layout: 
+- **Layout**:
+
 ```
 ┌────────────────────────────────────────────┐
 │                    HEADER                  │
@@ -27,54 +30,47 @@
 │  © CookTogether • Level up your cooking!  │
 └────────────────────────────────────────────┘
 ```
-- gamified libraries added:
+
+- **Gamified Libraries Added**:
   ```html
   <!-- Gamified UI Libraries -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
   ```
-</details>
 
 ---
 
-<details>
-<summary>public/favicon.ico</summary>
-
-- **Description**: Site favicon
+#### **public/favicon.ico**
+- **Description**: Site favicon for browser tabs
 - **Required Imports**: None
 - **Backend Endpoint**: None
-</details>
 
 ---
 
-<details>
-<summary>public/manifest.json</summary>
-
-- **Description**: PWA manifest
+#### **public/manifest.json**
+- **Description**: Progressive Web App manifest for mobile installation
 - **Required Imports**: None
 - **Backend Endpoint**: None
-</details>
-
-</details>
 
 ---
 
-<details>
-<summary>src/</summary>
+### **src/**
 
-<details>
-<summary>src/components/</summary>
+---
 
-<details>
-<summary>src/components/auth/</summary>
+### **src/components/**
 
-<details>
-<summary>src/components/auth/LoginForm.jsx</summary>
+---
 
+### **src/components/auth/**
+
+#### **src/components/auth/LoginForm.jsx**
+- **Description**: User login form with gamified elements and validation
 - **Required Imports**: React, useState, useNavigate from 'react-router-dom', api from '../../api/auth', { FaUser, FaLock, FaFire } from 'react-icons/fa'
 - **Backend Endpoint**: api/auth/login.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │           LOGIN FORM                │
@@ -89,23 +85,20 @@
 │    🔥 Daily Login Bonus Available!  │
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- handleSubmit(event) -> void: Handles login form submission
-- validateForm() -> boolean: Validates form inputs
-- resetForm() -> void: Resets form to initial state
-</details>
-</details>
+- **Functions**:
+  - `handleSubmit(event) -> void`: Handles login form submission
+  - `validateForm() -> boolean`: Validates form inputs
+  - `resetForm() -> void`: Resets form to initial state
 
 ---
 
-<details>
-<summary>src/components/auth/RegisterForm.jsx</summary>
-
+#### **src/components/auth/RegisterForm.jsx**
+- **Description**: User registration form with welcome bonuses and validation
 - **Required Imports**: React, useState, useNavigate from 'react-router-dom', api from '../../api/auth', { FaUserPlus, FaCrown, FaTrophy } from 'react-icons/fa'
 - **Backend Endpoint**: api/auth/register.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │         REGISTER FORM               │
@@ -122,42 +115,31 @@
 │    🏆 Welcome Bonus: 100 Gold + Chef Hat │
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- handleSubmit(event) -> void: Handles registration form submission
-- validateForm() -> boolean: Validates form inputs
-- checkPasswordStrength(password) -> string: Returns password strength rating
-</details>
-</details>
+- **Functions**:
+  - `handleSubmit(event) -> void`: Handles registration form submission
+  - `validateForm() -> boolean`: Validates form inputs
+  - `checkPasswordStrength(password) -> string`: Returns password strength rating
 
 ---
 
-<details>
-<summary>src/components/auth/ProtectedRoute.jsx</summary>
-
+#### **src/components/auth/ProtectedRoute.jsx**
+- **Description**: Route wrapper that protects authenticated routes
 - **Required Imports**: React, Navigate from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaShieldAlt } from 'react-icons/fa'
 - **Backend Endpoint**: api/auth/me.php (for token validation)
-<details>
-<summary>Functions</summary>
-
-- ProtectedRoute({ children }) -> JSX: Wraps protected routes with authentication check
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `ProtectedRoute({ children }) -> JSX`: Wraps protected routes with authentication check
 
 ---
 
-<details>
-<summary>src/components/common/</summary>
+### **src/components/common/**
 
-<details>
-<summary>src/components/common/Header.jsx</summary>
-
+#### **src/components/common/Header.jsx**
+- **Description**: Main application header with navigation and user stats
 - **Required Imports**: React, Link from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaHome, FaUtensils, FaUsers, FaBook, FaUser, FaCoins, FaGem } from 'react-icons/fa'
 - **Backend Endpoint**: api/auth/me.php, api/users/profile.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │ 🍳 CookTogether  │ 🔍 Search Recipes   │ 👤 Level 15│
@@ -168,52 +150,38 @@
 │ Home  Recipes Sessions Cookbooks Profile Shop Settings│
 └─────────────────────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- handleLogout() -> void: Logs user out and redirects to login
-- getGreeting() -> string: Returns time-based greeting message
-</details>
-</details>
+- **Functions**:
+  - `handleLogout() -> void`: Logs user out and redirects to login
+  - `getGreeting() -> string`: Returns time-based greeting message
 
 ---
 
-<details>
-<summary>src/components/common/Footer.jsx</summary>
-
+#### **src/components/common/Footer.jsx**
+- **Description**: Application footer with links and copyright
 - **Required Imports**: React, { FaHeart, FaTwitter, FaDiscord, FaGithub } from 'react-icons/fa'
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- getCurrentYear() -> number: Returns current year for copyright
-</details>
-</details>
+- **Functions**:
+  - `getCurrentYear() -> number`: Returns current year for copyright
 
 ---
 
-<details>
-<summary>src/components/common/Navigation.jsx</summary>
-
+#### **src/components/common/Navigation.jsx**
+- **Description**: Main navigation component with links and user actions
 - **Required Imports**: React, NavLink from 'react-router-dom', useAuth from '../../contexts/AuthContext', { FaBell, FaEnvelope, FaUserFriends } from 'react-icons/fa'
 - **Backend Endpoint**: api/auth/me.php
-<details>
-<summary>Functions</summary>
-
-- isActiveLink(isActive) -> string: Returns active link className
-- hasPermission(requiredRole) -> boolean: Checks if user has required permissions
-</details>
-</details>
+- **Functions**:
+  - `isActiveLink(isActive) -> string`: Returns active link className
+  - `hasPermission(requiredRole) -> boolean`: Checks if user has required permissions
 
 ---
 
-<details>
-<summary>src/components/common/LoadingSpinner.jsx</summary>
-
+#### **src/components/common/LoadingSpinner.jsx**
+- **Description**: Animated loading spinner with cooking theme
 - **Required Imports**: React, { FaUtensilSpoon, FaBlender } from 'react-icons/fa'
 - **Backend Endpoint**: None
-<details>
-<summary>layout:</summary>
+- **Layout**:
+
 ```
 ┌─────────────────────────┐
 │                         │
@@ -224,42 +192,43 @@
 │   +10 EXP for patience  │
 └─────────────────────────┘
 ```
-</details>
-<details>
-<summary>Functions</summary>
 
-- LoadingSpinner({ size, color }) -> JSX: Displays loading animation
-</details>
-</details>
+- **Functions**:
+  - `LoadingSpinner({ size, color }) -> JSX`: Displays loading animation
+- **Loading Types Support**:
+  - `type='default'`: General loading with cooking utensils
+  - `type='user'`: User data loading with user/chart icons
+  - `type='recipe'`: Recipe-specific loading with food icons
+  - `type='cooking'`: Cooking session loading with fire/cookie icons
+  - `type='recipe-list'`: Recipe list loading
+  - `type='recipe-detail'`: Recipe detail loading
 
 ---
 
-<details>
-<summary>src/components/common/ErrorBoundary.jsx</summary>
-
+#### **src/components/common/ErrorBoundary.jsx**
+- **Description**: Catches JavaScript errors and displays fallback UI
 - **Required Imports**: React, Component, { FaExclamationTriangle } from 'react-icons/fa'
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- getDerivedStateFromError(error) -> object: Updates state so next render shows fallback UI
-- componentDidCatch(error, errorInfo) -> void: Logs error to error reporting service
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `getDerivedStateFromError(error) -> object`: Updates state so next render shows fallback UI
+  - `componentDidCatch(error, errorInfo) -> void`: Logs error to error reporting service
+- **Error Type Detection**:
+  - `general`: General application errors
+  - `recipe`: Recipe-specific errors (missing ingredients, invalid data)
+  - `cooking`: Cooking session errors (timer, step completion)
+  - `auth`: Authentication errors (token expired, unauthorized)
+  - `network`: Network-related errors (API calls, connectivity)
 
 ---
 
-<details>
-<summary>src/components/recipes/</summary>
+### **src/components/recipes/**
 
-<details>
-<summary>src/components/recipes/RecipeCard.jsx</summary>
-
+#### **src/components/recipes/RecipeCard.jsx**
+- **Description**: Displays recipe information in card format
 - **Required Imports**: React, Link from 'react-router-dom', formatTime from '../../utils/formatters', { FaClock, FaFire, FaUser, FaHeart, FaStar, FaCoins } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/interact.php (for like/save interactions)
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────┐
 │   [RECIPE IMAGE 4:3]        │
@@ -272,22 +241,19 @@
 │   [🍴 Cook] [❤️ Like]      │
 └─────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- getDifficultyColor(difficulty) -> string: Returns color based on difficulty level
-- truncateText(text, maxLength) -> string: Truncates text to specified length
-</details>
-</details>
+- **Functions**:
+  - `getDifficultyColor(difficulty) -> string`: Returns color based on difficulty level
+  - `truncateText(text, maxLength) -> string`: Truncates text to specified length
 
 ---
 
-<details>
-<summary>src/components/recipes/RecipeForm.jsx</summary>
-
+#### **src/components/recipes/RecipeForm.jsx**
+- **Description**: Form for creating and editing recipes with ingredients and steps
 - **Required Imports**: React, useState, useEffect, useNavigate from 'react-router-dom', api from '../../api/recipes', { FaPlus, FaTrash, FaImage, FaListOl, FaClock, FaBalanceScale, FaCalculator } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/create.php, api/recipes/update.php, api/upload/image.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │        CREATE RECIPE                │
@@ -317,27 +283,24 @@
 │  [🎮 Create Recipe & Earn EXP]      │
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- handleSubmit(event) -> void: Handles recipe form submission
-- addIngredient() -> void: Adds new ingredient field
-- removeIngredient(index) -> void: Removes ingredient field
-- addStep() -> void: Adds new step field
-- removeStep(index) -> void: Removes step field
-- validateForm() -> boolean: Validates all form inputs
-- calculateNutrition() -> object: Calculates total nutrition from ingredients
-</details>
-</details>
+- **Functions**:
+  - `handleSubmit(event) -> void`: Handles recipe form submission
+  - `addIngredient() -> void`: Adds new ingredient field
+  - `removeIngredient(index) -> void`: Removes ingredient field
+  - `addStep() -> void`: Adds new step field
+  - `removeStep(index) -> void`: Removes step field
+  - `validateForm() -> boolean`: Validates all form inputs
+  - `calculateNutrition() -> object`: Calculates total nutrition from ingredients
 
 ---
 
-<details>
-<summary>src/components/recipes/RecipeDetail.jsx</summary>
-
+#### **src/components/recipes/RecipeDetail.jsx**
+- **Description**: Detailed view of a single recipe with ingredients, steps, and interactions
 - **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/recipes', { FaHeart, FaBookmark, FaShare, FaClock, FaFire, FaUtensils, FaUsers } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/show.php, api/recipes/interact.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │ [← Back] RECIPE TITLE  [❤️] [🔖]   │
@@ -357,23 +320,20 @@
 │ [👥 Cook with Friends]              │
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- loadRecipe() -> void: Fetches recipe details from API
-- handleInteraction(type) -> void: Handles like/dislike/save interactions
-- formatTimer(duration, unit) -> string: Formats timer for display
-</details>
-</details>
+- **Functions**:
+  - `loadRecipe() -> void`: Fetches recipe details from API
+  - `handleInteraction(type) -> void`: Handles like/dislike/save interactions
+  - `formatTimer(duration, unit) -> string`: Formats timer for display
 
 ---
 
-<details>
-<summary>src/components/recipes/RecipeList.jsx</summary>
-
+#### **src/components/recipes/RecipeList.jsx**
+- **Description**: Displays a list of recipes with filtering and pagination
 - **Required Imports**: React, useState, useEffect, RecipeCard from './RecipeCard', api from '../../api/recipes', { FaFilter, FaSort, FaSearch } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/index.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │ RECIPE DISCOVERY                    │
@@ -394,57 +354,41 @@
 │ Showing 1-20 of 250 recipes         │
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- loadRecipes() -> void: Fetches recipes from API
-- filterRecipes(criteria) -> array: Filters recipes based on criteria
-- sortRecipes(sortBy) -> array: Sorts recipes based on sort option
-</details>
-</details>
+- **Functions**:
+  - `loadRecipes() -> void`: Fetches recipes from API
+  - `filterRecipes(criteria) -> array`: Filters recipes based on criteria
+  - `sortRecipes(sortBy) -> array`: Sorts recipes based on sort option
 
 ---
 
-<details>
-<summary>src/components/recipes/IngredientList.jsx</summary>
-
+#### **src/components/recipes/IngredientList.jsx**
+- **Description**: Displays recipe ingredients with checkboxes for completion tracking
 - **Required Imports**: React, { FaCheckSquare, FaSquare, FaBalanceScale } from 'react-icons/fa'
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- formatAmount(amount, unit) -> string: Formats ingredient amount and unit
-</details>
-</details>
+- **Functions**:
+  - `formatAmount(amount, unit) -> string`: Formats ingredient amount and unit
 
 ---
 
-<details>
-<summary>src/components/recipes/StepList.jsx</summary>
-
+#### **src/components/recipes/StepList.jsx**
+- **Description**: Displays cooking steps with timers and completion tracking
 - **Required Imports**: React, useState, { FaCheckCircle, FaPlayCircle, FaPauseCircle } from 'react-icons/fa'
 - **Backend Endpoint**: api/cooking-sessions/complete-step.php
-<details>
-<summary>Functions</summary>
-
-- startTimer(duration) -> void: Starts countdown timer for step
-- completeStep(stepId) -> void: Marks step as completed
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `startTimer(duration) -> void`: Starts countdown timer for step
+  - `completeStep(stepId) -> void`: Marks step as completed
 
 ---
 
-<details>
-<summary>src/components/cooking/</summary>
+### **src/components/cooking/**
 
-<details>
-<summary>src/components/cooking/CookingSession.jsx</summary>
-
+#### **src/components/cooking/CookingSession.jsx**
+- **Description**: Main cooking session interface with progress tracking and step management
 - **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/cooking-sessions', { FaPlay, FaPause, FaStop, FaStepForward, FaUsers, FaTrophy } from 'react-icons/fa'
 - **Backend Endpoint**: api/cooking-sessions/show.php, api/cooking-sessions/update.php, api/cooking-sessions/complete-step.php, api/cooking-sessions/vote.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │ [← Back] RECIPE   ⏱️ 12:45  [🎮]   │
@@ -462,76 +406,55 @@
 │ 👤👤👤      │   +15 EXP | +8 Gold   │
 └─────────────┴───────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- loadSession() -> void: Loads cooking session details
-- startSession() -> void: Starts the cooking session
-- pauseSession() -> void: Pauses the cooking session
-- completeSession() -> void: Marks session as complete
-- nextStep() -> void: Advances to next step
-</details>
-</details>
+- **Functions**:
+  - `loadSession() -> void`: Loads cooking session details
+  - `startSession() -> void`: Starts the cooking session
+  - `pauseSession() -> void`: Pauses the cooking session
+  - `completeSession() -> void`: Marks session as complete
+  - `nextStep() -> void`: Advances to next step
 
 ---
 
-<details>
-<summary>src/components/cooking/SessionTimer.jsx</summary>
-
+#### **src/components/cooking/SessionTimer.jsx**
+- **Description**: Timer component for cooking sessions with play/pause/reset controls
 - **Required Imports**: React, useState, useEffect, { FaPlay, FaPause, FaRedo, FaHourglassHalf } from 'react-icons/fa'
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- formatTime(seconds) -> string: Formats seconds to MM:SS
-- startTimer(duration) -> void: Starts the timer
-- pauseTimer() -> void: Pauses the timer
-- resetTimer() -> void: Resets the timer to initial duration
-</details>
-</details>
+- **Functions**:
+  - `formatTime(seconds) -> string`: Formats seconds to MM:SS
+  - `startTimer(duration) -> void`: Starts the timer
+  - `pauseTimer() -> void`: Pauses the timer
+  - `resetTimer() -> void`: Resets the timer to initial duration
 
 ---
 
-<details>
-<summary>src/components/cooking/ParticipantList.jsx</summary>
-
+#### **src/components/cooking/ParticipantList.jsx**
+- **Description**: Displays participants in a cooking session with status indicators
 - **Required Imports**: React, useEffect, api from '../../api/cooking-sessions', { FaUser, FaCrown, FaEye } from 'react-icons/fa'
 - **Backend Endpoint**: api/cooking-sessions/show.php, api/cooking-sessions/join.php
-<details>
-<summary>Functions</summary>
-
-- loadParticipants() -> void: Loads session participants
-- updateParticipantStatus(userId, status) -> void: Updates participant status
-</details>
-</details>
+- **Functions**:
+  - `loadParticipants() -> void`: Loads session participants
+  - `updateParticipantStatus(userId, status) -> void`: Updates participant status
 
 ---
 
-<details>
-<summary>src/components/cooking/StepProgress.jsx</summary>
-
+#### **src/components/cooking/StepProgress.jsx**
+- **Description**: Visual progress indicator for cooking steps
 - **Required Imports**: React, { FaFlagCheckered, FaRoute } from 'react-icons/fa'
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- calculateProgress(current, total) -> number: Calculates progress percentage
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `calculateProgress(current, total) -> number`: Calculates progress percentage
 
 ---
 
-<details>
-<summary>src/components/users/</summary>
+### **src/components/users/**
 
-<details>
-<summary>src/components/users/UserCard.jsx</summary>
-
+#### **src/components/users/UserCard.jsx**
+- **Description**: Displays user information in card format for lists
 - **Required Imports**: React, Link from 'react-router-dom', api from '../../api/relationships', { FaUserCircle, FaPlus, FaCheck, FaStar, FaFire } from 'react-icons/fa'
 - **Backend Endpoint**: api/relationships/follow.php, api/users/profile.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────┐
 │   [PROFILE PICTURE]         │
@@ -541,22 +464,19 @@
 │   [➕ Follow] [📩 Message]   │
 └─────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- handleFollow() -> void: Follows/unfollows user
-- getLevelColor(level) -> string: Returns color based on user level
-</details>
-</details>
+- **Functions**:
+  - `handleFollow() -> void`: Follows/unfollows user
+  - `getLevelColor(level) -> string`: Returns color based on user level
 
 ---
 
-<details>
-<summary>src/components/users/UserProfile.jsx</summary>
-
+#### **src/components/users/UserProfile.jsx**
+- **Description**: Detailed user profile view with stats and content tabs
 - **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/users', { FaEdit, FaCamera, FaTrophy, FaChartLine, FaAward, FaCrown } from 'react-icons/fa'
 - **Backend Endpoint**: api/users/profile.php, api/users/update.php, api/users/stats.php, api/upload/image.php
-- layout:
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │ [✏️ Edit] [➕ Follow] [📩 Message]  │
@@ -572,126 +492,84 @@
 │  CONTENT AREA (Grid/List of items)  │
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- loadUserProfile() -> void: Loads user profile data
-- loadUserRecipes() -> void: Loads user's recipes
-- loadUserStats() -> void: Loads user statistics
-- calculateNextLevelProgress() -> object: Calculates progress to next level
-</details>
-</details>
+- **Functions**:
+  - `loadUserProfile() -> void`: Loads user profile data
+  - `loadUserRecipes() -> void`: Loads user's recipes
+  - `loadUserStats() -> void`: Loads user statistics
+  - `calculateNextLevelProgress() -> object`: Calculates progress to next level
 
 ---
 
-<details>
-<summary>src/components/users/StatsDisplay.jsx</summary>
-
+#### **src/components/users/StatsDisplay.jsx**
+- **Description**: Displays user statistics with icons and formatted values
 - **Required Imports**: React, { FaChartBar, FaFire, FaCoins, FaGem, FaStar, FaMedal } from 'react-icons/fa'
 - **Backend Endpoint**: api/users/stats.php
-<details>
-<summary>Functions</summary>
-
-- formatStatValue(value, type) -> string: Formats stat values for display
-- getStatIcon(statName) -> JSX: Returns icon for stat type
-</details>
-</details>
+- **Functions**:
+  - `formatStatValue(value, type) -> string`: Formats stat values for display
+  - `getStatIcon(statName) -> JSX`: Returns icon for stat type
 
 ---
 
-<details>
-<summary>src/components/users/FollowButton.jsx</summary>
-
+#### **src/components/users/FollowButton.jsx**
+- **Description**: Button component for following/unfollowing users
 - **Required Imports**: React, useState, api from '../../api/relationships', { FaUserPlus, FaUserCheck, FaUserTimes } from 'react-icons/fa'
 - **Backend Endpoint**: api/relationships/follow.php, api/relationships/friends.php
-<details>
-<summary>Functions</summary>
-
-- checkFollowingStatus() -> boolean: Checks if current user follows target user
-- toggleFollow() -> void: Toggles follow/unfollow
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `checkFollowingStatus() -> boolean`: Checks if current user follows target user
+  - `toggleFollow() -> void`: Toggles follow/unfollow
 
 ---
 
-<details>
-<summary>src/components/gamification/</summary>
+### **src/components/gamification/**
 
-<details>
-<summary>src/components/gamification/CurrencyDisplay.jsx</summary>
-
+#### **src/components/gamification/CurrencyDisplay.jsx**
+- **Description**: Displays user's currency balances (gold and gems)
 - **Required Imports**: React, { FaCoins, FaGem, FaMoneyBillWave } from 'react-icons/fa'
 - **Backend Endpoint**: api/users/stats.php
-<details>
-<summary>Functions</summary>
-
-- formatCurrency(amount, type) -> string: Formats currency values with appropriate symbols
-</details>
-</details>
+- **Functions**:
+  - `formatCurrency(amount, type) -> string`: Formats currency values with appropriate symbols
 
 ---
 
-<details>
-<summary>src/components/gamification/LevelProgress.jsx</summary>
-
+#### **src/components/gamification/LevelProgress.jsx**
+- **Description**: Visual progress bar for user level progression
 - **Required Imports**: React, { FaTrophy, FaChessQueen, FaStar, FaCrown } from 'react-icons/fa'
 - **Backend Endpoint**: api/users/stats.php
-<details>
-<summary>Functions</summary>
-
-- calculateProgress(currentExp, nextLevelExp) -> number: Calculates progress percentage
-- getLevelTitle(level) -> string: Returns title based on level
-</details>
-</details>
+- **Functions**:
+  - `calculateProgress(currentExp, nextLevelExp) -> number`: Calculates progress percentage
+  - `getLevelTitle(level) -> string`: Returns title based on level
 
 ---
 
-<details>
-<summary>src/components/gamification/RewardNotification.jsx</summary>
-
+#### **src/components/gamification/RewardNotification.jsx**
+- **Description**: Displays reward notifications with animations
 - **Required Imports**: React, useState, useEffect, { FaGift, FaCoins, FaGem, FaStar, FaTrophy } from 'react-icons/fa'
 - **Backend Endpoint**: api/users/stats.php (for reward updates)
-<details>
-<summary>Functions</summary>
-
-- showNotification(reward) -> void: Displays reward notification
-- hideNotification() -> void: Hides notification after timeout
-</details>
-</details>
+- **Functions**:
+  - `showNotification(reward) -> void`: Displays reward notification
+  - `hideNotification() -> void`: Hides notification after timeout
 
 ---
 
-<details>
-<summary>src/components/gamification/ShopItem.jsx</summary>
-
+#### **src/components/gamification/ShopItem.jsx**
+- **Description**: Displays shop items with purchase functionality
 - **Required Imports**: React, useState, api from '../../api/shop', { FaShoppingCart, FaLock, FaCheck } from 'react-icons/fa'
-- **Backend Endpoint**: api/shop.js (to be implemented)
-<details>
-<summary>Functions</summary>
-
-- canAfford() -> boolean: Checks if user can afford item
-- purchaseItem() -> void: Handles item purchase
-</details>
-</details>
-
-</details>
-
-</details>
+- **Backend Endpoint**: api/shop.js (to be implemented in backend)
+- **Functions**:
+  - `canAfford() -> boolean`: Checks if user can afford item
+  - `purchaseItem() -> void`: Handles item purchase
 
 ---
 
-<details>
-<summary>src/pages/</summary>
+### **src/pages/**
 
-<details>
-<summary>src/pages/HomePage.jsx</summary>
-
+#### **src/pages/HomePage.jsx**
+- **Description**: Main landing page with featured content and quick actions
 - **Required Imports**: React, Link from 'react-router-dom', RecipeList from '../components/recipes/RecipeList', { FaFire, FaNewspaper, FaTrophy, FaUsers } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/index.php, api/cooking-sessions/index.php
-<details>
-<summary>layout:</summary>
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │          HERO SECTION               │
@@ -715,125 +593,86 @@
 │  • New recipe: Vegan Lasagna        │
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- getFeaturedRecipes() -> array: Returns featured recipes for homepage
-- getRecentActivities() -> array: Returns recent user activities
-</details>
-</details>
+- **Functions**:
+  - `getFeaturedRecipes() -> array`: Returns featured recipes for homepage
+  - `getRecentActivities() -> array`: Returns recent user activities
 
 ---
 
-<details>
-<summary>src/pages/LoginPage.jsx</summary>
-
+#### **src/pages/LoginPage.jsx**
+- **Description**: Login page that wraps the LoginForm component
 - **Required Imports**: React, LoginForm from '../components/auth/LoginForm', { FaSignInAlt, FaFire, FaGift } from 'react-icons/fa'
 - **Backend Endpoint**: api/auth/login.php
-<details>
-<summary>Functions</summary>
-
-- handleLoginSuccess() -> void: Redirects after successful login
-</details>
-</details>
+- **Functions**:
+  - `handleLoginSuccess() -> void`: Redirects after successful login
 
 ---
 
-<details>
-<summary>src/pages/RegisterPage.jsx</summary>
-
+#### **src/pages/RegisterPage.jsx**
+- **Description**: Registration page that wraps the RegisterForm component
 - **Required Imports**: React, RegisterForm from '../components/auth/RegisterForm', { FaUserPlus, FaCrown, FaTrophy } from 'react-icons/fa'
 - **Backend Endpoint**: api/auth/register.php
-<details>
-<summary>Functions</summary>
-
-- handleRegisterSuccess() -> void: Redirects after successful registration
-</details>
-</details>
+- **Functions**:
+  - `handleRegisterSuccess() -> void`: Redirects after successful registration
 
 ---
 
-<details>
-<summary>src/pages/RecipesPage.jsx</summary>
-
+#### **src/pages/RecipesPage.jsx**
+- **Description**: Page for browsing and searching recipes
 - **Required Imports**: React, useState, RecipeList from '../components/recipes/RecipeList', RecipeFilters from '../components/recipes/RecipeFilters', { FaFilter, FaSortAmountDown, FaSearch } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/index.php
-<details>
-<summary>Functions</summary>
-
-- loadAllRecipes() -> void: Loads all recipes with pagination
-- handleSearch(query) -> void: Handles recipe search
-- handleFilterChange(filters) -> void: Updates recipe filters
-</details>
-</details>
+- **Functions**:
+  - `loadAllRecipes() -> void`: Loads all recipes with pagination
+  - `handleSearch(query) -> void`: Handles recipe search
+  - `handleFilterChange(filters) -> void`: Updates recipe filters
 
 ---
 
-<details>
-<summary>src/pages/RecipeDetailPage.jsx</summary>
-
+#### **src/pages/RecipeDetailPage.jsx**
+- **Description**: Page for viewing detailed recipe information
 - **Required Imports**: React, RecipeDetail from '../components/recipes/RecipeDetail', CookingSession from '../components/cooking/CookingSession', { FaUtensils, FaUsers, FaHeart } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/show.php, api/recipes/interact.php, api/cooking-sessions/create.php
-<details>
-<summary>Functions</summary>
-
-- handleStartCooking() -> void: Starts cooking session from recipe
-</details>
-</details>
+- **Functions**:
+  - `handleStartCooking() -> void`: Starts cooking session from recipe
 
 ---
 
-<details>
-<summary>src/pages/CreateRecipePage.jsx</summary>
-
+#### **src/pages/CreateRecipePage.jsx**
+- **Description**: Page for creating new recipes
 - **Required Imports**: React, RecipeForm from '../components/recipes/RecipeForm', { FaPlusCircle, FaLightbulb, FaAward } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/create.php, api/upload/image.php
-<details>
-<summary>Functions</summary>
-
-- handleRecipeCreated(recipeId) -> void: Handles successful recipe creation
-</details>
-</details>
+- **Functions**:
+  - `handleRecipeCreated(recipeId) -> void`: Handles successful recipe creation
 
 ---
 
-<details>
-<summary>src/pages/ProfilePage.jsx</summary>
-
+#### **src/pages/ProfilePage.jsx**
+- **Description**: User profile page with edit functionality
 - **Required Imports**: React, UserProfile from '../components/users/UserProfile', UserRecipes from '../components/users/UserRecipes', { FaUserCircle, FaCog, FaChartLine } from 'react-icons/fa'
 - **Backend Endpoint**: api/users/profile.php, api/users/update.php, api/users/stats.php, api/recipes/index.php, api/cookbooks/index.php
-<details>
-<summary>Functions</summary>
-
-- loadUserData() -> void: Loads comprehensive user data
-- handleProfileUpdate() -> void: Handles profile update success
-</details>
-</details>
+- **Functions**:
+  - `loadUserData() -> void`: Loads comprehensive user data
+  - `handleProfileUpdate() -> void`: Handles profile update success
 
 ---
 
-<details>
-<summary>src/pages/CookingSessionPage.jsx</summary>
-
+#### **src/pages/CookingSessionPage.jsx**
+- **Description**: Page for active cooking sessions
 - **Required Imports**: React, CookingSession from '../components/cooking/CookingSession', SessionTimer from '../components/cooking/SessionTimer', { FaPlay, FaUsers, FaTrophy } from 'react-icons/fa'
 - **Backend Endpoint**: api/cooking-sessions/show.php, api/cooking-sessions/update.php, api/cooking-sessions/complete-step.php, api/cooking-sessions/vote.php
-<details>
-<summary>Functions</summary>
-
-- handleSessionComplete() -> void: Handles session completion
-- handleStepComplete() -> void: Handles step completion with rewards
-</details>
-</details>
+- **Functions**:
+  - `handleSessionComplete() -> void`: Handles session completion
+  - `handleStepComplete() -> void`: Handles step completion with rewards
 
 ---
 
-<details>
-<summary>src/pages/ShopPage.jsx</summary>
-
+#### **src/pages/ShopPage.jsx**
+- **Description**: Virtual shop for purchasing items with currency
 - **Required Imports**: React, useState, ShopItem from '../components/gamification/ShopItem', { FaStore, FaCoins, FaGem, FaTags } from 'react-icons/fa'
 - **Backend Endpoint**: api/shop.js (to be implemented), api/users/stats.php
-<details>
-<summary>layout:</summary>
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │          COOKTOGETHER SHOP          │
@@ -856,24 +695,20 @@
 │  🔥 Daily Deal: Golden Spoon 50% off│
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- loadShopItems() -> void: Loads available shop items
-- handlePurchase(itemId) -> void: Handles item purchase
-- filterItems(category) -> array: Filters shop items by category
-</details>
-</details>
+- **Functions**:
+  - `loadShopItems() -> void`: Loads available shop items
+  - `handlePurchase(itemId) -> void`: Handles item purchase
+  - `filterItems(category) -> array`: Filters shop items by category
 
 ---
 
-<details>
-<summary>src/pages/DiscoverPage.jsx</summary>
-
+#### **src/pages/DiscoverPage.jsx**
+- **Description**: Discovery page for finding recipes and users
 - **Required Imports**: React, useState, UserCard from '../components/users/UserCard', RecipeCard from '../components/recipes/RecipeCard', { FaCompass, FaFire, FaTrophy, FaUsers } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/index.php, api/users/search.php, api/users/profile.php
-<details>
-<summary>layout:</summary>
+- **Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │           DISCOVER                  │
@@ -895,419 +730,322 @@
 │  🏆 Master Chef: Top 10% get rewards│
 └─────────────────────────────────────┘
 ```
-<details>
-<summary>Functions</summary>
 
-- loadTopChefs() -> void: Loads top-rated users
-- loadTrendingRecipes() -> void: Loads trending recipes
-- loadRecentChallenges() -> void: Loads recent challenges
-</details>
-</details>
+- **Functions**:
+  - `loadTopChefs() -> void`: Loads top-rated users
+  - `loadTrendingRecipes() -> void`: Loads trending recipes
+  - `loadRecentChallenges() -> void`: Loads recent challenges
 
 ---
 
-<details>
-<summary>src/pages/CookbooksPage.jsx</summary>
-
+#### **src/pages/CookbooksPage.jsx**
+- **Description**: Page for managing recipe collections/cookbooks
 - **Required Imports**: React, useState, api from '../api/cookbooks', { FaBook, FaPlus, FaFolderOpen } from 'react-icons/fa'
 - **Backend Endpoint**: api/cookbooks/index.php, api/cookbooks/create.php, api/cookbooks/add-recipe.php, api/cookbooks/remove-recipe.php
-<details>
-<summary>Functions</summary>
-
-- loadCookbooks() -> void: Loads user's cookbooks
-- createCookbook() -> void: Creates new cookbook
-- addRecipeToCookbook() -> void: Adds recipe to cookbook
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `loadCookbooks() -> void`: Loads user's cookbooks
+  - `createCookbook() -> void`: Creates new cookbook
+  - `addRecipeToCookbook() -> void`: Adds recipe to cookbook
 
 ---
 
-<details>
-<summary>src/contexts/</summary>
+### **src/contexts/**
 
-<details>
-<summary>src/contexts/AuthContext.jsx</summary>
-
+#### **src/contexts/AuthContext.jsx**
+- **Description**: Context for managing authentication state and actions
 - **Required Imports**: React, createContext, useState, useContext, useEffect, { FaUserShield } from 'react-icons/fa'
 - **Backend Endpoint**: api/auth/login.php, api/auth/register.php, api/auth/logout.php, api/auth/me.php, api/auth/refresh-token.php
-<details>
-<summary>Functions</summary>
-
-- login(email, password) -> object: Authenticates user
-- logout() -> void: Logs out user and clears session
-- isAuthenticated() -> boolean: Checks if user is authenticated
-- getCurrentUser() -> object: Returns current user data
-- refreshToken() -> boolean: Refreshes authentication token
-</details>
-</details>
+- **Functions**:
+  - `login(email, password) -> object`: Authenticates user
+  - `logout() -> void`: Logs out user and clears session
+  - `isAuthenticated() -> boolean`: Checks if user is authenticated
+  - `getCurrentUser() -> object`: Returns current user data
+  - `refreshToken() -> boolean`: Refreshes authentication token
 
 ---
 
-<details>
-<summary>src/contexts/DataContext.jsx</summary>
-
+#### **src/contexts/DataContext.jsx**
+- **Description**: Context for managing application data state and caching
 - **Required Imports**: React, createContext, useState, useContext
 - **Backend Endpoint**: None (frontend-only state management)
-<details>
-<summary>Functions</summary>
-
-### **Public API Functions (Used by Components):**
-- `useData() -> object`: Custom hook to access DataContext from any component
-- `DataProvider({ children }) -> JSX`: Wraps application to provide context to all components
-
-### **State Management Functions:**
-- `updateUserData(data) -> void`: Updates user data in context (alias: `updateUsers`)
-- `updateRecipes(data) -> void`: Updates recipes in context
-- `updateRelationships(data) -> void`: Updates relationships in context
-- `clearData() -> void`: Clears all context data
-
-### **Cache Management Functions:**
-- `getCachedData(key) -> mixed`: Retrieves cached data with timestamp validation
-- `setCachedData(key, data) -> void`: Sets data in cache with current timestamp
-
-### **Convenience Properties:**
-- `currentUserData`: Alias for userData (commonly accessed property)
-- `userRewardLimits`: Pre-calculated reward limits derived from user stats
-</details>
-<details>
+- **Functions**:
+  - `useData() -> object`: Custom hook to access DataContext from any component
+  - `DataProvider({ children }) -> JSX`: Wraps application to provide context to all components
+  - `updateUserData(data) -> void`: Updates user data in context (alias: `updateUsers`)
+  - `updateRecipes(data) -> void`: Updates recipes in context
+  - `updateRelationships(data) -> void`: Updates relationships in context
+  - `clearData() -> void`: Clears all context data
+  - `getCachedData(key) -> mixed`: Retrieves cached data with timestamp validation
+  - `setCachedData(key, data) -> void`: Sets data in cache with current timestamp
+- **Convenience Properties**:
+  - `currentUserData`: Alias for userData (commonly accessed property)
+  - `userRewardLimits`: Pre-calculated reward limits derived from user stats
 
 ---
 
-<details>
-<summary>src/contexts/NotificationContext.jsx</summary>
-
+#### **src/contexts/NotificationContext.jsx**
+- **Description**: Context for managing application notifications
 - **Required Imports**: React, createContext, useState, useContext, { FaBell, FaTimes } from 'react-icons/fa'
 - **Backend Endpoint**: None (frontend-only)
-<details>
-<summary>Functions</summary>
-
-- showNotification(message, type) -> void: Shows notification
-- hideNotification(id) -> void: Hides specific notification
-- clearNotifications() -> void: Clears all notifications
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `showNotification(message, type) -> void`: Shows notification
+  - `hideNotification(id) -> void`: Hides specific notification
+  - `clearNotifications() -> void`: Clears all notifications
 
 ---
 
-<details>
-<summary>src/hooks/</summary>
+### **src/hooks/**
 
-<details>
-<summary>src/hooks/useAuth.js</summary>
-
+#### **src/hooks/useAuth.js**
+- **Description**: Custom hook for accessing authentication context
 - **Required Imports**: useContext from 'react', AuthContext from '../contexts/AuthContext'
 - **Backend Endpoint**: Through AuthContext
-<details>
-<summary>Functions</summary>
-
-- useAuth() -> object: Provides authentication state and methods
-</details>
-</details>
+- **Functions**:
+  - `useAuth() -> object`: Provides authentication state and methods
 
 ---
 
-<details>
-<summary>src/hooks/useApi.js</summary>
-
+#### **src/hooks/useApi.js**
+- **Description**: Custom hook for making API calls with loading and error states
 - **Required Imports**: useState, useEffect, useCallback
 - **Backend Endpoint**: Various (generic hook for all API calls)
-<details>
-<summary>Functions</summary>
-
-- useApi(endpoint, method, body) -> object: Custom hook for API calls with loading and error states
-- fetchData() -> void: Fetches data from API
-- postData(data) -> void: Posts data to API
-- putData(data) -> void: Updates data via API
-- deleteData() -> void: Deletes data via API
-</details>
-</details>
+- **Functions**:
+  - `useApi(endpoint, method, body) -> object`: Custom hook for API calls with loading and error states
+  - `fetchData() -> void`: Fetches data from API
+  - `postData(data) -> void`: Posts data to API
+  - `putData(data) -> void`: Updates data via API
+  - `deleteData() -> void`: Deletes data via API
 
 ---
 
-<details>
-<summary>src/hooks/useForm.js</summary>
-
+#### **src/hooks/useForm.js**
+- **Description**: Custom hook for form state management
 - **Required Imports**: useState, useCallback
 - **Backend Endpoint**: None (frontend-only)
-<details>
-<summary>Functions</summary>
-
-- useForm(initialValues) -> object: Custom hook for form state management
-- handleChange(event) -> void: Handles form field changes
-- handleSubmit(callback) -> void: Handles form submission
-- resetForm() -> void: Resets form to initial values
-- validateForm() -> object: Validates form fields
-</details>
-</details>
+- **Functions**:
+  - `useForm(initialValues) -> object`: Custom hook for form state management
+  - `handleChange(event) -> void`: Handles form field changes
+  - `handleSubmit(callback) -> void`: Handles form submission
+  - `resetForm() -> void`: Resets form to initial values
+  - `validateForm() -> object`: Validates form fields
 
 ---
 
-<details>
-<summary>src/hooks/useLocalStorage.js</summary>
-
+#### **src/hooks/useLocalStorage.js**
+- **Description**: Custom hook for localStorage with React state synchronization
 - **Required Imports**: useState, useEffect
 - **Backend Endpoint**: None (frontend-only)
-<details>
-<summary>Functions</summary>
-
-- useLocalStorage(key, initialValue) -> array: Custom hook for localStorage with state synchronization
-- setValue(value) -> void: Sets value in localStorage and state
-- removeValue() -> void: Removes value from localStorage and state
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `useLocalStorage(key, initialValue) -> array`: Custom hook for localStorage with state synchronization
+  - `setValue(value) -> void`: Sets value in localStorage and state
+  - `removeValue() -> void`: Removes value from localStorage and state
 
 ---
 
-<details>
-<summary>src/utils/</summary>
+### **src/utils/**
 
-<details>
-<summary>src/utils/api.js</summary>
-
+#### **src/utils/api.js**
+- **Description**: API utility functions for making HTTP requests
 - **Required Imports**: None
 - **Backend Endpoint**: All backend API endpoints
-<details>
-<summary>Functions</summary>
-
-- get(endpoint) -> promise: GET request helper
-- post(endpoint, data) -> promise: POST request helper
-- put(endpoint, data) -> promise: PUT request helper
-- delete(endpoint) -> promise: DELETE request helper
-- setAuthToken(token) -> void: Sets authentication token for requests
-- handleResponse(response) -> object: Handles API response
-- handleError(error) -> object: Handles API errors
-</details>
-</details>
+- **Functions**:
+  - `get(endpoint) -> promise`: GET request helper
+  - `post(endpoint, data) -> promise`: POST request helper
+  - `put(endpoint, data) -> promise`: PUT request helper
+  - `delete(endpoint) -> promise`: DELETE request helper
+  - `setAuthToken(token) -> void`: Sets authentication token for requests
+  - `handleResponse(response) -> object`: Handles API response
+  - `handleError(error) -> object`: Handles API errors
 
 ---
 
-<details>
-<summary>src/utils/formatters.js</summary>
-
+#### **src/utils/formatters.js**
+- **Description**: Utility functions for formatting data
 - **Required Imports**: None
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- formatTime(minutes) -> string: Formats minutes to hours:minutes
-- formatDate(timestamp) -> string: Formats timestamp to readable date
-- truncateText(text, length) -> string: Truncates text with ellipsis
-- formatCurrency(amount) -> string: Formats currency with commas
-- capitalizeFirst(string) -> string: Capitalizes first letter
-</details>
-</details>
+- **Functions**:
+  - `formatTime(minutes) -> string`: Formats minutes to hours:minutes
+  - `formatDate(timestamp) -> string`: Formats timestamp to readable date
+  - `truncateText(text, length) -> string`: Truncates text with ellipsis
+  - `formatCurrency(amount) -> string`: Formats currency with commas
+  - `capitalizeFirst(string) -> string`: Capitalizes first letter
 
 ---
 
-<details>
-<summary>src/utils/validators.js</summary>
-
+#### **src/utils/validators.js**
+- **Description**: Validation functions for form inputs
 - **Required Imports**: None
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- validateEmail(email) -> boolean: Validates email format
-- validatePassword(password) -> boolean: Validates password strength
-- validateRequired(value) -> boolean: Checks if value is not empty
-- validateNumber(value, min, max) -> boolean: Validates number range
-- validateUrl(url) -> boolean: Validates URL format
-</details>
-</details>
+- **Functions**:
+  - `validateEmail(email) -> boolean`: Validates email format
+  - `validatePassword(password) -> boolean`: Validates password strength
+  - `validateRequired(value) -> boolean`: Checks if value is not empty
+  - `validateNumber(value, min, max) -> boolean`: Validates number range
+  - `validateUrl(url) -> boolean`: Validates URL format
 
 ---
 
-<details>
-<summary>src/utils/constants.js</summary>
-
+#### **src/utils/constants.js**
+- **Description**: Application constants and configuration values
 - **Required Imports**: None
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- API_BASE_URL() -> string: Returns API base URL based on environment
-- getDifficultyOptions() -> array: Returns difficulty options for forms
-- getCuisineOptions() -> array: Returns cuisine options
-- getUnitOptions() -> array: Returns measurement unit options
-- getLevelThresholds() -> object: Returns level progression thresholds
-</details>
-</details>
+- **Functions**:
+  - `API_BASE_URL() -> string`: Returns API base URL based on environment
+  - `getDifficultyOptions() -> array`: Returns difficulty options for forms
+  - `getCuisineOptions() -> array`: Returns cuisine options
+  - `getUnitOptions() -> array`: Returns measurement unit options
+  - `getLevelThresholds() -> object`: Returns level progression thresholds
 
 ---
 
-<details>
-<summary>src/utils/helpers.js</summary>
-
+#### **src/utils/helpers.js**
+- **Description**: General helper utility functions
 - **Required Imports**: None
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- generateId() -> string: Generates unique ID
-- debounce(func, wait) -> function: Creates debounced function
-- throttle(func, limit) -> function: Creates throttled function
-- deepClone(obj) -> object: Creates deep clone of object
-- isEmpty(obj) -> boolean: Checks if object is empty
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `generateId() -> string`: Generates unique ID
+  - `debounce(func, wait) -> function`: Creates debounced function
+  - `throttle(func, limit) -> function`: Creates throttled function
+  - `deepClone(obj) -> object`: Creates deep clone of object
+  - `isEmpty(obj) -> boolean`: Checks if object is empty
 
 ---
 
-<details>
-<summary>src/api/</summary>
+#### **src/utils/upload.js**
+- **Description**: Utility functions for handling file uploads
+- **Required Imports**: None
+- **Backend Endpoint**: None (Utility functions for upload handling)
+- **Functions**:
+  - `prepareFormData(file, fieldName, additionalData) -> FormData`: Prepares FormData for multipart file upload
+  - `validateImageFile(file, options) -> object`: Validates image file with size and type constraints
+  - `createImagePreview(file) -> Promise<string>`: Creates data URL for image preview
 
-<details>
-<summary>src/api/auth.js</summary>
+---
 
+#### **src/utils/userCalculations.js**
+- **Description**: Gamification calculation functions (must match backend/classes/UserCalculations.php)
+- **Required Imports**: None
+- **Backend Endpoint**: None (Must match backend/classes/UserCalculations.php)
+- **Functions**:
+  - `calculateMaxRewards(userData) -> object`: Calculates maximum EXP/Gold/Gem rewards
+  - `calculateMaxPrices(userData) -> object`: Calculates maximum Gold/Gem prices for recipes
+  - `calculateAllUserLimits(userData) -> object`: Combines all user limits
+  - `calculateLevelUpRequirements(current_level, current_exp) -> object`: Calculates level progress
+  - `calculateRecipeRewards(difficulty, user_limits) -> object`: Calculates recipe rewards
+  - `calculateStepRewards(step_index, total_steps, recipe_rewards) -> object`: Calculates step rewards
+  - `checkLevelUp(current_level, current_exp) -> object`: Checks if user should level up
+  - `calculateDailyLoginBonus(login_streak) -> object`: Calculates daily login bonus
+  - `calculateItemAffordability(userStats, item) -> object`: Checks if user can afford shop item
+
+---
+
+### **src/api/**
+
+#### **src/api/auth.js**
+- **Description**: API functions for authentication operations
 - **Required Imports**: api from '../utils/api'
 - **Backend Endpoint**: api/auth/login.php, api/auth/register.php, api/auth/logout.php, api/auth/me.php, api/auth/refresh-token.php
-<details>
-<summary>Functions</summary>
-
-- login(email, password) -> promise: Authenticates user
-- register(userData) -> promise: Registers new user
-- logout() -> promise: Logs out user
-- getCurrentUser() -> promise: Gets current user data
-- refreshToken() -> promise: Refreshes authentication token
-</details>
-</details>
+- **Functions**:
+  - `login(email, password) -> promise`: Authenticates user
+  - `register(userData) -> promise`: Registers new user
+  - `logout() -> promise`: Logs out user
+  - `getCurrentUser() -> promise`: Gets current user data
+  - `refreshToken() -> promise`: Refreshes authentication token
 
 ---
 
-<details>
-<summary>src/api/users.js</summary>
-
+#### **src/api/users.js**
+- **Description**: API functions for user operations
 - **Required Imports**: api from '../utils/api'
 - **Backend Endpoint**: api/users/profile.php, api/users/update.php, api/users/stats.php, api/users/search.php
-<details>
-<summary>Functions</summary>
-
-- getProfile(userId) -> promise: Gets user profile
-- updateProfile(userId, data) -> promise: Updates user profile
-- getUserStats(userId) -> promise: Gets user statistics
-- searchUsers(query) -> promise: Searches for users
-- getFollowers(userId) -> promise: Gets user's followers
-- getFollowing(userId) -> promise: Gets users followed by user
-</details>
-</details>
+- **Functions**:
+  - `getProfile(userId) -> promise`: Gets user profile
+  - `updateProfile(userId, data) -> promise`: Updates user profile
+  - `getUserStats(userId) -> promise`: Gets user statistics
+  - `searchUsers(query) -> promise`: Searches for users
+  - `getFollowers(userId) -> promise`: Gets user's followers
+  - `getFollowing(userId) -> promise`: Gets users followed by user
 
 ---
 
-<details>
-<summary>src/api/recipes.js</summary>
-
+#### **src/api/recipes.js**
+- **Description**: API functions for recipe operations
 - **Required Imports**: api from '../utils/api'
 - **Backend Endpoint**: api/recipes/index.php, api/recipes/show.php, api/recipes/create.php, api/recipes/update.php, api/recipes/delete.php, api/recipes/interact.php
-<details>
-<summary>Functions</summary>
-
-- getAllRecipes(params) -> promise: Gets all recipes with filters
-- getRecipe(recipeId) -> promise: Gets single recipe with details
-- createRecipe(recipeData) -> promise: Creates new recipe
-- updateRecipe(recipeId, data) -> promise: Updates recipe
-- deleteRecipe(recipeId) -> promise: Deletes recipe
-- likeRecipe(recipeId) -> promise: Likes recipe
-- saveRecipe(recipeId) -> promise: Saves recipe to cookbook
-- getRecipeInteractions(recipeId) -> promise: Gets recipe interactions
-</details>
-</details>
+- **Functions**:
+  - `getAllRecipes(params) -> promise`: Gets all recipes with filters
+  - `getRecipe(recipeId) -> promise`: Gets single recipe with details
+  - `createRecipe(recipeData) -> promise`: Creates new recipe
+  - `updateRecipe(recipeId, data) -> promise`: Updates recipe
+  - `deleteRecipe(recipeId) -> promise`: Deletes recipe
+  - `likeRecipe(recipeId) -> promise`: Likes recipe
+  - `saveRecipe(recipeId) -> promise`: Saves recipe to cookbook
+  - `getRecipeInteractions(recipeId) -> promise`: Gets recipe interactions
 
 ---
 
-<details>
-<summary>src/api/cooking-sessions.js</summary>
-
+#### **src/api/cooking-sessions.js**
+- **Description**: API functions for cooking session operations
 - **Required Imports**: api from '../utils/api'
 - **Backend Endpoint**: api/cooking-sessions/index.php, api/cooking-sessions/create.php, api/cooking-sessions/show.php, api/cooking-sessions/update.php, api/cooking-sessions/join.php, api/cooking-sessions/complete-step.php, api/cooking-sessions/vote.php
-<details>
-<summary>Functions</summary>
-
-- createSession(sessionData) -> promise: Creates cooking session
-- getSession(sessionId) -> promise: Gets session details
-- joinSession(sessionId) -> promise: Joins cooking session
-- leaveSession(sessionId) -> promise: Leaves cooking session
-- completeStep(sessionId, stepId) -> promise: Completes cooking step
-- updateSession(sessionId, data) -> promise: Updates session
-- voteSkip(sessionId, voteType) -> promise: Votes to skip step/timer
-</details>
-</details>
+- **Functions**:
+  - `createSession(sessionData) -> promise`: Creates cooking session
+  - `getSession(sessionId) -> promise`: Gets session details
+  - `joinSession(sessionId) -> promise`: Joins cooking session
+  - `leaveSession(sessionId) -> promise`: Leaves cooking session
+  - `completeStep(sessionId, stepId) -> promise`: Completes cooking step
+  - `updateSession(sessionId, data) -> promise`: Updates session
+  - `voteSkip(sessionId, voteType) -> promise`: Votes to skip step/timer
 
 ---
 
-<details>
-<summary>src/api/relationships.js</summary>
-
+#### **src/api/relationships.js**
+- **Description**: API functions for user relationship operations
 - **Required Imports**: api from '../utils/api'
 - **Backend Endpoint**: api/relationships/follow.php, api/relationships/friends.php, api/relationships/list.php
-<details>
-<summary>Functions</summary>
-
-- followUser(targetUserId) -> promise: Follows another user
-- unfollowUser(targetUserId) -> promise: Unfollows user
-- getFriendRequests() -> promise: Gets pending friend requests
-- acceptFriendRequest(requestId) -> promise: Accepts friend request
-- rejectFriendRequest(requestId) -> promise: Rejects friend request
-- removeFriend(friendId) -> promise: Removes friend
-</details>
-</details>
+- **Functions**:
+  - `followUser(targetUserId) -> promise`: Follows another user
+  - `unfollowUser(targetUserId) -> promise`: Unfollows user
+  - `getFriendRequests() -> promise`: Gets pending friend requests
+  - `acceptFriendRequest(requestId) -> promise`: Accepts friend request
+  - `rejectFriendRequest(requestId) -> promise`: Rejects friend request
+  - `removeFriend(friendId) -> promise`: Removes friend
 
 ---
 
-<details>
-<summary>src/api/cookbooks.js</summary>
-
+#### **src/api/cookbooks.js**
+- **Description**: API functions for cookbook operations
 - **Required Imports**: api from '../utils/api'
 - **Backend Endpoint**: api/cookbooks/index.php, api/cookbooks/create.php, api/cookbooks/show.php, api/cookbooks/add-recipe.php, api/cookbooks/remove-recipe.php
-<details>
-<summary>Functions</summary>
-
-- getCookbooks() -> promise: Gets user's cookbooks
-- createCookbook(data) -> promise: Creates new cookbook
-- addRecipeToCookbook(cookbookId, recipeId) -> promise: Adds recipe to cookbook
-- removeRecipeFromCookbook(cookbookId, recipeId) -> promise: Removes recipe from cookbook
-- getCookbookRecipes(cookbookId) -> promise: Gets recipes in cookbook
-</details>
-</details>
+- **Functions**:
+  - `getCookbooks() -> promise`: Gets user's cookbooks
+  - `createCookbook(data) -> promise`: Creates new cookbook
+  - `addRecipeToCookbook(cookbookId, recipeId) -> promise`: Adds recipe to cookbook
+  - `removeRecipeFromCookbook(cookbookId, recipeId) -> promise`: Removes recipe from cookbook
+  - `getCookbookRecipes(cookbookId) -> promise`: Gets recipes in cookbook
 
 ---
 
-<details>
-<summary>src/api/shop.js</summary>
-
+#### **src/api/shop.js**
+- **Description**: API functions for shop operations
 - **Required Imports**: api from '../utils/api'
 - **Backend Endpoint**: api/shop.php (to be implemented in backend)
-<details>
-<summary>Functions</summary>
-
-- getShopItems() -> promise: Gets available shop items
-- purchaseItem(itemId) -> promise: Purchases shop item
-- getUserPurchases() -> promise: Gets user's purchased items
-- getItemCategories() -> promise: Gets shop item categories
-</details>
-</details>
-
-</details>
+- **Functions**:
+  - `getShopItems() -> promise`: Gets available shop items
+  - `purchaseItem(itemId) -> promise`: Purchases shop item
+  - `getUserPurchases() -> promise`: Gets user's purchased items
+  - `getItemCategories() -> promise`: Gets shop item categories
 
 ---
 
-<details>
-<summary>src/styles/</summary>
+### **src/styles/**
 
-<details>
-<summary>src/styles/index.css</summary>
-
-- **Required Imports**: './themes.css', './components.css', './layout.css', './utilities.css'
+#### **src/styles/index.css**
 - **Description**: Main stylesheet with global styles and gamified theme imports
+- **Required Imports**: './themes.css', './components.css', './layout.css', './utilities.css'
 - **Backend Endpoint**: None
-- gamified libraries imported:
+- **Gamified Libraries Imported**:
+
   ```css
   /* Gamified CSS Libraries */
   @import 'animate.css/animate.min.css';
@@ -1327,126 +1065,90 @@
     -webkit-text-fill-color: transparent;
   }
   ```
-</details>
 
 ---
 
-<details>
-<summary>src/styles/components.css</summary>
-
-- **Required Imports**: None
+#### **src/styles/components.css**
 - **Description**: Component-specific styles with gamified elements
+- **Required Imports**: None
 - **Backend Endpoint**: None
-</details>
 
 ---
 
-<details>
-<summary>src/styles/layout.css</summary>
-
-- **Required Imports**: None
+#### **src/styles/layout.css**
 - **Description**: Layout and grid styles
+- **Required Imports**: None
 - **Backend Endpoint**: None
-</details>
 
 ---
 
-<details>
-<summary>src/styles/utilities.css</summary>
-
-- **Required Imports**: None
+#### **src/styles/utilities.css**
 - **Description**: Utility classes and helper styles
-- **Backend Endpoint**: None
-</details>
-
----
-
-<details>
-<summary>src/styles/themes.css</summary>
-
 - **Required Imports**: None
-- **Description**: Theme variables and color schemes from frontend_design.md
 - **Backend Endpoint**: None
-</details>
-
-</details>
 
 ---
 
-<details>
-<summary>src/assets/</summary>
-
-<details>
-<summary>src/assets/images/</summary>
-
-- icons/ - Gamified icons (swords, shields, crowns, etc.)
-- illustrations/ - Cooking and gamification illustrations
-- backgrounds/ - Patterned backgrounds for cards and sections
+#### **src/styles/themes.css**
+- **Description**: Theme variables and color schemes from ui_design.md
+- **Required Imports**: None
 - **Backend Endpoint**: None
-</details>
 
 ---
 
-<details>
-<summary>src/assets/fonts/</summary>
+### **src/assets/**
 
-- Custom font files for gamified typography
+#### **src/assets/images/**
+- **Description**: Image assets directory
+- **Required Imports**: None
 - **Backend Endpoint**: None
-</details>
-
-</details>
+- **Subdirectories**:
+  - `icons/` - Gamified icons (swords, shields, crowns, etc.)
+  - `illustrations/` - Cooking and gamification illustrations
+  - `backgrounds/` - Patterned backgrounds for cards and sections
 
 ---
 
-<details>
-<summary>src/App.jsx</summary>
+#### **src/assets/fonts/**
+- **Description**: Custom font files for gamified typography
+- **Required Imports**: None
+- **Backend Endpoint**: None
 
+---
+
+### **src/App.jsx**
+- **Description**: Main application component with routing setup
 - **Required Imports**: React, BrowserRouter, Routes, Route from 'react-router-dom', AuthContext from './contexts/AuthContext', DataContext from './contexts/DataContext', NotificationContext from './contexts/NotificationContext', all page components from './pages', Header from './components/common/Header', Footer from './components/common/Footer', { FaGamepad, FaCookieBite } from 'react-icons/fa'
 - **Backend Endpoint**: Various (through page components)
-<details>
-<summary>Functions</summary>
-
-- App() -> JSX: Main application component with routing
-- initializeApp() -> void: Initializes application state
-- handleRouteChange() -> void: Handles route change events
-</details>
-</details>
+- **Functions**:
+  - `App() -> JSX`: Main application component with routing
+  - `initializeApp() -> void`: Initializes application state
+  - `handleRouteChange() -> void`: Handles route change events
 
 ---
 
-<details>
-<summary>src/index.js</summary>
-
+### **src/index.js**
+- **Description**: Application entry point that renders React to DOM
 - **Required Imports**: React, ReactDOM from 'react-dom/client', App from './App', './styles/index.css'
 - **Backend Endpoint**: None
-<details>
-<summary>Functions</summary>
-
-- renderApp() -> void: Renders React application to DOM
-</details>
-</details>
+- **Functions**:
+  - `renderApp() -> void`: Renders React application to DOM
 
 ---
 
-<details>
-<summary>src/setupTests.js</summary>
-
+### **src/setupTests.js**
+- **Description**: Test setup configuration for Jest and React Testing Library
 - **Required Imports**: '@testing-library/jest-dom'
-- **Description**: Test setup configuration
 - **Backend Endpoint**: None
-</details>
-
-</details>
 
 ---
 
-<details>
-<summary>package.json</summary>
-
+### **package.json**
+- **Description**: Project dependencies and scripts configuration
 - **Required Imports**: None
-- **Description**: Project dependencies and scripts
 - **Backend Endpoint**: None
-- gamified dependencies added:
+- **Gamified Dependencies Added**:
+
   ```json
   "dependencies": {
     "react-icons": "^4.11.0",
@@ -1458,26 +1160,17 @@
     "react-progressbar.js": "^1.0.1"
   }
   ```
-</details>
 
 ---
 
-<details>
-<summary>.env</summary>
-
+### **.env**
+- **Description**: Environment variables configuration
 - **Required Imports**: None
-- **Description**: Environment variables
 - **Backend Endpoint**: None
-</details>
 
 ---
 
-<details>
-<summary>.gitignore</summary>
-
+### **.gitignore**
+- **Description**: Git ignore rules for version control
 - **Required Imports**: None
-- **Description**: Git ignore rules
 - **Backend Endpoint**: None
-</details>
-
-</details>

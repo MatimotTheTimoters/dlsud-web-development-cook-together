@@ -1,700 +1,563 @@
 # Backend Directory Structure
 
-<details>
-<summary>backend/</summary>
+---
+
+## **config/**
 
 ---
 
-<details>
-<summary>config/</summary>
+### **config/environment.php**
 
----
-
-<details>
-<summary>config/environment.php</summary>
-
+- **Description**: Configuration file for environment settings and API configuration
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- getEnvironment() -> string: Returns current environment (dev/prod)
-- getDatabaseConfig() -> array: Returns database connection parameters
-- getApiConfig() -> array: Returns API configuration settings
-</details>
-</details>
+**Functions**:
+- `getEnvironment() -> string`: Returns current environment (dev/prod)
+- `getDatabaseConfig() -> array`: Returns database connection parameters
+- `getApiConfig() -> array`: Returns API configuration settings
 
 ---
 
-<details>
-<summary>config/database.php</summary>
+### **config/database.php**
 
+- **Description**: Database connection and query helper functions
 - **Required Imports**: environment.php
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- connect() -> PDO: Establishes database connection
-- query(string $sql, array $params) -> PDOStatement: Executes prepared statement
-- fetchAll(string $sql, array $params) -> array: Fetches all results
-- fetchOne(string $sql, array $params) -> array|false: Fetches single row
-- insert(string $table, array $data) -> string|false: Inserts record
-- update(string $table, array $data, string $where) -> int: Updates record
-- delete(string $table, string $where) -> int: Deletes record
-</details>
-</details>
+**Functions**:
+- `connect() -> PDO`: Establishes database connection
+- `query(string $sql, array $params) -> PDOStatement`: Executes prepared statement
+- `fetchAll(string $sql, array $params) -> array`: Fetches all results
+- `fetchOne(string $sql, array $params) -> array|false`: Fetches single row
+- `insert(string $table, array $data) -> string|false`: Inserts record
+- `update(string $table, array $data, string $where) -> int`: Updates record
+- `delete(string $table, string $where) -> int`: Deletes record
 
 ---
 
-<details>
-<summary>config/cors.php</summary>
+### **config/cors.php**
 
+- **Description**: CORS headers configuration for API responses
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- setCorsHeaders() -> void: Sets CORS headers for API responses
-- handlePreflight() -> void: Handles OPTIONS preflight requests
-</details>
-</details>
-
-</details>
+**Functions**:
+- `setCorsHeaders() -> void`: Sets CORS headers for API responses
+- `handlePreflight() -> void`: Handles OPTIONS preflight requests
 
 ---
 
-<details>
-<summary>classes/</summary>
+## **classes/**
 
 ---
 
-<details>
-<summary>classes/AuthHelper.php</summary>
+### **classes/AuthHelper.php**
 
+- **Description**: Authentication helper functions for JWT tokens and password handling
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- generateToken(string $user_id, string $email) -> string: Generates JWT token
-- validateToken(string $token) -> array|false: Validates JWT token
-- hashPassword(string $password) -> string: Hashes password
-- verifyPassword(string $password, string $hash) -> bool: Verifies password
-</details>
-</details>
+**Functions**:
+- `generateToken(string $user_id, string $email) -> string`: Generates JWT token
+- `validateToken(string $token) -> array|false`: Validates JWT token
+- `hashPassword(string $password) -> string`: Hashes password
+- `verifyPassword(string $password, string $hash) -> bool`: Verifies password
 
 ---
 
-<details>
-<summary>classes/DatabaseHelper.php</summary>
+### **classes/DatabaseHelper.php**
 
+- **Description**: Main database operations helper for all application features
 - **Required Imports**: ../config/database.php
+- **Backend Endpoint**: Various (through API endpoints)
 
-<details>
-<summary>Functions</summary>
+**Functions**:
 
-<details>
-<summary>User Operations</summary>
+**User Operations**:
+- `registerUser(array $user_data) -> bool`: Creates new user
+- `validateUserLogin(string $email, string $password) -> array|false`: Validates login credentials
+- `getUserById(string $user_id) -> array|false`: Gets user by ID
+- `updateUserProfile(string $user_id, array $data) -> bool`: Updates user profile
 
-- registerUser(array $user_data) -> bool: Creates new user
-- validateUserLogin(string $email, string $password) -> array|false: Validates login credentials
-- getUserById(string $user_id) -> array|false: Gets user by ID
-- updateUserProfile(string $user_id, array $data) -> bool: Updates user profile
-- getUserStats(string $user_id) -> array|false: Gets user stats
-- updateUserStats(string $user_id, array $updates) -> bool: Updates user stats
-- incrementUserStat(string $user_id, string $field, int $amount) -> bool: Increments user stat
-- searchUsers(string $query, array $filters) -> array: Searches users with pagination (mentioned as needed for api/users/search.php)
-- createRecipe(array $recipe_data, array $ingredients, array $steps) -> string|false: Creates recipe with ingredients and steps
-- getRecipe(string $recipe_id) -> array|false: Gets full recipe with details
-- updateRecipe(string $recipe_id, array $recipe_data, array $ingredients, array $steps) -> bool: Updates recipe
-- deleteRecipe(string $recipe_id) -> bool: Deletes recipe and related data
-- createCookingSession(array $session_data) -> string|false: Creates cooking session
-- getCookingSession(string $session_id) -> array|false: Gets cooking session with details
-- updateCookingSession(string $session_id, array $updates) -> bool: Updates cooking session
-- joinCookingSession(string $session_id, string $user_id) -> bool: Joins user to cooking session
-- followUser(string $source_user_id, string $target_user_id, string $relationship_type) -> bool: Follows/unfollows user
-- unfollowUser(string $source_user_id, string $target_user_id) -> bool: Removes relationship
-- getFriendRequests(string $user_id) -> array: Gets pending friend requests
-- acceptFriendRequest(string $relationship_id) -> bool: Accepts friend request
-- rejectFriendRequest(string $relationship_id) -> bool: Rejects friend request
-- removeFriend(string $relationship_id) -> bool: Removes friend relationship
-- getRelationships(string $user_id, string $type = 'following') -> array: Gets user relationships
-- getCookbooks(string $user_id, bool $include_public = false) -> array: Gets user's cookbooks
-- createCookbook(array $cookbook_data) -> string|false: Creates new cookbook
-- getCookbook(string $cookbook_id) -> array|false: Gets cookbook with recipes
-- updateCookbook(string $cookbook_id, array $updates) -> bool: Updates cookbook
-- deleteCookbook(string $cookbook_id) -> bool: Deletes cookbook
-- addRecipeToCookbook(string $cookbook_id, string $recipe_id, string $user_id) -> bool: Adds recipe to cookbook
-- removeRecipeFromCookbook(string $cookbook_id, string $recipe_id) -> bool: Removes recipe from cookbook
-- getCookbookRecipes(string $cookbook_id) -> array: Gets recipes in cookbook
-- getShopItems(array $filters = []) -> array: Gets available shop items
-- purchaseItem(string $user_id, string $item_id) -> array|false: Purchases shop item
-- getUserPurchases(string $user_id) -> array: Gets user's purchased items
-- getItemCategories() -> array: Gets shop item categories
-</details>
+**User Stats Operations**:
+- `getUserStats(string $user_id) -> array|false`: Gets user stats
+- `updateUserStats(string $user_id, array $updates) -> bool`: Updates user stats
+- `incrementUserStat(string $user_id, string $field, int $amount) -> bool`: Increments user stat
+- `searchUsers(string $query, array $filters) -> array`: Searches users with pagination
 
----
+**Recipe Operations**:
+- `createRecipe(array $recipe_data, array $ingredients, array $steps) -> string|false`: Creates recipe with ingredients and steps
+- `getRecipe(string $recipe_id) -> array|false`: Gets full recipe with details
+- `updateRecipe(string $recipe_id, array $recipe_data, array $ingredients, array $steps) -> bool`: Updates recipe
+- `deleteRecipe(string $recipe_id) -> bool`: Deletes recipe and related data
 
-<details>
-<summary>User Stats Operations</summary>
+**Cooking Session Operations**:
+- `createCookingSession(array $session_data) -> string|false`: Creates cooking session
+- `getCookingSession(string $session_id) -> array|false`: Gets cooking session with details
+- `updateCookingSession(string $session_id, array $updates) -> bool`: Updates cooking session
+- `joinCookingSession(string $session_id, string $user_id) -> bool`: Joins user to cooking session
 
-- getUserStats(string $user_id) -> array|false: Gets user stats
-- updateUserStats(string $user_id, array $updates) -> bool: Updates user stats
-- incrementUserStat(string $user_id, string $field, int $amount) -> bool: Increments user stat
-</details>
+**Relationship Operations**:
+- `followUser(string $source_user_id, string $target_user_id, string $relationship_type) -> bool`: Follows/unfollows user
+- `unfollowUser(string $source_user_id, string $target_user_id) -> bool`: Removes relationship
+- `getFriendRequests(string $user_id) -> array`: Gets pending friend requests
+- `acceptFriendRequest(string $relationship_id) -> bool`: Accepts friend request
+- `rejectFriendRequest(string $relationship_id) -> bool`: Rejects friend request
+- `removeFriend(string $relationship_id) -> bool`: Removes friend relationship
+- `getRelationships(string $user_id, string $type = 'following') -> array`: Gets user relationships
 
----
+**Cookbook Operations**:
+- `getCookbooks(string $user_id, bool $include_public = false) -> array`: Gets user's cookbooks
+- `createCookbook(array $cookbook_data) -> string|false`: Creates new cookbook
+- `getCookbook(string $cookbook_id) -> array|false`: Gets cookbook with recipes
+- `updateCookbook(string $cookbook_id, array $updates) -> bool`: Updates cookbook
+- `deleteCookbook(string $cookbook_id) -> bool`: Deletes cookbook
+- `addRecipeToCookbook(string $cookbook_id, string $recipe_id, string $user_id) -> bool`: Adds recipe to cookbook
+- `removeRecipeFromCookbook(string $cookbook_id, string $recipe_id) -> bool`: Removes recipe from cookbook
+- `getCookbookRecipes(string $cookbook_id) -> array`: Gets recipes in cookbook
 
-<details>
-<summary>Recipe Operations</summary>
-
-- createRecipe(array $recipe_data, array $ingredients, array $steps) -> string|false: Creates recipe with ingredients and steps
-- getRecipe(string $recipe_id) -> array|false: Gets full recipe with details
-- updateRecipe(string $recipe_id, array $recipe_data, array $ingredients, array $steps) -> bool: Updates recipe
-- deleteRecipe(string $recipe_id) -> bool: Deletes recipe and related data
-</details>
+**Shop Operations**:
+- `getShopItems(array $filters = []) -> array`: Gets available shop items
+- `purchaseItem(string $user_id, string $item_id) -> array|false`: Purchases shop item
+- `getUserPurchases(string $user_id) -> array`: Gets user's purchased items
+- `getItemCategories() -> array`: Gets shop item categories
 
 ---
 
-<details>
-<summary>Cooking Session Operations</summary>
+### **classes/ResponseFormatter.php**
 
-- createCookingSession(array $session_data) -> string|false: Creates cooking session
-- getCookingSession(string $session_id) -> array|false: Gets cooking session with details
-- updateCookingSession(string $session_id, array $updates) -> bool: Updates cooking session
-- joinCookingSession(string $session_id, string $user_id) -> bool: Joins user to cooking session
-</details>
-</details>
-</details>
-
----
-
-<details>
-<summary>classes/ResponseFormatter.php</summary>
-
+- **Description**: Standardizes API response formats
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- success(mixed $data, string $message, int $code) -> void: Returns success response
-- error(string $message, int $code, mixed $details) -> void: Returns error response
-- validationError(array $errors) -> void: Returns validation error
-- unauthorized(string $message) -> void: Returns unauthorized error
-- notFound(string $message) -> void: Returns not found error
-</details>
-</details>
+**Functions**:
+- `success(mixed $data, string $message, int $code) -> void`: Returns success response
+- `error(string $message, int $code, mixed $details) -> void`: Returns error response
+- `validationError(array $errors) -> void`: Returns validation error
+- `unauthorized(string $message) -> void`: Returns unauthorized error
+- `notFound(string $message) -> void`: Returns not found error
 
 ---
 
-<details>
-<summary>classes/UserCalculations.php</summary>
+### **classes/UserCalculations.php**
 
+- **Description**: Calculates gamification values like rewards, prices, and level requirements
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- calculateMaxRewards(array $user_data) -> array: Calculates max rewards
-- calculateMaxPrices(array $user_data) -> array: Calculates max prices
-- calculateAllUserLimits(array $user_data) -> array: Calculates all limits
-- calculateLevelUpRequirements(int $current_level, int $current_exp) -> array: Calculates level up requirements
-</details>
-</details>
-
-</details>
+**Functions**:
+- `calculateMaxRewards(array $user_data) -> array`: Calculates max rewards
+- `calculateMaxPrices(array $user_data) -> array`: Calculates max prices
+- `calculateAllUserLimits(array $user_data) -> array`: Calculates all limits
+- `calculateLevelUpRequirements(int $current_level, int $current_exp) -> array`: Calculates level up requirements
 
 ---
 
-<details>
-<summary>utils/</summary>
+## **utils/**
 
 ---
 
-<details>
-<summary>utils/uuidHelper.php</summary>
+### **utils/uuidHelper.php**
 
+- **Description**: Generates unique identifiers for database records
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- makeId() -> string: Generates unique ID
-- generateUniqueId(string $table, string $field) -> string: Generates unique ID for table
-</details>
-</details>
+**Functions**:
+- `makeId() -> string`: Generates unique ID
+- `generateUniqueId(string $table, string $field) -> string`: Generates unique ID for table
 
 ---
 
-<details>
-<summary>utils/fileUpload.php</summary>
+### **utils/fileUpload.php**
 
+- **Description**: Handles image uploads for profile pictures, recipe images, and step images
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- uploadImage(array $file, string $type, string $user_id) -> array|false: Uploads image file
-- validateImage(array $file) -> bool: Validates image file
-- deleteFile(string $path) -> bool: Deletes uploaded file
-</details>
-</details>
+**Functions**:
+- `uploadImage(array $file, string $type, string $user_id) -> array|false`: Uploads image file
+- `validateImage(array $file) -> bool`: Validates image file
+- `deleteFile(string $path) -> bool`: Deletes uploaded file
 
 ---
 
-<details>
-<summary>utils/validation.php</summary>
+### **utils/validation.php**
 
+- **Description**: Input validation and sanitization functions
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- validateEmail(string $email) -> bool: Validates email format
-- validatePassword(string $password) -> bool: Validates password strength
-- sanitizeInput(mixed $input) -> mixed: Sanitizes input data
-</details>
-</details>
+**Functions**:
+- `validateEmail(string $email) -> bool`: Validates email format
+- `validatePassword(string $password) -> bool`: Validates password strength
+- `sanitizeInput(mixed $input) -> mixed`: Sanitizes input data
 
 ---
 
-<details>
-<summary>utils/logging.php</summary>
+### **utils/logging.php**
 
+- **Description**: Logging system for errors, user activities, and API requests
 - **Required Imports**: None
+- **Backend Endpoint**: None
 
-<details>
-<summary>Functions</summary>
-
-- logError(string $message, array $context) -> void: Logs error to file
-- logActivity(string $user_id, string $action, array $details) -> void: Logs user activity
-- logApiRequest(string $method, string $**Endpoint**, int $status) -> void: Logs API request
-</details>
-</details>
-
-</details>
+**Functions**:
+- `logError(string $message, array $context) -> void`: Logs error to file
+- `logActivity(string $user_id, string $action, array $details) -> void`: Logs user activity
+- `logApiRequest(string $method, string $endpoint, int $status) -> void`: Logs API request
 
 ---
 
-<details>
-<summary>database/</summary>
+## **database/**
 
 ---
 
-<details>
-<summary>database/schema.sql</summary>
+### **database/schema.sql**
 
+- **Description**: SQL schema for creating all database tables
 - **Required Imports**: None
-- Functions: N/A (SQL file)
-</details>
+- **Backend Endpoint**: None
+- **Functions**: N/A (SQL file)
 
 ---
 
-<details>
-<summary>database/seeds.sql</summary>
+### **database/seeds.sql**
 
+- **Description**: Seed data for testing and development
 - **Required Imports**: None
-- Functions: N/A (SQL file)
-</details>
-
-</details>
+- **Backend Endpoint**: None
+- **Functions**: N/A (SQL file)
 
 ---
 
-<details>
-<summary>api/</summary>
+## **api/**
 
 ---
 
-<details>
-<summary>api/auth/</summary>
+## **api/auth/**
 
 ---
 
-<details>
-<summary>api/auth/register.php</summary>
+### **api/auth/register.php**
 
+- **Description**: Handles user registration
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
-- **Endpoint**: POST /api/auth/register
-</details>
+- **Backend Endpoint**: POST /api/auth/register
 
 ---
 
-<details>
-<summary>api/auth/login.php</summary>
+### **api/auth/login.php**
 
+- **Description**: Handles user authentication
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/auth/login
-</details>
+- **Backend Endpoint**: POST /api/auth/login
 
 ---
 
-<details>
-<summary>api/auth/me.php</summary>
+### **api/auth/me.php**
 
+- **Description**: Returns current authenticated user's information
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/auth/me
-</details>
+- **Backend Endpoint**: GET /api/auth/me
 
 ---
 
-<details>
-<summary>api/auth/logout.php</summary>
+### **api/auth/logout.php**
 
+- **Description**: Handles user logout
 - **Required Imports**: ../../config/database.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/auth/logout
-</details>
+- **Backend Endpoint**: POST /api/auth/logout
 
 ---
 
-<details>
-<summary>api/auth/refresh-token.php</summary>
+### **api/auth/refresh-token.php**
 
+- **Description**: Refreshes authentication tokens
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/auth/refresh-token
-</details>
-
-</details>
+- **Backend Endpoint**: POST /api/auth/refresh-token
 
 ---
 
-<details>
-<summary>api/users/</summary>
+## **api/users/**
 
 ---
 
-<details>
-<summary>api/users/profile.php</summary>
+### **api/users/profile.php**
 
+- **Description**: Retrieves user profile information
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/users/profile
-</details>
+- **Backend Endpoint**: GET /api/users/profile
 
 ---
 
-<details>
-<summary>api/users/update.php</summary>
+### **api/users/update.php**
 
+- **Description**: Updates user profile information
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/validation.php
-- **Endpoint**: PUT /api/users/update
-</details>
+- **Backend Endpoint**: PUT /api/users/update
 
 ---
 
-<details>
-<summary>api/users/stats.php</summary>
+### **api/users/stats.php**
 
+- **Description**: Retrieves user statistics and gamification data
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/users/stats
-</details>
+- **Backend Endpoint**: GET /api/users/stats
 
 ---
 
-<details>
-<summary>api/users/search.php</summary>
+### **api/users/search.php**
 
+- **Description**: Searches for users by name or criteria
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/users/search
-</details>
-
-</details>
+- **Backend Endpoint**: GET /api/users/search
 
 ---
 
-<details>
-<summary>api/relationships/</summary>
+## **api/relationships/**
 
 ---
 
-<details>
-<summary>api/relationships/follow.php</summary>
+### **api/relationships/follow.php**
 
+- **Description**: Handles user following/unfollowing
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/relationships/follow.php
-</details>
+- **Backend Endpoint**: POST /api/relationships/follow
 
 ---
 
-<details>
-<summary>api/relationships/friends.php</summary>
+### **api/relationships/friends.php**
 
+- **Description**: Manages friend requests and relationships
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/relationships/friends
-</details>
+- **Backend Endpoint**: POST /api/relationships/friends
 
 ---
 
-<details>
-<summary>api/relationships/list.php</summary>
+### **api/relationships/list.php**
 
+- **Description**: Lists user relationships (following, followers, friends)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/relationships/list
-</details>
-
-</details>
+- **Backend Endpoint**: GET /api/relationships/list
 
 ---
 
-<details>
-<summary>api/recipes/</summary>
+## **api/recipes/**
 
 ---
 
-<details>
-<summary>api/recipes/index.php</summary>
+### **api/recipes/index.php**
 
+- **Description**: Lists recipes with filtering and pagination
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/recipes
-</details>
+- **Backend Endpoint**: GET /api/recipes
 
 ---
 
-<details>
-<summary>api/recipes/create.php</summary>
+### **api/recipes/create.php**
 
+- **Description**: Creates a new recipe
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php, ../../utils/validation.php
-- **Endpoint**: POST /api/recipes/create.php
-</details>
+- **Backend Endpoint**: POST /api/recipes/create
 
 ---
 
-<details>
-<summary>api/recipes/show.php</summary>
+### **api/recipes/show.php**
 
+- **Description**: Retrieves detailed information about a specific recipe
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/recipes/show.php?id={id}
-</details>
+- **Backend Endpoint**: GET /api/recipes/show.php?id={id}
 
 ---
 
-<details>
-<summary>api/recipes/update.php</summary>
+### **api/recipes/update.php**
 
+- **Description**: Updates an existing recipe
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/validation.php
-- **Endpoint**: PUT /api/recipes/{id}
-</details>
+- **Backend Endpoint**: PUT /api/recipes/{id}
 
 ---
 
-<details>
-<summary>api/recipes/delete.php</summary>
+### **api/recipes/delete.php**
 
+- **Description**: Deletes a recipe
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: DELETE /api/recipes/{id}
-</details>
+- **Backend Endpoint**: DELETE /api/recipes/{id}
 
 ---
 
-<details>
-<summary>api/recipes/interact.php</summary>
+### **api/recipes/interact.php**
 
+- **Description**: Handles recipe interactions (likes, saves, purchases)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/recipes/create.php/{id}/interact
-</details>
-
-</details>
+- **Backend Endpoint**: POST /api/recipes/{id}/interact
 
 ---
 
-<details>
-<summary>api/cooking-sessions/</summary>
+## **api/cooking-sessions/**
 
 ---
 
-<details>
-<summary>api/cooking-sessions/index.php</summary>
+### **api/cooking-sessions/index.php**
 
+- **Description**: Lists cooking sessions
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/cooking-sessions
-</details>
+- **Backend Endpoint**: GET /api/cooking-sessions
 
 ---
 
-<details>
-<summary>api/cooking-sessions/create.php</summary>
+### **api/cooking-sessions/create.php**
 
+- **Description**: Creates a new cooking session
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
-- **Endpoint**: POST /api/cooking-sessions
-</details>
+- **Backend Endpoint**: POST /api/cooking-sessions
 
 ---
 
-<details>
-<summary>api/cooking-sessions/show.php</summary>
+### **api/cooking-sessions/show.php**
 
+- **Description**: Retrieves detailed information about a specific cooking session
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/cooking-sessions/{id}
-</details>
+- **Backend Endpoint**: GET /api/cooking-sessions/{id}
 
 ---
 
-<details>
-<summary>api/cooking-sessions/update.php</summary>
+### **api/cooking-sessions/update.php**
 
+- **Description**: Updates an existing cooking session
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: PUT /api/cooking-sessions/{id}
-</details>
+- **Backend Endpoint**: PUT /api/cooking-sessions/{id}
 
 ---
 
-<details>
-<summary>api/cooking-sessions/join.php</summary>
+### **api/cooking-sessions/join.php**
 
+- **Description**: Allows users to join a cooking session
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/cooking-sessions/{id}/join
-</details>
+- **Backend Endpoint**: POST /api/cooking-sessions/{id}/join
 
 ---
 
-<details>
-<summary>api/cooking-sessions/complete-step.php</summary>
+### **api/cooking-sessions/complete-step.php**
 
+- **Description**: Marks a cooking step as completed
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/cooking-sessions/{id}/complete-step
-</details>
+- **Backend Endpoint**: POST /api/cooking-sessions/{id}/complete-step
 
 ---
 
-<details>
-<summary>api/cooking-sessions/vote.php</summary>
+### **api/cooking-sessions/vote.php**
 
+- **Description**: Handles voting in cooking sessions (skip steps, etc.)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/cooking-sessions/{id}/vote
-</details>
-
-</details>
+- **Backend Endpoint**: POST /api/cooking-sessions/{id}/vote
 
 ---
 
-<details>
-<summary>api/cookbooks/</summary>
+## **api/cookbooks/**
 
 ---
 
-<details>
-<summary>api/cookbooks/index.php</summary>
+### **api/cookbooks/index.php**
 
+- **Description**: Lists user's cookbooks
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/cookbooks/index.php
-</details>
+- **Backend Endpoint**: GET /api/cookbooks
 
 ---
 
-<details>
-<summary>api/cookbooks/create.php</summary>
+### **api/cookbooks/create.php**
 
+- **Description**: Creates a new cookbook
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
-- **Endpoint**: POST /api/cookbooks
-</details>
+- **Backend Endpoint**: POST /api/cookbooks
 
 ---
 
-<details>
-<summary>api/cookbooks/show.php</summary>
+### **api/cookbooks/show.php**
 
+- **Description**: Retrieves detailed information about a specific cookbook
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: GET /api/cookbooks/index.php/{id}
-</details>
+- **Backend Endpoint**: GET /api/cookbooks/{id}
 
 ---
 
-<details>
-<summary>api/cookbooks/add-recipe.php</summary>
+### **api/cookbooks/add-recipe.php**
 
+- **Description**: Adds a recipe to a cookbook
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/cookbooks/{id}/add-recipe
-</details>
+- **Backend Endpoint**: POST /api/cookbooks/{id}/add-recipe
 
 ---
 
-<details>
-<summary>api/cookbooks/remove-recipe.php</summary>
+### **api/cookbooks/remove-recipe.php**
 
+- **Description**: Removes a recipe from a cookbook
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: DELETE /api/cookbooks/{id}/remove-recipe
-</details>
-
-</details>
+- **Backend Endpoint**: DELETE /api/cookbooks/{id}/remove-recipe
 
 ---
 
-<details>
-<summary>api/upload/</summary>
+## **api/upload/**
 
 ---
 
-<details>
-<summary>api/upload/image.php</summary>
+### **api/upload/image.php**
 
+- **Description**: Handles image uploads for various types (profile, recipe, step)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../utils/fileUpload.php, ../../classes/ResponseFormatter.php
-- **Endpoint**: POST /api/upload/image
-</details>
-
-</details>
-
-</details>
+- **Backend Endpoint**: POST /api/upload/image
 
 ---
 
-<details>
-<summary>uploads/</summary>
-
-- profile-pictures/
-- recipe-images/
-- step-images/
-</details>
+## **api/shop/**
 
 ---
 
-<details>
-<summary>api/shop/</summary>
+### **api/shop/items.php**
 
----
-
-<details>
-<summary>api/shop/items.php</summary>
-
+- **Description**: Lists available shop items
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../config/cors.php
-- **Endpoint**: GET /api/shop/items
-<details>
-<summary>Functions</summary>
+- **Backend Endpoint**: GET /api/shop/items
 
-- getAuthorizationToken() -> string|null: Extracts Bearer token from Authorization header
-</details>
-</details>
+**Functions**:
+- `getAuthorizationToken() -> string|null`: Extracts Bearer token from Authorization header
 
 ---
 
-<details>
-<summary>api/shop/purchase.php</summary>
+### **api/shop/purchase.php**
 
+- **Description**: Handles shop item purchases
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../config/cors.php
-- **Endpoint**: POST /api/shop/purchase
-<details>
-<summary>Functions</summary>
+- **Backend Endpoint**: POST /api/shop/purchase
 
-- getAuthorizationToken() -> string|null: Extracts Bearer token from Authorization header
-</details>
-</details>
-
-</details>
+**Functions**:
+- `getAuthorizationToken() -> string|null`: Extracts Bearer token from Authorization header
 
 ---
 
-<details>
-<summary>.htaccess</summary>
+## **uploads/**
 
-- description: URL rewriting for clean API **Endpoint**s
-- content: Rewrites all requests to index.php
-</details>
+- **Description**: Directory for uploaded files
+- **Subdirectories**:
+  - `profile-pictures/`: User profile pictures
+  - `recipe-images/`: Recipe cover images
+  - `step-images/`: Cooking step images
 
 ---
 
-<details>
-<summary>index.php</summary>
+## **.htaccess**
 
+- **Description**: URL rewriting for clean API endpoints
+- **Content**: Rewrites all requests to index.php
+
+---
+
+## **index.php**
+
+- **Description**: Main entry point that routes requests to appropriate endpoints
 - **Required Imports**: config/cors.php
-- functionality: Routes requests to appropriate **Endpoint**s
-</details>
+- **Functionality**: Routes requests to appropriate endpoints
 
-</details>
+---
