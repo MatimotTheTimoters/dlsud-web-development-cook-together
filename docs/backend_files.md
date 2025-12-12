@@ -101,53 +101,68 @@
 **Functions**:
 
 **User Operations**:
-- `registerUser(array $user_data) -> bool`: Creates new user
+- `registerUser(array $user_data) -> string|false`: Creates new user, returns user ID
 - `validateUserLogin(string $email, string $password) -> array|false`: Validates login credentials
 - `getUserById(string $user_id) -> array|false`: Gets user by ID
 - `updateUserProfile(string $user_id, array $data) -> bool`: Updates user profile
+- `searchUsers(string $query, int $limit = 20, int $offset = 0) -> array`: Searches users
 
 **User Stats Operations**:
 - `getUserStats(string $user_id) -> array|false`: Gets user stats
 - `updateUserStats(string $user_id, array $updates) -> bool`: Updates user stats
 - `incrementUserStat(string $user_id, string $field, int $amount) -> bool`: Increments user stat
-- `searchUsers(string $query, array $filters) -> array`: Searches users with pagination
 
 **Recipe Operations**:
-- `createRecipe(array $recipe_data, array $ingredients, array $steps) -> string|false`: Creates recipe with ingredients and steps
-- `getRecipe(string $recipe_id) -> array|false`: Gets full recipe with details
-- `updateRecipe(string $recipe_id, array $recipe_data, array $ingredients, array $steps) -> bool`: Updates recipe
+- `createRecipe(array $recipe_data, array $ingredients, array $steps) -> string|false`: Creates recipe, returns recipe ID
+- `getRecipe(string $recipe_id, string $user_id = null) -> array|false`: Gets full recipe with user-specific access
+- `updateRecipe(string $recipe_id, array $recipe_data, array $ingredients = [], array $steps = []) -> bool`: Updates recipe
 - `deleteRecipe(string $recipe_id) -> bool`: Deletes recipe and related data
+- `getRecipes(array $filters = [], int $limit = 20, int $offset = 0) -> array`: Gets recipes with filters
+
+**Recipe Access & Purchase**:
+- `checkRecipeAccess(string $user_id, string $recipe_id) -> array|false`: Checks access (purchased/created/free)
+- `purchaseRecipe(string $user_id, string $recipe_id, string $currency_type, int $price) -> bool`: Processes recipe purchase
+- `grantRecipeAccess(string $user_id, string $recipe_id, string $access_type, array $purchase_data = null) -> bool`: Grants recipe access
+
+**Recipe Interactions**:
+- `handleRecipeInteraction(string $user_id, string $recipe_id, string $interaction_type, array $metadata = []) -> bool`: Handles like/dislike/save
+- `getRecipeInteractions(string $recipe_id) -> array`: Gets recipe interaction counts
 
 **Cooking Session Operations**:
-- `createCookingSession(array $session_data) -> string|false`: Creates cooking session
-- `getCookingSession(string $session_id) -> array|false`: Gets cooking session with details
-- `updateCookingSession(string $session_id, array $updates) -> bool`: Updates cooking session
-- `joinCookingSession(string $session_id, string $user_id) -> bool`: Joins user to cooking session
+- `createCookingSession(array $session_data) -> string|false`: Creates session, returns session ID
+- `getCookingSession(string $session_id) -> array|false`: Gets session with participants
+- `updateCookingSession(string $session_id, array $updates) -> bool`: Updates session
+- `joinCookingSession(string $session_id, string $user_id) -> bool`: Joins session
+- `completeCookingStep(string $session_id, string $step_id, string $user_id, array $completion_data) -> bool`: Completes step
+- `getUserSessionHistory(string $user_id, int $limit = 20, int $offset = 0) -> array`: Gets session history
 
 **Relationship Operations**:
-- `followUser(string $source_user_id, string $target_user_id, string $relationship_type) -> bool`: Follows/unfollows user
-- `unfollowUser(string $source_user_id, string $target_user_id) -> bool`: Removes relationship
-- `getFriendRequests(string $user_id) -> array`: Gets pending friend requests
-- `acceptFriendRequest(string $relationship_id) -> bool`: Accepts friend request
-- `rejectFriendRequest(string $relationship_id) -> bool`: Rejects friend request
-- `removeFriend(string $relationship_id) -> bool`: Removes friend relationship
-- `getRelationships(string $user_id, string $type = 'following') -> array`: Gets user relationships
+- `manageRelationship(string $source_user_id, string $target_user_id, string $action, array $data = []) -> bool`: Handles follow/unfollow/friend requests
+- `getRelationships(string $user_id, string $type = 'following', int $limit = 50) -> array`: Gets relationships
+- `updateRelationshipStatus(string $relationship_id, string $status) -> bool`: Updates relationship status
 
 **Cookbook Operations**:
-- `getCookbooks(string $user_id, bool $include_public = false) -> array`: Gets user's cookbooks
-- `createCookbook(array $cookbook_data) -> string|false`: Creates new cookbook
-- `getCookbook(string $cookbook_id) -> array|false`: Gets cookbook with recipes
+- `createCookbook(array $cookbook_data) -> string|false`: Creates cookbook, returns ID
+- `getCookbook(string $cookbook_id, bool $include_recipes = true) -> array|false`: Gets cookbook
 - `updateCookbook(string $cookbook_id, array $updates) -> bool`: Updates cookbook
-- `deleteCookbook(string $cookbook_id) -> bool`: Deletes cookbook
-- `addRecipeToCookbook(string $cookbook_id, string $recipe_id, string $user_id) -> bool`: Adds recipe to cookbook
-- `removeRecipeFromCookbook(string $cookbook_id, string $recipe_id) -> bool`: Removes recipe from cookbook
-- `getCookbookRecipes(string $cookbook_id) -> array`: Gets recipes in cookbook
+- `manageCookbookRecipe(string $cookbook_id, string $recipe_id, string $action, string $user_id) -> bool`: Adds/removes recipe
+- `getUserCookbooks(string $user_id, bool $include_public = false) -> array`: Gets user's cookbooks
 
-**Shop Operations**:
-- `getShopItems(array $filters = []) -> array`: Gets available shop items
-- `purchaseItem(string $user_id, string $item_id) -> array|false`: Purchases shop item
-- `getUserPurchases(string $user_id) -> array`: Gets user's purchased items
-- `getItemCategories() -> array`: Gets shop item categories
+**Shop & Inventory Operations**:
+- `getShopItems(array $filters = [], int $limit = 50) -> array`: Gets shop items with filters
+- `purchaseShopItem(string $user_id, string $item_id, string $currency_type, int $price) -> bool`: Purchases shop item
+- `addToInventory(string $user_id, string $item_id, int $quantity = 1, array $item_data = []) -> bool`: Adds to inventory
+- `getUserInventory(string $user_id, string $category = null) -> array`: Gets user inventory
+- `useInventoryItem(string $user_id, string $inventory_id) -> array|false`: Uses item, returns effect data
+
+**Activity Feed Operations**:
+- `logActivity(string $user_id, string $activity_type, array $activity_data) -> bool`: Logs activity
+- `getActivityFeed(string $user_id = null, int $limit = 20, int $offset = 0) -> array`: Gets activity feed
+
+**Voting & Chat Operations**:
+- `handleSessionVote(string $session_id, string $user_id, string $vote_type, bool $vote_value) -> bool`: Handles session votes
+- `saveChatMessage(string $session_id, string $user_id, string $message, string $message_type = 'text') -> bool`: Saves chat message
+- `getSessionChat(string $session_id, int $limit = 100) -> array`: Gets session chat
 
 ---
 
@@ -202,6 +217,7 @@
 - `calculateStepRewards(int $step_index, int $total_steps, array $recipe_rewards) -> array`: Calculates step completion rewards
 - `checkLevelUp(int $current_level, int $current_exp) -> array`: Checks if user should level up
 - `calculateDailyLoginBonus(int $login_streak) -> array`: Calculates daily login bonus rewards
+- `applyConsumableEffect(array $user_stats, string $consumable_type, int $effect_value) -> array`: Applies consumable effect to user stats
 
 ---
 
@@ -626,15 +642,15 @@
 
 ---
 
-### **api/inventory/equip.php**
-- **Description**: Equips or unequips purchased items
-- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Backend Endpoint**: POST /api/inventory/equip
+### **api/inventory/use.php**
+- **Description**: Uses a consumable item from inventory
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../classes/UserCalculations.php
+- **Backend Endpoint**: POST /api/inventory/use
 - **Functions**:
-  - `equipItem(user_id, item_id) -> bool`: Equips an item from inventory
-  - `unequipItem(user_id, item_id) -> bool`: Unequips an item
-  - `validateEquipRequest(user_id, item_id) -> bool`: Validates equip/unequip request
-  - `getActiveEffects(user_id) -> array`: Gets active effects from equipped items
+  - `validateConsumableUse(user_id, inventory_id) -> bool`: Validates if item can be used
+  - `applyConsumableEffect(user_id, inventory_id) -> array`: Applies consumable effect and updates stats
+  - `consumeItem(user_id, inventory_id) -> bool`: Reduces quantity or removes item
+  - `getConsumableEffects() -> array`: Returns list of possible consumable effects
 
 ---
 

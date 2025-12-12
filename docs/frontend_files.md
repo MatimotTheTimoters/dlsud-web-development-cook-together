@@ -596,21 +596,25 @@ Here's the updated `frontend_files.md` with all your requested changes:
 
 ---
 
+### **src/components/inventory/**
+
+---
+
 #### **src/components/inventory/InventoryItem.jsx**
-- **Description**: Displays inventory item with equip/unequip functionality
-- **Required Imports**: React, useState, api from '../../api/inventory', { FaCheck, FaTimes, FaBox } from 'react-icons/fa'
-- **Backend Endpoint**: api/inventory/equip.php
+- **Description**: Displays inventory item with use functionality for consumables
+- **Required Imports**: React, useState, api from '../../api/inventory', { FaCheck, FaTimes, FaBox, FaFire } from 'react-icons/fa'
+- **Backend Endpoint**: api/inventory/use.php
 - **Layout**:
 ┌─────────────────────────────┐
 │   [ITEM IMAGE]              │
-│   👑 Golden Spoon           │
-│   ⚡ +10% EXP Boost         │
-│   📅 Expires: Jan 30        │
-│   [✅ Equipped] [🔧 Use]    │
+│   ⚡ EXP Booster (50%)      │
+│   📦 Quantity: 3            │
+│   ⏱️ Duration: 60 min       │
+│   [🔥 Use Now]              │
 └─────────────────────────────┘
 - **Functions**:
-  - `toggleEquip() -> void`: Toggles equip/unequip
   - `useItem() -> void`: Uses consumable item
+  - `getEffectDescription() -> string`: Returns effect description
   - `getTimeRemaining() -> string`: Calculates time until expiration
 
 ---
@@ -621,7 +625,7 @@ Here's the updated `frontend_files.md` with all your requested changes:
 - **Backend Endpoint**: api/inventory/list.php
 - **Functions**:
   - `loadInventory() -> void`: Loads user inventory
-  - `filterByCategory(category) -> array`: Filters items by category
+  - `filterByType(type) -> array`: Filters items by type (consumable, etc.)
   - `sortItems(sortBy) -> array`: Sorts inventory items
 
 ---
@@ -1082,12 +1086,11 @@ Here's the updated `frontend_files.md` with all your requested changes:
 #### **src/api/inventory.js**
 - **Description**: API functions for inventory operations
 - **Required Imports**: api from '../utils/api'
-- **Backend Endpoint**: api/inventory/list.php, api/inventory/equip.php
+- **Backend Endpoint**: api/inventory/list.php, api/inventory/use.php
 - **Functions**:
   - `getUserInventory() -> promise`: Gets user's inventory items
-  - `equipItem(itemId) -> promise`: Equips an inventory item
-  - `unequipItem(itemId) -> promise`: Unequips an inventory item
-  - `getEquippedItems() -> promise`: Gets currently equipped items
+  - `useConsumable(inventoryId) -> promise`: Uses a consumable item
+  - `getItemCategories() -> promise`: Gets inventory item categories
 
 ---
 

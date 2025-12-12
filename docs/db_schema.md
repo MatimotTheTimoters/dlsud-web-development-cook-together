@@ -323,7 +323,7 @@ ___
 | **id** | `VARCHAR(255)` | `PRIMARY KEY` | Item unique identifier |
 | **name** | `VARCHAR(255)` | `NOT NULL` | Item name |
 | **description** | `TEXT` | `NULL` | Item description |
-| **item_type** | `ENUM('cosmetic','tool','recipe','boost','other')` | `NOT NULL` | Type of shop item |
+| **item_type** | `ENUM('boost','currency','consumable')` | `NOT NULL` | Type of shop item |
 | **category** | `VARCHAR(100)` | `NOT NULL` | Item category (e.g., 'avatar', 'tool', 'recipe', 'boost') |
 | **gold_price** | `INT` | `DEFAULT 0` | Price in gold coins |
 | **gem_price** | `INT` | `DEFAULT 0` | Price in gems |

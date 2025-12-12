@@ -1,4 +1,4 @@
-    <details> 
+<details> 
 <summary>Frontend</summary>
 frontend/
 ├── .env
@@ -13,10 +13,13 @@ frontend/
     ├── index.js
     ├── setupTests.js
     ├── api/
+    │   ├── activity.js
     │   ├── auth.js
     │   ├── chat.js
     │   ├── cookbooks.js
     │   ├── cooking-sessions.js
+    │   ├── inventory.js
+    │   ├── purchase.js
     │   ├── recipes.js
     │   ├── relationships.js
     │   ├── shop.js
@@ -49,8 +52,11 @@ frontend/
     │   │   ├── LevelProgress.jsx
     │   │   ├── RewardNotification.jsx
     │   │   └── ShopItem.jsx
-    |   ├── purchase/
-|   |   |    └── PurchaseModal.php
+    │   ├── inventory/
+    │   │   ├── InventoryItem.jsx
+    │   │   └── InventoryList.jsx
+    │   ├── purchase/
+    │   │   └── PurchaseModal.jsx
     │   ├── recipes/
     │   │   ├── IngredientList.jsx
     │   │   ├── RecipeCard.jsx
@@ -107,6 +113,8 @@ backend/
 ├── .htaccess
 ├── index.php
 ├── api/
+│   ├── activity/
+│   │   └── feed.php
 │   ├── auth/
 │   │   ├── login.php
 │   │   ├── logout.php
@@ -131,7 +139,8 @@ backend/
 │   │   └── vote.php
 │   ├── inventory/
 │   │   ├── equip.php
-│   │   └── list.php
+│   │   ├── list.php
+│   │   └── use.php
 │   ├── recipes/
 │   │   ├── access.php
 │   │   ├── create.php
@@ -148,8 +157,8 @@ backend/
 │   ├── sessions/
 │   │   └── history.php
 │   ├── shop/
-│   │    ├── items.php
-│   │    └── purchase.php
+│   │   ├── items.php
+│   │   └── purchase.php
 │   ├── upload/
 │   │   └── image.php
 │   └── users/
