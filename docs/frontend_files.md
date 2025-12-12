@@ -493,23 +493,24 @@ Here's the updated `frontend_files.md` with all your requested changes:
 
 #### **src/components/users/UserProfile.jsx**
 - **Description**: Detailed user profile view with stats and content tabs
-- **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/users', { FaEdit, FaCamera, FaTrophy, FaChartLine, FaAward, FaCrown } from 'react-icons/fa'
+- **Required Imports**: React, useState, useEffect, useParams from 'react-router-dom', api from '../../api/users', { FaEdit, FaCamera, FaChartLine, FaCrown, FaBook, FaUsers } from 'react-icons/fa'
 - **Backend Endpoint**: api/users/profile.php, api/users/update.php, api/users/stats.php, api/upload/image.php
 - **Layout**:
 
 ```
 ┌─────────────────────────────────────┐
-│ [✏️ Edit] [➕ Follow] [📩 Message]  │
+│ [✏️ Edit] [➕ Follow] [📩 Message] │
 ├─────────────────────────────────────┤
-│        [PROFILE PICTURE LARGE]      │
-│        👨‍🍳 John Doe | Level 15 Chef│
-│        🔥 7-Day Login Streak        │
-│        🏆 12 Achievements Unlocked  │
+│ [PROFILE PICTURE LARGE] │
+│ 👨‍🍳 John Doe | Level 15 Chef│
+│ 🔥 7-Day Login Streak │
+│ ⭐ 4.8 Average Rating │
 ├─────────────────────────────────────┤
-│  TABS: 📖 Recipes | 📚 Cookbooks    │
-│        👥 Following | 🏅 Achievements│
+│ TABS: 📖 Recipes | 📚 Cookbooks │
+│ 👥 Following | 👤 Followers │
+│ ⏱️ Session History │
 ├─────────────────────────────────────┤
-│  CONTENT AREA (Grid/List of items)  │
+│ CONTENT AREA (Grid/List of items) │
 └─────────────────────────────────────┘
 ```
 
@@ -518,16 +519,25 @@ Here's the updated `frontend_files.md` with all your requested changes:
   - `loadUserRecipes() -> void`: Loads user's recipes
   - `loadUserStats() -> void`: Loads user statistics
   - `calculateNextLevelProgress() -> object`: Calculates progress to next level
+  - `loadSessionHistory() -> void`: Loads user's cooking session history
 
 ---
 
 #### **src/components/users/StatsDisplay.jsx**
 - **Description**: Displays user statistics with icons and formatted values
-- **Required Imports**: React, { FaChartBar, FaFire, FaCoins, FaGem, FaStar, FaMedal } from 'react-icons/fa'
+- **Required Imports**: React, { FaChartBar, FaFire, FaCoins, FaGem, FaStar, FaUtensils, FaClock } from 'react-icons/fa'
 - **Backend Endpoint**: api/users/stats.php
 - **Functions**:
   - `formatStatValue(value, type) -> string`: Formats stat values for display
   - `getStatIcon(statName) -> JSX`: Returns icon for stat type
+- **Stats Displayed**:
+  - Level & EXP Progress
+  - Currency (Gold/Gems)
+  - Recipes Created/Cooked
+  - Cooking Time Total
+  - Login Streak
+  - Followers/Following Count
+  - Session History Stats
 
 ---
 
@@ -613,31 +623,31 @@ Here's the updated `frontend_files.md` with all your requested changes:
 
 #### **src/pages/HomePage.jsx**
 - **Description**: Main landing page with featured content and quick actions
-- **Required Imports**: React, Link from 'react-router-dom', RecipeList from '../components/recipes/RecipeList', { FaFire, FaNewspaper, FaTrophy, FaUsers } from 'react-icons/fa'
+- **Required Imports**: React, Link from 'react-router-dom', RecipeList from '../components/recipes/RecipeList', { FaFire, FaNewspaper, FaUsers, FaStore } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/index.php, api/cooking-sessions/index.php
 - **Layout**:
 
 ```
 ┌─────────────────────────────────────┐
-│          HERO SECTION               │
-│   🍳 CookTogether                   │
-│   Level up your cooking skills!     │
-│   [🎮 Start Cooking] [📖 Browse]    │
+│ HERO SECTION │
+│ 🍳 CookTogether │
+│ Level up your cooking skills! │
+│ [🎮 Start Cooking] [📖 Browse] │
 ├─────────────────────────────────────┤
-│  FEATURED SECTIONS                  │
-│  ┌──────────┬──────────┬──────────┐│
-│  │ 🔥Trending│ 🏆Challenges│ 👥Community││
-│  │ Recipes  │ Daily/Weekly│ Top Chefs││
-│  └──────────┴──────────┴──────────┘│
+│ FEATURED SECTIONS │
+│ ┌──────────┬──────────┬──────────┐│
+│ │ 🔥Trending│ 🏪 Shop Deals │ 👥Community││
+│ │ Recipes │ Daily Offers │ Top Chefs││
+│ └──────────┴──────────┴──────────┘│
 ├─────────────────────────────────────┤
-│  QUICK ACTIONS                      │
-│  [🍳 Create Recipe] [👥 Find Friends]│
-│  [🏆 View Challenges] [🏪 Visit Shop]│
+│ QUICK ACTIONS │
+│ [🍳 Create Recipe] [👥 Find Friends]│
+│ [📊 View Stats] [🏪 Visit Shop] │
 ├─────────────────────────────────────┤
-│  RECENT ACTIVITY FEED               │
-│  • Chef Mario cooked Carbonara +50XP│
-│  • Sarah reached Level 20! 🎉       │
-│  • New recipe: Vegan Lasagna        │
+│ RECENT ACTIVITY FEED │
+│ • Chef Mario cooked Carbonara +50XP│
+│ • Sarah reached Level 20! 🎉 │
+│ • New recipe: Vegan Lasagna │
 └─────────────────────────────────────┘
 ```
 
@@ -752,29 +762,30 @@ Here's the updated `frontend_files.md` with all your requested changes:
 
 #### **src/pages/DiscoverPage.jsx**
 - **Description**: Discovery page for finding recipes and users
-- **Required Imports**: React, useState, UserCard from '../components/users/UserCard', RecipeCard from '../components/recipes/RecipeCard', { FaCompass, FaFire, FaTrophy, FaUsers } from 'react-icons/fa'
+- **Required Imports**: React, useState, UserCard from '../components/users/UserCard', RecipeCard from '../components/recipes/RecipeCard', { FaCompass, FaFire, FaUsers, FaStar } from 'react-icons/fa'
 - **Backend Endpoint**: api/recipes/index.php, api/users/search.php, api/users/profile.php
 - **Layout**:
 
 ```
 ┌─────────────────────────────────────┐
-│           DISCOVER                  │
-│  🔥 Trending | 👑 Top Chefs | 🏆 New│
+│ DISCOVER │
+│ 🔥 Trending | 👑 Top Chefs | ⭐ New│
 ├─────────────────────────────────────┤
-│  TOP CHEFS THIS WEEK               │
-│  ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐    │
-│  │ 👨│ │ 👩│ │ 🧑│ │ 👨│ │ 👩│    │
-│  │Level││Level││Level││Level││Level││
-│  │ 25 ││ 22 ││ 20 ││ 18 ││ 17 │    │
-│  └───┘ └───┘ └───┘ └───┘ └───┘    │
+│ TOP CHEFS THIS WEEK │
+│ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ │
+│ │ 👨│ │ 👩│ │ 🧑│ │ 👨│ │ 👩│ │
+│ │Level││Level││Level││Level││Level││
+│ │ 25 ││ 22 ││ 20 ││ 18 ││ 17 │ │
+│ └───┘ └───┘ └───┘ └───┘ └───┘ │
 ├─────────────────────────────────────┤
-│  TRENDING RECIPES                  │
-│  [🍕] [🥗] [🍣] [🌮] [🍰]          │
-│  +125   +98   +76   +64   +52      │
+│ TRENDING RECIPES │
+│ [🍕] [🥗] [🍣] [🌮] [🍰] │
+│ +125 +98 +76 +64 +52 │
 ├─────────────────────────────────────┤
-│  COMMUNITY CHALLENGES              │
-│  ⚔️ Vegan Week: 342 participants    │
-│  🏆 Master Chef: Top 10% get rewards│
+│ NEW IN SHOP │
+│ 👑 Golden Spoon - 500 Gold │
+│ 🎩 Chef Hat - 300 Gold │
+│ 🔪 Sharp Knife - 750 Gold │
 └─────────────────────────────────────┘
 ```
 
@@ -971,6 +982,9 @@ Here's the updated `frontend_files.md` with all your requested changes:
   - `getCuisineOptions() -> array`: Returns cuisine options
   - `getUnitOptions() -> array`: Returns measurement unit options
   - `getLevelThresholds() -> object`: Returns level progression thresholds
+  - `getShopCategories() -> array`: Returns shop item categories
+  - `getSessionStatusLabels() -> object`: Returns cooking session status labels
+- **Removed**: All challenge and achievement related constants
 
 ---
 
@@ -1012,6 +1026,7 @@ Here's the updated `frontend_files.md` with all your requested changes:
   - `checkLevelUp(current_level, current_exp) -> object`: Checks if user should level up
   - `calculateDailyLoginBonus(login_streak) -> object`: Calculates daily login bonus
   - `calculateItemAffordability(userStats, item) -> object`: Checks if user can afford shop item
+  - `calculateSessionRewards(session_data) -> object`: Calculates rewards for completed session
 
 ---
 
