@@ -406,6 +406,31 @@
 
 ---
 
+### **api/recipes/purchase.php**
+
+- **Description**: Handles recipe purchases with currency (gold or gems)
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../classes/UserCalculations.php
+- **Backend Endpoint**: POST /api/recipes/purchase
+- **Functions**:
+  - `validateRecipePurchase(user_id, recipe_id, currency_type) -> bool`: Validates recipe purchase request
+  - `processRecipePurchase(user_id, recipe_id, currency_type) -> array`: Processes the recipe purchase transaction
+  - `checkRecipeOwnership(user_id, recipe_id) -> bool`: Checks if user already owns recipe
+  - `grantRecipeAccess(user_id, recipe_id, currency_type, price) -> bool`: Grants access to recipe after purchase
+
+---
+
+### **api/recipes/access.php**
+
+- **Description**: Checks if user has access to a recipe (purchased, created, or free)
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Backend Endpoint**: GET /api/recipes/access
+- **Functions**:
+  - `checkRecipeAccess(user_id, recipe_id) -> array`: Checks access and returns access type
+  - `getAccessibleRecipes(user_id) -> array`: Gets all recipes user can access
+  - `validateRecipePurchaseRequired(recipe_id) -> bool`: Checks if recipe requires purchase
+  
+---
+
 ### **api/recipes/create.php**
 
 - **Description**: Creates a new recipe
@@ -586,6 +611,33 @@
 
 ---
 
+## **api/inventory/**
+
+---
+
+### **api/inventory/list.php**
+- **Description**: Lists user's purchased inventory items
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Backend Endpoint**: GET /api/inventory/list
+- **Functions**:
+  - `getUserInventory(user_id, category) -> array`: Gets user's inventory items
+  - `getEquippedItems(user_id) -> array`: Gets currently equipped items
+  - `getItemDetails(item_id) -> array`: Gets detailed information about an inventory item
+
+---
+
+### **api/inventory/equip.php**
+- **Description**: Equips or unequips purchased items
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Backend Endpoint**: POST /api/inventory/equip
+- **Functions**:
+  - `equipItem(user_id, item_id) -> bool`: Equips an item from inventory
+  - `unequipItem(user_id, item_id) -> bool`: Unequips an item
+  - `validateEquipRequest(user_id, item_id) -> bool`: Validates equip/unequip request
+  - `getActiveEffects(user_id) -> array`: Gets active effects from equipped items
+
+---
+
 ## **api/shop/**
 
 ---
@@ -601,7 +653,7 @@
 
 ---
 
-### **api/shop/purchase.php** (UPDATE)
+### **api/shop/purchase.php**
 - **Description**: Handles shop item purchases (redirects to /api/purchase/item.php)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../purchase/item.php
 - **Backend Endpoint**: POST /api/shop/purchase

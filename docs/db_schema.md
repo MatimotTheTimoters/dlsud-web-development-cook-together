@@ -38,6 +38,7 @@ ___
 | **recipes_cooked** | `INT` | `DEFAULT 0` | Total recipes cooked |
 | **challenges_completed** | `INT` | `DEFAULT 0` | Completed challenges |
 | **recipes_sold** | `INT` | `DEFAULT 0` | Recipes sold to other users |
+| **total_cooking_time** | `INT` | `DEFAULT 0` | Total minutes spent cooking |
 | **max_exp_reward** | `INT` | `DEFAULT 100` | Maximum EXP reward per recipe |
 | **max_gold_reward** | `INT` | `DEFAULT 50` | Maximum Gold reward per recipe |
 | **max_gem_reward** | `INT` | `DEFAULT 5` | Maximum Gem reward per recipe |

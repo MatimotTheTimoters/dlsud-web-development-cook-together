@@ -592,14 +592,48 @@ Here's the updated `frontend_files.md` with all your requested changes:
 
 ---
 
+### **src/components/inventory/**
+
+---
+
+#### **src/components/inventory/InventoryItem.jsx**
+- **Description**: Displays inventory item with equip/unequip functionality
+- **Required Imports**: React, useState, api from '../../api/inventory', { FaCheck, FaTimes, FaBox } from 'react-icons/fa'
+- **Backend Endpoint**: api/inventory/equip.php
+- **Layout**:
+┌─────────────────────────────┐
+│   [ITEM IMAGE]              │
+│   👑 Golden Spoon           │
+│   ⚡ +10% EXP Boost         │
+│   📅 Expires: Jan 30        │
+│   [✅ Equipped] [🔧 Use]    │
+└─────────────────────────────┘
+- **Functions**:
+  - `toggleEquip() -> void`: Toggles equip/unequip
+  - `useItem() -> void`: Uses consumable item
+  - `getTimeRemaining() -> string`: Calculates time until expiration
+
+---
+
+#### **src/components/inventory/InventoryList.jsx**
+- **Description**: Displays user's inventory with filtering
+- **Required Imports**: React, useState, InventoryItem from './InventoryItem', { FaFilter, FaSort } from 'react-icons/fa'
+- **Backend Endpoint**: api/inventory/list.php
+- **Functions**:
+  - `loadInventory() -> void`: Loads user inventory
+  - `filterByCategory(category) -> array`: Filters items by category
+  - `sortItems(sortBy) -> array`: Sorts inventory items
+
+---
+
 ### src/components/purchase/
 
 ---
 
 #### **src/components/purchase/PurchaseModal.jsx**
 - **Description**: Modal for purchasing recipes or shop items
-- **Required Imports**: React, useState, api from '../../api/recipes' or '../../api/shop', { FaCoins, FaGem, FaLock, FaCheck } from 'react-icons/fa'
-- **Backend Endpoint**: api/purchase/recipe.php, api/purchase/item.php
+- **Required Imports**: React, useState, api from '../../api/purchase', { FaCoins, FaGem, FaLock, FaCheck } from 'react-icons/fa'
+- **Backend Endpoint**: api/recipes/purchase.php, api/shop/purchase.php
 - **Layout**:
 ┌─────────────────────────────────────┐
 │ PURCHASE CONFIRMATION │
@@ -1042,6 +1076,18 @@ Here's the updated `frontend_files.md` with all your requested changes:
   - `logout() -> promise`: Logs out user
   - `getCurrentUser() -> promise`: Gets current user data
   - `refreshToken() -> promise`: Refreshes authentication token
+
+---
+
+#### **src/api/inventory.js**
+- **Description**: API functions for inventory operations
+- **Required Imports**: api from '../utils/api'
+- **Backend Endpoint**: api/inventory/list.php, api/inventory/equip.php
+- **Functions**:
+  - `getUserInventory() -> promise`: Gets user's inventory items
+  - `equipItem(itemId) -> promise`: Equips an inventory item
+  - `unequipItem(itemId) -> promise`: Unequips an inventory item
+  - `getEquippedItems() -> promise`: Gets currently equipped items
 
 ---
 

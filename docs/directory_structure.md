@@ -113,8 +113,8 @@ backend/
 │   │   ├── me.php
 │   │   ├── refresh-token.php
 │   │   └── register.php
-|   ├── chat/
-|   |   └── messages.php
+│   ├── chat/
+│   │   └── messages.php
 │   ├── cookbooks/
 │   │   ├── add-recipe.php
 │   │   ├── create.php
@@ -129,19 +129,24 @@ backend/
 │   │   ├── show.php
 │   │   ├── update.php
 │   │   └── vote.php
+│   ├── inventory/
+│   │   ├── equip.php
+│   │   └── list.php
 │   ├── recipes/
+│   │   ├── access.php
 │   │   ├── create.php
 │   │   ├── delete.php
 │   │   ├── index.php
 │   │   ├── interact.php
+│   │   ├── purchase.php
 │   │   ├── show.php
 │   │   └── update.php
 │   ├── relationships/
 │   │   ├── follow.php
 │   │   ├── friends.php
 │   │   └── list.php
-|   ├── sessions/
-|   |   └── history.php
+│   ├── sessions/
+│   │   └── history.php
 │   ├── shop/
 │   │    ├── items.php
 │   │    └── purchase.php
