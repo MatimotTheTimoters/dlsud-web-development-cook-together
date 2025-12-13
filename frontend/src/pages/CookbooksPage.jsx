@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaBook, FaPlus, FaFolderOpen, FaTrash, FaEdit } from 'react-icons/fa';
-import api from '../api/cookbooks';
+import { FaBook, FaPlus, FaFolderOpen } from 'react-icons/fa';
 
 const CookbooksPage = () => {
     const [cookbooks, setCookbooks] = useState([]);
@@ -16,13 +15,23 @@ const CookbooksPage = () => {
     const loadCookbooks = async () => {
         try {
             setLoading(true);
-            const response = await api.getCookbooks();
-            setCookbooks(response.data);
+            // API call would go here
+            // const response = await api.getCookbooks();
+            // setCookbooks(response.data);
+
+            // Mock data for now
+            setTimeout(() => {
+                setCookbooks([
+                    { id: 1, name: 'Italian Favorites', description: 'My favorite Italian recipes', is_public: true, recipe_count: 5 },
+                    { id: 2, name: 'Quick Breakfasts', description: 'Easy morning meals', is_public: false, recipe_count: 3 },
+                ]);
+                setLoading(false);
+            }, 1000);
+
             setError(null);
         } catch (err) {
             setError('Failed to load cookbooks. Please try again.');
             console.error('Error loading cookbooks:', err);
-        } finally {
             setLoading(false);
         }
     };
@@ -36,16 +45,19 @@ const CookbooksPage = () => {
         }
 
         try {
-            const cookbookData = {
+            // API call would go here
+            // const response = await api.createCookbook(cookbookData);
+
+            // Mock response
+            const newCookbook = {
+                id: Date.now(),
                 name: newCookbookName,
                 description: newCookbookDescription,
-                is_public: false // Default to private
+                is_public: false,
+                recipe_count: 0
             };
 
-            const response = await api.createCookbook(cookbookData);
-
-            // Add the new cookbook to the list
-            setCookbooks([...cookbooks, response.data]);
+            setCookbooks([...cookbooks, newCookbook]);
 
             // Reset form
             setNewCookbookName('');
@@ -61,48 +73,19 @@ const CookbooksPage = () => {
         }
     };
 
-    // Add recipe to cookbook
-    const addRecipeToCookbook = async (cookbookId, recipeId) => {
-        try {
-            await api.addRecipeToCookbook(cookbookId, recipeId);
-
-            // Update UI - you might want to refresh the recipes list
-            if (activeCookbook === cookbookId) {
-                // Reload recipes for this cookbook
-                const response = await api.getCookbookRecipes(cookbookId);
-                setRecipes(response.data);
-            }
-
-            alert('Recipe added to cookbook!');
-        } catch (err) {
-            setError('Failed to add recipe to cookbook. Please try again.');
-            console.error('Error adding recipe to cookbook:', err);
-        }
-    };
-
-    // Remove recipe from cookbook
-    const removeRecipeFromCookbook = async (cookbookId, recipeId) => {
-        try {
-            await api.removeRecipeFromCookbook(cookbookId, recipeId);
-
-            // Update UI
-            if (activeCookbook === cookbookId) {
-                setRecipes(recipes.filter(recipe => recipe.id !== recipeId));
-            }
-
-            alert('Recipe removed from cookbook!');
-        } catch (err) {
-            setError('Failed to remove recipe from cookbook. Please try again.');
-            console.error('Error removing recipe from cookbook:', err);
-        }
-    };
-
     // Load recipes for a specific cookbook
     const loadCookbookRecipes = async (cookbookId) => {
         try {
             setActiveCookbook(cookbookId);
-            const response = await api.getCookbookRecipes(cookbookId);
-            setRecipes(response.data);
+            // API call would go here
+            // const response = await api.getCookbookRecipes(cookbookId);
+
+            // Mock data
+            const mockRecipes = [
+                { id: 1, title: 'Spaghetti Carbonara', description: 'Classic Italian pasta', difficulty: 'Medium', preparation_time: 30 },
+                { id: 2, title: 'Margherita Pizza', description: 'Simple and delicious', difficulty: 'Easy', preparation_time: 45 },
+            ];
+            setRecipes(mockRecipes);
         } catch (err) {
             setError('Failed to load cookbook recipes. Please try again.');
             console.error('Error loading cookbook recipes:', err);
@@ -219,11 +202,6 @@ const CookbooksPage = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="cookbook-actions">
-                                        <button className="btn-icon">
-                                            <FaEdit />
-                                        </button>
-                                    </div>
                                 </div>
                             ))
                         )}
@@ -238,11 +216,6 @@ const CookbooksPage = () => {
                                 <h3>
                                     {cookbooks.find(c => c.id === activeCookbook)?.name || 'Cookbook'} Recipes
                                 </h3>
-                                <div className="content-actions">
-                                    <button className="btn-secondary">
-                                        <FaPlus /> Add Recipe
-                                    </button>
-                                </div>
                             </div>
 
                             <div className="recipes-grid">
@@ -250,19 +223,10 @@ const CookbooksPage = () => {
                                     <div className="empty-state">
                                         <FaBook />
                                         <p>No recipes in this cookbook yet.</p>
-                                        <button className="btn-primary">
-                                            <FaPlus /> Add Your First Recipe
-                                        </button>
                                     </div>
                                 ) : (
                                     recipes.map(recipe => (
                                         <div key={recipe.id} className="recipe-card">
-                                            <div className="recipe-image">
-                                                {/* Recipe image would go here */}
-                                                <div className="image-placeholder">
-                                                    <FaBook />
-                                                </div>
-                                            </div>
                                             <div className="recipe-info">
                                                 <h4>{recipe.title}</h4>
                                                 <p className="recipe-description">
@@ -276,14 +240,6 @@ const CookbooksPage = () => {
                                                         {recipe.preparation_time || '?'} min
                                                     </span>
                                                 </div>
-                                            </div>
-                                            <div className="recipe-actions">
-                                                <button
-                                                    className="btn-icon danger"
-                                                    onClick={() => removeRecipeFromCookbook(activeCookbook, recipe.id)}
-                                                >
-                                                    <FaTrash />
-                                                </button>
                                             </div>
                                         </div>
                                     ))

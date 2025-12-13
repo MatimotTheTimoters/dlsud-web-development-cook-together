@@ -2,19 +2,21 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import UserCard from '../components/users/UserCard';
 import RecipeCard from '../components/recipes/RecipeCard';
-import { FaCompass, FaFire, FaTrophy, FaUsers, FaSearch, FaFilter, FaSync } from 'react-icons/fa';
+import RecipeList from '../components/recipes/RecipeList';
+import { FaCompass, FaFire, FaTrophy, FaUsers, FaStar, FaSearch, FaFilter, FaSync } from 'react-icons/fa';
 import * as usersApi from '../api/users';
 import * as recipesApi from '../api/recipes';
-import * as relationshipsApi from '../api/relationships';
+import * as shopApi from '../api/shop';
+import ShopItem from '../components/gamification/ShopItem';
 import { DataContext } from '../contexts/DataContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 /**
  * DiscoverPage Component
- * Page for discovering users, recipes, and community challenges
+ * Page for discovering recipes, users, and shop items
  */
 const DiscoverPage = () => {
-    const { updateUsers, updateRecipes, getCachedData, setCachedData } = useContext(DataContext);
+    const { currentUserData, getCachedData, setCachedData } = useContext(DataContext);
 
     // State for top chefs
     const [topChefs, setTopChefs] = useState([]);
@@ -24,36 +26,9 @@ const DiscoverPage = () => {
     const [trendingRecipes, setTrendingRecipes] = useState([]);
     const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
 
-    // State for community challenges
-    const [communityChallenges, setCommunityChallenges] = useState([
-        {
-            id: 1,
-            title: 'Vegan Week Challenge',
-            description: 'Cook 5 vegan recipes this week',
-            participants: 342,
-            reward: '🏆 Vegan Chef Badge + 500 Gold',
-            endsIn: '3 days',
-            difficulty: 'medium'
-        },
-        {
-            id: 2,
-            title: 'Master Chef Competition',
-            description: 'Top 10% get exclusive rewards',
-            participants: 128,
-            reward: '👑 Master Chef Title + 1000 Gems',
-            endsIn: '1 week',
-            difficulty: 'hard'
-        },
-        {
-            id: 3,
-            title: 'Quick Meal Challenge',
-            description: 'Cook meals under 30 minutes',
-            participants: 215,
-            reward: '⚡ Speed Chef Badge + 250 Gold',
-            endsIn: '2 days',
-            difficulty: 'easy'
-        }
-    ]);
+    // State for shop items
+    const [shopItems, setShopItems] = useState([]);
+    const [isLoadingShop, setIsLoadingShop] = useState(true);
 
     // State for search
     const [searchQuery, setSearchQuery] = useState('');
@@ -61,48 +36,19 @@ const DiscoverPage = () => {
     const [isSearching, setIsSearching] = useState(false);
 
     // Active tab
-    const [activeTab, setActiveTab] = useState('chefs'); // 'chefs', 'recipes', 'challenges'
+    const [activeTab, setActiveTab] = useState('trending'); // 'trending', 'chefs', 'shop'
 
     // Load data on component mount
     useEffect(() => {
-        loadTopChefs();
         loadTrendingRecipes();
+        loadTopChefs();
+        loadShopItems();
     }, []);
 
-    // Check cache first, then load from API
-    const loadTopChefs = async () => {
-        setIsLoadingChefs(true);
-
-        try {
-            // Check cache first
-            const cachedChefs = getCachedData('top_chefs');
-            if (cachedChefs) {
-                setTopChefs(cachedChefs);
-                setIsLoadingChefs(false);
-                return;
-            }
-
-            // Load from API - using search with level filter to get top users
-            const response = await usersApi.searchUsers('', { sortBy: 'level', order: 'desc', limit: 10 });
-            const chefs = response.users || [];
-
-            setTopChefs(chefs);
-            setCachedData('top_chefs', chefs, 300); // Cache for 5 minutes
-            updateUsers(chefs); // Update global context
-        } catch (error) {
-            console.error('Error loading top chefs:', error);
-            // Fallback to sample data
-            setTopChefs(getSampleChefs());
-        } finally {
-            setIsLoadingChefs(false);
-        }
-    };
-
+    // Load trending recipes
     const loadTrendingRecipes = async () => {
         setIsLoadingRecipes(true);
-
         try {
-            // Check cache first
             const cachedRecipes = getCachedData('trending_recipes');
             if (cachedRecipes) {
                 setTrendingRecipes(cachedRecipes);
@@ -110,7 +56,6 @@ const DiscoverPage = () => {
                 return;
             }
 
-            // Load from API - get recipes sorted by popularity (cook_count)
             const response = await recipesApi.getAllRecipes({
                 sortBy: 'cook_count',
                 order: 'desc',
@@ -120,20 +65,72 @@ const DiscoverPage = () => {
 
             const recipes = response.recipes || [];
             setTrendingRecipes(recipes);
-            setCachedData('trending_recipes', recipes, 300); // Cache for 5 minutes
-            updateRecipes(recipes); // Update global context
+            setCachedData('trending_recipes', recipes, 300);
         } catch (error) {
             console.error('Error loading trending recipes:', error);
-            // Fallback to empty array
             setTrendingRecipes([]);
         } finally {
             setIsLoadingRecipes(false);
         }
     };
 
+    // Load top chefs
+    const loadTopChefs = async () => {
+        setIsLoadingChefs(true);
+        try {
+            const cachedChefs = getCachedData('top_chefs');
+            if (cachedChefs) {
+                setTopChefs(cachedChefs);
+                setIsLoadingChefs(false);
+                return;
+            }
+
+            const response = await usersApi.searchUsers('', {
+                sortBy: 'level',
+                order: 'desc',
+                limit: 10
+            });
+
+            const chefs = response.users || [];
+            setTopChefs(chefs);
+            setCachedData('top_chefs', chefs, 300);
+        } catch (error) {
+            console.error('Error loading top chefs:', error);
+            setTopChefs([]);
+        } finally {
+            setIsLoadingChefs(false);
+        }
+    };
+
+    // Load shop items
+    const loadShopItems = async () => {
+        setIsLoadingShop(true);
+        try {
+            const cachedItems = getCachedData('shop_items');
+            if (cachedItems) {
+                setShopItems(cachedItems);
+                setIsLoadingShop(false);
+                return;
+            }
+
+            const response = await shopApi.getShopItems();
+            const items = response.items || [];
+            setShopItems(items);
+            setCachedData('shop_items', items, 600);
+        } catch (error) {
+            console.error('Error loading shop items:', error);
+            setShopItems([]);
+        } finally {
+            setIsLoadingShop(false);
+        }
+    };
+
     const handleSearch = async (e) => {
         e.preventDefault();
-        if (!searchQuery.trim()) return;
+        if (!searchQuery.trim()) {
+            setSearchResults([]);
+            return;
+        }
 
         setIsSearching(true);
         try {
@@ -149,7 +146,10 @@ const DiscoverPage = () => {
             });
             const recipes = recipesResponse.recipes || [];
 
-            setSearchResults([...users.map(u => ({ ...u, type: 'user' })), ...recipes.map(r => ({ ...r, type: 'recipe' }))]);
+            setSearchResults([
+                ...users.map(u => ({ ...u, type: 'user' })),
+                ...recipes.map(r => ({ ...r, type: 'recipe' }))
+            ]);
         } catch (error) {
             console.error('Search error:', error);
             setSearchResults([]);
@@ -159,33 +159,23 @@ const DiscoverPage = () => {
     };
 
     const refreshData = () => {
-        loadTopChefs();
         loadTrendingRecipes();
-    };
-
-    // Sample data fallback
-    const getSampleChefs = () => {
-        return [
-            { id: 'usr_001', full_name: 'Chef Marco', level: 25, profile_picture: null, recipes_count: 42 },
-            { id: 'usr_002', full_name: 'Chef Sarah', level: 22, profile_picture: null, recipes_count: 38 },
-            { id: 'usr_003', full_name: 'Chef Alex', level: 20, profile_picture: null, recipes_count: 35 },
-            { id: 'usr_004', full_name: 'Chef Maria', level: 18, profile_picture: null, recipes_count: 29 },
-            { id: 'usr_005', full_name: 'Chef David', level: 17, profile_picture: null, recipes_count: 26 }
-        ];
+        loadTopChefs();
+        loadShopItems();
     };
 
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12 px-6">
+            <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white py-12 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-4xl font-bold mb-3 flex items-center gap-3">
                                 <FaCompass className="text-white" /> Discover
                             </h1>
-                            <p className="text-xl text-blue-100">
-                                Find amazing chefs, trending recipes, and community challenges
+                            <p className="text-xl text-orange-100">
+                                Find amazing chefs, trending recipes, and shop items
                             </p>
                         </div>
                         <button
@@ -204,11 +194,11 @@ const DiscoverPage = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search for chefs, recipes, or ingredients..."
-                                className="w-full px-6 py-4 pr-12 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="w-full px-6 py-4 pr-12 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                             <button
                                 type="submit"
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-orange-500 hover:text-orange-600"
                                 disabled={isSearching}
                             >
                                 <FaSearch className="text-xl" />
@@ -222,31 +212,31 @@ const DiscoverPage = () => {
                 {/* Tabs */}
                 <div className="flex gap-2 mb-8 border-b border-gray-200">
                     <button
+                        onClick={() => setActiveTab('trending')}
+                        className={`px-6 py-3 font-medium rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'trending'
+                                ? 'bg-white border-t border-l border-r border-gray-200 text-orange-600'
+                                : 'text-gray-600 hover:text-orange-500'
+                            }`}
+                    >
+                        <FaFire /> Trending
+                    </button>
+                    <button
                         onClick={() => setActiveTab('chefs')}
                         className={`px-6 py-3 font-medium rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'chefs'
-                                ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600'
-                                : 'text-gray-600 hover:text-blue-500'
+                                ? 'bg-white border-t border-l border-r border-gray-200 text-orange-600'
+                                : 'text-gray-600 hover:text-orange-500'
                             }`}
                     >
                         <FaUsers /> Top Chefs
                     </button>
                     <button
-                        onClick={() => setActiveTab('recipes')}
-                        className={`px-6 py-3 font-medium rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'recipes'
-                                ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600'
-                                : 'text-gray-600 hover:text-blue-500'
+                        onClick={() => setActiveTab('shop')}
+                        className={`px-6 py-3 font-medium rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'shop'
+                                ? 'bg-white border-t border-l border-r border-gray-200 text-orange-600'
+                                : 'text-gray-600 hover:text-orange-500'
                             }`}
                     >
-                        <FaFire /> Trending Recipes
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('challenges')}
-                        className={`px-6 py-3 font-medium rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'challenges'
-                                ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600'
-                                : 'text-gray-600 hover:text-blue-500'
-                            }`}
-                    >
-                        <FaTrophy /> Challenges
+                        <FaStar /> Shop
                     </button>
                 </div>
 
@@ -266,7 +256,9 @@ const DiscoverPage = () => {
                                             />
                                             <div>
                                                 <h3 className="font-semibold">{result.full_name}</h3>
-                                                <p className="text-sm text-gray-500">Level {result.level} • {result.recipes_count || 0} recipes</p>
+                                                <p className="text-sm text-gray-500">
+                                                    Level {result.level} • {result.recipes_count || 0} recipes
+                                                </p>
                                             </div>
                                         </div>
                                     </Link>
@@ -290,83 +282,24 @@ const DiscoverPage = () => {
 
                 {/* Tab Content */}
                 <div className="space-y-8">
-                    {/* Top Chefs Section */}
-                    {activeTab === 'chefs' && (
-                        <div className="bg-white rounded-xl shadow p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold flex items-center gap-2">
-                                    <FaUsers className="text-blue-500" /> Top Chefs This Week
-                                </h2>
-                                <span className="text-sm text-gray-500">
-                                    Updated just now
-                                </span>
-                            </div>
-
-                            {isLoadingChefs ? (
-                                <div className="py-12">
-                                    <LoadingSpinner />
-                                </div>
-                            ) : topChefs.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                                    {topChefs.map((chef, index) => (
-                                        <div key={chef.id} className="text-center">
-                                            <div className="relative">
-                                                <Link to={`/profile/${chef.id}`}>
-                                                    <img
-                                                        src={chef.profile_picture || '/default-avatar.png'}
-                                                        alt={chef.full_name}
-                                                        className="w-20 h-20 rounded-full object-cover mx-auto border-4 border-white shadow-lg"
-                                                    />
-                                                </Link>
-                                                <div className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full w-8 h-8 flex items-center justify-center">
-                                                    #{index + 1}
-                                                </div>
-                                            </div>
-                                            <h3 className="font-semibold mt-3">{chef.full_name}</h3>
-                                            <p className="text-sm text-gray-600">Level {chef.level}</p>
-                                            <p className="text-xs text-gray-500">
-                                                {chef.recipes_count || 0} recipes
-                                            </p>
-                                            <Link
-                                                to={`/profile/${chef.id}`}
-                                                className="mt-3 inline-block text-blue-500 hover:text-blue-600 text-sm font-medium"
-                                            >
-                                                View Profile →
-                                            </Link>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12">
-                                    <FaUsers className="text-4xl text-gray-300 mx-auto mb-4" />
-                                    <p className="text-gray-500">No chefs found</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Trending Recipes Section */}
-                    {activeTab === 'recipes' && (
+                    {/* Trending Section */}
+                    {activeTab === 'trending' && (
                         <div className="bg-white rounded-xl shadow p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold flex items-center gap-2">
                                     <FaFire className="text-orange-500" /> Trending Recipes
                                 </h2>
-                                <Link to="/recipes" className="text-blue-500 hover:text-blue-600 font-medium">
+                                <Link to="/recipes" className="text-orange-500 hover:text-orange-600 font-medium">
                                     View all recipes →
                                 </Link>
                             </div>
 
                             {isLoadingRecipes ? (
                                 <div className="py-12">
-                                    <LoadingSpinner />
+                                    <LoadingSpinner type="recipe-list" />
                                 </div>
                             ) : trendingRecipes.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                    {trendingRecipes.map((recipe) => (
-                                        <RecipeCard key={recipe.id} recipe={recipe} />
-                                    ))}
-                                </div>
+                                <RecipeList recipes={trendingRecipes} />
                             ) : (
                                 <div className="text-center py-12">
                                     <FaFire className="text-4xl text-gray-300 mx-auto mb-4" />
@@ -409,96 +342,108 @@ const DiscoverPage = () => {
                         </div>
                     )}
 
-                    {/* Community Challenges Section */}
-                    {activeTab === 'challenges' && (
+                    {/* Top Chefs Section */}
+                    {activeTab === 'chefs' && (
                         <div className="bg-white rounded-xl shadow p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold flex items-center gap-2">
-                                    <FaTrophy className="text-yellow-500" /> Community Challenges
+                                    <FaUsers className="text-orange-500" /> Top Chefs
                                 </h2>
-                                <button className="text-blue-500 hover:text-blue-600 font-medium flex items-center gap-2">
+                                <span className="text-sm text-gray-500">
+                                    Updated just now
+                                </span>
+                            </div>
+
+                            {isLoadingChefs ? (
+                                <div className="py-12">
+                                    <LoadingSpinner type="user" />
+                                </div>
+                            ) : topChefs.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                                    {topChefs.slice(0, 5).map((chef, index) => (
+                                        <UserCard key={chef.id} user={chef} showRank={index + 1} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <FaUsers className="text-4xl text-gray-300 mx-auto mb-4" />
+                                    <p className="text-gray-500">No chefs found</p>
+                                </div>
+                            )}
+
+                            {/* Additional chefs in grid */}
+                            {topChefs.length > 5 && (
+                                <div className="mt-8">
+                                    <h3 className="text-xl font-bold mb-4">More Top Chefs</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        {topChefs.slice(5).map((chef) => (
+                                            <UserCard key={chef.id} user={chef} compact={true} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Shop Section */}
+                    {activeTab === 'shop' && (
+                        <div className="bg-white rounded-xl shadow p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold flex items-center gap-2">
+                                    <FaStar className="text-yellow-500" /> Shop Items
+                                </h2>
+                                <button className="text-orange-500 hover:text-orange-600 font-medium flex items-center gap-2">
                                     <FaFilter /> Filter
                                 </button>
                             </div>
 
-                            <div className="space-y-4">
-                                {communityChallenges.map((challenge) => (
-                                    <div key={challenge.id} className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 transition-colors">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h3 className="text-xl font-bold mb-2">{challenge.title}</h3>
-                                                <p className="text-gray-600 mb-4">{challenge.description}</p>
+                            {isLoadingShop ? (
+                                <div className="py-12">
+                                    <LoadingSpinner />
+                                </div>
+                            ) : shopItems.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    {shopItems.map((item) => (
+                                        <ShopItem key={item.id} item={item} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <FaStar className="text-4xl text-gray-300 mx-auto mb-4" />
+                                    <p className="text-gray-500">No shop items found</p>
+                                </div>
+                            )}
 
-                                                <div className="flex flex-wrap gap-4 text-sm">
-                                                    <div className="flex items-center gap-2">
-                                                        <FaUsers className="text-gray-400" />
-                                                        <span className="font-medium">{challenge.participants} participants</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <FaTrophy className="text-yellow-500" />
-                                                        <span className="font-medium">{challenge.reward}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${challenge.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
-                                                                challenge.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                                                    'bg-red-100 text-red-800'
-                                                            }`}>
-                                                            {challenge.difficulty}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="text-right">
-                                                <div className="text-sm text-gray-500 mb-2">Ends in</div>
-                                                <div className="text-lg font-bold text-blue-600">{challenge.endsIn}</div>
-                                                <button className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-                                                    Join Challenge
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Progress bar (example) */}
-                                        <div className="mt-6">
-                                            <div className="flex justify-between text-sm text-gray-600 mb-1">
-                                                <span>Progress</span>
-                                                <span>42% complete</span>
-                                            </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div
-                                                    className="bg-green-500 h-2 rounded-full"
-                                                    style={{ width: '42%' }}
-                                                ></div>
-                                            </div>
-                                        </div>
+                            {/* Shop Stats */}
+                            {currentUserData && (
+                                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-6 rounded-xl">
+                                        <h3 className="font-bold text-lg">Your Gold</h3>
+                                        <p className="text-3xl font-bold mt-2">
+                                            {currentUserData.stats?.gold_count || 0}
+                                        </p>
+                                        <p className="text-yellow-100 mt-1">Available balance</p>
                                     </div>
-                                ))}
-                            </div>
-
-                            {/* Challenge Stats */}
-                            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
-                                    <h3 className="font-bold text-lg">Total Participants</h3>
-                                    <p className="text-3xl font-bold mt-2">685</p>
-                                    <p className="text-blue-100 mt-1">Active this month</p>
+                                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl">
+                                        <h3 className="font-bold text-lg">Your Gems</h3>
+                                        <p className="text-3xl font-bold mt-2">
+                                            {currentUserData.stats?.gem_count || 0}
+                                        </p>
+                                        <p className="text-purple-100 mt-1">Premium currency</p>
+                                    </div>
+                                    <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl">
+                                        <h3 className="font-bold text-lg">Items Owned</h3>
+                                        <p className="text-3xl font-bold mt-2">0</p>
+                                        <p className="text-green-100 mt-1">In your inventory</p>
+                                    </div>
                                 </div>
-                                <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl">
-                                    <h3 className="font-bold text-lg">Rewards Distributed</h3>
-                                    <p className="text-3xl font-bold mt-2">12,450G</p>
-                                    <p className="text-purple-100 mt-1">+ 845 Gems</p>
-                                </div>
-                                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl">
-                                    <h3 className="font-bold text-lg">Recipes Created</h3>
-                                    <p className="text-3xl font-bold mt-2">128</p>
-                                    <p className="text-green-100 mt-1">Through challenges</p>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     )}
                 </div>
 
                 {/* Quick Actions */}
-                <div className="mt-12 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl p-8">
+                <div className="mt-12 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl p-8">
                     <h2 className="text-2xl font-bold mb-6">Ready to Level Up?</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <Link
@@ -510,7 +455,7 @@ const DiscoverPage = () => {
                             <p className="text-white/80 mt-2">Share your culinary creations</p>
                         </Link>
                         <Link
-                            to="/discover?tab=chefs"
+                            to="/profile"
                             className="bg-white/20 hover:bg-white/30 p-6 rounded-xl transition-colors text-center"
                         >
                             <div className="text-3xl mb-3">👥</div>
@@ -518,12 +463,12 @@ const DiscoverPage = () => {
                             <p className="text-white/80 mt-2">Connect with other chefs</p>
                         </Link>
                         <Link
-                            to="/challenges"
+                            to="/shop"
                             className="bg-white/20 hover:bg-white/30 p-6 rounded-xl transition-colors text-center"
                         >
                             <div className="text-3xl mb-3">🏆</div>
-                            <h3 className="font-bold text-lg">View Challenges</h3>
-                            <p className="text-white/80 mt-2">Join community events</p>
+                            <h3 className="font-bold text-lg">View Shop</h3>
+                            <p className="text-white/80 mt-2">Get exclusive items</p>
                         </Link>
                     </div>
                 </div>
