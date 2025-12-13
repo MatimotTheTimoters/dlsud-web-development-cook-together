@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import api from '../../api/auth.js';
+import api from '../api/auth.js';
 import { FaUserShield } from 'react-icons/fa';
 
 /**
