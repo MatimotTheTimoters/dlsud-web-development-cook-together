@@ -1,5 +1,4 @@
 <?php
-
 // Set CORS headers and handle preflight
 require_once __DIR__ . '/../../config/cors.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
@@ -41,14 +40,14 @@ try {
     
     $user_id = $payload['user_id'];
     
-    // Get user data
+    // Get user data using DatabaseHelper
     $user = DatabaseHelper::getUserById($user_id);
     
     if (!$user) {
         ResponseFormatter::notFound('User not found');
     }
     
-    // Get user stats
+    // Get user stats using DatabaseHelper
     $stats = DatabaseHelper::getUserStats($user_id);
     
     // Prepare response data
@@ -80,3 +79,4 @@ try {
     error_log('Get profile error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
     ResponseFormatter::error('An error occurred while fetching profile', 500);
 }
+?>

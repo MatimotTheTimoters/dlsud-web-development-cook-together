@@ -1,5 +1,4 @@
 <?php
-
 // Set CORS headers and handle preflight
 require_once __DIR__ . '/../../config/cors.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
@@ -24,7 +23,6 @@ require_once __DIR__ . '/../../classes/AuthHelper.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 require_once __DIR__ . '/../../utils/uuidHelper.php';
-require_once __DIR__ . '/../../utils/validation.php';
 
 try {
     // Get and decode JSON input
@@ -35,26 +33,24 @@ try {
         ResponseFormatter::error('Invalid JSON input', 400);
     }
     
-    // Sanitize input
-    $input = Validation::sanitizeInput($input);
-    
     // Validate required fields
-    $required_fields = ['full_name', 'email', 'password'];
-    $validation_errors = Validation::validateRequired($input, $required_fields);
-    
-    if (!empty($validation_errors)) {
-        ResponseFormatter::validationError($validation_errors);
+    if (empty($input['full_name']) || empty($input['email']) || empty($input['password'])) {
+        ResponseFormatter::validationError([
+            'full_name' => empty($input['full_name']) ? 'Full name is required' : null,
+            'email' => empty($input['email']) ? 'Email is required' : null,
+            'password' => empty($input['password']) ? 'Password is required' : null
+        ]);
     }
     
     // Extract data
-    $full_name = $input['full_name'];
-    $email = strtolower($input['email']);
+    $full_name = trim($input['full_name']);
+    $email = strtolower(trim($input['email']));
     $password = $input['password'];
     $age = isset($input['age']) ? (int)$input['age'] : null;
     $gender = isset($input['gender']) ? $input['gender'] : null;
     
     // Validate email format
-    if (!Validation::validateEmail($email)) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         ResponseFormatter::validationError(['email' => 'Invalid email format']);
     }
     
@@ -64,15 +60,10 @@ try {
         ResponseFormatter::validationError(['password' => $password_strength['message']]);
     }
     
-    // Check if email already exists
-    if (DatabaseHelper::emailExists($email)) {
-        ResponseFormatter::validationError(['email' => 'Email already registered']);
-    }
-    
     // Hash password
     $password_hash = AuthHelper::hashPassword($password);
     
-    // Prepare user data
+    // Prepare user data for DatabaseHelper
     $user_data = [
         'full_name' => $full_name,
         'email' => $email,
@@ -81,24 +72,40 @@ try {
         'gender' => $gender
     ];
     
-    // Register user
-    $new_user = DatabaseHelper::registerUser($user_data);
+    // Register user using DatabaseHelper
+    $user_id = DatabaseHelper::registerUser($user_data);
     
-    if (!$new_user) {
+    if (!$user_id) {
         ResponseFormatter::error('Failed to create user account', 500);
     }
     
+    // Get the newly created user
+    $user = DatabaseHelper::getUserById($user_id);
+    
+    if (!$user) {
+        ResponseFormatter::error('Failed to retrieve created user', 500);
+    }
+    
     // Generate JWT token
-    $token = AuthHelper::generateToken($new_user['id'], $email, [
-        'full_name' => $full_name
-    ]);
+    $token = AuthHelper::generateToken($user['id'], $user['email']);
     
     // Generate refresh token
-    $refresh_token = AuthHelper::generateRefreshToken($new_user['id']);
+    $refresh_token = AuthHelper::generateRefreshToken($user['id']);
+    
+    // Prepare user data for response
+    $user_data = [
+        'id' => $user['id'],
+        'full_name' => $user['full_name'],
+        'email' => $user['email'],
+        'profile_picture' => $user['profile_picture'],
+        'age' => $user['age'],
+        'gender' => $user['gender'],
+        'created_at' => $user['created_at']
+    ];
     
     // Prepare response data
     $response_data = [
-        'user' => $new_user,
+        'user' => $user_data,
         'token' => $token,
         'refresh_token' => $refresh_token,
         'expires_in' => AuthHelper::getConfig()['token_expiry']
@@ -111,3 +118,4 @@ try {
     error_log('Registration error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
     ResponseFormatter::error('An error occurred during registration', 500);
 }
+?>

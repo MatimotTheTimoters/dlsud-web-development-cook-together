@@ -1,5 +1,4 @@
 <?php
-
 // Set CORS headers and handle preflight
 require_once __DIR__ . '/../../config/cors.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
@@ -38,6 +37,8 @@ try {
         ResponseFormatter::validationError(['refresh_token' => 'Refresh token is required']);
     }
     
+    $refresh_token = $input['refresh_token'];
+    
     // Also check for old token to get user info
     $old_token = AuthHelper::getBearerToken();
     
@@ -45,24 +46,14 @@ try {
         ResponseFormatter::unauthorized('No authentication token provided');
     }
     
-    $refresh_token = $input['refresh_token'];
+    // Validate the old token (might be expired but still valid for refresh)
+    $payload = AuthHelper::validateToken($old_token, true); // true = allow expired
     
-    // Try to get payload from old token (even if expired)
-    $token_parts = explode('.', $old_token);
-    if (count($token_parts) !== 3) {
-        ResponseFormatter::unauthorized('Invalid token format');
-    }
-    
-    // Decode payload without validation (since token might be expired)
-    $payload_json = AuthHelper::base64UrlDecode($token_parts[1]);
-    $payload = json_decode($payload_json, true);
-    
-    if (!$payload || !isset($payload['user_id']) || !isset($payload['email'])) {
-        ResponseFormatter::unauthorized('Invalid token payload');
+    if (!$payload) {
+        ResponseFormatter::unauthorized('Invalid token');
     }
     
     $user_id = $payload['user_id'];
-    $user_email = $payload['email'];
     
     // Get user data to verify
     $user = DatabaseHelper::getUserById($user_id);
@@ -71,16 +62,8 @@ try {
         ResponseFormatter::unauthorized('User not found');
     }
     
-    // Verify user email matches
-    if ($user['email'] !== $user_email) {
-        ResponseFormatter::unauthorized('Token email mismatch');
-    }
-    
     // Generate new JWT token
-    $new_token = AuthHelper::generateToken($user['id'], $user['email'], [
-        'full_name' => $user['full_name'],
-        'level' => $user['level'] ?? 1
-    ]);
+    $new_token = AuthHelper::generateToken($user['id'], $user['email']);
     
     // Generate new refresh token
     $new_refresh_token = AuthHelper::generateRefreshToken($user['id']);
@@ -99,3 +82,4 @@ try {
     error_log('Token refresh error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
     ResponseFormatter::error('An error occurred while refreshing token', 500);
 }
+?>

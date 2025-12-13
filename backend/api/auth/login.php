@@ -1,5 +1,4 @@
 <?php
-
 // Set CORS headers and handle preflight
 require_once __DIR__ . '/../../config/cors.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
@@ -45,7 +44,7 @@ try {
     $email = strtolower(trim($input['email']));
     $password = $input['password'];
     
-    // Validate user credentials
+    // Validate user credentials using DatabaseHelper
     $user = DatabaseHelper::validateUserLogin($email, $password);
     
     if (!$user) {
@@ -53,13 +52,13 @@ try {
     }
     
     // Generate JWT token
-    $token = AuthHelper::generateToken($user['id'], $user['email'], [
-        'full_name' => $user['full_name'],
-        'level' => $user['level'] ?? 1
-    ]);
+    $token = AuthHelper::generateToken($user['id'], $user['email']);
     
     // Generate refresh token
     $refresh_token = AuthHelper::generateRefreshToken($user['id']);
+    
+    // Get user stats
+    $stats = DatabaseHelper::getUserStats($user['id']);
     
     // Prepare user data for response
     $user_data = [
@@ -73,13 +72,13 @@ try {
     ];
     
     // Prepare stats data
-    $stats_data = [
-        'level' => $user['level'] ?? 1,
-        'current_exp' => $user['current_exp'] ?? 0,
-        'current_level_ceiling' => $user['current_level_ceiling'] ?? 100,
-        'gold_count' => $user['gold_count'] ?? 0,
-        'gem_count' => $user['gem_count'] ?? 0,
-        'login_streak' => $user['login_streak'] ?? 0
+    $stats_data = $stats ?: [
+        'level' => 1,
+        'current_exp' => 0,
+        'current_level_ceiling' => 100,
+        'gold_count' => 0,
+        'gem_count' => 0,
+        'login_streak' => 0
     ];
     
     // Prepare response data
@@ -98,3 +97,4 @@ try {
     error_log('Login error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
     ResponseFormatter::error('An error occurred during login', 500);
 }
+?>
