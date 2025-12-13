@@ -1,51 +1,67 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../classes/DatabaseHelper.php';
-require_once __DIR__ . '/../../classes/ResponseFormatter.php';
+require_once '../../config/database.php';
+require_once '../../classes/AuthHelper.php';
+require_once '../../classes/DatabaseHelper.php';
+require_once '../../classes/ResponseFormatter.php';
 
-// Set CORS headers
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
+header('Content-Type: application/json');
 
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+$response = new ResponseFormatter();
 
 try {
-    // Validate request method
-    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        ResponseFormatter::error('Method not allowed', 405);
-        exit();
-    }
-
     // Get cookbook ID from URL
-    $url_parts = explode('/', $_SERVER['REQUEST_URI']);
-    $cookbook_id = end($url_parts);
-
-    // Validate cookbook ID
-    if (empty($cookbook_id) || !preg_match('/^[a-f0-9\-]+$/i', $cookbook_id)) {
-        ResponseFormatter::error('Invalid cookbook ID format', 400);
-        exit();
+    if (!isset($_GET['id']) || empty($_GET['id'])) {
+        $response->badRequest('Cookbook ID is required');
+        exit;
     }
 
-    // Get query parameters
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
-    $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
-
-    // Get cookbook recipes
-    $result = DatabaseHelper::getCookbookRecipes($cookbook_id, $limit, $offset);
-
-    if (!$result) {
-        ResponseFormatter::error('Cookbook not found or failed to fetch data', 404);
-        exit();
+    $cookbook_id = $_GET['id'];
+    
+    // Check authentication
+    $token = AuthHelper::getBearerToken();
+    $user_id = null;
+    $is_owner = false;
+    
+    if ($token) {
+        $userData = AuthHelper::validateToken($token);
+        if ($userData) {
+            $user_id = $userData['user_id'];
+        }
     }
 
-    ResponseFormatter::success($result, 'Cookbook retrieved successfully', 200);
+    $dbHelper = new DatabaseHelper();
+    
+    // Get cookbook
+    $include_recipes = isset($_GET['include_recipes']) ? (bool)$_GET['include_recipes'] : true;
+    $cookbook = $dbHelper->getCookbook($cookbook_id, $include_recipes);
+    
+    if (!$cookbook) {
+        $response->notFound('Cookbook not found');
+        exit;
+    }
+
+    // Check permissions
+    if ($user_id) {
+        $is_owner = ($cookbook['user_id'] === $user_id);
+    }
+    
+    // If cookbook is not public and user is not owner
+    if (!$cookbook['is_public'] && !$is_owner) {
+        $response->forbidden('You do not have permission to view this cookbook');
+        exit;
+    }
+
+    // Add permission info to response
+    $cookbook['permissions'] = [
+        'can_edit' => $is_owner,
+        'can_add_recipe' => $is_owner,
+        'can_remove_recipe' => $is_owner
+    ];
+
+    $response->success($cookbook, 'Cookbook retrieved successfully');
+    
 } catch (Exception $e) {
     error_log("Cookbook show error: " . $e->getMessage());
-    ResponseFormatter::error('Internal server error', 500, ['message' => $e->getMessage()]);
+    $response->error('Server error', 500);
 }
+?>

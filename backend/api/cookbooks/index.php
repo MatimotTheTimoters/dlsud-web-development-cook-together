@@ -1,55 +1,63 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../classes/DatabaseHelper.php';
-require_once __DIR__ . '/../../classes/ResponseFormatter.php';
+require_once '../../config/database.php';
+require_once '../../classes/AuthHelper.php';
+require_once '../../classes/DatabaseHelper.php';
+require_once '../../classes/ResponseFormatter.php';
 
-// Set CORS headers
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
+header('Content-Type: application/json');
 
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+$response = new ResponseFormatter();
 
 try {
-    // Validate request method
-    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        ResponseFormatter::error('Method not allowed', 405);
-        exit();
+    // Check for token (optional for public cookbooks)
+    $token = AuthHelper::getBearerToken();
+    $user_id = null;
+    
+    if ($token) {
+        $userData = AuthHelper::validateToken($token);
+        if ($userData) {
+            $user_id = $userData['user_id'];
+        }
     }
 
     // Get query parameters
-    $user_id = $_GET['user_id'] ?? null;
-    $include_public = isset($_GET['include_public']) ? filter_var($_GET['include_public'], FILTER_VALIDATE_BOOLEAN) : false;
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
+    $filters = [];
+    $user_id_filter = isset($_GET['user_id']) ? $_GET['user_id'] : $user_id;
+    $include_public = isset($_GET['include_public']) ? (bool)$_GET['include_public'] : false;
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
     $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
-    // Validate user_id if provided
-    if ($user_id && !preg_match('/^[a-f0-9\-]+$/i', $user_id)) {
-        ResponseFormatter::error('Invalid user ID format', 400);
-        exit();
-    }
-
-    // Get cookbooks
+    $dbHelper = new DatabaseHelper();
+    
+    // If user is authenticated, get their cookbooks
     if ($user_id) {
-        $cookbooks = DatabaseHelper::getCookbooks($user_id, $include_public);
+        $cookbooks = $dbHelper->getUserCookbooks($user_id, $include_public, $limit, $offset);
+        
+        // If specific user_id is requested and it's not the current user
+        if (isset($_GET['user_id']) && $_GET['user_id'] !== $user_id) {
+            // Only show public cookbooks of other users
+            $cookbooks = array_filter($cookbooks, function($cookbook) {
+                return $cookbook['is_public'] == true;
+            });
+        }
     } else {
-        // If no user_id provided, return error
-        ResponseFormatter::error('User ID is required', 400);
-        exit();
+        // For non-authenticated users, only show public cookbooks
+        $filters['is_public'] = true;
+        $cookbooks = $dbHelper->getCookbooks($filters, $limit, $offset);
     }
 
-    if ($cookbooks === false) {
-        ResponseFormatter::error('Failed to fetch cookbooks', 500);
-        exit();
-    }
+    // Format response
+    $responseData = [
+        'cookbooks' => $cookbooks,
+        'count' => count($cookbooks),
+        'limit' => $limit,
+        'offset' => $offset
+    ];
 
-    ResponseFormatter::success($cookbooks, 'Cookbooks retrieved successfully', 200);
+    $response->success($responseData, 'Cookbooks retrieved successfully');
+    
 } catch (Exception $e) {
     error_log("Cookbooks index error: " . $e->getMessage());
-    ResponseFormatter::error('Internal server error', 500, ['message' => $e->getMessage()]);
+    $response->error('Server error', 500);
 }
+?>

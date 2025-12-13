@@ -377,46 +377,232 @@ class DatabaseHelper
         return Database::update('user_relationships', ['status' => $status], "id = '$relationship_id'") > 0;
     }
     
-    // Cookbook Operations
-    public static function createCookbook($cookbook_data) {
-        $cookbook_id = generateUniqueId('cookbooks', 'id');
-        $cookbook_data['id'] = $cookbook_id;
-        return Database::insert('cookbooks', $cookbook_data) ? $cookbook_id : false;
-    }
-    
-    public static function getCookbook($cookbook_id, $include_recipes = true) {
-        $sql = "SELECT c.*, u.full_name as owner_name FROM cookbooks c LEFT JOIN users u ON c.user_id = u.id WHERE c.id = :cookbook_id";
-        $cookbook = Database::fetchOne($sql, ['cookbook_id' => $cookbook_id]);
+// Cookbook Operations
+public function createCookbook(array $cookbook_data) {
+    try {
+        $sql = "INSERT INTO cookbooks (id, user_id, name, description, is_public) 
+                VALUES (:id, :user_id, :name, :description, :is_public)";
         
-        if ($cookbook && $include_recipes) {
-            $sql = "SELECT r.* FROM recipes r INNER JOIN cookbook_recipes cr ON r.id = cr.recipe_id WHERE cr.cookbook_id = :cookbook_id";
-            $cookbook['recipes'] = Database::fetchAll($sql, ['cookbook_id' => $cookbook_id]);
+        $params = [
+            ':id' => $cookbook_data['id'],
+            ':user_id' => $cookbook_data['user_id'],
+            ':name' => $cookbook_data['name'],
+            ':description' => $cookbook_data['description'],
+            ':is_public' => $cookbook_data['is_public'] ? 1 : 0
+        ];
+        
+        $stmt = $this->query($sql, $params);
+        return $cookbook_data['id'];
+    } catch (Exception $e) {
+        error_log("Create cookbook error: " . $e->getMessage());
+        return false;
+    }
+}
+
+public function getCookbook(string $cookbook_id, bool $include_recipes = true) {
+    try {
+        // Get basic cookbook info
+        $sql = "SELECT c.*, 
+                       u.full_name as owner_name,
+                       u.profile_picture as owner_picture,
+                       COUNT(cr.id) as recipe_count
+                FROM cookbooks c
+                LEFT JOIN users u ON c.user_id = u.id
+                LEFT JOIN cookbook_recipes cr ON c.id = cr.cookbook_id
+                WHERE c.id = :cookbook_id
+                GROUP BY c.id";
+        
+        $cookbook = $this->fetchOne($sql, [':cookbook_id' => $cookbook_id]);
+        
+        if (!$cookbook) {
+            return false;
+        }
+        
+        if ($include_recipes) {
+            $cookbook['recipes'] = $this->getCookbookRecipes($cookbook_id);
         }
         
         return $cookbook;
+    } catch (Exception $e) {
+        error_log("Get cookbook error: " . $e->getMessage());
+        return false;
     }
-    
-    public static function updateCookbook($cookbook_id, $updates) {
-        return Database::update('cookbooks', $updates, "id = '$cookbook_id'") > 0;
-    }
-    
-    public static function manageCookbookRecipe($cookbook_id, $recipe_id, $action, $user_id) {
-        if ($action === 'add') {
-            if (Database::fetchOne("SELECT 1 FROM cookbook_recipes WHERE cookbook_id = :cookbook_id AND recipe_id = :recipe_id", 
-                ['cookbook_id' => $cookbook_id, 'recipe_id' => $recipe_id])) return true;
+}
+
+public function getUserCookbooks(string $user_id, bool $include_public = false, int $limit = 20, int $offset = 0) {
+    try {
+        if ($include_public) {
+            $sql = "SELECT c.*, 
+                           COUNT(cr.id) as recipe_count,
+                           u.full_name as owner_name
+                    FROM cookbooks c
+                    LEFT JOIN cookbook_recipes cr ON c.id = cr.cookbook_id
+                    LEFT JOIN users u ON c.user_id = u.id
+                    WHERE c.user_id = :user_id OR c.is_public = 1
+                    GROUP BY c.id
+                    ORDER BY c.updated_at DESC
+                    LIMIT :limit OFFSET :offset";
             
-            $entry_id = generateUniqueId('cookbook_recipes', 'id');
-            $entry_data = ['id' => $entry_id, 'cookbook_id' => $cookbook_id, 'recipe_id' => $recipe_id, 'added_by' => $user_id];
-            return Database::insert('cookbook_recipes', $entry_data);
+            $params = [
+                ':user_id' => $user_id,
+                ':limit' => $limit,
+                ':offset' => $offset
+            ];
         } else {
-            return Database::delete('cookbook_recipes', "cookbook_id = '$cookbook_id' AND recipe_id = '$recipe_id'") > 0;
+            $sql = "SELECT c.*, 
+                           COUNT(cr.id) as recipe_count
+                    FROM cookbooks c
+                    LEFT JOIN cookbook_recipes cr ON c.id = cr.cookbook_id
+                    WHERE c.user_id = :user_id
+                    GROUP BY c.id
+                    ORDER BY c.updated_at DESC
+                    LIMIT :limit OFFSET :offset";
+            
+            $params = [
+                ':user_id' => $user_id,
+                ':limit' => $limit,
+                ':offset' => $offset
+            ];
+        }
+        
+        $stmt = $this->query($sql, $params);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log("Get user cookbooks error: " . $e->getMessage());
+        return [];
+    }
+}
+
+public function getCookbooks(array $filters = [], int $limit = 20, int $offset = 0) {
+    try {
+        $where = [];
+        $params = [];
+        
+        if (isset($filters['is_public'])) {
+            $where[] = "c.is_public = :is_public";
+            $params[':is_public'] = $filters['is_public'] ? 1 : 0;
+        }
+        
+        if (isset($filters['user_id'])) {
+            $where[] = "c.user_id = :user_id";
+            $params[':user_id'] = $filters['user_id'];
+        }
+        
+        if (isset($filters['search'])) {
+            $where[] = "(c.name LIKE :search OR c.description LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+        
+        $whereClause = $where ? "WHERE " . implode(' AND ', $where) : "";
+        
+        $sql = "SELECT c.*, 
+                       COUNT(cr.id) as recipe_count,
+                       u.full_name as owner_name,
+                       u.profile_picture as owner_picture
+                FROM cookbooks c
+                LEFT JOIN cookbook_recipes cr ON c.id = cr.cookbook_id
+                LEFT JOIN users u ON c.user_id = u.id
+                $whereClause
+                GROUP BY c.id
+                ORDER BY c.updated_at DESC
+                LIMIT :limit OFFSET :offset";
+        
+        $params[':limit'] = $limit;
+        $params[':offset'] = $offset;
+        
+        $stmt = $this->query($sql, $params);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log("Get cookbooks error: " . $e->getMessage());
+        return [];
+    }
+    }
+    
+    public function manageCookbookRecipe(string $cookbook_id, string $recipe_id, string $action, string $user_id) {
+        try {
+            if ($action === 'add') {
+                $sql = "INSERT INTO cookbook_recipes (id, cookbook_id, recipe_id, added_by) 
+                        VALUES (:id, :cookbook_id, :recipe_id, :added_by)";
+                
+                $params = [
+                    ':id' => $this->generateUniqueId('cookbook_recipes', 'id'),
+                    ':cookbook_id' => $cookbook_id,
+                    ':recipe_id' => $recipe_id,
+                    ':added_by' => $user_id
+                ];
+                
+                $this->query($sql, $params);
+                return true;
+            } elseif ($action === 'remove') {
+                $sql = "DELETE FROM cookbook_recipes 
+                        WHERE cookbook_id = :cookbook_id 
+                        AND recipe_id = :recipe_id";
+                
+                $params = [
+                    ':cookbook_id' => $cookbook_id,
+                    ':recipe_id' => $recipe_id
+                ];
+                
+                $this->query($sql, $params);
+                return true;
+            }
+            
+            return false;
+        } catch (Exception $e) {
+            error_log("Manage cookbook recipe error: " . $e->getMessage());
+            return false;
         }
     }
     
-    public static function getUserCookbooks($user_id, $include_public = false) {
-        $where = "c.user_id = :user_id" . ($include_public ? " OR c.is_public = 1" : "");
-        $sql = "SELECT c.* FROM cookbooks c WHERE $where ORDER BY c.created_at DESC";
-        return Database::fetchAll($sql, ['user_id' => $user_id]);
+    public function checkRecipeInCookbook(string $cookbook_id, string $recipe_id) {
+        try {
+            $sql = "SELECT id FROM cookbook_recipes 
+                    WHERE cookbook_id = :cookbook_id 
+                    AND recipe_id = :recipe_id";
+            
+            $result = $this->fetchOne($sql, [
+                ':cookbook_id' => $cookbook_id,
+                ':recipe_id' => $recipe_id
+            ]);
+            
+            return $result !== false;
+        } catch (Exception $e) {
+            error_log("Check recipe in cookbook error: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function getCookbookRecipes(string $cookbook_id) {
+        try {
+            $sql = "SELECT r.*, 
+                           rm.*,
+                           u.full_name as author_name,
+                           u.profile_picture as author_picture,
+                           cr.added_at,
+                           cr.added_by,
+                           u2.full_name as added_by_name
+                    FROM cookbook_recipes cr
+                    JOIN recipes r ON cr.recipe_id = r.id
+                    LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id
+                    LEFT JOIN users u ON r.user_id = u.id
+                    LEFT JOIN users u2 ON cr.added_by = u2.id
+                    WHERE cr.cookbook_id = :cookbook_id
+                    ORDER BY cr.added_at DESC";
+            
+            $stmt = $this->query($sql, [':cookbook_id' => $cookbook_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Get cookbook recipes error: " . $e->getMessage());
+            return [];
+        }
     }
     
     // Shop & Inventory Operations
