@@ -332,9 +332,22 @@ backend/
 | **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Interaction timestamp |
 | **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id)` | User who interacted |
 | **recipe_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES recipes(id)` | Recipe interacted with |
-| **interaction_type** | `ENUM('like','dislike','save','purchase')` | `NOT NULL` | Type of interaction |
+| **interaction_type** | `ENUM('like','dislike','save')` | `NOT NULL` | Type of interaction |
 | **metadata** | `JSON` | `NULL` | Additional interaction data |
 | **UNIQUE KEY** | `(user_id, recipe_id, interaction_type)` | `UNIQUE` | Prevent duplicate interactions |
+
+## User_Recipe_Purchases Table
+
+| **Column Name** | **Data Type** | **Constraint** | **Description** |
+|-----------------|---------------|----------------|-----------------|
+| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Access entry ID |
+| **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE` | User who has access |
+| **recipe_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES recipes(id) ON DELETE CASCADE` | Accessible recipe |
+| **purchased_at** | `DATETIME` | `NULL` | When recipe was purchased |
+| **currency_used** | `ENUM('gold','gem')` | `NULL` | Currency used for purchase |
+| **price_paid** | `INT` | `NULL` | Amount paid |
+| **expires_at** | `DATETIME` | `NULL` | When access expires (NULL for permanent) |
+| **UNIQUE KEY** | `(user_id, recipe_id)` | `UNIQUE` | Prevent duplicate access |
 
 ## Cooking_Sessions Table
 
@@ -412,6 +425,18 @@ backend/
 | **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Vote timestamp |
 | **UNIQUE KEY** | `(cooking_session_id, user_id, vote_type)` | `UNIQUE` | One vote per user per type per session |
 
+## Session_Chat_Messages Table
+
+| **Column Name** | **Data Type** | **Constraint** | **Description** |
+|-----------------|---------------|----------------|-----------------|
+| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Message ID |
+| **cooking_session_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES cooking_sessions(id) ON DELETE CASCADE` | Reference to session |
+| **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id)` | Message sender |
+| **message** | `TEXT` | `NOT NULL` | Chat message content |
+| **message_type** | `ENUM('text','system','vote')` | `DEFAULT 'text'` | Type of message |
+| **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Message timestamp |
+| **is_read** | `BOOLEAN` | `DEFAULT FALSE` | Whether message was read |
+
 ## Cookbooks Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
@@ -455,7 +480,7 @@ backend/
 | **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Creation timestamp |
 | **updated_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP` | Last update timestamp |
 
-## User_Purchases Table
+## User_Shop_Purchases Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -468,32 +493,6 @@ backend/
 | **expires_at** | `DATETIME` | `NULL` | When item expires (NULL for permanent) |
 | **is_active** | `BOOLEAN` | `DEFAULT TRUE` | Whether purchase is currently active |
 | **UNIQUE KEY** | `(user_id, item_id, is_active)` | `UNIQUE` | Prevent duplicate active purchases of same item |
-
-## Session_Chat_Messages Table
-
-| **Column Name** | **Data Type** | **Constraint** | **Description** |
-|-----------------|---------------|----------------|-----------------|
-| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Message ID |
-| **cooking_session_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES cooking_sessions(id) ON DELETE CASCADE` | Reference to session |
-| **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id)` | Message sender |
-| **message** | `TEXT` | `NOT NULL` | Chat message content |
-| **message_type** | `ENUM('text','system','vote')` | `DEFAULT 'text'` | Type of message |
-| **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Message timestamp |
-| **is_read** | `BOOLEAN` | `DEFAULT FALSE` | Whether message was read |
-
-## User_Recipe_Access Table
-
-| **Column Name** | **Data Type** | **Constraint** | **Description** |
-|-----------------|---------------|----------------|-----------------|
-| **id** | `VARCHAR(255)` | `PRIMARY KEY` | Access entry ID |
-| **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE` | User who has access |
-| **recipe_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES recipes(id) ON DELETE CASCADE` | Accessible recipe |
-| **access_type** | `ENUM('purchased','created','gifted','free')` | `NOT NULL` | How access was obtained |
-| **purchased_at** | `DATETIME` | `NULL` | When recipe was purchased |
-| **currency_used** | `ENUM('gold','gem')` | `NULL` | Currency used for purchase |
-| **price_paid** | `INT` | `NULL` | Amount paid |
-| **expires_at** | `DATETIME` | `NULL` | When access expires (NULL for permanent) |
-| **UNIQUE KEY** | `(user_id, recipe_id)` | `UNIQUE` | Prevent duplicate access |
 
 ## User_Inventory Table
 
