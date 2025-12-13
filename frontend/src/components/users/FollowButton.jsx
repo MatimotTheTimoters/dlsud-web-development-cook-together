@@ -1,41 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserPlus, FaUserCheck, FaUserTimes } from 'react-icons/fa';
+import { FaUserPlus, FaUserCheck } from 'react-icons/fa';
 import * as relationshipsApi from '../../api/relationships';
-import { useAuth } from '../../hooks/useAuth'; // Fixed import path
+import { useAuth } from '../../hooks/useAuth';
 
-const FollowButton = ({ targetUserId, initialFollowing = false, onFollowChange }) => {
-    const [isFollowing, setIsFollowing] = useState(initialFollowing);
+const FollowButton = ({ targetUserId, onFollowChange }) => {
+    const [isFollowing, setIsFollowing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const { currentUser } = useAuth();
 
-    const checkFollowingStatus = async () => {
-        if (!currentUser || targetUserId === currentUser.id) return false;
-
-        try {
-            // This function needs to be implemented in relationships API
-            const response = await relationshipsApi.getFriendRequests();
-            const isFollowing = response.some(req =>
-                req.target_user_id === targetUserId &&
-                req.relationship_type === 'following' &&
-                req.status === 'accepted'
-            );
-            return isFollowing;
-        } catch (error) {
-            console.error('Error checking following status:', error);
-            return initialFollowing;
-        }
-    };
-
     useEffect(() => {
-        const init = async () => {
-            const followingStatus = await checkFollowingStatus();
-            setIsFollowing(followingStatus);
+        const checkFollowingStatus = async () => {
+            if (!currentUser || targetUserId === currentUser.id) return;
+
+            try {
+                const response = await relationshipsApi.getFollowing();
+                const following = response.some(following => following.id === targetUserId);
+                setIsFollowing(following);
+            } catch (error) {
+                console.error('Error checking following status:', error);
+            }
         };
-        init();
+
+        if (currentUser) {
+            checkFollowingStatus();
+        }
     }, [targetUserId, currentUser]);
 
     const toggleFollow = async () => {
+        if (!currentUser || targetUserId === currentUser.id) return;
+
         setIsLoading(true);
         setError(null);
 
@@ -52,7 +46,6 @@ const FollowButton = ({ targetUserId, initialFollowing = false, onFollowChange }
         } catch (err) {
             console.error('Error toggling follow:', err);
             setError(err.response?.data?.message || 'Failed to update follow status');
-            setIsFollowing(!isFollowing); // Revert on error
         } finally {
             setIsLoading(false);
         }
@@ -71,7 +64,7 @@ const FollowButton = ({ targetUserId, initialFollowing = false, onFollowChange }
             >
                 {isLoading ? (
                     <>
-                        <span className="spinner"></span>
+                        <span className="spinner-small"></span>
                         {isFollowing ? 'Unfollowing...' : 'Following...'}
                     </>
                 ) : (
