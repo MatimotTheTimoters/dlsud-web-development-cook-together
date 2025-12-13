@@ -2878,22 +2878,6 @@ backend/
   
 - **Used In**: Every component via utility classes for quick styling
 
-#### src/assets/
-
-##### src/assets/fonts/
-- **Description**: Custom font files for gamified typography
-- **Required Imports**: None
-- **Backend Endpoint**: None
-
-##### src/assets/images/
-- **Description**: Image assets directory
-- **Required Imports**: None
-- **Backend Endpoint**: None
-- **Subdirectories**:
-  - `backgrounds/` - Patterned backgrounds for cards and sections
-  - `icons/` - Gamified icons (swords, shields, crowns, etc.)
-  - `illustrations/` - Cooking and gamification illustrations
-
 ---
 
 # 📄 Layouts
