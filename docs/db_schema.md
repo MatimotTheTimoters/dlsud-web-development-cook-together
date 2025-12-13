@@ -1,9 +1,7 @@
 # Database Schema
 
-<details>
-<summary>Users Table</summary>
 
-___
+## Users Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -17,12 +15,7 @@ ___
 | **age** | `INT` | `NULL` | User's age |
 | **gender** | `ENUM('male','female','non-binary','other')` | `NULL` | User's gender |
 
-</details>
-
-<details>
-<summary>User_Stats Table</summary>
-
-___
+## User_Stats Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -47,12 +40,7 @@ ___
 | **last_limit_update** | `DATETIME` | `NULL` | When limits were last calculated |
 | **UNIQUE KEY** | `(user_id)` | `UNIQUE` | One stats entry per user |
 
-</details>
-
-<details>
-<summary>User_Relationships Table</summary>
-
-___
+## User_Relationships Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -66,12 +54,7 @@ ___
 | **responded_at** | `DATETIME` | `NULL` | When request was responded to |
 | **UNIQUE KEY** | `(source_user_id, target_user_id, relationship_type)` | `UNIQUE` | Prevent duplicate relationship types |
 
-</details>
-
-<details>
-<summary>Recipes Table</summary>
-
-___
+## Recipes Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -90,12 +73,7 @@ ___
 | **is_public** | `BOOLEAN` | `DEFAULT TRUE` | Public visibility |
 | **user_id** | `VARCHAR(255)` | `FOREIGN KEY REFERENCES users(id)` | User who created the recipe |
 
-</details>
-
-<details>
-<summary>Recipe_Metadata Table</summary>
-
-___
+## Recipe_Metadata Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -117,12 +95,8 @@ ___
 | **total_fat** | `DECIMAL(10,2)` | `DEFAULT 0` | Total fat in recipe |
 | **UNIQUE KEY** | `(recipe_id)` | `UNIQUE` | One metadata entry per recipe |
 
-</details>
 
-<details>
-<summary>Recipe_Ingredients Table</summary>
-
-___
+## Recipe_Ingredients Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -138,12 +112,7 @@ ___
 | **carbs_per_unit** | `DECIMAL(10,2)` | `DEFAULT 0` | Carbohydrates per unit |
 | **fat_per_unit** | `DECIMAL(10,2)` | `DEFAULT 0` | Fat per unit |
 
-</details>
-
-<details>
-<summary>Recipe_Steps Table</summary>
-
-___
+## Recipe_Steps Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -159,12 +128,7 @@ ___
 | **gem_reward** | `INT` | `DEFAULT 0` | Gem reward for completing step |
 | **order_index** | `INT` | `NOT NULL` | Step sequence order |
 
-</details>
-
-<details>
-<summary>Recipe_Interactions Table</summary>
-
-___
+## Recipe_Interactions Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -176,12 +140,7 @@ ___
 | **metadata** | `JSON` | `NULL` | Additional interaction data |
 | **UNIQUE KEY** | `(user_id, recipe_id, interaction_type)` | `UNIQUE` | Prevent duplicate interactions |
 
-</details>
-
-<details>
-<summary>Cooking_Sessions Table</summary>
-
-___
+## Cooking_Sessions Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -198,12 +157,7 @@ ___
 | **completed_at** | `DATETIME` | `NULL` | When session was completed |
 | **notes** | `TEXT` | `NULL` | Session notes |
 
-</details>
-
-<details>
-<summary>Cooking_Session_Details Table</summary>
-
-___
+## Cooking_Session_Details Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -221,12 +175,7 @@ ___
 | **cook_duration** | `INT` | `NULL` | Cooking time in minutes |
 | **UNIQUE KEY** | `(cooking_session_id)` | `UNIQUE` | One detail entry per session |
 
-</details>
-
-<details>
-<summary>Cooking_Session_Participants Table</summary>
-
-___
+## Cooking_Session_Participants Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -239,12 +188,7 @@ ___
 | **left_at** | `DATETIME` | `NULL` | When user left |
 | **UNIQUE KEY** | `(cooking_session_id, user_id)` | `UNIQUE` | Prevent duplicate joins |
 
-</details>
-
-<details>
-<summary>Cooking_Step_Completions Table</summary>
-
-___
+## Cooking_Step_Completions Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -260,12 +204,7 @@ ___
 | **gold_earned** | `INT` | `DEFAULT 0` | Gold earned from this step |
 | **gems_earned** | `INT` | `DEFAULT 0` | Gems earned from this step |
 
-</details>
-
-<details>
-<summary>Cooking_Session_Votes Table</summary>
-
-___
+## Cooking_Session_Votes Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -277,12 +216,7 @@ ___
 | **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Vote timestamp |
 | **UNIQUE KEY** | `(cooking_session_id, user_id, vote_type)` | `UNIQUE` | One vote per user per type per session |
 
-</details>
-
-<details>
-<summary>Cookbooks Table</summary>
-
-___
+## Cookbooks Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -294,12 +228,7 @@ ___
 | **description** | `TEXT` | `NULL` | Cookbook description |
 | **is_public** | `BOOLEAN` | `DEFAULT FALSE` | Whether cookbook is public |
 
-</details>
-
-<details>
-<summary>Cookbook_Recipes Table</summary>
-
-___
+## Cookbook_Recipes Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -311,12 +240,7 @@ ___
 | **added_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Addition timestamp |
 | **UNIQUE KEY** | `(cookbook_id, recipe_id)` | `UNIQUE` | Prevent duplicate additions |
 
-</details>
-
-<details>
-<summary>Shop_Items Table</summary>
-
-___
+## Shop_Items Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -335,12 +259,7 @@ ___
 | **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Creation timestamp |
 | **updated_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP` | Last update timestamp |
 
-</details>
-
-<details>
-<summary>User_Purchases Table</summary>
-
-___
+## User_Purchases Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -354,12 +273,7 @@ ___
 | **is_active** | `BOOLEAN` | `DEFAULT TRUE` | Whether purchase is currently active |
 | **UNIQUE KEY** | `(user_id, item_id, is_active)` | `UNIQUE` | Prevent duplicate active purchases of same item |
 
-</details>
-
-<details>
-<summary>Session_Chat_Messages Table</summary>
-
-___
+## Session_Chat_Messages Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -371,12 +285,7 @@ ___
 | **created_at** | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Message timestamp |
 | **is_read** | `BOOLEAN` | `DEFAULT FALSE` | Whether message was read |
 
-</details>
-
-<details>
-<summary>User_Recipe_Access Table</summary>
-
-___
+## User_Recipe_Access Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -390,12 +299,7 @@ ___
 | **expires_at** | `DATETIME` | `NULL` | When access expires (NULL for permanent) |
 | **UNIQUE KEY** | `(user_id, recipe_id)` | `UNIQUE` | Prevent duplicate access |
 
-</details>
-
-<details>
-<summary>User_Inventory Table</summary>
-
-___
+## User_Inventory Table
 
 | **Column Name** | **Data Type** | **Constraint** | **Description** |
 |-----------------|---------------|----------------|-----------------|
@@ -407,5 +311,3 @@ ___
 | **is_equipped** | `BOOLEAN` | `DEFAULT FALSE` | Whether item is currently equipped |
 | **expires_at** | `DATETIME` | `NULL` | When item expires |
 | **UNIQUE KEY** | `(user_id, item_id)` | `UNIQUE` | Prevent duplicate inventory entries |
-
-</details>
