@@ -1,100 +1,61 @@
 <?php
+// backend/api/cooking-sessions/show.php
+// Required Imports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 
-// Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 
-// Set CORS headers
 header('Content-Type: application/json');
-require_once __DIR__ . '/../../config/cors.php';
 
-$responseFormatter = new ResponseFormatter();
+// Check if it's a GET request
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    ResponseFormatter::error('Method not allowed', 405);
+    exit;
+}
 
 try {
-    // Check request method
-    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        $responseFormatter->error("Method not allowed", 405);
-        exit;
-    }
-    
     // Get session ID from URL
-    $url_parts = explode('/', $_SERVER['REQUEST_URI']);
-    $session_id = end($url_parts);
+    $session_id = isset($_GET['id']) ? $_GET['id'] : null;
     
-    if (empty($session_id)) {
-        $responseFormatter->error("Session ID is required", 400);
+    if (!$session_id) {
+        ResponseFormatter::error('Session ID is required', 400);
         exit;
     }
     
     $dbHelper = new DatabaseHelper();
     
     // Get cooking session
-    $sessionData = $dbHelper->getCookingSession($session_id);
+    $session = $dbHelper->getCookingSession($session_id);
     
-    if (!$sessionData) {
-        $responseFormatter->notFound("Cooking session not found");
+    if (!$session) {
+        ResponseFormatter::error('Cooking session not found', 404);
         exit;
     }
     
-    // Check visibility
-    $session = $sessionData['session'];
-    
-    // If session is private, check if user is a participant
-    if ($session['visibility'] === 'private') {
+    // Check if user can view the session (based on visibility)
+    if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
         require_once __DIR__ . '/../../classes/AuthHelper.php';
         $authHelper = new AuthHelper();
+        $token = $authHelper->getBearerToken();
         
-        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (!empty($authHeader) && str_starts_with($authHeader, 'Bearer ')) {
-            $token = str_replace('Bearer ', '', $authHeader);
-            $decoded = $authHelper->validateToken($token);
-            
-            if ($decoded) {
-                $userId = $decoded['user_id'];
-                
-                // Check if user is a participant
-                $isParticipant = false;
-                foreach ($sessionData['participants'] as $participant) {
-                    if ($participant['user_id'] === $userId) {
-                        $isParticipant = true;
-                        break;
-                    }
-                }
-                
-                if (!$isParticipant) {
-                    $responseFormatter->unauthorized("You don't have permission to view this session");
-                    exit;
-                }
-            } else {
-                $responseFormatter->unauthorized("Authentication required");
-                exit;
+        if ($token) {
+            $tokenData = $authHelper->validateToken($token);
+            if ($tokenData) {
+                $user_id = $tokenData['user_id'];
+                // Add user-specific data (like participation status)
+                $session['user_participant'] = $dbHelper->isUserInSession($session_id, $user_id);
             }
-        } else {
-            $responseFormatter->unauthorized("Authentication required");
-            exit;
         }
     }
     
-    // Format response
-    $responseData = [
+    ResponseFormatter::success([
         'session' => $session,
-        'details' => $sessionData['details'],
-        'participants' => $sessionData['participants'],
-        'completed_steps' => $sessionData['completed_steps'],
-        'votes' => $sessionData['votes'],
-        'recipe_steps' => $sessionData['recipe_steps'],
-        'progress' => [
-            'current_step' => $sessionData['details']['current_step_index'] ?? 0,
-            'completed_steps' => $sessionData['details']['completed_steps'] ?? 0,
-            'total_steps' => $sessionData['details']['total_steps'] ?? 0,
-            'percentage' => $sessionData['details']['total_steps'] > 0 ? 
-                round(($sessionData['details']['completed_steps'] / $sessionData['details']['total_steps']) * 100, 1) : 0
-        ]
-    ];
-    
-    $responseFormatter->success($responseData, "Cooking session retrieved successfully", 200);
+        'message' => 'Cooking session retrieved successfully'
+    ], 'Session retrieved', 200);
     
 } catch (Exception $e) {
-    $responseFormatter->error("Failed to retrieve cooking session: " . $e->getMessage(), 500);
+    error_log('Error retrieving cooking session: ' . $e->getMessage());
+    ResponseFormatter::error('Server error: ' . $e->getMessage(), 500);
 }
+?>
