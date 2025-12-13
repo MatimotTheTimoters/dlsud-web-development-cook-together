@@ -109,16 +109,35 @@ export const voteSkip = async (sessionId, voteType, voteValue) => {
 };
 
 
+/**
+ * Gets user's cooking session history
+ * @param {Object} params - Query parameters (user_id, limit, offset, etc.)
+ * @returns {Promise} API response with session history
+ */
 export const getSessionHistory = async (params = {}) => {
     try {
-        const response = await api.post('/cooking-sessions/vote.php', {
-            session_id: sessionId,
-            vote_type: voteType,
-            vote_value: voteValue
-        });
-        return response;
+        // Should be calling the history endpoint, not vote endpoint
+        const response = await api.get('/sessions/history.php', { params });
+        return response.data;
     } catch (error) {
         console.error('Error getting session history:', error);
+        throw error;
+    }
+};
+
+/**
+ * Gets cooking session statistics
+ * @param {string} userId - User ID to get stats for
+ * @returns {Promise} API response with session statistics
+ */
+export const getSessionStatistics = async (userId) => {
+    try {
+        const response = await api.get('/sessions/history.php', {
+            params: { user_id: userId, stats: true }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error getting session statistics:', error);
         throw error;
     }
 };
