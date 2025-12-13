@@ -5,9 +5,9 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../classes/AuthHelper.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
+require_once __DIR__ . '/../../classes/UserCalculations.php';
 require_once __DIR__ . '/../../utils/uuidHelper.php';
 require_once __DIR__ . '/../../utils/validation.php';
-require_once __DIR__ . '/../../utils/fileUpload.php';
 
 // Set CORS headers
 header('Content-Type: application/json');
@@ -40,215 +40,167 @@ try {
         exit;
     }
 
-    // Handle multipart form data
-    if (!empty($_FILES['cover_image'])) {
-        // Handle cover image upload
-        $uploadResult = FileUpload::uploadImage($_FILES['cover_image'], 'recipe', $userId);
+    // Get and validate recipe data
+    $data = json_decode(file_get_contents('php://input'), true);
 
-        if ($uploadResult) {
-            $coverImagePath = $uploadResult['relative_path'];
-        } else {
-            $coverImagePath = null;
-        }
-    } else {
-        $coverImagePath = null;
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $responseFormatter->error("Invalid JSON data", 400);
+        exit;
     }
 
-    // Get form data
-    $data = [];
-
-    // Get text fields from POST
-    $textFields = [
-        'title',
-        'description',
-        'origin',
-        'difficulty',
-        'is_paid',
-        'is_public',
-        'preparation_time',
-        'cooking_time',
-        'serving_size',
-        'exp_reward',
-        'gold_reward',
-        'gem_reward',
-        'gold_price',
-        'gem_price',
-        'total_calories',
-        'total_protein',
-        'total_carbs',
-        'total_fat',
-        'tags'
-    ];
-
-    foreach ($textFields as $field) {
-        if (isset($_POST[$field])) {
-            $data[$field] = $_POST[$field];
-        }
-    }
-
-    // Parse JSON arrays if they were sent as form fields
-    if (isset($_POST['ingredients'])) {
-        $data['ingredients'] = json_decode($_POST['ingredients'], true);
-    }
-
-    if (isset($_POST['steps'])) {
-        $data['steps'] = json_decode($_POST['steps'], true);
-    }
-
-    // If no POST data, try JSON input (for backward compatibility)
-    if (empty($data) && empty($_FILES)) {
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $responseFormatter->error("Invalid JSON data", 400);
+    // Validate required fields
+    $requiredFields = ['title', 'ingredients', 'steps'];
+    foreach ($requiredFields as $field) {
+        if (!isset($data[$field]) || empty($data[$field])) {
+            $responseFormatter->error("$field is required", 400);
             exit;
         }
     }
 
-    // Validate required fields
-    $requiredFields = ['title', 'description', 'difficulty'];
-    $validationErrors = [];
+    // Sanitize input
+    $data = sanitizeInput($data);
 
-    foreach ($requiredFields as $field) {
-        if (empty($data[$field])) {
-            $validationErrors[$field] = "This field is required";
-        }
-    }
+    // Get user stats for reward calculations
+    $userCalculations = new UserCalculations();
+    $dbHelper = new DatabaseHelper();
 
-    if (!empty($validationErrors)) {
-        $responseFormatter->validationError($validationErrors);
+    $userStats = $dbHelper->getUserStats($userId);
+    if (!$userStats) {
+        $responseFormatter->error("Failed to get user stats", 500);
         exit;
     }
 
-    // Sanitize input
-    $data = Validation::sanitizeInput($data);
+    $userLimits = $userCalculations->calculateAllUserLimits($userStats);
 
-    // Generate recipe ID
-    $recipeId = UUIDHelper::generateUniqueId('recipes', 'id');
-
-    // Prepare recipe data
-    $recipeData = [
-        'id' => $recipeId,
-        'title' => $data['title'],
-        'description' => $data['description'] ?? '',
-        'origin' => $data['origin'] ?? '',
-        'preparation_time' => isset($data['preparation_time']) ? (int)$data['preparation_time'] : null,
-        'cooking_time' => isset($data['cooking_time']) ? (int)$data['cooking_time'] : null,
-        'serving_size' => isset($data['serving_size']) ? (int)$data['serving_size'] : null,
-        'difficulty' => $data['difficulty'],
-        'is_paid' => isset($data['is_paid']) ? (bool)$data['is_paid'] : false,
-        'is_public' => isset($data['is_public']) ? (bool)$data['is_public'] : true,
-        'user_id' => $userId,
-        'cover_image' => $coverImagePath
-    ];
+    // Calculate recipe rewards
+    $difficulty = $data['difficulty'] ?? 'medium';
+    $recipeRewards = $userCalculations->calculateRecipeRewards($difficulty, $userLimits);
 
     // Start transaction
     Database::query("START TRANSACTION");
 
     try {
+        // Generate recipe ID
+        $recipeId = generateUniqueId('recipes', 'id');
+
+        // Prepare recipe data
+        $recipeData = [
+            'id' => $recipeId,
+            'user_id' => $userId,
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'origin' => $data['origin'] ?? null,
+            'preparation_time' => isset($data['preparation_time']) ? (int)$data['preparation_time'] : null,
+            'cooking_time' => isset($data['cooking_time']) ? (int)$data['cooking_time'] : null,
+            'serving_size' => isset($data['serving_size']) ? (int)$data['serving_size'] : null,
+            'difficulty' => $difficulty,
+            'is_paid' => isset($data['is_paid']) ? (bool)$data['is_paid'] : false,
+            'is_public' => isset($data['is_public']) ? (bool)$data['is_public'] : true,
+            'cover_image' => $data['cover_image'] ?? null
+        ];
+
         // Insert recipe
-        $recipeInserted = Database::insert('recipes', $recipeData);
+        Database::insert('recipes', $recipeData);
 
-        if (!$recipeInserted) {
-            throw new Exception("Failed to create recipe");
-        }
-
-        // Create recipe metadata
-        $metadataId = UUIDHelper::generateUniqueId('recipe_metadata', 'id');
+        // Insert recipe metadata with rewards
+        $metadataId = generateUniqueId('recipe_metadata', 'id');
         $metadataData = [
             'id' => $metadataId,
             'recipe_id' => $recipeId,
-            'tags' => isset($data['tags']) ? $data['tags'] : null,
-            'exp_reward' => isset($data['exp_reward']) ? (int)$data['exp_reward'] : 0,
-            'gold_reward' => isset($data['gold_reward']) ? (int)$data['gold_reward'] : 0,
-            'gem_reward' => isset($data['gem_reward']) ? (int)$data['gem_reward'] : 0,
+            'tags' => isset($data['tags']) ? (is_array($data['tags']) ? implode(',', $data['tags']) : $data['tags']) : null,
+            'exp_reward' => $recipeRewards['exp_reward'],
+            'gold_reward' => $recipeRewards['gold_reward'],
+            'gem_reward' => $recipeRewards['gem_reward'],
             'gold_price' => isset($data['gold_price']) ? (int)$data['gold_price'] : 0,
             'gem_price' => isset($data['gem_price']) ? (int)$data['gem_price'] : 0,
-            'total_calories' => isset($data['total_calories']) ? (float)$data['total_calories'] : 0,
-            'total_protein' => isset($data['total_protein']) ? (float)$data['total_protein'] : 0,
-            'total_carbs' => isset($data['total_carbs']) ? (float)$data['total_carbs'] : 0,
-            'total_fat' => isset($data['total_fat']) ? (float)$data['total_fat'] : 0
+            'total_calories' => 0,
+            'total_protein' => 0,
+            'total_carbs' => 0,
+            'total_fat' => 0
         ];
 
         Database::insert('recipe_metadata', $metadataData);
 
         // Insert ingredients
-        if (!empty($data['ingredients']) && is_array($data['ingredients'])) {
-            foreach ($data['ingredients'] as $index => $ingredient) {
-                $ingredientId = UUIDHelper::generateUniqueId('recipe_ingredients', 'id');
-                $ingredientData = [
-                    'id' => $ingredientId,
-                    'recipe_id' => $recipeId,
-                    'name' => $ingredient['name'] ?? '',
-                    'amount' => isset($ingredient['amount']) ? (float)$ingredient['amount'] : null,
-                    'unit' => $ingredient['unit'] ?? '',
-                    'notes' => $ingredient['notes'] ?? '',
-                    'order_index' => isset($ingredient['order_index']) ? (int)$ingredient['order_index'] : $index,
-                    'calories_per_unit' => isset($ingredient['calories_per_unit']) ? (float)$ingredient['calories_per_unit'] : 0,
-                    'protein_per_unit' => isset($ingredient['protein_per_unit']) ? (float)$ingredient['protein_per_unit'] : 0,
-                    'carbs_per_unit' => isset($ingredient['carbs_per_unit']) ? (float)$ingredient['carbs_per_unit'] : 0,
-                    'fat_per_unit' => isset($ingredient['fat_per_unit']) ? (float)$ingredient['fat_per_unit'] : 0
-                ];
+        $totalNutrition = ['calories' => 0, 'protein' => 0, 'carbs' => 0, 'fat' => 0];
 
-                Database::insert('recipe_ingredients', $ingredientData);
+        foreach ($data['ingredients'] as $index => $ingredient) {
+            $ingredientId = generateUniqueId('recipe_ingredients', 'id');
+            $ingredientData = [
+                'id' => $ingredientId,
+                'recipe_id' => $recipeId,
+                'name' => $ingredient['name'],
+                'amount' => isset($ingredient['amount']) ? (float)$ingredient['amount'] : null,
+                'unit' => $ingredient['unit'] ?? null,
+                'notes' => $ingredient['notes'] ?? null,
+                'order_index' => isset($ingredient['order_index']) ? (int)$ingredient['order_index'] : $index,
+                'calories_per_unit' => isset($ingredient['calories_per_unit']) ? (float)$ingredient['calories_per_unit'] : 0,
+                'protein_per_unit' => isset($ingredient['protein_per_unit']) ? (float)$ingredient['protein_per_unit'] : 0,
+                'carbs_per_unit' => isset($ingredient['carbs_per_unit']) ? (float)$ingredient['carbs_per_unit'] : 0,
+                'fat_per_unit' => isset($ingredient['fat_per_unit']) ? (float)$ingredient['fat_per_unit'] : 0
+            ];
+
+            Database::insert('recipe_ingredients', $ingredientData);
+
+            // Calculate nutrition totals
+            if ($ingredientData['amount'] && $ingredientData['calories_per_unit']) {
+                $totalNutrition['calories'] += $ingredientData['amount'] * $ingredientData['calories_per_unit'];
+                $totalNutrition['protein'] += $ingredientData['amount'] * $ingredientData['protein_per_unit'];
+                $totalNutrition['carbs'] += $ingredientData['amount'] * $ingredientData['carbs_per_unit'];
+                $totalNutrition['fat'] += $ingredientData['amount'] * $ingredientData['fat_per_unit'];
             }
         }
 
-        // Insert steps
-        if (!empty($data['steps']) && is_array($data['steps'])) {
-            foreach ($data['steps'] as $index => $step) {
-                $stepId = UUIDHelper::generateUniqueId('recipe_steps', 'id');
-                $stepData = [
-                    'id' => $stepId,
-                    'recipe_id' => $recipeId,
-                    'description' => $step['description'] ?? '',
-                    'image' => $step['image'] ?? null,
-                    'read_timer_duration' => isset($step['read_timer_duration']) ? (int)$step['read_timer_duration'] : 10,
-                    'timer_duration' => isset($step['timer_duration']) ? (int)$step['timer_duration'] : null,
-                    'timer_unit' => $step['timer_unit'] ?? 'seconds',
-                    'exp_reward' => isset($step['exp_reward']) ? (int)$step['exp_reward'] : 0,
-                    'gold_reward' => isset($step['gold_reward']) ? (int)$step['gold_reward'] : 0,
-                    'gem_reward' => isset($step['gem_reward']) ? (int)$step['gem_reward'] : 0,
-                    'order_index' => isset($step['order_index']) ? (int)$step['order_index'] : $index
-                ];
+        // Update metadata with nutrition totals
+        Database::update('recipe_metadata', [
+            'total_calories' => $totalNutrition['calories'],
+            'total_protein' => $totalNutrition['protein'],
+            'total_carbs' => $totalNutrition['carbs'],
+            'total_fat' => $totalNutrition['fat']
+        ], "recipe_id = :recipe_id", ['recipe_id' => $recipeId]);
 
-                // Handle step image upload if provided
-                if (!empty($_FILES['step_images'][$index])) {
-                    $stepUploadResult = FileUpload::uploadImage($_FILES['step_images'][$index], 'step', $userId);
-                    if ($stepUploadResult) {
-                        $stepData['image'] = $stepUploadResult['relative_path'];
-                    }
-                }
+        // Insert steps with rewards
+        foreach ($data['steps'] as $index => $step) {
+            $stepId = generateUniqueId('recipe_steps', 'id');
 
-                Database::insert('recipe_steps', $stepData);
-            }
+            // Calculate step rewards
+            $stepRewards = $userCalculations->calculateStepRewards(
+                $index,
+                count($data['steps']),
+                $recipeRewards
+            );
+
+            $stepData = [
+                'id' => $stepId,
+                'recipe_id' => $recipeId,
+                'description' => $step['description'],
+                'image' => $step['image'] ?? null,
+                'read_timer_duration' => isset($step['read_timer_duration']) ? (int)$step['read_timer_duration'] : 10,
+                'timer_duration' => isset($step['timer_duration']) ? (int)$step['timer_duration'] : null,
+                'timer_unit' => $step['timer_unit'] ?? 'seconds',
+                'exp_reward' => $stepRewards['exp_reward'],
+                'gold_reward' => $stepRewards['gold_reward'],
+                'gem_reward' => $stepRewards['gem_reward'],
+                'order_index' => isset($step['order_index']) ? (int)$step['order_index'] : $index
+            ];
+
+            Database::insert('recipe_steps', $stepData);
         }
+
+        // Update user stats (increment recipes created)
+        $dbHelper->incrementUserStat($userId, 'recipes_created', 1);
 
         // Commit transaction
         Database::query("COMMIT");
 
-        // Update user stats (recipes created)
-        $dbHelper = new DatabaseHelper();
-        $dbHelper->incrementUserStat($userId, 'recipes_created', 1);
-
-        // Get full recipe data to return
-        $recipeSql = "SELECT r.*, rm.*, u.full_name as author_name 
-                     FROM recipes r 
-                     LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id 
-                     LEFT JOIN users u ON r.user_id = u.id 
-                     WHERE r.id = :id";
-        $createdRecipe = Database::fetchOne($recipeSql, ['id' => $recipeId]);
-
-        // Add full URL for cover image
-        if (!empty($createdRecipe['cover_image'])) {
-            $createdRecipe['cover_image_url'] = FileUpload::getFileUrl($createdRecipe['cover_image']);
-        }
-
-        $responseFormatter->success([
-            'recipe' => $createdRecipe,
+        // Return success response with recipe data
+        $responseData = [
             'recipe_id' => $recipeId,
+            'rewards' => $recipeRewards,
             'message' => 'Recipe created successfully'
-        ], "Recipe created successfully", 201);
+        ];
+
+        $responseFormatter->created($responseData, "Recipe created successfully");
     } catch (Exception $e) {
         // Rollback on error
         Database::query("ROLLBACK");
