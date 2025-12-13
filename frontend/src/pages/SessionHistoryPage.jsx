@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaHistory, FaChartBar, FaClock, FaCalendar } from 'react-icons/fa';
+import { FaHistory, FaChartBar, FaClock, FaCalendar, FaFilter } from 'react-icons/fa';
 
 const SessionHistoryPage = () => {
     const [sessionHistory, setSessionHistory] = useState([]);

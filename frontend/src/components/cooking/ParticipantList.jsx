@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaCrown, FaEye, FaPlus, FaUserCheck } from 'react-icons/fa';
+import { FaUser, FaCrown, FaEye, FaPlus, FaUserCheck, FaUsers } from 'react-icons/fa';
 import { getSession } from '../../api/cooking-sessions';
 
 const ParticipantList = ({ sessionId }) => {

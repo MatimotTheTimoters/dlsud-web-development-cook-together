@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaPlay, FaPause, FaStop, FaStepForward, FaUsers, FaTrophy } from 'react-icons/fa';
+import { FaPlay, FaPause, FaStop, FaStepForward, FaUsers, FaTrophy, FaCheckCircle } from 'react-icons/fa';
 import {
     getSession,
     updateSession,
