@@ -1682,80 +1682,92 @@ backend/
 
 ## api/
 
-## api/auth/
+### api/activity/
 
-### api/auth/register.php
+#### api/activity/feed.php
+- **Description**: Handles activity feed retrieval for user actions and achievements
+- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+- **Frontend Consumers**: HomePage.jsx activity feed, api/activity.js getActivityFeed()
+- **Functions**:
+  - `getUserActivityFeed(user_id, limit, offset) -> array`: Gets paginated activity feed for user
+  - `getGlobalActivityFeed(limit, offset) -> array`: Gets public activity feed
+  - `filterActivitiesByType(activities, type) -> array`: Filters activities by type
+  - `formatActivityForDisplay(activity) -> array`: Formats activity data for frontend display
+
+### api/auth/
+
+#### api/auth/register.php
 - **Description**: Handles user registration
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
 - **Frontend Consumers**: RegisterForm.jsx, RegisterPage.jsx, api/auth.js register()
 
-### api/auth/login.php
+#### api/auth/login.php
 - **Description**: Handles user authentication
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: LoginForm.jsx, LoginPage.jsx, api/auth.js login()
 
-### api/auth/me.php
+#### api/auth/me.php
 - **Description**: Returns current authenticated user's information
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: AuthContext.jsx, Header.jsx, ProtectedRoute.jsx, api/auth.js getCurrentUser()
 
-### api/auth/logout.php
+#### api/auth/logout.php
 - **Description**: Handles user logout
 - **Required Imports**: ../../config/database.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: Header.jsx logout, AuthContext.jsx logout(), api/auth.js logout()
 
-### api/auth/refresh-token.php
+#### api/auth/refresh-token.php
 - **Description**: Refreshes authentication tokens
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: AuthContext.jsx refreshToken(), api/auth.js refreshToken(), useAuth hook
 
-## api/users/
+### api/users/
 
-### api/users/profile.php
+#### api/users/profile.php
 - **Description**: Retrieves user profile information
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: UserProfile.jsx, ProfilePage.jsx, Header.jsx, api/users.js getProfile()
 
-### api/users/update.php
+#### api/users/update.php
 - **Description**: Updates user profile information
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/validation.php
 - **Frontend Consumers**: UserProfile.jsx edit, ProfilePage.jsx, api/users.js updateProfile()
 
-### api/users/stats.php
+#### api/users/stats.php
 - **Description**: Retrieves user statistics and gamification data
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: StatsDisplay.jsx, UserProfile.jsx, Header.jsx, LevelProgress.jsx, api/users.js getUserStats()
 
-### api/users/search.php
+#### api/users/search.php
 - **Description**: Searches for users by name or criteria
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: DiscoverPage.jsx, UserCard.jsx lists, api/users.js searchUsers()
 
-## api/relationships/
+### api/relationships/
 
-### api/relationships/follow.php
+#### api/relationships/follow.php
 - **Description**: Handles user following/unfollowing
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: FollowButton.jsx, UserCard.jsx, UserProfile.jsx, api/relationships.js followUser()/unfollowUser()
 
-### api/relationships/friends.php
+#### api/relationships/friends.php
 - **Description**: Manages friend requests and relationships
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: UserProfile.jsx friend requests, api/relationships.js friend request functions
 
-### api/relationships/list.php
+#### api/relationships/list.php
 - **Description**: Lists user relationships (following, followers, friends)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: UserProfile.jsx tabs, api/relationships.js getFollowing()/getFollowers()
 
-## api/recipes/
+### api/recipes/
 
-### api/recipes/index.php
+#### api/recipes/index.php
 - **Description**: Lists recipes with filtering and pagination
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: RecipeList.jsx, RecipesPage.jsx, HomePage.jsx, DiscoverPage.jsx, api/recipes.js getAllRecipes()
 
-### api/recipes/purchase.php
+#### api/recipes/purchase.php
 - **Description**: Handles recipe purchases with currency (gold or gems)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../classes/UserCalculations.php
 - **Frontend Consumers**: PurchaseModal.jsx, RecipeDetail.jsx purchase button, api/purchase.js purchaseRecipe()
@@ -1764,69 +1776,69 @@ backend/
   - `processRecipePurchase(user_id, recipe_id, currency_type) -> array`: Processes the recipe purchase transaction
   - `checkRecipeOwnership(user_id, recipe_id) -> bool`: Checks if user already owns recipe
 
-### api/recipes/create.php
+#### api/recipes/create.php
 - **Description**: Creates a new recipe
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php, ../../utils/validation.php
 - **Frontend Consumers**: RecipeForm.jsx, CreateRecipePage.jsx, api/recipes.js createRecipe()
 
-### api/recipes/show.php
+#### api/recipes/show.php
 - **Description**: Retrieves detailed information about a specific recipe
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: RecipeDetail.jsx, RecipeDetailPage.jsx, api/recipes.js getRecipe()
 
-### api/recipes/update.php
+#### api/recipes/update.php
 - **Description**: Updates an existing recipe
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/validation.php
 - **Frontend Consumers**: RecipeForm.jsx edit mode, api/recipes.js updateRecipe()
 
-### api/recipes/delete.php
+#### api/recipes/delete.php
 - **Description**: Deletes a recipe
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: RecipeDetail.jsx delete button, api/recipes.js deleteRecipe()
 
-### api/recipes/interact.php
+#### api/recipes/interact.php
 - **Description**: Handles recipe interactions (likes, saves, purchases)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: RecipeCard.jsx like/save buttons, RecipeDetail.jsx interactions, api/recipes.js likeRecipe()/saveRecipe()
 
-## api/cooking-sessions/
+### api/cooking-sessions/
 
-### api/cooking-sessions/index.php
+#### api/cooking-sessions/index.php
 - **Description**: Lists cooking sessions
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: HomePage.jsx session list, api/cooking-sessions.js session listing
 
-### api/cooking-sessions/create.php
+#### api/cooking-sessions/create.php
 - **Description**: Creates a new cooking session
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
 - **Frontend Consumers**: RecipeDetail.jsx "Start Cooking", CookingSessionPage.jsx, api/cooking-sessions.js createSession()
 
-### api/cooking-sessions/show.php
+#### api/cooking-sessions/show.php
 - **Description**: Retrieves detailed information about a specific cooking session
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: CookingSession.jsx, CookingSessionPage.jsx, api/cooking-sessions.js getSession()
 
-### api/cooking-sessions/update.php
+#### api/cooking-sessions/update.php
 - **Description**: Updates an existing cooking session
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: CookingSession.jsx controls, api/cooking-sessions.js updateSession()
 
-### api/cooking-sessions/join.php
+#### api/cooking-sessions/join.php
 - **Description**: Allows users to join a cooking session
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: CookingSession.jsx join button, ParticipantList.jsx, api/cooking-sessions.js joinSession()
 
-### api/cooking-sessions/complete-step.php
+#### api/cooking-sessions/complete-step.php
 - **Description**: Marks a cooking step as completed
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: CookingSession.jsx step completion, StepList.jsx, api/cooking-sessions.js completeStep()
 
-### api/cooking-sessions/vote.php
+#### api/cooking-sessions/vote.php
 - **Description**: Handles voting in cooking sessions (skip steps, etc.)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: CookingSession.jsx vote buttons, SessionChat.jsx, api/cooking-sessions.js voteSkip()
 
-### api/sessions/history.php
+#### api/sessions/history.php
 - **Description**: Retrieves user's cooking session history
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: SessionHistoryPage.jsx, UserProfile.jsx history tab, api/cooking-sessions.js session history
@@ -1834,9 +1846,9 @@ backend/
   - `getUserSessionHistory(user_id, limit, offset) -> array`: Gets paginated session history
   - `getSessionStatistics(user_id) -> array`: Gets cooking stats (total sessions, time, etc.)
 
-## api/chat/
+### api/chat/
 
-### api/chat/messages.php
+#### api/chat/messages.php
 - **Description**: Handles cooking session chat messages (for multiplayer)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: SessionChat.jsx send/receive, api/chat.js sendChatMessage()/getChatMessages()
@@ -1844,43 +1856,43 @@ backend/
   - `sendSessionMessage(session_id, user_id, message) -> bool`: Saves chat message
   - `getSessionMessages(session_id, limit) -> array`: Retrieves session chat history
 
-## api/cookbooks/
+### api/cookbooks/
 
-### api/cookbooks/index.php
+#### api/cookbooks/index.php
 - **Description**: Lists user's cookbooks
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: CookbooksPage.jsx, UserProfile.jsx cookbooks tab, api/cookbooks.js getCookbooks()
 
-### api/cookbooks/create.php
+#### api/cookbooks/create.php
 - **Description**: Creates a new cookbook
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../utils/uuidHelper.php
 - **Frontend Consumers**: CookbooksPage.jsx create button, api/cookbooks.js createCookbook()
 
-### api/cookbooks/show.php
+#### api/cookbooks/show.php
 - **Description**: Retrieves detailed information about a specific cookbook
 - **Required Imports**: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: Cookbook detail views, api/cookbooks.js getCookbookRecipes()
 
-### api/cookbooks/add-recipe.php
+#### api/cookbooks/add-recipe.php
 - **Description**: Adds a recipe to a cookbook
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: RecipeDetail.jsx "Add to Cookbook", api/cookbooks.js addRecipeToCookbook()
 
-### api/cookbooks/remove-recipe.php
+#### api/cookbooks/remove-recipe.php
 - **Description**: Removes a recipe from a cookbook
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: Cookbook management, api/cookbooks.js removeRecipeFromCookbook()
 
-## api/upload/
+### api/upload/
 
-### api/upload/image.php
+#### api/upload/image.php
 - **Description**: Handles image uploads for various types (profile, recipe, step)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../utils/fileUpload.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: UserProfile.jsx profile picture, RecipeForm.jsx images, upload.js utility, api/upload image functions
 
-## api/inventory/
+### api/inventory/
 
-### api/inventory/list.php
+#### api/inventory/list.php
 - **Description**: Lists user's purchased inventory items
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 - **Frontend Consumers**: InventoryList.jsx, InventoryItem.jsx, ShopPage.jsx inventory, api/inventory.js getUserInventory()
@@ -1889,7 +1901,7 @@ backend/
   - `getEquippedItems(user_id) -> array`: Gets currently equipped items
   - `getItemDetails(item_id) -> array`: Gets detailed information about an inventory item
 
-### api/inventory/use.php
+#### api/inventory/use.php
 - **Description**: Uses a consumable item from inventory
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../classes/UserCalculations.php
 - **Frontend Consumers**: InventoryItem.jsx use button, api/inventory.js useConsumable()
@@ -1899,9 +1911,9 @@ backend/
   - `consumeItem(user_id, inventory_id) -> bool`: Reduces quantity or removes item
   - `getConsumableEffects() -> array`: Returns list of possible consumable effects
 
-## api/shop/
+### api/shop/
 
-### api/shop/items.php
+#### api/shop/items.php
 - **Description**: Lists available shop items
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../../config/cors.php
 - **Frontend Consumers**: ShopPage.jsx, ShopItem.jsx, DiscoverPage.jsx shop items, api/shop.js getShopItems()
@@ -1909,7 +1921,7 @@ backend/
 **Functions**:
 - `getAuthorizationToken() -> string|null`: Extracts Bearer token from Authorization header
 
-### api/shop/purchase.php
+#### api/shop/purchase.php
 - **Description**: Handles shop item purchases (redirects to /api/purchase/item.php)
 - **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php, ../purchase/item.php
 - **Frontend Consumers**: ShopItem.jsx purchase, PurchaseModal.jsx, api/shop.js purchaseItem()
