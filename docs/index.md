@@ -2770,6 +2770,8 @@ backend/
 
 # 📄 Layouts
 
+# 📄 Layouts
+
 ## Public Layouts
 
 ### **public/index.html** - Main App Template
@@ -2790,51 +2792,471 @@ backend/
 
 ## Component Layouts
 
-### **src/components/common/**
-- **Header.jsx**: App header with navigation, user stats, quick actions
-- **Navigation.jsx**: Main navigation menu with icons
-- **Footer.jsx**: App footer with links and copyright
-- **LoadingSpinner.jsx**: Animated loading indicator
-- **ErrorBoundary.jsx**: Error handling wrapper
+### **src/components/common/Header.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 🍳 CookTogether                            │
+├────────────────────────────────────────────┤
+│ [🏠 Home] [📖 Recipes] [👥 Discover]       │
+│ [🍳 Cook] [🏪 Shop] [📚 Cookbooks]         │
+├────────────────────────────────────────────┤
+│ 👤 Level 15 | 💰 250 | 💎 45 | 🔔 3        │
+└────────────────────────────────────────────┘
+```
 
-### **src/components/auth/**
-- **LoginForm.jsx**: Email/password form with login streak bonus
-- **RegisterForm.jsx**: Registration form with welcome bonuses
-- **ProtectedRoute.jsx**: Authentication guard wrapper
+### **src/components/common/Navigation.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 🍳 CookTogether                            │
+├────────────────────────────────────────────┤
+│ Main Nav                                   │
+│ [🏠 Home]      [📖 Recipes]   [👥 Discover]│
+│ [🍳 Cook]      [🏪 Shop]      [📚 Cookbooks]│
+├────────────────────────────────────────────┤
+│ User Actions                               │
+│ [👤 Profile]   [🔔 Notif 3]   [✉️ Messages]│
+└────────────────────────────────────────────┘
+```
 
-### **src/components/recipes/**
-- **RecipeCard.jsx**: Compact recipe preview card
-- **RecipeDetail.jsx**: Full recipe view with tabs
-- **RecipeForm.jsx**: Multi-section recipe creation/editing
-- **RecipeList.jsx**: Filterable, paginated recipe grid
-- **IngredientList.jsx**: Checkable ingredient display
-- **StepList.jsx**: Timer-enabled cooking steps
+### **src/components/common/Footer.jsx**
+```
+┌────────────────────────────────────────────┐
+│ Links: [About] [Blog] [Privacy] [Terms]    │
+│ Social: [🐦] [📘] [📷] [🎥]                │
+├────────────────────────────────────────────┤
+│ © 2024 CookTogether • Level up your cooking│
+│ Made with ❤️ and 🍳 by food lovers         │
+└────────────────────────────────────────────┘
+```
 
-### **src/components/cooking/**
-- **CookingSession.jsx**: Main cooking interface with split panel
-- **SessionTimer.jsx**: Countdown timer controls
-- **ParticipantList.jsx**: Session participants display
-- **StepProgress.jsx**: Visual step completion tracker
-- **SessionChat.jsx**: Real-time chat panel
+### **src/components/common/LoadingSpinner.jsx**
+```
+          ╔════════════════╗
+          ║    Loading     ║
+          ║   🍳  🔥  🥘   ║
+          ║  Cooking up... ║
+          ╚════════════════╝
+```
 
-### **src/components/users/**
-- **UserCard.jsx**: Compact user profile card
-- **UserProfile.jsx**: Detailed profile with tabs
-- **StatsDisplay.jsx**: Gamification stats dashboard
-- **FollowButton.jsx**: Follow/unfollow toggle
+### **src/components/common/ErrorBoundary.jsx**
+```
+┌────────────────────────────────────────────┐
+│ ⚠️  Something went wrong!                  │
+├────────────────────────────────────────────┤
+│ Error details: [Technical details here]    │
+│                                            │
+│ [🔄 Try Again]   [🏠 Go Home]              │
+└────────────────────────────────────────────┘
+```
 
-### **src/components/gamification/**
-- **CurrencyDisplay.jsx**: Gold/Gem balance indicator
-- **LevelProgress.jsx**: EXP progress bar
-- **RewardNotification.jsx**: Animated reward alerts
-- **ShopItem.jsx**: Purchasable item card
+### **src/components/auth/LoginForm.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 🔐 Login to CookTogether                   │
+├────────────────────────────────────────────┤
+│ 📧 Email: [____________________________]   │
+│ 🔒 Password: [_________________________]   │
+│                                            │
+│ [✅ Remember me]                           │
+│                                            │
+│ [🍳 Login]                                 │
+├────────────────────────────────────────────┤
+│ Forgot password? [Reset]                   │
+│ New here? [Create Account]                 │
+└────────────────────────────────────────────┘
+```
 
-### **src/components/inventory/**
-- **InventoryItem.jsx**: Consumable item card with usage
-- **InventoryList.jsx**: Filterable inventory grid
+### **src/components/auth/RegisterForm.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 👤 Create Your Account                     │
+├────────────────────────────────────────────┤
+│ 👤 Full Name: [_________________________]  │
+│ 📧 Email: [____________________________]   │
+│ 🔐 Password: [_________________________]   │
+│ 🔐 Confirm: [__________________________]   │
+│                                            │
+│ Welcome Bonus: 🎁 +100 Gold               │
+│              🏆 Level 1 Starter Kit        │
+│                                            │
+│ [✅ I agree to Terms]                      │
+│                                            │
+│ [🍳 Create Account]                        │
+└────────────────────────────────────────────┘
+```
 
-### **src/components/purchase/**
-- **PurchaseModal.jsx**: Currency selection purchase dialog
+### **src/components/auth/ProtectedRoute.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 🔒 Access Restricted                       │
+├────────────────────────────────────────────┤
+│ This content requires authentication.      │
+│                                            │
+│ [🔐 Login]     [👤 Register]               │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/recipes/RecipeCard.jsx**
+```
+┌────────────────────────────────────────────┐
+│ [Recipe Image]                             │
+├────────────────────────────────────────────┤
+│ 🍕 Pizza Margherita                        │
+│ ⭐⭐⭐⭐⭐ (124) | 🕐 45 min | 🔥 Medium      │
+├────────────────────────────────────────────┤
+│ Classic Italian pizza with fresh           │
+│ mozzarella and basil...                    │
+├────────────────────────────────────────────┤
+│ ❤️ 45 | 📖 12 | 👤 Chef Mario             │
+│ 💰 150 Gold or 💎 15 Gems                  │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/recipes/RecipeDetail.jsx**
+```
+┌────────────────────────────────────────────┐
+│ [HERO IMAGE - Full width]                  │
+├────────────────────────────────────────────┤
+│ 🍕 Pizza Margherita      👤 Chef Mario     │
+│ ⭐⭐⭐⭐⭐ (124) 🕐 45 min 🔥 Medium 🇮🇹 Italian│
+├────────────────────────────────────────────┤
+│ [TABS: 📝 Overview 🛒 Ingredients 👨‍🍳 Steps]│
+├────────────────────────────────────────────┤
+│ Tab Content Area                           │
+│ • Overview: Description, nutrition         │
+│ • Ingredients: Checkable list with amounts │
+│ • Steps: Numbered steps with timers        │
+├────────────────────────────────────────────┤
+│ ❤️ Like | 📖 Save | 👥 Start Cooking       │
+│ 💰 Purchase Options: [150 Gold] [15 Gems]  │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/recipes/RecipeForm.jsx**
+```
+┌────────────────────────────────────────────┐
+│ ✍️ Create New Recipe                       │
+├────────────────────────────────────────────┤
+│ [Basic Info Tab]                           │
+│ Title: [____________________________]      │
+│ Description: [_______________________]     │
+│ Difficulty: [🔥 Easy 🔥 Medium 🔥 Hard]   │
+│ Time: [__] min | Servings: [__]           │
+├────────────────────────────────────────────┤
+│ [Ingredients Tab]                          │
+│ 1. [Flour] [500] [g] [Notes...] [🗑️]      │
+│ 2. [Water] [300] [ml] [Notes...] [🗑️]     │
+│ [+] Add Ingredient                         │
+├────────────────────────────────────────────┤
+│ [Steps Tab]                                │
+│ 1. [Mix ingredients...] [⏱️ 5 min] [🗑️]   │
+│ 2. [Knead dough...] [⏱️ 10 min] [🗑️]      │
+│ [+] Add Step                               │
+├────────────────────────────────────────────┤
+│ 🎮 Rewards Preview: +150 EXP, +75 Gold     │
+│                                            │
+│ [💾 Save Draft] [🚀 Publish Recipe]        │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/recipes/RecipeList.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 🔍 Search: [_________________________]     │
+│ Filters: [All] [Free] [Paid] [Difficulty] │
+│ Sort: [Popular] [New] [Difficulty] [Time] │
+├────────────────────────────────────────────┤
+│ ┌────┐ ┌────┐ ┌────┐ ┌────┐               │
+│ │🍕 │ │🍝 │ │🍰 │ │🥗 │                   │
+│ │Card│ │Card│ │Card│ │Card│               │
+│ └────┘ └────┘ └────┘ └────┘               │
+│                                            │
+│ ┌────┐ ┌────┐ ┌────┐ ┌────┐               │
+│ │🍖 │ │🍣 │ │🍔 │ │🥞 │                   │
+│ │Card│ │Card│ │Card│ │Card│               │
+│ └────┘ └────┘ └────┘ └────┘               │
+├────────────────────────────────────────────┤
+│ [← Previous] Page 1 of 5 [Next →]         │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/recipes/IngredientList.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 🛒 Ingredients (4 items)                   │
+├────────────────────────────────────────────┤
+│ [✓] Flour             500g                │
+│ [✓] Water            300ml                │
+│ [ ] Yeast             10g  (activated)    │
+│ [ ] Salt               5g                 │
+├────────────────────────────────────────────┤
+│ 📊 Nutrition: 1200 cal | 40g protein      │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/recipes/StepList.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 👨‍🍳 Cooking Steps (6 steps)                │
+├────────────────────────────────────────────┤
+│ 1. [✓] Mix dry ingredients       ⏱️ 5 min  │
+│    ✔️ Completed at 2:30 PM                 │
+├────────────────────────────────────────────┤
+│ 2. [▶] Add water and knead       ⏱️ 10 min │
+│    ⏱️ 8:45 remaining                       │
+│    [⏸️ Pause] [⏩ Skip]                    │
+├────────────────────────────────────────────┤
+│ 3. [ ] Let dough rise            ⏱️ 60 min │
+│    [▶ Start]                                 │
+├────────────────────────────────────────────┤
+│ 4-6. [ ] Remaining steps                    │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/cooking/CookingSession.jsx**
+```
+┌────────────────────────────────────────────┬────────────────────────────────────────────┐
+│ Left Panel                                 │ Right Panel                                │
+├────────────────────────────────────────────┼────────────────────────────────────────────┤
+│ 🛒 Ingredients                            │ 👨‍🍳 Current Step                          │
+│ • [✓] Flour 500g                         │ Step 2: Knead the dough                    │
+│ • [ ] Water 300ml                        │                                            │
+│ • [ ] Yeast 10g                          │ Mix thoroughly until smooth...             │
+│                                            │                                            │
+│ 👥 Participants (3)                       │ ⏱️ Timer: 08:45 remaining                  │
+│ 👑 You (Host)                            │ [⏸️ Pause] [⏭️ Next Step]                  │
+│ 👤 ChefLisa                              │                                            │
+│ 👤 FoodieFrank                           │ 🎮 Rewards for this step:                  │
+│                                            │ +25 EXP | +12 Gold | +1 Gem               │
+└────────────────────────────────────────────┴────────────────────────────────────────────┘
+```
+
+### **src/components/cooking/SessionTimer.jsx**
+```
+          ╔══════════════════════════╗
+          ║        ⏱️ 08:45          ║
+          ║   Knead the dough        ║
+          ╠══════════════════════════╣
+          ║ [⏸️ Pause] [▶ Resume]     ║
+          ║ [⏭️ Skip] [🔁 Reset]      ║
+          ╚══════════════════════════╝
+```
+
+### **src/components/cooking/ParticipantList.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 👥 Participants (3/4)                      │
+├────────────────────────────────────────────┤
+│ 👑 You                Host | ✅ Ready      │
+│ 👤 ChefLisa           ✅ Step 2           │
+│ 👤 FoodieFrank        ⏸️ Paused           │
+├────────────────────────────────────────────┤
+│ 👤 Available to join:                     │
+│ • CookMaster99                             │
+│ • BakingBuddy                              │
+│                                            │
+│ [👥 Invite More]                           │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/cooking/StepProgress.jsx**
+```
+Step Progress: ████████░░░░ 80%
+┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+│ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │10 │
+│ ✓ │ ▶ │   │   │   │   │   │   │   │   │
+└───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
+```
+
+### **src/components/cooking/SessionChat.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 💬 Session Chat                            │
+├────────────────────────────────────────────┤
+│ 14:30 System: ChefLisa joined the session  │
+│ 14:32 You: Let's start with step 1!        │
+│ 14:35 ChefLisa: Done mixing!               │
+│ 14:40 FoodieFrank: Timer started           │
+├────────────────────────────────────────────┤
+│ [Type your message...] [📤 Send]           │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/users/UserCard.jsx**
+```
+┌────────────────────────────────────────────┐
+│ [Profile Picture]                          │
+├────────────────────────────────────────────┤
+│ 👤 Chef Mario                              │
+│ 🏆 Level 24 | Italian Master               │
+│ ⭐ 4.8 (245 reviews)                       │
+├────────────────────────────────────────────┤
+│ 📖 45 recipes | 👥 1.2k followers          │
+│ 🔥 12 cooking now                          │
+├────────────────────────────────────────────┤
+│ [➕ Follow] [👥 Invite to Cook]            │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/users/UserProfile.jsx**
+```
+┌────────────────────────────────────────────┐
+│ [Profile Banner]                           │
+├────────────────────────────────────────────┤
+│ [Profile Pic] 👤 Chef Mario [✏️ Edit]      │
+│ 🏆 Level 24 Italian Master                 │
+│ ⭐ 4.8 (245) | 📍 Rome, Italy              │
+├────────────────────────────────────────────┤
+│ [TABS: 📖 Recipes 👥 Followers 🏪 Shop    │
+│        📚 Cookbooks 📅 History ⚙️ Settings]│
+├────────────────────────────────────────────┤
+│ Tab Content Area                           │
+│ • Recipes: Grid of user's recipes          │
+│ • Followers: List of followers/following   │
+│ • History: Past cooking sessions           │
+│ • Settings: Profile edit form              │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/users/StatsDisplay.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 📊 Your Stats                              │
+├────────────────────────────────────────────┤
+│ 🏆 Level 15 ██████████░░ 75% to 16         │
+│                                            │
+│ 💰 Currency                                │
+│ Gold: 1,250 [🏪 Shop]                      │
+│ Gems: 45 [💎 Earn More]                    │
+│                                            │
+│ 🍳 Cooking Stats                           │
+│ Recipes Created: 12                        │
+│ Recipes Cooked: 45                         │
+│ Total Cooking Time: 68h 22m                │
+│                                            │
+│ 👥 Social                                  │
+│ Followers: 124 | Following: 89             │
+│ Login Streak: 🔥 7 days                    │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/users/FollowButton.jsx**
+```
+┌────────────────────────────────────────────┐
+│ Current State: [Following]                 │
+│                                            │
+│ Options:                                   │
+│ [➕ Follow]   (if not following)           │
+│ [✓ Following] (if following)              │
+│ [👥 Friends]   (if friends)               │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/gamification/CurrencyDisplay.jsx**
+```
+          ╔══════════════════════════╗
+          ║        💰  Wallet        ║
+          ╠══════════════════════════╣
+          ║  Gold:  1,250  [🏪]      ║
+          ║  Gems:     45  [💎]      ║
+          ╚══════════════════════════╝
+```
+
+### **src/components/gamification/LevelProgress.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 🏆 Level 15                                │
+├────────────────────────────────────────────┤
+│ ███████████████████░░░░░░░░░░░░ 75%       │
+│ 1,200/1,600 EXP to Level 16               │
+├────────────────────────────────────────────┤
+│ Next: Unlock 🍳 Master Recipes             │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/gamification/RewardNotification.jsx**
+```
+          🎉 LEVEL UP! 🎉
+          Level 15 → 16
+          
+          🎁 Rewards:
+          +100 💰 Gold
+          +10  💎 Gems
+          +500 ⭐ EXP
+          
+          🔓 Unlocked: Master Recipes
+```
+
+### **src/components/gamification/ShopItem.jsx**
+```
+┌────────────────────────────────────────────┐
+│ [Item Image]                               │
+├────────────────────────────────────────────┤
+│ 🍳 Golden Whisk                            │
+│ (+15% cooking speed for 24h)               │
+├────────────────────────────────────────────┤
+│ 💰 500 Gold   or   💎 50 Gems              │
+├────────────────────────────────────────────┤
+│ [🛒 Purchase] [👁️ Preview]                 │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/inventory/InventoryItem.jsx**
+```
+┌────────────────────────────────────────────┐
+│ [Item Image]                               │
+├────────────────────────────────────────────┤
+│ 🍯 Honey Glaze                             │
+│ (Adds sweet glaze to any dish)             │
+├────────────────────────────────────────────┤
+│ Quantity: 3x                               │
+│ Expires: 2d 12h                            │
+├────────────────────────────────────────────┤
+│ [Use Now] [Sell] [Info]                    │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/inventory/InventoryList.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 📦 Inventory                               │
+├────────────────────────────────────────────┤
+│ Filters: [All] [Consumables] [Equipment]   │
+│ Sort: [Newest] [Quantity] [Expiring]       │
+├────────────────────────────────────────────┤
+│ ┌────┐ ┌────┐ ┌────┐ ┌────┐               │
+│ │🍯 │ │🍳 │ │🔥 │ │⭐ │                   │
+│ │Item│ │Item│ │Item│ │Item│               │
+│ └────┘ └────┘ └────┘ └────┘               │
+│                                            │
+│ ┌────┐ ┌────┐ ┌────┐ ┌────┐               │
+│ │🍰 │ │🎁 │ │🔧 │ │✨ │                   │
+│ │Item│ │Item│ │Item│ │Item│               │
+│ └────┘ └────┘ └────┘ └────┘               │
+└────────────────────────────────────────────┘
+```
+
+### **src/components/purchase/PurchaseModal.jsx**
+```
+┌────────────────────────────────────────────┐
+│ 💰 Purchase Recipe                         │
+├────────────────────────────────────────────┤
+│ 🍕 Pizza Margherita                        │
+│ Get full access to this recipe             │
+├────────────────────────────────────────────┤
+│ Select Currency:                           │
+│ [ ] 💰 150 Gold (You have: 1,250)          │
+│ [ ] 💎 15 Gems (You have: 45)              │
+├────────────────────────────────────────────┤
+│ Included:                                  │
+│ ✓ Step-by-step instructions                │
+│ ✓ Nutritional information                  │
+│ ✓ Cooking timers                           │
+│ ✓ EXP & Gold rewards                       │
+├────────────────────────────────────────────┤
+│ [✅ Purchase] [❌ Cancel]                   │
+└────────────────────────────────────────────┘
+```
 
 ## Page Layouts (Component Composition)
 
