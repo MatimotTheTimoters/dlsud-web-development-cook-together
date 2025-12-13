@@ -1,4 +1,4 @@
-import api from './api'; // Assuming you have a base api utility
+import api from '../utils/api';
 
 /**
  * Upload utility functions for handling file uploads
