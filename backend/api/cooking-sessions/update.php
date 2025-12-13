@@ -1,146 +1,98 @@
 <?php
+// backend/api/cooking-sessions/update.php
+// Required Imports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 
-// Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../classes/AuthHelper.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 
-// Set CORS headers
 header('Content-Type: application/json');
-require_once __DIR__ . '/../../config/cors.php';
 
-$responseFormatter = new ResponseFormatter();
-$authHelper = new AuthHelper();
+// Check if it's a PUT request
+if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
+    ResponseFormatter::error('Method not allowed', 405);
+    exit;
+}
 
 try {
-    // Check authentication
-    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    if (empty($authHeader) || !str_starts_with($authHeader, 'Bearer ')) {
-        $responseFormatter->unauthorized("Authentication required");
+    // Get authorization token
+    $authHelper = new AuthHelper();
+    $token = $authHelper->getBearerToken();
+    
+    if (!$token) {
+        ResponseFormatter::unauthorized('No authentication token provided');
         exit;
     }
     
-    $token = str_replace('Bearer ', '', $authHeader);
-    $decoded = $authHelper->validateToken($token);
-    
-    if (!$decoded) {
-        $responseFormatter->unauthorized("Invalid or expired token");
+    // Validate token
+    $tokenData = $authHelper->validateToken($token);
+    if (!$tokenData) {
+        ResponseFormatter::unauthorized('Invalid or expired token');
         exit;
     }
     
-    $userId = $decoded['user_id'];
+    $user_id = $tokenData['user_id'];
     
-    // Get session ID from URL
-    $url_parts = explode('/', $_SERVER['REQUEST_URI']);
-    $session_id = end($url_parts);
+    // Get input
+    $input = json_decode(file_get_contents('php://input'), true);
     
-    if (empty($session_id)) {
-        $responseFormatter->error("Session ID is required", 400);
+    if (!isset($input['session_id'])) {
+        ResponseFormatter::error('Session ID is required', 400);
         exit;
     }
     
-    // Check request method
-    if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
-        $responseFormatter->error("Method not allowed", 405);
-        exit;
-    }
+    $session_id = $input['session_id'];
+    $updates = $input['updates'] ?? [];
     
-    // Get and validate input data
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        $responseFormatter->error("Invalid JSON data", 400);
+    if (empty($updates)) {
+        ResponseFormatter::error('No updates provided', 400);
         exit;
     }
     
     $dbHelper = new DatabaseHelper();
     
-    // Get current session
-    $sessionData = $dbHelper->getCookingSession($session_id);
+    // Check if user is the host or has permission to update
+    $session = $dbHelper->getCookingSession($session_id);
     
-    if (!$sessionData) {
-        $responseFormatter->notFound("Cooking session not found");
+    if (!$session) {
+        ResponseFormatter::error('Cooking session not found', 404);
         exit;
     }
     
-    $session = $sessionData['session'];
-    
-    // Check permission - only host or admin can update session
-    $isHost = ($session['host_id'] === $userId);
-    
-    if (!$isHost) {
-        // Check if user is admin (you might have an admin check here)
-        $responseFormatter->unauthorized("Only the session host can update the session");
+    // Only host can update session
+    if ($session['host_id'] !== $user_id) {
+        ResponseFormatter::forbidden('Only the session host can update the session');
         exit;
     }
     
-    // Prepare update data
-    $updateData = [];
-    $allowedFields = [
-        'mode', 'visibility', 'status', 'notes', 
-        'started_at', 'paused_at', 'completed_at'
-    ];
+    // Validate allowed update fields
+    $allowedFields = ['status', 'visibility', 'notes', 'started_at', 'paused_at', 'completed_at'];
+    $filteredUpdates = array_intersect_key($updates, array_flip($allowedFields));
     
-    foreach ($allowedFields as $field) {
-        if (isset($data[$field])) {
-            $updateData[$field] = $data[$field];
-        }
-    }
-    
-    // Handle status transitions
-    if (isset($data['status'])) {
-        $currentStatus = $session['status'];
-        $newStatus = $data['status'];
-        
-        // Validate status transition
-        $validTransitions = [
-            'planned' => ['preparing', 'cooking', 'cancelled'],
-            'preparing' => ['cooking', 'paused', 'cancelled'],
-            'cooking' => ['paused', 'completed', 'abandoned'],
-            'paused' => ['cooking', 'completed', 'cancelled'],
-            'completed' => [], // No transitions from completed
-            'cancelled' => [], // No transitions from cancelled
-            'abandoned' => []  // No transitions from abandoned
-        ];
-        
-        if (!in_array($newStatus, $validTransitions[$currentStatus] ?? [])) {
-            $responseFormatter->error("Invalid status transition from $currentStatus to $newStatus", 400);
-            exit;
-        }
-        
-        // Set timestamps based on status
-        if ($newStatus === 'cooking' && $currentStatus !== 'cooking') {
-            $updateData['started_at'] = date('Y-m-d H:i:s');
-        } elseif ($newStatus === 'paused' && $currentStatus === 'cooking') {
-            $updateData['paused_at'] = date('Y-m-d H:i:s');
-        } elseif ($newStatus === 'completed' && in_array($currentStatus, ['cooking', 'paused'])) {
-            $updateData['completed_at'] = date('Y-m-d H:i:s');
-        }
-    }
-    
-    if (empty($updateData)) {
-        $responseFormatter->error("No valid fields to update", 400);
+    if (empty($filteredUpdates)) {
+        ResponseFormatter::error('No valid fields to update', 400);
         exit;
     }
     
-    // Update session
-    $updated = $dbHelper->updateCookingSession($session_id, $updateData);
+    // Update cooking session
+    $success = $dbHelper->updateCookingSession($session_id, $filteredUpdates);
     
-    if (!$updated) {
-        throw new Exception("Failed to update cooking session");
+    if (!$success) {
+        ResponseFormatter::error('Failed to update cooking session', 500);
+        exit;
     }
     
     // Get updated session
     $updatedSession = $dbHelper->getCookingSession($session_id);
     
-    $responseData = [
-        'session' => $updatedSession['session'],
+    ResponseFormatter::success([
+        'session' => $updatedSession,
         'message' => 'Cooking session updated successfully'
-    ];
-    
-    $responseFormatter->success($responseData, "Cooking session updated successfully", 200);
+    ], 'Session updated', 200);
     
 } catch (Exception $e) {
-    $responseFormatter->error("Failed to update cooking session: " . $e->getMessage(), 500);
+    error_log('Error updating cooking session: ' . $e->getMessage());
+    ResponseFormatter::error('Server error: ' . $e->getMessage(), 500);
 }
+?>
