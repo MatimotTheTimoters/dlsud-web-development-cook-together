@@ -2705,50 +2705,178 @@ backend/
 
 #### src/styles/
 
-##### src/styles/index.css
+##### **src/styles/index.css**
 - **Description**: Main stylesheet with global styles and gamified theme imports
-- **Required Imports**: './themes.css', './components.css', './layout.css', './utilities.css'
-- **Backend Endpoint**: None
-- **Gamified Libraries Imported**:
-  ```css
-  /* Gamified CSS Libraries */
-  @import 'animate.css/animate.min.css';
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap');
-  
-  /* Game-like UI enhancements */
-  .game-button {
-    background: linear-gradient(145deg, #ff6b6b, #ff8a8a);
-    border: 3px solid #ffc107;
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  }
-  
-  .level-badge {
-    background: linear-gradient(45deg, #4CAF50, #FFC107, #FF6B6B);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  ```
+- **Selectors**:
+  - `*`: Universal reset and box-sizing
+  - `html, body`: Root font, background, and scroll behavior
+  - `#root`: App container
+  - `@import` rules: External libraries (animate.css, Google Fonts)
+- **Used In**: `App.jsx`, all pages and components
 
-##### src/styles/components.css
+##### **src/styles/themes.css**
+- **Description**: Theme variables and color schemes
+- **Selectors**:
+  - `:root`: CSS custom properties for:
+    - Color variables (`--chef-red`, `--gold-coin`, `--xp-purple`)
+    - Typography (`--font-heading`, `--font-body`)
+    - Spacing (`--spacing-xs`, `--spacing-lg`)
+    - Shadows (`--shadow-card`, `--shadow-button`)
+    - Border radius (`--radius-sm`, `--radius-xl`)
+  - `.dark-theme`: Alternative theme override
+  - `.seasonal-theme`: Holiday/event themes
+- **Used In**: All CSS files via `@import`, every component with CSS
+
+##### **src/styles/components.css**
 - **Description**: Component-specific styles with gamified elements
-- **Required Imports**: None
-- **Backend Endpoint**: None
+- **Selectors**:
+  
+  **Button Components**:
+  - `.btn-rpg`: RPG-style buttons with 3D effect
+  - `.btn-cooking`: Cooking-specific buttons (red/orange theme)
+  - `.btn-gamification`: Gold/gem currency buttons
+  - `.btn-icon`: Buttons with icon-only styling
+  - `.btn[disabled]`: Disabled state styling
+  
+  **Card Components**:
+  - `.card-recipe`: Recipe cards with hover effects
+  - `.card-user`: User profile cards
+  - `.card-shop`: Shop item cards with pricing
+  - `.card-session`: Cooking session cards
+  
+  **Form Components**:
+  - `.form-control`: Input fields, textareas
+  - `.form-label`: Form labels with cooking icons
+  - `.form-error`: Validation error states
+  - `.form-success`: Success states
+  
+  **Gamification Components**:
+  - `.level-badge`: Level display badges
+  - `.currency-display`: Gold/gem counters
+  - `.xp-bar`: Experience progress bars
+  - `.reward-notification`: Popup rewards
+  
+  **Navigation Components**:
+  - `.navbar`: Main navigation bar
+  - `.nav-link`: Navigation links with hover effects
+  - `.nav-icon`: Icon buttons in nav
+  
+  **Modal Components**:
+  - `.modal-overlay`: Modal background
+  - `.modal-content`: Modal content container
+  - `.modal-header`: Modal titles
+  - `.modal-footer`: Modal action buttons
+  
+  **Loading/Error States**:
+  - `.loading-spinner`: Animated spinners
+  - `.error-boundary`: Error display containers
+  - `.empty-state`: Empty list/placeholder states
+  
+  **Chat Components**:
+  - `.chat-container`: Chat message area
+  - `.chat-message`: Individual messages
+  - `.chat-input`: Message input field
+  
+- **Used In**: All React components (`*.jsx`) - specific selectors used in:
+  - `RecipeCard.jsx`, `RecipeDetail.jsx`, `UserCard.jsx`, `ShopItem.jsx`
+  - `LoginForm.jsx`, `RegisterForm.jsx`, `RecipeForm.jsx`
+  - `CookingSession.jsx`, `SessionChat.jsx`
+  - `PurchaseModal.jsx`, `LevelProgress.jsx`, `CurrencyDisplay.jsx`
 
-##### src/styles/layout.css
+##### **src/styles/layout.css**
 - **Description**: Layout and grid styles
-- **Required Imports**: None
-- **Backend Endpoint**: None
+- **Selectors**:
+  
+  **Grid Layouts**:
+  - `.grid-container`: Main grid wrapper
+  - `.grid-2col`, `.grid-3col`, `.grid-4col`: Column grids
+  - `.grid-responsive`: Responsive grid with media queries
+  
+  **Page Layouts**:
+  - `.page-container`: Page wrapper with max-width
+  - `.page-header`: Page title sections
+  - `.page-content`: Main content area
+  - `.page-sidebar`: Sidebar layout
+  
+  **Flex Layouts**:
+  - `.flex-center`: Centered flex containers
+  - `.flex-between`: Space-between alignment
+  - `.flex-column`: Column direction
+  - `.flex-wrap`: Wrapping flex items
+  
+  **Header/Footer**:
+  - `.main-header`: App header styling
+  - `.main-footer`: App footer styling
+  - `.header-nav`: Navigation within header
+  
+  **Component Layouts**:
+  - `.two-panel`: Split screen layouts (CookingSession.jsx)
+  - `.tab-container`: Tabbed content areas
+  - `.form-layout`: Form field arrangements
+  - `.card-grid`: Grid of cards (RecipeList.jsx, UserCard.jsx)
+  
+  **Spacing & Containers**:
+  - `.container`: Centered container with padding
+  - `.section`: Content sections with margins
+  - `.spacer`: Vertical/horizontal spacing helpers
+  
+- **Used In**: All page components and layout-specific components:
+  - `App.jsx` (main layout)
+  - `Header.jsx`, `Footer.jsx`, `Navigation.jsx`
+  - `HomePage.jsx`, `RecipesPage.jsx`, `DiscoverPage.jsx`
+  - `CookingSession.jsx` (two-panel layout)
+  - `RecipeList.jsx`, `InventoryList.jsx` (grid layouts)
 
-##### src/styles/utilities.css
+##### **src/styles/utilities.css**
 - **Description**: Utility classes and helper styles
-- **Required Imports**: None
-- **Backend Endpoint**: None
-
-##### src/styles/themes.css
-- **Description**: Theme variables and color schemes from ui_design.md
-- **Required Imports**: None
-- **Backend Endpoint**: None
+- **Selectors**:
+  
+  **Text Utilities**:
+  - `.text-center`, `.text-right`, `.text-left`: Text alignment
+  - `.text-truncate`: Truncated text with ellipsis
+  - `.text-uppercase`: Uppercase text
+  - `.text-gradient`: Gradient text effects
+  
+  **Color Utilities**:
+  - `.bg-primary`, `.bg-secondary`: Background colors
+  - `.text-danger`, `.text-success`: Text colors
+  - `.border-color`: Border color helpers
+  
+  **Spacing Utilities**:
+  - `.m-*`, `.p-*`: Margin and padding (0-5 scale)
+  - `.mx-auto`: Horizontal centering
+  - `.gap-*`: Grid/flex gap spacing
+  
+  **Display Utilities**:
+  - `.d-none`, `.d-block`, `.d-flex`: Display properties
+  - `.d-md-block`: Responsive display classes
+  - `.visible`, `.invisible`: Visibility helpers
+  
+  **Positioning**:
+  - `.position-relative`, `.position-absolute`
+  - `.top-0`, `.right-0`: Position coordinates
+  - `.z-index-*`: Z-index layers
+  
+  **Sizing**:
+  - `.w-100`, `.h-100`: Width/height percentages
+  - `.min-width-*`, `.max-height-*`: Min/max sizing
+  
+  **Effects**:
+  - `.shadow-sm`, `.shadow-lg`: Box shadows
+  - `.rounded-sm`, `.rounded-circle`: Border radius
+  - `.transition`: Smooth transitions
+  
+  **Animation Classes**:
+  - `.animate-pulse`: Pulsing animation
+  - `.animate-bounce`: Bouncing animation
+  - `.animate-spin`: Spinning animation
+  
+  **Gamification Utilities**:
+  - `.glow-effect`: Glowing border/text effects
+  - `.sparkle`: Sparkle animation for rewards
+  - `.confetti`: Confetti animation container
+  
+- **Used In**: Every component via utility classes for quick styling
 
 #### src/assets/
 
@@ -2770,7 +2898,6 @@ backend/
 
 # 📄 Layouts
 
-# 📄 Layouts
 
 ## Public Layouts
 
