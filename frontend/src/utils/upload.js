@@ -13,7 +13,6 @@ export const prepareFormData = (file, fieldName = 'file', additionalData = {}) =
     const formData = new FormData();
     formData.append(fieldName, file);
 
-    // Append additional data
     Object.entries(additionalData).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
             formData.append(key, value);
@@ -31,7 +30,7 @@ export const prepareFormData = (file, fieldName = 'file', additionalData = {}) =
  */
 export const validateImageFile = (file, options = {}) => {
     const {
-        maxSize = 5 * 1024 * 1024, // 5MB default
+        maxSize = 5 * 1024 * 1024,
         allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
     } = options;
 

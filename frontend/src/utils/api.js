@@ -1,6 +1,7 @@
 /**
  * API Configuration and Helper Functions
  * Handles all HTTP requests to the PHP backend API
+ * Used by ALL frontend API modules
  */
 
 // Base URL for the PHP backend
@@ -26,7 +27,7 @@ export const setAuthToken = (token, refreshTokenValue = null) => {
     } else {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
-    
+
     if (refreshTokenValue) {
         refreshToken = refreshTokenValue;
         localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshTokenValue);
@@ -82,12 +83,12 @@ const getDefaultHeaders = () => {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     };
-    
+
     // Add authorization header if token exists
     if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
     }
-    
+
     return headers;
 };
 
@@ -110,13 +111,13 @@ const handleResponse = async (response) => {
             statusText: response.statusText
         };
     }
-    
+
     // Check if response indicates success
     if (!response.ok) {
         // Extract error message from response
         const errorMessage = data.message || `HTTP error ${response.status}`;
         const errorDetails = data.errors || data.details;
-        
+
         throw {
             success: false,
             message: errorMessage,
@@ -126,7 +127,7 @@ const handleResponse = async (response) => {
             data: data
         };
     }
-    
+
     // Return successful response
     return {
         success: true,
@@ -153,12 +154,12 @@ const handleError = (error) => {
             statusText: 'Network Error'
         };
     }
-    
+
     // Check if it's already a formatted error from handleResponse
     if (error.success === false) {
         return error;
     }
-    
+
     // Generic error
     return {
         success: false,
@@ -181,11 +182,11 @@ const retryWithRefresh = async (requestFn, args) => {
         const refreshResult = await post('/auth/refresh-token', {
             refresh_token: refreshToken
         });
-        
+
         if (refreshResult.success && refreshResult.data.token) {
             // Update tokens
             setAuthToken(refreshResult.data.token, refreshResult.data.refresh_token);
-            
+
             // Retry original request with new token
             return await requestFn(...args);
         }
@@ -194,7 +195,7 @@ const retryWithRefresh = async (requestFn, args) => {
         clearAuthTokens();
         throw new Error('Session expired. Please login again.');
     }
-    
+
     // If we get here, refresh didn't work
     clearAuthTokens();
     throw new Error('Session expired. Please login again.');
@@ -211,34 +212,34 @@ const retryWithRefresh = async (requestFn, args) => {
 const makeRequest = async (method, endpoint, data = null, options = {}) => {
     const url = buildUrl(endpoint);
     const headers = getDefaultHeaders();
-    
+
     // Merge custom headers if provided
     if (options.headers) {
         Object.assign(headers, options.headers);
     }
-    
+
     // Prepare request config
     const config = {
         method: method,
         headers: headers,
-        credentials: 'include', // Include cookies if needed
+        credentials: 'include',
         ...options
     };
-    
+
     // Add body for methods that support it
     if (data && ['POST', 'PUT', 'PATCH'].includes(method)) {
         config.body = JSON.stringify(data);
     }
-    
+
     try {
         const response = await fetch(url, config);
         const result = await handleResponse(response);
-        
+
         // Check for token expiration (401 Unauthorized)
         if (response.status === 401 && refreshToken && endpoint !== '/auth/refresh-token') {
             return retryWithRefresh(makeRequest, [method, endpoint, data, options]);
         }
-        
+
         return result;
     } catch (error) {
         throw handleError(error);
@@ -254,13 +255,13 @@ const makeRequest = async (method, endpoint, data = null, options = {}) => {
  */
 export const get = async (endpoint, params = null, options = {}) => {
     let url = endpoint;
-    
+
     // Add query parameters if provided
     if (params) {
         const queryString = new URLSearchParams(params).toString();
         url += `?${queryString}`;
     }
-    
+
     return makeRequest('GET', url, null, options);
 };
 
@@ -317,17 +318,17 @@ export const del = async (endpoint, options = {}) => {
 export const upload = async (endpoint, formData, options = {}) => {
     const url = buildUrl(endpoint);
     const headers = getDefaultHeaders();
-    
-    // Remove Content-Type for FormData (browser will set it with boundary)
+
+    // Remove Content-Type for FormData
     delete headers['Content-Type'];
-    
+
     const config = {
         method: 'POST',
         headers: headers,
         body: formData,
         ...options
     };
-    
+
     try {
         const response = await fetch(url, config);
         return await handleResponse(response);
@@ -364,50 +365,40 @@ export const testApiConnection = async () => {
  * Initialize API module - check for saved token on page load
  */
 export const initializeApi = () => {
-    // Check if token exists in localStorage
     const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
     const savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-    
+
     if (savedToken) {
         authToken = savedToken;
         refreshToken = savedRefreshToken;
     }
-    
-    // Test API connection on initialization
+
     testApiConnection().then(isConnected => {
         if (!isConnected) {
             console.warn('API server is not reachable. Please ensure the backend is running.');
         }
     });
-    
+
     console.log('API module initialized with PHP backend');
 };
 
 // Auto-initialize when module is loaded
 initializeApi();
 
-// Export all functions
 export default {
-    // HTTP methods
     get,
     post,
     put,
     patch,
     delete: del,
     upload,
-    
-    // Token management
     setAuthToken,
     getAuthToken,
     getRefreshToken,
     clearAuthTokens,
     isAuthenticated,
-    
-    // Utility
     testApiConnection,
     initializeApi,
-    
-    // Constants
     API_BASE_URL,
     TOKEN_STORAGE_KEY,
     REFRESH_TOKEN_STORAGE_KEY

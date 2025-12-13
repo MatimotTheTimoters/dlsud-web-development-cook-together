@@ -1,43 +1,176 @@
+<!-- frontend/public/index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>Cook Together</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#FF6B6B" />
+  <meta name="description"
+    content="CookTogether - Level up your cooking skills with gamified recipes and multiplayer cooking sessions" />
+  <meta name="keywords" content="cooking, recipes, gamification, multiplayer, cooking games" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+  <!-- Gamified UI Libraries as specified in frontend_files.md -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+  <!-- Progressive Web App manifest -->
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+  <title>CookTogether - Level Up Your Cooking</title>
+
+  <!-- SEO Meta Tags -->
+  <meta property="og:title" content="CookTogether - Level Up Your Cooking">
+  <meta property="og:description" content="Gamified cooking app with recipes, multiplayer sessions, and rewards">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cooktogether.app">
+  <meta property="og:image" content="%PUBLIC_URL%/og-image.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CookTogether">
+  <meta name="twitter:description" content="Gamified cooking app with recipes, multiplayer sessions, and rewards">
+  <meta name="twitter:image" content="%PUBLIC_URL%/twitter-card.png">
+
+  <!-- PWA Configuration -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CookTogether">
+
+  <!-- Preload critical assets -->
+  <link rel="preload" href="%PUBLIC_URL%/fonts/Poppins-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="%PUBLIC_URL%/fonts/Rubik-Regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- Inline critical CSS for performance -->
+  <style>
+    /* Critical styles for initial load */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background-color: #F9F9F9;
+      color: #2D3436;
+      overflow-x: hidden;
+    }
+
+    #root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Loading animation */
+    .app-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%);
+      color: white;
+    }
+
+    .loading-icons {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .gamepad-icon,
+    .cookie-icon {
+      font-size: 2rem;
+      animation: bounce 2s infinite;
+    }
+
+    .cookie-icon {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* Responsive base */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>
+    <div class="noscript-message">
+      <h2>JavaScript Required</h2>
+      <p>CookTogether requires JavaScript to function. Please enable JavaScript in your browser settings.</p>
+    </div>
+  </noscript>
+  <div id="root"></div>
+
+  <!-- Preconnect to API domains -->
+  <link rel="preconnect" href="https://api.cooktogether.app" crossorigin>
+  <link rel="dns-prefetch" href="https://api.cooktogether.app">
+
+  <!-- Performance monitoring script -->
+  <script>
+    // Performance monitoring for gamified features
+    if ('performance' in window) {
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const timing = performance.getEntriesByType('navigation')[0];
+          if (timing) {
+            console.log('App loaded in', timing.loadEventEnd - timing.startTime, 'ms');
+          }
+        }, 0);
+      });
+    }
+
+    // Service Worker registration for PWA
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registered:', registration);
+          })
+          .catch(error => {
+            console.log('ServiceWorker registration failed:', error);
+          });
+      });
+    }
+  </script>
+</body>
+
 </html>

@@ -16,24 +16,19 @@ export const calculateMaxRewards = (userData) => {
   const recipes_created = userData?.recipes_created || 0;
   const recipes_cooked = userData?.recipes_cooked || 0;
 
-  // Base rewards increase with level
   const base_exp = 100;
   const base_gold = 50;
   const base_gems = 5;
 
-  // Level multiplier (increases rewards by 10% per level)
   const level_multiplier = 1 + ((level - 1) * 0.1);
 
-  // Activity bonus (more recipes = higher rewards)
   const total_recipes = recipes_created + recipes_cooked;
-  const activity_bonus = 1 + Math.min((total_recipes / 100), 1.0); // Up to 100% bonus
+  const activity_bonus = 1 + Math.min((total_recipes / 100), 1.0);
 
-  // Calculate max rewards
   let max_exp_reward = Math.round(base_exp * level_multiplier * activity_bonus);
   let max_gold_reward = Math.round(base_gold * level_multiplier * activity_bonus);
-  let max_gem_reward = Math.round(base_gems * (level_multiplier * 0.5) * activity_bonus); // Gems increase slower
+  let max_gem_reward = Math.round(base_gems * (level_multiplier * 0.5) * activity_bonus);
 
-  // Apply minimum and maximum caps (MATCHING BACKEND)
   max_exp_reward = Math.max(50, Math.min(max_exp_reward, 500));
   max_gold_reward = Math.max(25, Math.min(max_gold_reward, 250));
   max_gem_reward = Math.max(1, Math.min(max_gem_reward, 25));
@@ -57,21 +52,16 @@ export const calculateMaxPrices = (userData) => {
   const level = userData?.level || 1;
   const recipes_sold = userData?.recipes_sold || 0;
 
-  // Base prices increase with level
   const base_gold_price = 100;
   const base_gem_price = 10;
 
-  // Level multiplier (increases prices by 15% per level)
   const level_multiplier = 1 + ((level - 1) * 0.15);
 
-  // Sales reputation bonus (more sales = higher prices)
-  const sales_bonus = 1 + Math.min((recipes_sold / 50), 2.0); // Up to 200% bonus
+  const sales_bonus = 1 + Math.min((recipes_sold / 50), 2.0);
 
-  // Calculate max prices
   let max_gold_price = Math.round(base_gold_price * level_multiplier * sales_bonus);
-  let max_gem_price = Math.round(base_gem_price * (level_multiplier * 0.8) * sales_bonus); // Gems increase slower
+  let max_gem_price = Math.round(base_gem_price * (level_multiplier * 0.8) * sales_bonus);
 
-  // Apply minimum and maximum caps (MATCHING BACKEND)
   max_gold_price = Math.max(50, Math.min(max_gold_price, 1000));
   max_gem_price = Math.max(5, Math.min(max_gem_price, 100));
 
@@ -95,7 +85,7 @@ export const calculateAllUserLimits = (userData) => {
   return {
     ...max_rewards,
     ...max_prices,
-    last_limit_update: new Date().toISOString().slice(0, 19).replace('T', ' ') // Format: YYYY-MM-DD HH:MM:SS
+    last_limit_update: new Date().toISOString().slice(0, 19).replace('T', ' ')
   };
 };
 
@@ -108,23 +98,15 @@ export const calculateAllUserLimits = (userData) => {
  * @returns {Object} Level up requirements and progress
  */
 export const calculateLevelUpRequirements = (current_level, current_exp) => {
-  // Exponential level progression formula
-  // Each level requires more EXP than the previous one
-  const base_exp = 100;
-  const growth_factor = 1.5;
-
-  // Calculate EXP needed for current level and next level
   const current_level_exp = calculateExpForLevel(current_level);
   const next_level_exp = calculateExpForLevel(current_level + 1);
 
-  // Calculate progress
   const exp_for_current_level = current_exp - current_level_exp;
   const exp_needed_for_next = next_level_exp - current_level_exp;
   const progress_percentage = exp_needed_for_next > 0
     ? Math.min(100, parseFloat(((exp_for_current_level / exp_needed_for_next) * 100).toFixed(2)))
     : 100;
 
-  // Determine level title based on level
   const level_title = getLevelTitle(current_level);
   const next_level_title = getLevelTitle(current_level + 1);
 
@@ -151,7 +133,6 @@ export const calculateLevelUpRequirements = (current_level, current_exp) => {
 const calculateExpForLevel = (level) => {
   if (level <= 1) return 0;
 
-  // Exponential growth formula: EXP = 100 * (level - 1)^1.5
   const base_exp = 100;
   const growth_factor = 1.5;
 
@@ -185,7 +166,6 @@ const getLevelTitle = (level) => {
     50: 'Grandmaster Chef'
   };
 
-  // Find the highest title the user has achieved
   let applicable_title = 'Novice Cook';
   Object.keys(titles).forEach(title_level => {
     if (level >= parseInt(title_level)) {
@@ -214,9 +194,9 @@ export const calculateRecipeRewards = (difficulty, user_limits) => {
   const multiplier = difficulty_multipliers[difficulty] || 1.0;
 
   return {
-    exp_reward: parseInt(Math.round(user_limits.max_exp_reward * multiplier * 0.7)), // 70% of max for normal completion
+    exp_reward: parseInt(Math.round(user_limits.max_exp_reward * multiplier * 0.7)),
     gold_reward: parseInt(Math.round(user_limits.max_gold_reward * multiplier * 0.7)),
-    gem_reward: parseInt(Math.round(user_limits.max_gem_reward * multiplier * 0.5)) // Gems are rarer
+    gem_reward: parseInt(Math.round(user_limits.max_gem_reward * multiplier * 0.5))
   };
 };
 
@@ -234,23 +214,19 @@ export const calculateStepRewards = (step_index, total_steps, recipe_rewards) =>
     return { exp_reward: 0, gold_reward: 0, gem_reward: 0 };
   }
 
-  // First and last steps give more rewards
   let step_multiplier = 1.0;
   if (step_index === 1) {
-    step_multiplier = 1.5; // First step bonus
+    step_multiplier = 1.5;
   } else if (step_index === total_steps) {
-    step_multiplier = 2.0; // Final step bonus
+    step_multiplier = 2.0;
   } else if (step_index > 0 && step_index < total_steps) {
-    // Middle steps: linear distribution
     step_multiplier = 0.8 + (0.4 * (step_index / total_steps));
   }
 
-  // Distribute total rewards across steps
   const base_exp_per_step = recipe_rewards.exp_reward / total_steps;
   const base_gold_per_step = recipe_rewards.gold_reward / total_steps;
-  const base_gems_per_step = recipe_rewards.gem_reward / Math.max(1, total_steps / 2); // Gems on half the steps
+  const base_gems_per_step = recipe_rewards.gem_reward / Math.max(1, total_steps / 2);
 
-  // Check if this step should give gems (every other step)
   const gems_for_this_step = (step_index % 2 === 0) ? base_gems_per_step : 0;
 
   return {
@@ -272,7 +248,6 @@ export const checkLevelUp = (current_level, current_exp) => {
   const next_level_exp = calculateExpForLevel(current_level + 1);
 
   if (current_exp >= next_level_exp) {
-    // Calculate how many levels the user should gain
     let new_level = current_level;
     while (current_exp >= calculateExpForLevel(new_level + 1)) {
       new_level++;
@@ -283,7 +258,7 @@ export const checkLevelUp = (current_level, current_exp) => {
       old_level: current_level,
       new_level: new_level,
       levels_gained: new_level - current_level,
-      exp_after_level_up: current_exp // Keep excess EXP
+      exp_after_level_up: current_exp
     };
   }
 
@@ -302,20 +277,17 @@ export const checkLevelUp = (current_level, current_exp) => {
  * @returns {Object} Daily bonus rewards
  */
 export const calculateDailyLoginBonus = (login_streak) => {
-  // Base rewards
   const base_exp = 10;
   const base_gold = 5;
 
-  // Streak bonus (increases every 7 days)
   const streak_bonus = 1 + Math.floor(login_streak / 7);
 
-  // Special rewards for milestone streaks
   let gem_bonus = 0;
   if (login_streak % 7 === 0) {
-    gem_bonus = 1; // Gem every week
+    gem_bonus = 1;
   }
   if (login_streak % 30 === 0) {
-    gem_bonus = 3; // More gems for monthly streak
+    gem_bonus = 3;
   }
 
   return {
@@ -328,9 +300,45 @@ export const calculateDailyLoginBonus = (login_streak) => {
 };
 
 /**
- * Calculate shop item affordability (NEW - for gamification)
- * @param {Object} userStats - User stats (gold_count, gem_count)
- * @param {Object} item - Shop item with prices
+ * Apply consumable effect to user stats
+ * MUST MATCH backend applyConsumableEffect()
+ * 
+ * @param {Object} user_stats User stats object
+ * @param {string} consumable_type Type of consumable
+ * @param {number} effect_value Effect magnitude
+ * @returns {Object} Updated user stats
+ */
+export const applyConsumableEffect = (user_stats, consumable_type, effect_value) => {
+  const updated_stats = { ...user_stats };
+
+  switch (consumable_type) {
+    case 'exp_boost':
+      updated_stats.current_exp += effect_value;
+      break;
+    case 'gold_boost':
+      updated_stats.gold_count += effect_value;
+      break;
+    case 'gem_boost':
+      updated_stats.gem_count += effect_value;
+      break;
+    case 'recipe_quality':
+      updated_stats.max_exp_reward = Math.min(500, updated_stats.max_exp_reward + effect_value);
+      updated_stats.max_gold_reward = Math.min(250, updated_stats.max_gold_reward + effect_value);
+      updated_stats.max_gem_reward = Math.min(25, updated_stats.max_gem_reward + effect_value);
+      break;
+    case 'cooking_speed':
+      updated_stats.total_cooking_time = Math.max(0, updated_stats.total_cooking_time - effect_value);
+      break;
+  }
+
+  return updated_stats;
+};
+
+/**
+ * Calculate item affordability for shop purchases
+ * 
+ * @param {Object} userStats User stats (gold_count, gem_count)
+ * @param {Object} item Shop item with prices
  * @returns {Object} Affordability information
  */
 export const calculateItemAffordability = (userStats, item) => {
@@ -355,36 +363,6 @@ export const calculateItemAffordability = (userStats, item) => {
   };
 };
 
-// Keep the old functions for backward compatibility but mark them as deprecated
-// These will be removed in future versions
-
-/**
- * @deprecated Use calculateMaxRewards instead
- */
-export const calculateMaxRewardsOld = (userData) => {
-  console.warn('calculateMaxRewardsOld is deprecated. Use calculateMaxRewards instead.');
-  // Convert old format to new format if needed
-  return calculateMaxRewards(userData);
-};
-
-/**
- * @deprecated Use calculateMaxPrices instead
- */
-export const calculateMaxPricesOld = (userData) => {
-  console.warn('calculateMaxPricesOld is deprecated. Use calculateMaxPrices instead.');
-  // Convert old format to new format if needed
-  return calculateMaxPrices(userData);
-};
-
-/**
- * @deprecated Use calculateAllUserLimits instead
- */
-export const calculateAllUserLimitsOld = (userData) => {
-  console.warn('calculateAllUserLimitsOld is deprecated. Use calculateAllUserLimits instead.');
-  // Convert old format to new format if needed
-  return calculateAllUserLimits(userData);
-};
-
 export default {
   calculateMaxRewards,
   calculateMaxPrices,
@@ -394,23 +372,6 @@ export default {
   calculateStepRewards,
   checkLevelUp,
   calculateDailyLoginBonus,
-  calculateItemAffordability,
-  // Deprecated exports for backward compatibility
-  calculateCookingRewards: (recipeRewards, userData, success = true) => {
-    console.warn('calculateCookingRewards is deprecated. Use calculateRecipeRewards and calculateStepRewards instead.');
-    // Simple fallback implementation
-    const { expReward = 0, goldReward = 0, gemReward = 0 } = recipeRewards;
-    const { level = 1, loginStreak = 0 } = userData;
-
-    const levelBonus = 1 + (level * 0.02);
-    const streakBonus = 1 + (loginStreak * 0.005);
-    const successMultiplier = success ? 1 : 0.3;
-
-    return {
-      exp: Math.floor(expReward * levelBonus * streakBonus * successMultiplier),
-      gold: Math.floor(goldReward * levelBonus * streakBonus * successMultiplier),
-      gem: Math.floor(gemReward * levelBonus * streakBonus * successMultiplier),
-      success
-    };
-  }
+  applyConsumableEffect,
+  calculateItemAffordability
 };
