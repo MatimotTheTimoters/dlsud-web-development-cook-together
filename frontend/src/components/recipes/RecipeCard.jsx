@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     FaClock, FaFire, FaUser, FaHeart, FaStar, FaCoins, FaGem,
-    FaBookmark, FaShare, FaEye, FaSpinner
+    FaBookmark, FaShare, FaEye, FaSpinner, FaUtensils
 } from 'react-icons/fa';
-import * as recipesApi from '../../api/recipes';
 import { useAuth } from '../../contexts/AuthContext';
 
 const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
@@ -13,11 +12,10 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
     const [isLiking, setIsLiking] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, getCurrentUser } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        // If recipe data is not provided, fetch it from the API
         if (!recipe && recipeId) {
             loadRecipe();
         }
@@ -27,8 +25,18 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
         setIsLoading(true);
         setError(null);
         try {
-            const recipe = await recipesApi.getRecipe(recipeId);
-            setRecipeData(recipe);
+            const response = await fetch(`/api/recipes/show.php?id=${recipeId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                setRecipeData(result.data);
+            } else {
+                setError(result.message || 'Failed to load recipe');
+            }
         } catch (err) {
             console.error('Error loading recipe:', err);
             setError('Failed to load recipe');
@@ -60,12 +68,25 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
 
         setIsLiking(true);
         try {
-            await recipesApi.likeRecipe(recipeData.id);
-            // Update local state
-            setRecipeData(prev => ({
-                ...prev,
-                like_count: (prev.like_count || 0) + 1
-            }));
+            const response = await fetch('/api/recipes/interact.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    recipe_id: recipeData.id,
+                    interaction_type: 'like'
+                })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                setRecipeData(prev => ({
+                    ...prev,
+                    like_count: (prev.like_count || 0) + 1
+                }));
+            }
         } catch (err) {
             console.error('Error liking recipe:', err);
             setError('Failed to like recipe');
@@ -82,8 +103,18 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
 
         setIsSaving(true);
         try {
-            await recipesApi.saveRecipe(recipeData.id);
-            // You could add a visual indicator for saved recipes
+            const response = await fetch('/api/recipes/interact.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    recipe_id: recipeData.id,
+                    interaction_type: 'save'
+                })
+            });
+            await response.json();
         } catch (err) {
             console.error('Error saving recipe:', err);
             setError('Failed to save recipe');
@@ -100,7 +131,6 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
                 url: window.location.origin + `/recipes/${recipeData.id}`
             });
         } else {
-            // Fallback copy to clipboard
             navigator.clipboard.writeText(window.location.origin + `/recipes/${recipeData.id}`);
             alert('Recipe link copied to clipboard!');
         }
@@ -143,9 +173,10 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
         );
     }
 
+    const rating = recipeData.rating || recipeData.average_rating || 4.5;
+
     return (
         <div className={`card card-recipe animate__animated animate__fadeIn ${showFull ? 'full-width' : ''}`}>
-            {/* Recipe Image */}
             <div className="card-recipe-image-container">
                 {recipeData.cover_image ? (
                     <img
@@ -160,7 +191,6 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
                     </div>
                 )}
 
-                {/* Recipe Badges */}
                 <div className="card-recipe-badges">
                     <span className={`card-recipe-badge ${getDifficultyColor(recipeData.difficulty)}`}>
                         <FaFire /> {recipeData.difficulty || 'medium'}
@@ -172,7 +202,6 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
                     )}
                 </div>
 
-                {/* Quick Actions */}
                 <div className="card-recipe-actions">
                     <button
                         className="card-action-btn"
@@ -195,34 +224,29 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
                 </div>
             </div>
 
-            {/* Card Body */}
             <div className="card-body">
-                {/* Rating */}
                 <div className="recipe-rating mb-2">
                     <div className="stars">
                         {[1, 2, 3, 4, 5].map((star) => (
                             <FaStar
                                 key={star}
-                                className={`star ${star <= (recipeData.rating || 4) ? 'filled' : ''}`}
+                                className={`star ${star <= rating ? 'filled' : ''}`}
                             />
                         ))}
                     </div>
-                    <span className="rating-text">({recipeData.rating || 4.5})</span>
+                    <span className="rating-text">({rating.toFixed(1)})</span>
                 </div>
 
-                {/* Title */}
                 <h3 className="recipe-title text-lg font-bold mb-2">
                     <Link to={`/recipes/${recipeData.id}`} className="text-warm-gray-dark hover:text-chef-red">
                         {recipeData.title}
                     </Link>
                 </h3>
 
-                {/* Description */}
                 <p className="recipe-description text-sm text-warm-gray-medium mb-3">
                     {truncateText(recipeData.description, showFull ? 250 : 120)}
                 </p>
 
-                {/* Metadata */}
                 <div className="recipe-metadata mb-3">
                     <div className="metadata-item">
                         <FaClock className="metadata-icon" />
@@ -238,7 +262,6 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
                     </div>
                 </div>
 
-                {/* Tags */}
                 {recipeData.tags && recipeData.tags.length > 0 && (
                     <div className="recipe-tags mb-3">
                         {recipeData.tags.slice(0, 3).map((tag, index) => (
@@ -254,7 +277,6 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
                     </div>
                 )}
 
-                {/* Rewards & Pricing */}
                 <div className="recipe-rewards">
                     <div className="rewards-section">
                         <span className="reward-item">
@@ -281,7 +303,6 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
                 </div>
             </div>
 
-            {/* Card Footer */}
             <div className="card-footer">
                 <div className="recipe-actions">
                     <Link
@@ -301,12 +322,6 @@ const RecipeCard = ({ recipe, recipeId, showFull = false }) => {
                     )}
                 </div>
             </div>
-
-            {error && (
-                <div className="card-error-notice">
-                    <p className="text-error text-sm">{error}</p>
-                </div>
-            )}
         </div>
     );
 };

@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useNavigate } from 'react-router-dom';
-import { useData } from '../../contexts/DataContext';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   FaPlus, FaTrash, FaImage, FaListOl, FaClock,
   FaBalanceScale, FaCalculator, FaSave, FaUpload
 } from 'react-icons/fa';
+import { createRecipe, updateRecipe } from '../../api/recipes';
+import { uploadImage } from '../../api/upload';
 
 const RecipeForm = ({ recipeId, initialData = null }) => {
   const navigate = useNavigate();
-  const { addRecipe, updateRecipeInContext } = useData();
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -40,7 +41,7 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
     if (recipeId && initialData) {
       setFormData({
         ...initialData,
-        cover_image: null, // File will be re-uploaded if changed
+        cover_image: null,
         cover_image_url: initialData.cover_image || ''
       });
     }
@@ -111,7 +112,6 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
   };
 
   const calculateNutrition = () => {
-    // Calculate total nutrition from ingredients
     let totalCalories = 0;
     let totalProtein = 0;
     let totalCarbs = 0;
@@ -175,38 +175,61 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
 
     try {
       let result;
+      let imageUrl = formData.cover_image_url;
+
+      // Upload image if new
+      if (formData.cover_image && formData.cover_image instanceof File) {
+        const uploadResult = await uploadImage(formData.cover_image, 'recipe');
+        if (uploadResult.success) {
+          imageUrl = uploadResult.data.url;
+        }
+      }
+
+      const recipeData = {
+        title: formData.title,
+        description: formData.description,
+        origin: formData.origin,
+        preparation_time: parseInt(formData.preparation_time) || 0,
+        cooking_time: parseInt(formData.cooking_time) || 0,
+        serving_size: parseInt(formData.serving_size) || 1,
+        difficulty: formData.difficulty,
+        is_paid: formData.is_paid,
+        is_public: formData.is_public,
+        cover_image: imageUrl,
+        ingredients: formData.ingredients,
+        steps: formData.steps,
+        tags: formData.tags,
+        exp_reward: parseInt(formData.exp_reward) || 0,
+        gold_reward: parseInt(formData.gold_reward) || 0,
+        gem_reward: parseInt(formData.gem_reward) || 0,
+        gold_price: formData.is_paid ? parseInt(formData.gold_price) || 0 : 0,
+        gem_price: formData.is_paid ? parseInt(formData.gem_price) || 0 : 0
+      };
 
       if (recipeId) {
-        // Update existing recipe with image support
-        result = await updateRecipeWithImage(
-          recipeId,
-          {
-            title: formData.title,
-            description: formData.description,
-            // ... other fields ...
-          },
-          formData.cover_image // Pass the file object
-        );
+        result = await updateRecipe(recipeId, recipeData);
+        if (result.success) {
+          setSuccessMessage('Recipe updated successfully!');
+          setTimeout(() => {
+            navigate(`/recipes/${recipeId}`);
+          }, 1500);
+        }
       } else {
-        // Create new recipe with image support
-        result = await createRecipeWithImage(
-          {
-            title: formData.title,
-            description: formData.description,
-            // ... other fields ...
-          },
-          formData.cover_image // Pass the file object
-        );
+        result = await createRecipe(recipeData);
+        if (result.success) {
+          setSuccessMessage('Recipe created successfully!');
+          setTimeout(() => {
+            navigate(`/recipes/${result.data.id}`);
+          }, 1500);
+        }
       }
 
-      if (result.success) {
-        // Handle success...
-      } else {
-        setErrors({ submit: result.error || 'Failed to save recipe' });
+      if (!result.success) {
+        setErrors({ submit: result.message || 'Failed to save recipe' });
       }
-    } catch (error) {
-      console.error('Error saving recipe:', error);
-      setErrors({ submit: error.message || 'Failed to save recipe' });
+    } catch (err) {
+      console.error('Error saving recipe:', err);
+      setErrors({ submit: err.message || 'Failed to save recipe' });
     } finally {
       setLoading(false);
     }
@@ -473,32 +496,6 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               <FaCalculator /> Calculate Nutrition
             </button>
           </div>
-
-          {formData.total_calories > 0 && (
-            <div className="card bg-gray-50">
-              <div className="card-body">
-                <h4 className="font-bold mb-2">Nutrition Summary</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-chef-red">{formData.total_calories}</div>
-                    <div className="text-sm text-gray-600">Calories</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-sizzling-orange">{formData.total_protein}</div>
-                    <div className="text-sm text-gray-600">Protein (g)</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-gold-coin">{formData.total_carbs}</div>
-                    <div className="text-sm text-gray-600">Carbs (g)</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-rare-gem">{formData.total_fat}</div>
-                    <div className="text-sm text-gray-600">Fat (g)</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Steps Section */}
@@ -627,72 +624,6 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
           )}
         </div>
 
-        {/* Rewards Section */}
-        <div className="card-body border-t">
-          <h3 className="section-title">🏆 Cooking Rewards</h3>
-          <p className="text-gray-600 mb-4">
-            Set the rewards users earn when cooking this recipe
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="card bg-gradient-to-br from-purple-50 to-pink-50">
-              <div className="card-body text-center">
-                <div className="text-3xl mb-2">⭐</div>
-                <label className="block font-semibold mb-2">EXP Reward</label>
-                <input
-                  type="number"
-                  name="exp_reward"
-                  value={formData.exp_reward}
-                  onChange={handleInputChange}
-                  min="0"
-                  max="100"
-                  className="form-control text-center"
-                />
-              </div>
-            </div>
-
-            <div className="card bg-gradient-to-br from-yellow-50 to-orange-50">
-              <div className="card-body text-center">
-                <div className="text-3xl mb-2">💰</div>
-                <label className="block font-semibold mb-2">Gold Reward</label>
-                <input
-                  type="number"
-                  name="gold_reward"
-                  value={formData.gold_reward}
-                  onChange={handleInputChange}
-                  min="0"
-                  max="50"
-                  className="form-control text-center"
-                />
-              </div>
-            </div>
-
-            <div className="card bg-gradient-to-br from-blue-50 to-purple-50">
-              <div className="card-body text-center">
-                <div className="text-3xl mb-2">💎</div>
-                <label className="block font-semibold mb-2">Gem Reward</label>
-                <input
-                  type="number"
-                  name="gem_reward"
-                  value={formData.gem_reward}
-                  onChange={handleInputChange}
-                  min="0"
-                  max="5"
-                  className="form-control text-center"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <p className="text-lg font-semibold">
-              Total Rewards: <span className="text-xp-purple">{formData.exp_reward} EXP</span> •
-              <span className="text-gold-coin"> {formData.gold_reward} Gold</span> •
-              <span className="text-rare-gem"> {formData.gem_reward} Gems</span>
-            </p>
-          </div>
-        </div>
-
         {/* Submit Section */}
         <div className="card-footer">
           <button
@@ -719,16 +650,6 @@ const RecipeForm = ({ recipeId, initialData = null }) => {
               </>
             )}
           </button>
-
-          <div className="text-center mt-4">
-            <p className="text-gray-600">
-              <span className="inline-block mr-2">🎮</span>
-              {recipeId ?
-                'Update your recipe to keep it fresh!' :
-                'Create this recipe to earn creator rewards!'
-              }
-            </p>
-          </div>
         </div>
       </form>
     </div>

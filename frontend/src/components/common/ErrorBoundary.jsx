@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FaExclamationTriangle, FaRedo, FaHome, FaUser, FaUtensils, FaFire } from 'react-icons/fa';
+import { FaExclamationTriangle, FaRedo, FaHome, FaUtensils } from 'react-icons/fa';
 
 class ErrorBoundary extends Component {
     constructor(props) {
@@ -23,6 +23,20 @@ class ErrorBoundary extends Component {
             error.message.includes('step')
         )) {
             errorType = 'recipe';
+        } else if (error.message && (
+            error.message.includes('auth') ||
+            error.message.includes('Auth') ||
+            error.message.includes('token') ||
+            error.message.includes('login')
+        )) {
+            errorType = 'auth';
+        } else if (error.message && (
+            error.message.includes('network') ||
+            error.message.includes('Network') ||
+            error.message.includes('fetch') ||
+            error.message.includes('API')
+        )) {
+            errorType = 'network';
         }
 
         return {
@@ -46,14 +60,6 @@ class ErrorBoundary extends Component {
         window.location.href = '/';
     };
 
-    handleGoProfile = () => {
-        window.location.href = '/profile';
-    };
-
-    handleGoRecipes = () => {
-        window.location.href = '/recipes';
-    };
-
     getErrorIcon = () => {
         switch (this.state.errorType) {
             case 'recipe':
@@ -74,12 +80,18 @@ class ErrorBoundary extends Component {
 
                         <div className="error-content">
                             <h1 className="error-title">
-                                Kitchen Malfunction!
+                                ⚠️ Something went wrong!
                             </h1>
 
                             <div className="error-message">
                                 <p className="error-description">
-                                    Something went wrong! Please try again.
+                                    {this.state.errorType === 'recipe'
+                                        ? 'There was an error with the recipe system.'
+                                        : this.state.errorType === 'auth'
+                                            ? 'Authentication error. Please log in again.'
+                                            : this.state.errorType === 'network'
+                                                ? 'Network error. Please check your connection.'
+                                                : 'An unexpected error occurred.'}
                                 </p>
                             </div>
 

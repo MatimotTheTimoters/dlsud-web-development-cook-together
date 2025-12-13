@@ -1,19 +1,29 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaBell, FaSearch } from 'react-icons/fa';
+import useAuth from '../../hooks/useAuth';
+import { FaBell, FaEnvelope, FaUserFriends } from 'react-icons/fa';
 
 const Navigation = () => {
+    const { isAuthenticated } = useAuth();
+
     const isActiveLink = (isActive) => {
         return isActive
             ? 'nav-link active'
             : 'nav-link';
     };
 
+    const hasPermission = (requiredRole) => {
+        return true;
+    };
+
+    if (!isAuthenticated()) {
+        return null;
+    }
+
     return (
         <nav className="nav-main bg-card-bg shadow-sm border-b border-light">
             <div className="container">
                 <div className="nav-content">
-                    {/* Left side - Main navigation */}
                     <div className="nav-links">
                         <NavLink
                             to="/"
@@ -27,14 +37,14 @@ const Navigation = () => {
                             to="/recipes"
                             className={({ isActive }) => isActiveLink(isActive)}
                         >
-                            <FaSearch className="nav-icon" /> Recipes
+                            Recipes
                         </NavLink>
 
                         <NavLink
                             to="/discover"
                             className={({ isActive }) => isActiveLink(isActive)}
                         >
-                            <FaSearch className="nav-icon" /> Discover
+                            Discover
                         </NavLink>
 
                         <NavLink
@@ -45,10 +55,15 @@ const Navigation = () => {
                         </NavLink>
                     </div>
 
-                    {/* Right side - User actions */}
                     <div className="nav-actions">
                         <button className="nav-action-button">
                             <FaBell className="nav-icon" />
+                        </button>
+                        <button className="nav-action-button">
+                            <FaEnvelope className="nav-icon" />
+                        </button>
+                        <button className="nav-action-button">
+                            <FaUserFriends className="nav-icon" />
                         </button>
                     </div>
                 </div>
