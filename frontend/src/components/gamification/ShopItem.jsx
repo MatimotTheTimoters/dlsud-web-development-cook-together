@@ -3,10 +3,9 @@ import { FaShoppingCart, FaLock, FaCheck, FaCoins, FaGem, FaExclamationTriangle 
 import { purchaseItem } from '../../api/shop';
 import { useAuth } from '../../hooks/useAuth';
 import './ShopItem.css';
-import { calculateItemAffordability } from '../../utils/userCalculations';
 
 /**
- * ShopItem component for displaying and purchasing shop items
+ * ShopItem component for displaying shop items with purchase functionality
  * Backend Endpoint: api/shop/purchase.php
  */
 const ShopItem = ({ item, onPurchaseSuccess }) => {
@@ -18,24 +17,10 @@ const ShopItem = ({ item, onPurchaseSuccess }) => {
     const canAfford = () => {
         if (!user?.stats || !item) return false;
 
-        const affordability = calculateItemAffordability(user.stats, item);
-        return affordability.can_afford;
-    };
+        if (item.gold_price > 0 && user.stats.gold_count < item.gold_price) return false;
+        if (item.gem_price > 0 && user.stats.gem_count < item.gem_price) return false;
 
-    // Add detailed affordability display
-    const getAffordabilityDetails = () => {
-        if (!user?.stats) return null;
-
-        const affordability = calculateItemAffordability(user.stats, item);
-
-        if (!affordability.can_afford) {
-            return (
-                <div className="affordability-details">
-                    Need {affordability.gold_shortfall} more gold or {affordability.gem_shortfall} more gems
-                </div>
-            );
-        }
-        return null;
+        return true;
     };
 
     const hasRequiredLevel = () => {
@@ -125,21 +110,6 @@ const ShopItem = ({ item, onPurchaseSuccess }) => {
         return <div className="item-price free">FREE</div>;
     };
 
-    const getItemIcon = () => {
-        // Map item types to icons
-        const iconMap = {
-            'avatar_frame': '👤',
-            'profile_background': '🎨',
-            'recipe_unlock': '📖',
-            'exp_boost': '⚡',
-            'gold_boost': '💰',
-            'special_ingredient': '🥕',
-            'cooking_tool': '🔪'
-        };
-
-        return iconMap[item.item_type] || '🎁';
-    };
-
     const getPurchaseButton = () => {
         if (!isAvailable()) {
             return (
@@ -194,16 +164,15 @@ const ShopItem = ({ item, onPurchaseSuccess }) => {
 
     return (
         <div className={`shop-item ${!isAvailable() ? 'unavailable' : ''} ${isPurchased ? 'purchased' : ''}`}>
-            <div className="item-header">
-                <div className="item-icon">{getItemIcon()}</div>
-                <div className="item-category-badge">{item.category}</div>
-            </div>
-
             <div className="item-image">
                 {item.image_url ? (
                     <img src={item.image_url} alt={item.name} />
                 ) : (
-                    <div className="item-image-placeholder">{getItemIcon()}</div>
+                    <div className="item-image-placeholder">
+                        {item.item_type === 'consumable' ? '🍯' :
+                            item.item_type === 'boost' ? '⚡' :
+                                item.item_type === 'currency' ? '💰' : '🎁'}
+                    </div>
                 )}
             </div>
 
@@ -212,12 +181,10 @@ const ShopItem = ({ item, onPurchaseSuccess }) => {
                 <p className="item-description">{item.description}</p>
 
                 <div className="item-meta">
-                    <div className="item-level">
-                        Level {item.required_level || 1}+
-                    </div>
-                    {item.stock_quantity > 0 && (
-                        <div className="item-stock">
-                            {item.stock_quantity} left
+                    <div className="item-category">{item.category}</div>
+                    {item.duration_days && (
+                        <div className="item-duration">
+                            {item.duration_days} days
                         </div>
                     )}
                 </div>
@@ -225,9 +192,6 @@ const ShopItem = ({ item, onPurchaseSuccess }) => {
                 <div className="item-pricing">
                     {getPriceDisplay()}
                 </div>
-
-                {/* ADD THIS: */}
-                {getAffordabilityDetails()}
 
                 {purchaseError && (
                     <div className="purchase-error">

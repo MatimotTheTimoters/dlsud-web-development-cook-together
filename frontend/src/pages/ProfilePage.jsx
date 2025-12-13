@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UserProfile from '../components/users/UserProfile';
-// import UserRecipes from '../components/users/UserRecipes';
-// import LoadingSpinner from '../components/common/LoadingSpinner';
-import { 
+import {
   FaUserCircle, FaCog, FaChartLine, FaArrowLeft,
-  FaTrophy, FaBook, FaUsers 
+  FaTrophy, FaBook, FaUsers
 } from 'react-icons/fa';
-import RecipeList from '../components/recipes/RecipeList';
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -17,42 +14,39 @@ const ProfilePage = () => {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('profile');
 
-  // Load user data - UPDATED TO USE PHP BACKEND
+  // Load user data
   const loadUserData = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await fetch(`http://localhost/backend/api/users/profile.php?user_id=${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-
+      // Mock API call - replace with actual API
+      setTimeout(() => {
         setUserData({
-          profile: result.data?.profile || result.profile,
-          stats: result.data?.stats || result.stats,
-          level_progress: result.data?.level_progress,
-          is_following: result.data?.is_following,
-          is_friend: result.data?.is_friend
+          profile: {
+            id: id || '1',
+            full_name: 'Chef Mario',
+            email: 'mario@example.com',
+            profile_picture: null,
+            age: 35,
+            gender: 'male'
+          },
+          stats: {
+            level: 24,
+            current_exp: 1200,
+            gold_count: 1250,
+            gem_count: 45,
+            recipes_created: 12,
+            recipes_cooked: 45,
+            login_streak: 7
+          }
         });
-      } else {
-        throw new Error(result.message || 'Failed to load profile');
-      }
+        setLoading(false);
+      }, 1000);
+
     } catch (err) {
       setError(err.message || 'Failed to load user data');
       console.error('Error loading user data:', err);
-    } finally {
       setLoading(false);
     }
   };
@@ -68,14 +62,13 @@ const ProfilePage = () => {
     }
   }, [id]);
 
-  //<LoadingSpinner size="large" text={`Loading profile data...`}/>
-  // from between loading divs wont comment out down there
   if (loading) {
     return (
       <div className="profile-page-loading">
-
-        <div className="loading-bonus">
-          <FaTrophy /> +10 EXP for patience!
+        <div className="loading-content">
+          <FaUserCircle className="spinning-icon" />
+          <h2>Loading Profile</h2>
+          <p>Getting user information...</p>
         </div>
       </div>
     );
@@ -83,21 +76,21 @@ const ProfilePage = () => {
 
   if (error) {
     return (
-      <div className="profile-page-error animate__animated animate__shakeX">
+      <div className="profile-page-error">
         <div className="error-content">
           <div className="error-icon">⚠️</div>
           <h2>Profile Not Found</h2>
           <p>{error}</p>
           <div className="error-actions">
-            <button 
+            <button
               onClick={() => navigate(-1)}
-              className="game-button secondary"
+              className="btn-secondary"
             >
               <FaArrowLeft /> Go Back
             </button>
-            <button 
+            <button
               onClick={loadUserData}
-              className="game-button"
+              className="btn-primary"
             >
               Try Again
             </button>
@@ -111,24 +104,24 @@ const ProfilePage = () => {
     <div className="profile-page-container">
       {/* Profile Header */}
       <div className="profile-page-header">
-        <button 
+        <button
           onClick={() => navigate(-1)}
-          className="back-button game-button secondary"
+          className="back-button btn-secondary"
         >
           <FaArrowLeft /> Back
         </button>
-        
-        <h1 className="page-title animate__animated animate__bounceIn">
+
+        <h1 className="page-title">
           <FaUserCircle /> Profile
           {userData && (
             <span className="profile-title-user">
-              {userData.profile?.full_name || userData.full_name}
+              {userData.profile?.full_name || 'User'}
             </span>
           )}
         </h1>
-        
+
         <div className="header-actions">
-          <button className="game-button">
+          <button className="btn-secondary">
             <FaCog /> Settings
           </button>
         </div>
@@ -136,34 +129,31 @@ const ProfilePage = () => {
 
       {/* Section Navigation */}
       <div className="profile-sections-nav">
-        <button 
+        <button
           className={`section-button ${activeSection === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveSection('profile')}
         >
           <FaUserCircle /> Profile
         </button>
-        <button 
+        <button
           className={`section-button ${activeSection === 'recipes' ? 'active' : ''}`}
           onClick={() => setActiveSection('recipes')}
         >
           <FaBook /> Recipes
         </button>
-
-        {/* Cookbooks commmented out*/}
-        {/* <button 
+        <button
           className={`section-button ${activeSection === 'cookbooks' ? 'active' : ''}`}
           onClick={() => setActiveSection('cookbooks')}
         >
           <FaBook /> Cookbooks
-        </button> */}
-
-        <button 
+        </button>
+        <button
           className={`section-button ${activeSection === 'stats' ? 'active' : ''}`}
           onClick={() => setActiveSection('stats')}
         >
           <FaChartLine /> Stats
         </button>
-        <button 
+        <button
           className={`section-button ${activeSection === 'following' ? 'active' : ''}`}
           onClick={() => setActiveSection('following')}
         >
@@ -176,53 +166,47 @@ const ProfilePage = () => {
         {activeSection === 'profile' && (
           <UserProfile userId={id} onUpdate={handleProfileUpdate} />
         )}
-        
+
         {activeSection === 'recipes' && userData && (
           <div className="profile-recipes-section">
             <h2>
-              <FaBook /> {userData.profile?.full_name || userData.full_name}'s Recipes
+              <FaBook /> {userData.profile?.full_name || 'User'}'s Recipes
             </h2>
-
-            <RecipeList 
-              userId={id}
-              title=""
-              showFilters={false}
-              showSearch={false}
-              limit={12}
-            />
+            <div className="recipes-placeholder">
+              <FaBook size={64} />
+              <p>User's recipes will appear here</p>
+            </div>
           </div>
         )}
-        
+
+        {activeSection === 'cookbooks' && userData && (
+          <div className="profile-cookbooks-section">
+            <h2>
+              <FaBook /> {userData.profile?.full_name || 'User'}'s Cookbooks
+            </h2>
+            <div className="cookbooks-placeholder">
+              <FaBook size={64} />
+              <p>User's cookbooks will appear here</p>
+            </div>
+          </div>
+        )}
+
         {activeSection === 'stats' && userData && (
           <div className="profile-stats-section">
             <h2>
-              <FaChartLine /> {userData.profile?.full_name || userData.full_name}'s Statistics
+              <FaChartLine /> {userData.profile?.full_name || 'User'}'s Statistics
             </h2>
-            {/* StatsDisplay component would go here */}
             <div className="stats-placeholder">
               <FaTrophy size={64} />
               <p>Detailed statistics coming soon!</p>
             </div>
           </div>
         )}
-        
-        {/* Cookbooks commented out */}
-        {/* {activeSection === 'cookbooks' && userData && (
-          <div className="profile-cookbooks-section">
-            <h2>
-              <FaBook /> {userData.full_name}'s Cookbooks
-            </h2>
-            <div className="cookbooks-placeholder">
-              <FaBook size={64} />
-              <p>Cookbooks feature coming soon!</p>
-            </div>
-          </div>
-        )} */}
-        
+
         {activeSection === 'following' && userData && (
           <div className="profile-following-section">
             <h2>
-              <FaUsers /> {userData.profile?.full_name || userData.full_name}'s Following
+              <FaUsers /> {userData.profile?.full_name || 'User'}'s Following
             </h2>
             <div className="following-placeholder">
               <FaUsers size={64} />
@@ -230,20 +214,6 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Gamification Banner */}
-      <div className="gamification-banner animate__animated animate__pulse">
-        <div className="banner-content">
-          <FaTrophy className="banner-icon" />
-          <div className="banner-text">
-            <h3>Level Up Your Profile!</h3>
-            <p>Complete your profile, upload a picture, and create recipes to earn rewards!</p>
-          </div>
-          <button className="game-button banner-action">
-            Earn More EXP →
-          </button>
-        </div>
       </div>
     </div>
   );

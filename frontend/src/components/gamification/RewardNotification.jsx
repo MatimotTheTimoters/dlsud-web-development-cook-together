@@ -3,14 +3,9 @@ import { FaGift, FaCoins, FaGem, FaStar, FaTrophy, FaTimes } from 'react-icons/f
 import { getUserStats } from '../../api/users';
 import { useAuth } from '../../hooks/useAuth';
 import './RewardNotification.css';
-import {
-    calculateDailyLoginBonus,
-    checkLevelUp,
-    calculateRecipeRewards
-} from '../../utils/userCalculations';
 
 /**
- * RewardNotification component for displaying reward notifications
+ * RewardNotification component for displaying reward notifications with animations
  * Backend Endpoint: api/users/stats.php (for reward updates)
  */
 const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
@@ -43,7 +38,7 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
         };
 
         // Initial stats fetch
-        if (!previousStats) {
+        if (!previousStats && user?.id) {
             getUserStats(user.id).then(stats => {
                 setPreviousStats(stats);
                 setCurrentStats(stats);
@@ -65,7 +60,7 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
     const detectRewardChanges = (oldStats, newStats) => {
         const rewards = [];
 
-        // Original EXP/gold/gem detection (KEEP THIS!)
+        // EXP detection
         if (newStats.current_exp > (oldStats.current_exp || 0)) {
             const expGain = newStats.current_exp - (oldStats.current_exp || 0);
             if (expGain > 0) {
@@ -75,11 +70,12 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
                     amount: expGain,
                     message: `+${expGain} EXP Earned!`,
                     icon: <FaStar />,
-                    color: '#4CAF50'
+                    color: '#A55EEA' // XP Purple from styles
                 });
             }
         }
 
+        // Gold detection
         if (newStats.gold_count > (oldStats.gold_count || 0)) {
             const goldGain = newStats.gold_count - (oldStats.gold_count || 0);
             if (goldGain > 0) {
@@ -89,11 +85,12 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
                     amount: goldGain,
                     message: `+${goldGain} Gold Earned!`,
                     icon: <FaCoins />,
-                    color: '#FFD700'
+                    color: '#FFD93D' // Gold Coin from styles
                 });
             }
         }
 
+        // Gems detection
         if (newStats.gem_count > (oldStats.gem_count || 0)) {
             const gemGain = newStats.gem_count - (oldStats.gem_count || 0);
             if (gemGain > 0) {
@@ -103,35 +100,21 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
                     amount: gemGain,
                     message: `+${gemGain} Gems Earned!`,
                     icon: <FaGem />,
-                    color: '#9370DB'
+                    color: '#6C5CE7' // Rare Gem from styles
                 });
             }
         }
 
-        // Enhanced daily login bonus
-        if (newStats.login_streak > (oldStats.login_streak || 0)) {
-            const bonus = calculateDailyLoginBonus(newStats.login_streak);
-            rewards.push({
-                id: `daily-${Date.now()}`,
-                type: 'daily_bonus',
-                message: `Daily Login Bonus! +${bonus.exp_bonus} EXP, +${bonus.gold_bonus} Gold`,
-                amount: bonus.gold_bonus + bonus.gem_bonus,
-                streak: bonus.streak,
-                icon: <FaGift />,
-                color: '#FF6B6B'
-            });
-        }
-
-        // Enhanced level up detection
-        const levelUpCheck = checkLevelUp(oldStats.level || 1, newStats.current_exp);
-        if (levelUpCheck.should_level_up) {
+        // Level up detection
+        if (newStats.level > (oldStats.level || 1)) {
+            const levelsGained = newStats.level - (oldStats.level || 1);
             rewards.push({
                 id: `level-${Date.now()}`,
                 type: 'level_up',
-                message: `Level ${levelUpCheck.new_level} Unlocked! (+${levelUpCheck.levels_gained} levels)`,
-                amount: levelUpCheck.levels_gained,
+                message: `🎉 LEVEL UP! 🎉\nLevel ${newStats.level} Unlocked!`,
+                amount: levelsGained,
                 icon: <FaTrophy />,
-                color: '#FF6B6B'
+                color: '#FF6B6B' // Chef's Red from styles
             });
         }
 
@@ -179,26 +162,6 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
         setNotifications([]);
     };
 
-    const getNotificationIcon = (type) => {
-        switch (type) {
-            case 'exp':
-                return <FaStar />;
-            case 'gold':
-                return <FaCoins />;
-            case 'gem':
-                return <FaGem />;
-            case 'level':
-                return <FaTrophy />;
-            default:
-                return <FaGift />;
-        }
-    };
-
-    const formatAmount = (amount, type) => {
-        if (type === 'level') return '';
-        return amount.toLocaleString();
-    };
-
     if (notifications.length === 0) {
         return null;
     }
@@ -208,20 +171,20 @@ const RewardNotification = ({ initialRewards = [], autoShow = true }) => {
             {notifications.map(notification => (
                 <div
                     key={notification.id}
-                    className={`reward-notification ${notification.type} ${notification.visible ? 'visible' : 'hidden'}`}
+                    className={`reward-notification animate__animated animate__bounceIn ${notification.type} ${notification.visible ? 'visible' : 'hidden'}`}
                     style={{ borderLeftColor: notification.color }}
                 >
                     <div className="notification-icon" style={{ color: notification.color }}>
-                        {notification.icon || getNotificationIcon(notification.type)}
+                        {notification.icon}
                     </div>
 
                     <div className="notification-content">
                         <div className="notification-message">
                             {notification.message}
                         </div>
-                        {notification.amount > 0 && (
+                        {notification.amount > 0 && notification.type !== 'level_up' && (
                             <div className="notification-amount">
-                                {formatAmount(notification.amount, notification.type)}
+                                {notification.amount.toLocaleString()}
                             </div>
                         )}
                     </div>

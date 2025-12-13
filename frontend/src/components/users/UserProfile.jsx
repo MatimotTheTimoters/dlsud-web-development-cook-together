@@ -1,331 +1,145 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import {
-  FaEdit, FaCamera, FaTrophy,
-  FaChartLine, FaAward, FaCrown,
-  FaStar, FaFire, FaSync
+  FaEdit, FaCamera, FaChartLine, FaCrown, FaBook, FaUsers,
+  FaCoins, FaGem, FaStar, FaFire, FaClock, FaTrophy, FaAward
 } from 'react-icons/fa';
-import { useData } from '../../contexts/DataContext.js';
-import { useAuth } from '../../hooks/useAuth.js';
-//import LoadingSpinner from '../common/LoadingSpinner';
-// import StatsDisplay from './StatsDisplay';
+import { useAuth } from '../../hooks/useAuth';
+import * as usersApi from '../../api/users';
+import * as recipesApi from '../../api/recipes';
+import * as cookbooksApi from '../../api/cookbooks';
+import * as relationshipsApi from '../../api/relationships';
+import FollowButton from './FollowButton';
+import StatsDisplay from './StatsDisplay';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const UserProfile = ({ userId: propUserId }) => {
   const { id: paramUserId } = useParams();
   const userId = propUserId || paramUserId;
+  const { currentUser } = useAuth();
 
-  const { updateProfile, user: currentUser } = useAuth(); // Use current user from auth
-
-  const {
-    userData,
-    currentUserData,
-    loading,
-    errors,
-    fetchUserData,
-    fetchUserRecipes,
-    fetchRelationships,
-    fetchFollowers,
-    fetchFollowing,
-    followUser,
-    manageFriendRequest,
-    syncAllData
-  } = useData();
-
-  const [activeTab, setActiveTab] = useState('recipes');
   const [profileData, setProfileData] = useState(null);
   const [userStats, setUserStats] = useState(null);
   const [userRecipes, setUserRecipes] = useState([]);
   const [userCookbooks, setUserCookbooks] = useState([]);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [areFriends, setAreFriends] = useState(false);
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [activeTab, setActiveTab] = useState('recipes');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     full_name: '',
     age: '',
     gender: ''
   });
+  const [loading, setLoading] = useState({
+    profile: true,
+    recipes: false,
+    cookbooks: false,
+    relationships: false
+  });
 
-  // Check if viewing own profile
-  const isOwnProfile = currentUserData && currentUserData.id === userId;
+  const isOwnProfile = currentUser && currentUser.id === userId;
 
-  // Load user profile data using DataContext
   const loadUserProfile = async () => {
+    setLoading(prev => ({ ...prev, profile: true }));
     try {
-      // If it's own profile, use currentUserData from context
-      if (isOwnProfile && currentUserData) {
-        setProfileData(currentUserData);
-        setEditForm({
-          full_name: currentUserData.full_name || '',
-          age: currentUserData.age || '',
-          gender: currentUserData.gender || ''
-        });
-
-        // Extract stats from userData
-        if (currentUserData.stats) {
-          setUserStats(currentUserData.stats);
-        }
-      } else {
-        // For other users, fetch their profile
-        const result = await fetchUserProfileById(userId);
-        if (result.success) {
-          setProfileData(result.data);
-          setEditForm({
-            full_name: result.data.full_name || '',
-            age: result.data.age || '',
-            gender: result.data.gender || ''
-          });
-
-          if (result.data.stats) {
-            setUserStats(result.data.stats);
-          }
-
-          // Check follow status
-          if (result.data.is_following !== undefined) {
-            setIsFollowing(result.data.is_following);
-          }
-
-          // Check friend status
-          if (result.data.is_friend !== undefined) {
-            setAreFriends(result.data.is_friend);
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Error loading profile:', err);
-    }
-  };
-
-  // Fetch user profile by ID (helper function since DataContext doesn't have this directly)
-  const fetchUserProfileById = async (targetUserId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost/api/users/profile.php?user_id=${targetUserId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const profile = await usersApi.getProfile(userId);
+      setProfileData(profile);
+      setEditForm({
+        full_name: profile.full_name || '',
+        age: profile.age || '',
+        gender: profile.gender || ''
       });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        return { success: true, data: data.data };
-      } else {
-        return { success: false, message: data.message || 'Failed to fetch user profile' };
-      }
     } catch (error) {
-      return { success: false, message: error.message };
+      console.error('Error loading profile:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, profile: false }));
     }
   };
 
-  // Load user's recipes using DataContext
+  const loadUserStats = async () => {
+    try {
+      const stats = await usersApi.getUserStats(userId);
+      setUserStats(stats);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
   const loadUserRecipes = async () => {
+    setLoading(prev => ({ ...prev, recipes: true }));
     try {
-      const result = await fetchUserRecipes(userId);
-      if (result.success) {
-        setUserRecipes(result.data.recipes || []);
-      }
-    } catch (err) {
-      console.error('Error loading recipes:', err);
+      const recipes = await recipesApi.getAllRecipes({ user_id: userId });
+      setUserRecipes(recipes);
+    } catch (error) {
+      console.error('Error loading recipes:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, recipes: false }));
     }
   };
 
-  // Load user's cookbooks
   const loadUserCookbooks = async () => {
+    setLoading(prev => ({ ...prev, cookbooks: true }));
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost/api/cookbooks/user.php?user_id=${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setUserCookbooks(data.data.cookbooks || []);
-        }
-      }
-    } catch (err) {
-      console.error('Error loading cookbooks:', err);
+      const cookbooks = await cookbooksApi.getCookbooks(userId);
+      setUserCookbooks(cookbooks);
+    } catch (error) {
+      console.error('Error loading cookbooks:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, cookbooks: false }));
     }
   };
 
-  // Calculate progress to next level
-  const calculateNextLevelProgress = () => {
-    if (!userStats) return { progress: 0, remaining: 0 };
-
-    const currentExp = userStats.current_exp || 0;
-    const nextLevelExp = userStats.current_level_ceiling || 100;
-    const progress = (currentExp / nextLevelExp) * 100;
-
-    return {
-      progress: Math.min(progress, 100),
-      remaining: Math.max(0, nextLevelExp - currentExp)
-    };
+  const loadRelationships = async () => {
+    setLoading(prev => ({ ...prev, relationships: true }));
+    try {
+      const [followersData, followingData] = await Promise.all([
+        relationshipsApi.getFollowers(userId),
+        relationshipsApi.getFollowing(userId)
+      ]);
+      setFollowers(followersData);
+      setFollowing(followingData);
+    } catch (error) {
+      console.error('Error loading relationships:', error);
+    } finally {
+      setLoading(prev => ({ ...prev, relationships: false }));
+    }
   };
 
-  // Handle profile update
   const handleProfileUpdate = async (e) => {
-  e.preventDefault();
-
-  try {
-    await updateProfile(editForm);
-    
-    // Update local state
-    if (profileData) {
-      setProfileData({
-        ...profileData,
-        ...editForm
-      });
-    }
-    
-    setIsEditing(false);
-    
-    // Show success message
-    alert('Profile updated successfully!');
-  } catch (err) {
-    console.error('Error updating profile:', err);
-    alert(err.message || 'Failed to update profile. Please try again.');
-  }
-};
-
-  // Handle profile picture upload
-  // Handle profile picture upload
-const handleProfilePictureUpload = async (file) => {
-  try {
-    // Create FormData
-    const formData = new FormData();
-    formData.append('profile_picture', file);
-    
-    // Get token
-    const token = localStorage.getItem('token');
-    
-    // Upload the file
-    const response = await fetch('http://localhost/api/users/upload-profile-picture.php', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to upload profile picture');
-    }
-
-    if (data.success) {
-      // Update the profile with new picture URL
-      await updateProfile({ profile_picture: data.data.url });
-      
-      // Update local state
-      if (profileData) {
-        setProfileData({
-          ...profileData,
-          profile_picture: data.data.url
-        });
-      }
-      
-      alert('Profile picture updated successfully!');
-    } else {
-      throw new Error(data.message || 'Failed to upload profile picture');
-    }
-  } catch (err) {
-    console.error('Error uploading profile picture:', err);
-    alert(err.message || 'Failed to upload profile picture. Please try again.');
-  }
-};
-
-  // Handle follow/unfollow
-  const handleFollow = async () => {
+    e.preventDefault();
     try {
-      const action = isFollowing ? 'unfollow' : 'follow';
-      const result = await followUser(userId, action);
-
-      if (result.success) {
-        setIsFollowing(!isFollowing);
-        // Refresh relationship data
-        await fetchRelationships();
-        await fetchFollowers();
-        await fetchFollowing();
-      }
-    } catch (err) {
-      console.error('Error following user:', err);
-      alert(err.message);
+      await usersApi.updateProfile(userId, editForm);
+      await loadUserProfile();
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert(error.message || 'Failed to update profile');
     }
   };
 
-  // Handle friend request
-  const handleFriendRequest = async (action) => {
-    try {
-      const result = await manageFriendRequest(userId, action);
-
-      if (result.success) {
-        if (action === 'accept_request') {
-          setAreFriends(true);
-        } else if (action === 'remove_friend') {
-          setAreFriends(false);
-        }
-        // Refresh relationship data
-        await fetchRelationships();
-      }
-    } catch (err) {
-      console.error('Error managing friend request:', err);
-      alert(err.message);
-    }
-  };
-
-  // Load data on component mount or userId change
   useEffect(() => {
     if (userId) {
       loadUserProfile();
+      loadUserStats();
       loadUserRecipes();
       loadUserCookbooks();
+      loadRelationships();
     }
   }, [userId]);
 
-  /*
-  // Show loading state
-  if (loading.user || loading.recipes) {
-    return <LoadingSpinner size="large" text="Loading profile..." />;
-  }
-    */
-
-
-  // Show error state
-  if (errors.user) {
-    return (
-      <div className="error-container animate__animated animate__shakeX">
-        <div className="error-icon">⚠️</div>
-        <h3>Error Loading Profile</h3>
-        <p>{errors.user}</p>
-        <button
-          onClick={() => {
-            loadUserProfile();
-            loadUserRecipes();
-          }}
-          className="game-button"
-        >
-          <FaSync /> Try Again
-        </button>
-      </div>
-    );
+  if (loading.profile) {
+    return <LoadingSpinner text="Loading profile..." />;
   }
 
   if (!profileData) {
     return (
-      <div className="no-data-container">
-        <FaCamera size={64} />
-        <h3>No Profile Found</h3>
+      <div className="error-container">
+        <h3>Profile Not Found</h3>
         <p>The user profile could not be loaded.</p>
       </div>
     );
   }
-
-  const levelProgress = calculateNextLevelProgress();
 
   return (
     <div className="user-profile-container animate__animated animate__fadeIn">
@@ -334,69 +148,18 @@ const handleProfilePictureUpload = async (file) => {
         <div className="profile-actions">
           {isOwnProfile ? (
             <>
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="game-button secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleProfileUpdate}
-                    className="game-button success"
-                    disabled={loading.user}
-                  >
-                    {loading.user ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="game-button"
-                  >
-                    <FaEdit /> Edit Profile
-                  </button>
-                  <button
-                    onClick={syncAllData}
-                    className="game-button"
-                    disabled={loading.all}
-                  >
-                    <FaSync /> Sync Data
-                  </button>
-                </>
-              )}
+              <button
+                onClick={() => setIsEditing(true)}
+                className="game-button"
+              >
+                <FaEdit /> Edit Profile
+              </button>
             </>
           ) : (
-            <>
-              <button
-                onClick={handleFollow}
-                className={`game-button ${isFollowing ? 'secondary' : 'primary'}`}
-              >
-                {isFollowing ? 'Following' : 'Follow'}
-              </button>
-
-              {areFriends ? (
-                <button
-                  onClick={() => handleFriendRequest('remove_friend')}
-                  className="game-button warning"
-                >
-                  Remove Friend
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleFriendRequest('send_request')}
-                  className="game-button success"
-                >
-                  Add Friend
-                </button>
-              )}
-            </>
+            <FollowButton targetUserId={userId} />
           )}
         </div>
 
-        {/* Profile Picture */}
         <div className="profile-picture-section">
           <div className="profile-picture-wrapper">
             <img
@@ -410,11 +173,6 @@ const handleProfilePictureUpload = async (file) => {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files[0]) {
-                      handleProfilePictureUpload(e.target.files[0]);
-                    }
-                  }}
                   style={{ display: 'none' }}
                 />
               </label>
@@ -422,7 +180,7 @@ const handleProfilePictureUpload = async (file) => {
           </div>
 
           <div className="profile-info">
-            <h1 className="profile-name animate__animated animate__bounceIn">
+            <h1 className="profile-name">
               {profileData.full_name}
               {userStats && (
                 <span className="level-badge">
@@ -432,29 +190,23 @@ const handleProfilePictureUpload = async (file) => {
             </h1>
 
             <div className="profile-meta">
-              {profileData.email && (
-                <span className="meta-item">
-                  📧 {profileData.email}
-                </span>
-              )}
               {profileData.age && (
                 <span className="meta-item">
-                  🎂 {profileData.age} years old
+                  Age: {profileData.age}
                 </span>
               )}
               {profileData.gender && (
                 <span className="meta-item">
-                  👤 {profileData.gender.charAt(0).toUpperCase() + profileData.gender.slice(1)}
+                  Gender: {profileData.gender}
                 </span>
               )}
-              {userStats && (
+              {userStats && userStats.login_streak > 0 && (
                 <span className="meta-item">
-                  <FaFire /> {userStats.login_streak || 0}-Day Login Streak
+                  <FaFire /> {userStats.login_streak}-Day Login Streak
                 </span>
               )}
             </div>
 
-            {/* Stats Overview */}
             {userStats && (
               <div className="stats-overview">
                 <div className="stat-item">
@@ -488,19 +240,17 @@ const handleProfilePictureUpload = async (file) => {
         <div className="level-progress-section">
           <div className="progress-header">
             <span>Level {userStats.level} Progress</span>
-            <span>{Math.floor(levelProgress.progress)}%</span>
+            <span>
+              {userStats.current_exp || 0}/{userStats.current_level_ceiling || 100} EXP
+            </span>
           </div>
           <div className="progress-bar-container">
             <div
               className="progress-bar-fill"
-              style={{ width: `${levelProgress.progress}%` }}
-            >
-              <div className="progress-sparkle"></div>
-            </div>
-          </div>
-          <div className="progress-footer">
-            <span>{userStats.current_exp || 0} EXP</span>
-            <span>{levelProgress.remaining} to Level {userStats.level + 1}</span>
+              style={{
+                width: `${((userStats.current_exp || 0) / (userStats.current_level_ceiling || 100)) * 100}%`
+              }}
+            />
           </div>
         </div>
       )}
@@ -511,25 +261,31 @@ const handleProfilePictureUpload = async (file) => {
           className={`tab-button ${activeTab === 'recipes' ? 'active' : ''}`}
           onClick={() => setActiveTab('recipes')}
         >
-          📖 Recipes ({userRecipes.length})
+          <FaBook /> Recipes ({userRecipes.length})
         </button>
         <button
           className={`tab-button ${activeTab === 'cookbooks' ? 'active' : ''}`}
           onClick={() => setActiveTab('cookbooks')}
         >
-          📚 Cookbooks ({userCookbooks.length})
+          <FaBook /> Cookbooks ({userCookbooks.length})
         </button>
         <button
           className={`tab-button ${activeTab === 'stats' ? 'active' : ''}`}
           onClick={() => setActiveTab('stats')}
         >
-          📊 Stats
+          <FaChartLine /> Stats
         </button>
         <button
           className={`tab-button ${activeTab === 'following' ? 'active' : ''}`}
           onClick={() => setActiveTab('following')}
         >
-          👥 Following
+          <FaUsers /> Following ({following.length})
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'followers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('followers')}
+        >
+          <FaUsers /> Followers ({followers.length})
         </button>
       </div>
 
@@ -538,11 +294,10 @@ const handleProfilePictureUpload = async (file) => {
         {activeTab === 'recipes' && (
           <div className="recipes-grid">
             {loading.recipes ? (
-              //<LoadingSpinner text="Loading recipes..." />
-              <div className="loading-text">Loading recipes...</div>
+              <LoadingSpinner text="Loading recipes..." />
             ) : userRecipes.length === 0 ? (
               <div className="empty-state">
-                <FaTrophy size={48} />
+                <FaBook size={48} />
                 <h3>No Recipes Yet</h3>
                 <p>Create your first recipe to start earning rewards!</p>
               </div>
@@ -553,8 +308,8 @@ const handleProfilePictureUpload = async (file) => {
                   <h4>{recipe.title}</h4>
                   <span className="recipe-difficulty">{recipe.difficulty}</span>
                   <div className="recipe-meta">
-                    <span>👤 {recipe.creator_name}</span>
                     <span>👍 {recipe.like_count || 0}</span>
+                    <span>👁️ {recipe.view_count || 0}</span>
                   </div>
                 </div>
               ))
@@ -564,9 +319,11 @@ const handleProfilePictureUpload = async (file) => {
 
         {activeTab === 'cookbooks' && (
           <div className="cookbooks-grid">
-            {userCookbooks.length === 0 ? (
+            {loading.cookbooks ? (
+              <LoadingSpinner text="Loading cookbooks..." />
+            ) : userCookbooks.length === 0 ? (
               <div className="empty-state">
-                <FaTrophy size={48} />
+                <FaBook size={48} />
                 <h3>No Cookbooks Yet</h3>
                 <p>Create your first cookbook to organize your favorite recipes!</p>
               </div>
@@ -588,74 +345,59 @@ const handleProfilePictureUpload = async (file) => {
           </div>
         )}
 
-        {activeTab === 'stats' && userStats && (
-          <div className="stats-details">
-            <div className="stat-category">
-              <h4><FaChartLine /> Progress Stats</h4>
-              <div className="stat-row">
-                <span>Current Level</span>
-                <span className="stat-value">{userStats.level}</span>
-              </div>
-              <div className="stat-row">
-                <span>Current EXP</span>
-                <span className="stat-value">{userStats.current_exp}/{userStats.current_level_ceiling}</span>
-              </div>
-              <div className="stat-row">
-                <span>Login Streak</span>
-                <span className="stat-value">{userStats.login_streak} days</span>
-              </div>
-            </div>
-
-            <div className="stat-category">
-              <h4><FaTrophy /> Achievement Stats</h4>
-              <div className="stat-row">
-                <span>Recipes Created</span>
-                <span className="stat-value">{userStats.recipes_created}</span>
-              </div>
-              <div className="stat-row">
-                <span>Recipes Cooked</span>
-                <span className="stat-value">{userStats.recipes_cooked}</span>
-              </div>
-              <div className="stat-row">
-                <span>Challenges Completed</span>
-                <span className="stat-value">{userStats.challenges_completed}</span>
-              </div>
-              <div className="stat-row">
-                <span>Recipes Sold</span>
-                <span className="stat-value">{userStats.recipes_sold || 0}</span>
-              </div>
-            </div>
-
-            <div className="stat-category">
-              <h4><FaAward /> Currency</h4>
-              <div className="stat-row">
-                <span>Gold</span>
-                <span className="stat-value gold">{userStats.gold_count}</span>
-              </div>
-              <div className="stat-row">
-                <span>Gems</span>
-                <span className="stat-value gem">{userStats.gem_count}</span>
-              </div>
-            </div>
-          </div>
+        {activeTab === 'stats' && (
+          <StatsDisplay userId={userId} />
         )}
 
         {activeTab === 'following' && (
           <div className="following-section">
-            <div className="follow-tabs">
-              <button className="follow-tab active">Following</button>
-              <button className="follow-tab">Followers</button>
-            </div>
-            <div className="follow-list">
-              <p className="info-text">
-                Connect with other users to see their cooking activities!
-              </p>
-              {!isOwnProfile && (
-                <button className="game-button" onClick={handleFollow}>
-                  {isFollowing ? 'Unfollow User' : 'Follow User'}
-                </button>
-              )}
-            </div>
+            {loading.relationships ? (
+              <LoadingSpinner text="Loading following..." />
+            ) : following.length === 0 ? (
+              <div className="empty-state">
+                <FaUsers size={48} />
+                <h3>Not Following Anyone</h3>
+                <p>Follow other users to see their cooking activities!</p>
+              </div>
+            ) : (
+              <div className="users-grid">
+                {following.map(user => (
+                  <div key={user.id} className="user-card-mini">
+                    <img src={user.profile_picture || '/default-avatar.png'} alt={user.full_name} />
+                    <div className="user-info-mini">
+                      <Link to={`/profile/${user.id}`}>{user.full_name}</Link>
+                      <span className="user-level-mini">Lvl {user.level || 1}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'followers' && (
+          <div className="followers-section">
+            {loading.relationships ? (
+              <LoadingSpinner text="Loading followers..." />
+            ) : followers.length === 0 ? (
+              <div className="empty-state">
+                <FaUsers size={48} />
+                <h3>No Followers Yet</h3>
+                <p>Share your recipes and cooking sessions to get followers!</p>
+              </div>
+            ) : (
+              <div className="users-grid">
+                {followers.map(user => (
+                  <div key={user.id} className="user-card-mini">
+                    <img src={user.profile_picture || '/default-avatar.png'} alt={user.full_name} />
+                    <div className="user-info-mini">
+                      <Link to={`/profile/${user.id}`}>{user.full_name}</Link>
+                      <span className="user-level-mini">Lvl {user.level || 1}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -672,7 +414,6 @@ const handleProfilePictureUpload = async (file) => {
                   type="text"
                   value={editForm.full_name}
                   onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                  placeholder="Enter your full name"
                   className="game-input"
                 />
               </div>
@@ -682,7 +423,6 @@ const handleProfilePictureUpload = async (file) => {
                   type="number"
                   value={editForm.age}
                   onChange={(e) => setEditForm(prev => ({ ...prev, age: e.target.value }))}
-                  placeholder="Enter your age"
                   className="game-input"
                   min="1"
                   max="120"
@@ -713,9 +453,8 @@ const handleProfilePictureUpload = async (file) => {
                 <button
                   type="submit"
                   className="game-button success"
-                  disabled={loading.user}
                 >
-                  {loading.user ? 'Saving...' : 'Save Changes'}
+                  Save Changes
                 </button>
               </div>
             </form>

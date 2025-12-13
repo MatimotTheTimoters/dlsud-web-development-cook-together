@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaCoins, FaGem, FaMoneyBillWave } from 'react-icons/fa';
+import { FaCoins, FaGem } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 import { getUserStats } from '../../api/users';
 import './CurrencyDisplay.css';
-import { calculateMaxRewards } from '../../utils/userCalculations';
 
 /**
  * CurrencyDisplay component for showing user's currency balances
@@ -11,16 +10,8 @@ import { calculateMaxRewards } from '../../utils/userCalculations';
  */
 const CurrencyDisplay = ({ showLabels = true, compact = false }) => {
     const { user } = useAuth();
-    const [stats, setStats] = React.useState(null);
-    const [loading, setLoading] = React.useState(true);
-    const [earningPotential, setEarningPotential] = useState(null);
-
-    useEffect(() => {
-        if (stats) {
-            const potential = calculateMaxRewards(stats);
-            setEarningPotential(potential);
-        }
-    }, [stats]);
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserStats = async () => {
@@ -43,16 +34,6 @@ const CurrencyDisplay = ({ showLabels = true, compact = false }) => {
         const interval = setInterval(fetchUserStats, 30000);
         return () => clearInterval(interval);
     }, [user?.id]);
-
-    const renderEarningPotential = () => {
-        if (!earningPotential || compact) return null;
-
-        return (
-            <div className="earning-potential">
-                <small>Can earn up to {earningPotential.max_gold_reward}G per recipe</small>
-            </div>
-        );
-    };
 
     const formatCurrency = (amount, type) => {
         if (amount === null || amount === undefined) return '0';
@@ -108,14 +89,6 @@ const CurrencyDisplay = ({ showLabels = true, compact = false }) => {
                     {showLabels && <span className="currency-label">Gems</span>}
                 </div>
                 <span className="currency-amount">{formatCurrency(gemAmount, 'gems')}</span>
-            </div>
-
-            <div className="currency-item premium" title="Premium Currency">
-                <div className="currency-icon-container">
-                    <FaMoneyBillWave className="currency-icon" />
-                    {showLabels && <span className="currency-label">Premium</span>}
-                </div>
-                <span className="currency-amount">Coming Soon</span>
             </div>
         </div>
     );
