@@ -6,7 +6,7 @@ import {
   FaHome, FaUtensils, FaUsers, FaBook,
   FaUser, FaCoins, FaGem, FaSignOutAlt,
   FaSearch, FaBell, FaStore, FaTrophy,
-  FaChevronDown, FaBars
+  FaBars, FaEnvelope
 } from 'react-icons/fa';
 
 const Header = () => {
@@ -14,13 +14,11 @@ const Header = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [userStats, setUserStats] = useState(null);
-  const [loadingStats, setLoadingStats] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const loadUserStats = async () => {
     if (!user) return;
 
-    setLoadingStats(true);
     try {
       const response = await usersApi.getUserStats();
       if (response.success) {
@@ -28,8 +26,6 @@ const Header = () => {
       }
     } catch (error) {
       console.error('Error loading user stats:', error);
-    } finally {
-      setLoadingStats(false);
     }
   };
 
@@ -94,67 +90,65 @@ const Header = () => {
 
   return (
     <header className="page-header">
-      {/* Top Bar */}
-      <div className="header-top-bar nav-main">
-        <div className="nav-brand">
-          <Link to="/" className="nav-brand">
-            <span className="nav-brand-icon animate__animated animate__pulse">🍳</span>
-            <span className="nav-brand-text">CookTogether</span>
+      <nav className="nav-main">
+        <Link to="/" className="nav-brand">
+          <span className="nav-brand-icon">🍳</span>
+          <span className="nav-brand-text">CookTogether</span>
+        </Link>
+
+        <div className="nav-menu">
+          <Link to="/" className="nav-link">
+            <FaHome className="nav-icon" /> Home
+          </Link>
+          <Link to="/recipes" className="nav-link">
+            <FaUtensils className="nav-icon" /> Recipes
+          </Link>
+          <Link to="/discover" className="nav-link">
+            <FaUsers className="nav-icon" /> Discover
+          </Link>
+          <Link to="/cookbooks" className="nav-link">
+            <FaBook className="nav-icon" /> Cookbooks
+          </Link>
+          <Link to="/shop" className="nav-link">
+            <FaStore className="nav-icon" /> Shop
           </Link>
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="search-container">
-          <div className="form-with-icon">
-            <FaSearch className="form-icon" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search recipes, users, cookbooks..."
-              className="form-control"
-            />
-            <button type="submit" className="btn-rpg btn-rpg-sm">
-              Search
-            </button>
-          </div>
-        </form>
-
-        {/* User Info */}
-        <div className="user-info-container">
-          <div className="currency-display">
-            <div className="currency-item currency-gold">
-              <FaCoins className="currency-icon" />
-              <span className="currency-amount">
-                {loadingStats ? '...' : (userStats?.gold_count || 0).toLocaleString()}G
-              </span>
-            </div>
-            <div className="currency-item currency-gem">
-              <FaGem className="currency-icon" />
-              <span className="currency-amount">
-                {loadingStats ? '...' : userStats?.gem_count || 0}
-              </span>
-            </div>
-          </div>
-
-          <div className="user-profile-mini">
-            <Link to="/profile" className="profile-link">
-              <img
-                src={user?.profile_picture || '/default-avatar.png'}
-                alt={user?.full_name || 'User'}
-                className="card-user-avatar"
-              />
-              <div className="profile-info">
-                <span className="profile-greeting">{getGreeting()},</span>
-                <span className="profile-name">
-                  {user?.full_name || 'Chef'}
+        <div className="nav-actions">
+          <button className="nav-action-button">
+            <FaBell className="nav-icon" />
+          </button>
+          <button className="nav-action-button">
+            <FaEnvelope className="nav-icon" />
+          </button>
+          <button className="nav-action-button">
+            <FaUser className="nav-icon" />
+          </button>
+          {userStats && (
+            <div className="currency-display">
+              <div className="currency-item currency-gold">
+                <FaCoins className="currency-icon" />
+                <span className="currency-amount">
+                  {userStats.gold_count || 0}G
                 </span>
-                <div className="level-badge badge">
-                  <FaTrophy /> Lvl {userStats?.level || 1}
-                </div>
               </div>
-            </Link>
-          </div>
+              <div className="currency-item currency-gem">
+                <FaGem className="currency-icon" />
+                <span className="currency-amount">
+                  {userStats.gem_count || 0}
+                </span>
+              </div>
+              <div className="level-badge">
+                <FaTrophy /> Lvl {userStats.level || 1}
+              </div>
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="btn-rpg btn-rpg-secondary"
+          >
+            <FaSignOutAlt /> Logout
+          </button>
         </div>
 
         <button
@@ -163,68 +157,7 @@ const Header = () => {
         >
           <FaBars />
         </button>
-      </div>
-
-      {/* Navigation Bar */}
-      <nav className={`header-navigation nav-menu ${mobileMenuOpen ? 'open' : ''}`}>
-        <div className="nav-links">
-          <Link to="/" className="nav-link">
-            <FaHome className="nav-icon" /> Home
-          </Link>
-          <Link to="/recipes" className="nav-link">
-            <FaUtensils className="nav-icon" /> Recipes
-          </Link>
-          <Link to="/cooking-sessions" className="nav-link">
-            <FaUsers className="nav-icon" /> Sessions
-          </Link>
-          <Link to="/cookbooks" className="nav-link">
-            <FaBook className="nav-icon" /> Cookbooks
-          </Link>
-          <Link to="/discover" className="nav-link">
-            <FaUsers className="nav-icon" /> Discover
-          </Link>
-          <Link to="/shop" className="nav-link">
-            <FaStore className="nav-icon" /> Shop
-          </Link>
-          <Link to="/profile" className="nav-link">
-            <FaUser className="nav-icon" /> Profile
-          </Link>
-        </div>
-
-        <div className="nav-actions">
-          <button className="nav-action-button notification-button">
-            <FaBell />
-          </button>
-          <button
-            onClick={handleLogout}
-            className="btn-rpg btn-rpg-secondary logout-button"
-          >
-            <FaSignOutAlt /> Logout
-          </button>
-        </div>
       </nav>
-
-      {/* Progress Bar */}
-      {userStats && (
-        <div className="header-progress-bar">
-          <div className="progress-label">
-            <span>Level {userStats.level}</span>
-            <span className="progress-value">
-              {userStats.current_exp || 0} / {userStats.current_level_ceiling || 100} EXP
-            </span>
-          </div>
-          <div className="progress-container">
-            <div
-              className="progress-bar progress-bar-exp"
-              style={{
-                width: `${((userStats.current_exp || 0) / (userStats.current_level_ceiling || 100)) * 100}%`
-              }}
-            >
-              <div className="progress-sparkle"></div>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 };

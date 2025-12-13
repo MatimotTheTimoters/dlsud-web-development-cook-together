@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useData } from '../../contexts/DataContext';
-import RecipeCard from '../cards/RecipeCard';
+import RecipeCard from './RecipeCard';
 import {
   FaFilter, FaSort, FaSearch, FaTimes,
   FaClock, FaFire, FaStar, FaUtensils
 } from 'react-icons/fa';
-import { getAllRecipes, searchRecipes } from '../../api/recipes';
+import { getAllRecipes } from '../../api/recipes';
 
 const RecipeList = ({
   title = "Recipe Discovery",
@@ -15,8 +14,6 @@ const RecipeList = ({
   showFilters = true,
   showSearch = true
 }) => {
-  const { recipes: contextRecipes, fetchRecipes } = useData();
-
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,11 +69,6 @@ const RecipeList = ({
           total: result.data.pagination?.total_recipes || 0,
           totalPages: result.data.pagination?.total_pages || 1
         });
-
-        // Also update context if this is the main recipe list
-        if (!userId && !searchQuery && page === 1) {
-          // The context will handle its own updates
-        }
       } else {
         setError(result.message || 'Failed to load recipes');
       }
@@ -128,72 +120,10 @@ const RecipeList = ({
     }
   };
 
-  // Initialize with context recipes or load fresh
+  // Initialize
   useEffect(() => {
-    if (contextRecipes.length > 0 && !userId && !searchQuery && !filters.difficulty && !filters.sortBy) {
-      // Use context recipes for initial display
-      setRecipes(contextRecipes.slice(0, limit));
-      setLoading(false);
-    } else {
-      // Load fresh data with filters
-      loadRecipes(1);
-    }
+    loadRecipes(1);
   }, [userId, filters.difficulty, filters.sortBy, searchQuery]);
-
-  // Sort recipes locally (for client-side sorting)
-  const sortRecipes = (recipesToSort, sortBy) => {
-    const sorted = [...recipesToSort];
-
-    switch (sortBy) {
-      case 'popular':
-        return sorted.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
-      case 'recent':
-        return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      case 'difficulty':
-        const difficultyOrder = { easy: 1, medium: 2, hard: 3 };
-        return sorted.sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
-      case 'time':
-        return sorted.sort((a, b) => {
-          const aTime = (a.preparation_time || 0) + (a.cooking_time || 0);
-          const bTime = (b.preparation_time || 0) + (b.cooking_time || 0);
-          return aTime - bTime;
-        });
-      default:
-        return sorted;
-    }
-  };
-
-  // Filter recipes locally (for client-side filtering)
-  const filterRecipes = (recipesToFilter, criteria) => {
-    return recipesToFilter.filter(recipe => {
-      if (criteria.difficulty && criteria.difficulty !== 'all' && recipe.difficulty !== criteria.difficulty) {
-        return false;
-      }
-
-      if (criteria.timeRange && criteria.timeRange !== 'all') {
-        const totalTime = (recipe.preparation_time || 0) + (recipe.cooking_time || 0);
-
-        switch (criteria.timeRange) {
-          case 'quick':
-            if (totalTime > 30) return false;
-            break;
-          case 'medium':
-            if (totalTime <= 30 || totalTime > 60) return false;
-            break;
-          case 'long':
-            if (totalTime <= 60) return false;
-            break;
-        }
-      }
-
-      return true;
-    });
-  };
-
-  const sortedAndFilteredRecipes = sortRecipes(
-    filterRecipes(recipes, filters),
-    filters.sortBy
-  );
 
   if (loading && recipes.length === 0) {
     return (
@@ -203,7 +133,6 @@ const RecipeList = ({
             <FaUtensils className="spinning-icon" />
           </div>
           <p className="loading-text">Discovering delicious recipes...</p>
-          <p className="loading-subtext">+10 EXP for patience</p>
         </div>
       </div>
     );
@@ -236,7 +165,7 @@ const RecipeList = ({
 
           <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
             {showSearch && (
-              <div className="flex gap-2">
+              <form onSubmit={handleSearch} className="flex gap-2">
                 <div className="form-with-icon flex-1">
                   <FaSearch className="form-icon" />
                   <input
@@ -247,10 +176,10 @@ const RecipeList = ({
                     className="form-control"
                   />
                 </div>
-                <button className="btn-rpg btn-rpg-primary" onClick={handleSearch}>
+                <button type="submit" className="btn-rpg btn-rpg-primary">
                   Search
                 </button>
-              </div>
+              </form>
             )}
 
             {showFilters && (
@@ -333,18 +262,6 @@ const RecipeList = ({
               </div>
             </div>
 
-            <div className="mt-4">
-              <div className="form-check">
-                <input
-                  type="checkbox"
-                  checked={filters.showPublic}
-                  onChange={(e) => handleFilterChange('showPublic', e.target.checked)}
-                  className="form-check-input"
-                />
-                <label className="form-check-label">Show public recipes only</label>
-              </div>
-            </div>
-
             <div className="flex gap-2 mt-6">
               <button
                 className="btn-rpg btn-rpg-primary"
@@ -367,7 +284,7 @@ const RecipeList = ({
       <div className="card-body border-t">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
           <p className="recipe-count">
-            Showing <span className="font-bold text-chef-red">{sortedAndFilteredRecipes.length}</span> of{' '}
+            Showing <span className="font-bold text-chef-red">{recipes.length}</span> of{' '}
             <span className="font-bold">{pagination.total}</span> recipes
           </p>
 
@@ -376,7 +293,7 @@ const RecipeList = ({
               <span className="text-gray-600">Search: "{searchQuery}"</span>
               <button
                 className="btn-rpg btn-rpg-sm btn-rpg-secondary"
-                onClick={clearFilters}
+                onClick={() => setSearchQuery('')}
               >
                 <FaTimes /> Clear
               </button>
@@ -386,7 +303,7 @@ const RecipeList = ({
       </div>
 
       {/* Recipes Grid */}
-      {sortedAndFilteredRecipes.length === 0 ? (
+      {recipes.length === 0 ? (
         <div className="center-layout">
           <div className="center-content">
             <div className="text-6xl mb-4">🍳</div>
@@ -413,36 +330,8 @@ const RecipeList = ({
       ) : (
         <>
           <div className="recipe-grid p-4">
-            {sortedAndFilteredRecipes.map((recipe) => (
-              <div key={recipe.id} className="card-recipe card">
-                {recipe.cover_image && (
-                  <img src={recipe.cover_image} alt={recipe.title} className="card-recipe-image" />
-                )}
-                <div className="card-body">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-lg truncate">{recipe.title}</h3>
-                    <span className="card-recipe-badge">
-                      {recipe.difficulty}
-                    </span>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="flex items-center gap-1 text-sm">
-                      <FaClock /> {((recipe.preparation_time || 0) + (recipe.cooking_time || 0))}min
-                    </span>
-                    <span className="text-sm">{recipe.origin}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="currency-display currency-gold">
-                      <FaCoins className="currency-icon" />
-                      <span className="currency-amount">{recipe.gold_reward || 0}</span>
-                    </div>
-                    <button className="btn-rpg btn-rpg-primary btn-rpg-sm">
-                      Cook
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {recipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
             ))}
           </div>
 
@@ -531,41 +420,6 @@ const RecipeList = ({
             </div>
           )}
         </>
-      )}
-
-      {/* Quick Stats */}
-      {recipes.length > 0 && (
-        <div className="card-body border-t">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl mb-1">🍳</div>
-              <div className="text-xl font-bold">{recipes.length}</div>
-              <div className="text-sm text-gray-600">Recipes</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl mb-1">⏱️</div>
-              <div className="text-xl font-bold">
-                {Math.round(recipes.reduce((sum, recipe) =>
-                  sum + (recipe.preparation_time || 0) + (recipe.cooking_time || 0), 0) / recipes.length)}
-              </div>
-              <div className="text-sm text-gray-600">Avg. Time (min)</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl mb-1">🔥</div>
-              <div className="text-xl font-bold">
-                {recipes.filter(r => r.difficulty === 'hard').length}
-              </div>
-              <div className="text-sm text-gray-600">Hard Recipes</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl mb-1">⭐</div>
-              <div className="text-xl font-bold">
-                {Math.round(recipes.reduce((sum, recipe) => sum + (recipe.exp_reward || 0), 0) / recipes.length)}
-              </div>
-              <div className="text-sm text-gray-600">Avg. EXP</div>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

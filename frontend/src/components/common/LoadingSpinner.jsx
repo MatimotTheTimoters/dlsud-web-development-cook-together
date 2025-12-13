@@ -4,13 +4,7 @@ import {
     FaCookieBite, FaSeedling, FaCarrot, FaBreadSlice
 } from 'react-icons/fa';
 
-const LoadingSpinner = ({
-    size = 'medium',
-    color = 'chef-red',
-    type = 'default',
-    message = null,
-    progress = null
-}) => {
+const LoadingSpinner = ({ size = 'medium', type = 'default', message = null }) => {
     const getSizeClass = () => {
         switch (size) {
             case 'small': return 'spinner-small';
@@ -36,12 +30,18 @@ const LoadingSpinner = ({
                         <FaBreadSlice className="spinner-icon bread-icon" />
                     </>
                 );
+            case 'cooking':
+                return (
+                    <>
+                        <FaFire className="spinner-icon fire-icon" />
+                        <FaCookieBite className="spinner-icon cookie-icon" />
+                    </>
+                );
             case 'recipe-list':
                 return (
                     <>
                         <FaSeedling className="spinner-icon seedling-icon" />
                         <FaUtensilSpoon className="spinner-icon spoon-icon" />
-                        <FaBlender className="spinner-icon blender-icon" />
                     </>
                 );
             case 'recipe-detail':
@@ -50,13 +50,6 @@ const LoadingSpinner = ({
                         <FaCarrot className="spinner-icon carrot-icon" />
                         <FaUtensilSpoon className="spinner-icon spoon-icon" />
                         <FaFire className="spinner-icon fire-icon" />
-                    </>
-                );
-            case 'cooking':
-                return (
-                    <>
-                        <FaFire className="spinner-icon fire-icon" />
-                        <FaCookieBite className="spinner-icon cookie-icon" />
                     </>
                 );
             default:
@@ -75,17 +68,17 @@ const LoadingSpinner = ({
 
         switch (type) {
             case 'user':
-                return 'Loading user profile...';
+                return 'Loading user data...';
             case 'recipe':
-                return 'Creating your recipe masterpiece...';
-            case 'recipe-list':
-                return 'Gathering delicious recipes...';
-            case 'recipe-detail':
-                return 'Preparing recipe details...';
+                return 'Creating recipe...';
             case 'cooking':
                 return 'Preparing cooking session...';
+            case 'recipe-list':
+                return 'Loading recipes...';
+            case 'recipe-detail':
+                return 'Loading recipe details...';
             default:
-                return 'Cooking up something delicious...';
+                return 'Loading...';
         }
     };
 
@@ -95,9 +88,8 @@ const LoadingSpinner = ({
                 <div className="spinner-icon-container">
                     {getSpinnerIcons()}
                 </div>
-
-                <div className="spinner-text-container">
-                    <h3 className="spinner-title">{getLoadingMessage()}</h3>
+                <div className="spinner-text">
+                    {getLoadingMessage()}
                 </div>
             </div>
         </div>

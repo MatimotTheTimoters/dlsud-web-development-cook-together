@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../../api/auth';
+import * as authApi from '../../api/auth';
 import { FaUser, FaLock, FaFire } from 'react-icons/fa';
 
 const LoginForm = () => {
@@ -15,14 +15,24 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
+    setErrors({});
+
     try {
-      const response = await login(formData.email, formData.password);
+      const response = await authApi.login(formData.email, formData.password);
 
       if (response.success) {
+        // Show login success notification if response contains bonus info
+        if (response.data.daily_bonus) {
+          // Bonus notification would be handled by NotificationContext
+        }
         navigate('/');
       } else {
-        setErrors({ general: response.message || 'Login failed' });
+        setErrors({ general: response.message || 'Login failed. Please check your credentials.' });
       }
     } catch (error) {
       setErrors({ general: error.message || 'An error occurred during login' });
@@ -53,85 +63,107 @@ const LoginForm = () => {
     setErrors({});
   };
 
+  const checkPasswordStrength = (password) => {
+    if (password.length === 0) return '';
+    if (password.length < 6) return 'Weak';
+    if (password.length < 10) return 'Medium';
+    return 'Strong';
+  };
+
   return (
-    <div className="login-form">
-      <div className="card">
+    <div className="login-form-container">
+      <div className="login-card card">
         <div className="card-header">
-          <div className="flex items-center justify-center gap-3">
-            <h2>LOGIN FORM</h2>
-            <FaFire className="text-chef-red" />
+          <div className="card-title">
+            <FaFire className="icon-chef-red" />
+            <h2>🔐 Login to CookTogether</h2>
           </div>
         </div>
 
         <div className="card-body">
-          <form onSubmit={handleSubmit}>
-            {errors.general && (
-              <div className="notification notification-error">
-                {errors.general}
-              </div>
-            )}
+          {errors.general && (
+            <div className="notification notification-error">
+              {errors.general}
+            </div>
+          )}
 
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="email">
-                <FaUser />
-                Email Address
+              <label htmlFor="email" className="form-label">
+                <FaUser className="form-label-icon" />
+                <span>📧 Email:</span>
               </label>
-              <div className="form-with-icon">
-                <FaUser className="form-icon" />
+              <div className="input-with-icon">
+                <FaUser className="input-icon" />
                 <input
                   type="email"
                   id="email"
-                  name="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="Enter your email"
-                  className={`form-control ${errors.email ? 'form-control-error' : ''}`}
+                  className={`form-input ${errors.email ? 'form-input-error' : ''}`}
+                  disabled={loading}
                 />
               </div>
-              {errors.email && <span className="form-error">{errors.email}</span>}
+              {errors.email && <div className="form-error">{errors.email}</div>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">
-                <FaLock />
-                Password
+              <label htmlFor="password" className="form-label">
+                <FaLock className="form-label-icon" />
+                <span>🔒 Password:</span>
               </label>
-              <div className="form-with-icon">
-                <FaLock className="form-icon" />
+              <div className="input-with-icon">
+                <FaLock className="input-icon" />
                 <input
                   type="password"
                   id="password"
-                  name="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="Enter your password"
-                  className={`form-control ${errors.password ? 'form-control-error' : ''}`}
+                  className={`form-input ${errors.password ? 'form-input-error' : ''}`}
+                  disabled={loading}
                 />
               </div>
-              {errors.password && <span className="form-error">{errors.password}</span>}
+              {errors.password && <div className="form-error">{errors.password}</div>}
+            </div>
+
+            <div className="form-options">
+              <label className="checkbox-label">
+                <input type="checkbox" />
+                <span>✅ Remember me</span>
+              </label>
+              <a href="/forgot-password" className="forgot-password-link">
+                Forgot password?
+              </a>
             </div>
 
             <button
               type="submit"
-              className="btn-rpg btn-rpg-primary w-full"
+              className="btn-rpg btn-rpg-primary btn-login"
               disabled={loading}
             >
-              {loading ? 'Loading...' : <><FaFire /> LOGIN</>}
+              {loading ? (
+                <span className="loading-text">Authenticating...</span>
+              ) : (
+                <>
+                  <FaFire className="button-icon" />
+                  <span>🍳 Login</span>
+                </>
+              )}
             </button>
-
-            <div className="flex justify-between items-center">
-              <button
-                type="button"
-                className="btn-rpg btn-rpg-secondary"
-                onClick={resetForm}
-              >
-                Reset Form
-              </button>
-              <a href="/forgot-password">
-                Forgot Password?
-              </a>
-            </div>
           </form>
+        </div>
+
+        <div className="card-footer">
+          <div className="auth-links">
+            <p>
+              New here?{' '}
+              <a href="/register" className="register-link">
+                Create Account
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

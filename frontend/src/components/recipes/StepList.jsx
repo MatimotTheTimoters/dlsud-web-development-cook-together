@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
     FaCheckCircle, FaPlayCircle, FaPauseCircle,
-    FaCircle, FaHourglassHalf, FaClock, FaSpinner
+    FaCircle, FaHourglassHalf, FaClock, FaSpinner,
+    FaStepForward, FaRedo, FaFlagCheckered
 } from 'react-icons/fa';
-import * as recipesApi from '../../api/recipes';
-import * as cookingSessionsApi from '../../api/cooking-sessions';
 
 const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessionId = null }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +13,6 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // If steps are not provided, fetch them from the API
         if (!steps && recipeId) {
             loadSteps();
         }
@@ -24,8 +22,18 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
         setIsLoading(true);
         setError(null);
         try {
-            const recipe = await recipesApi.getRecipe(recipeId);
-            setRecipeSteps(recipe.steps || []);
+            const response = await fetch(`/api/recipes/show.php?id=${recipeId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                setRecipeSteps(result.data.steps || []);
+            } else {
+                setError(result.message || 'Failed to load steps');
+            }
         } catch (err) {
             console.error('Error loading steps:', err);
             setError('Failed to load cooking steps');
@@ -51,7 +59,6 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
         setActiveTimer(stepId);
         setTimerSeconds(prev => ({ ...prev, [stepId]: totalSeconds }));
 
-        // Timer countdown logic
         const timer = setInterval(() => {
             setTimerSeconds(prev => {
                 if (prev[stepId] <= 1) {
@@ -86,10 +93,20 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
             onCompleteStep(stepId);
         }
 
-        // If we have a cooking session ID, mark the step as complete via API
         if (sessionId) {
             try {
-                await cookingSessionsApi.completeStep(sessionId, stepId);
+                const response = await fetch('/api/cooking-sessions/complete-step.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        step_id: stepId
+                    })
+                });
+                await response.json();
             } catch (err) {
                 console.error('Error completing step:', err);
                 setError('Failed to save step completion');
@@ -138,7 +155,7 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
         <div className="list-layout">
             <div className="list-header mb-3">
                 <h3 className="text-xl font-bold text-warm-gray-dark">
-                    <FaClock className="inline mr-2" />
+                    <FaFlagCheckered className="inline mr-2" />
                     Cooking Steps
                 </h3>
                 <p className="text-sm text-warm-gray-medium">
@@ -169,7 +186,6 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
                                         <p className="text-warm-gray-dark">{step.description}</p>
                                     </div>
 
-                                    {/* Step Image */}
                                     {step.image && (
                                         <div className="step-image mb-2">
                                             <img
@@ -180,7 +196,6 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
                                         </div>
                                     )}
 
-                                    {/* Timer Section */}
                                     {hasTimer && (
                                         <div className="step-timer-section mb-2">
                                             <div className="timer-card card">
@@ -217,7 +232,7 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
                                                             className="btn-rpg btn-rpg-secondary btn-rpg-sm"
                                                             onClick={() => resetTimer(stepId)}
                                                         >
-                                                            Reset
+                                                            <FaRedo /> Reset
                                                         </button>
                                                     </div>
                                                 </div>
@@ -225,7 +240,6 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
                                         </div>
                                     )}
 
-                                    {/* Rewards */}
                                     {(step.exp_reward > 0 || step.gold_reward > 0 || step.gem_reward > 0) && (
                                         <div className="step-rewards mb-2">
                                             <div className="rewards-badges flex gap-2">
@@ -249,7 +263,6 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
                                     )}
                                 </div>
 
-                                {/* Complete Button */}
                                 <div className="step-actions ml-3">
                                     <button
                                         className={`btn-rpg ${isCompleted ? 'btn-rpg-success' : 'btn-rpg-secondary'} btn-rpg-sm`}
@@ -278,7 +291,6 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
                 )}
             </div>
 
-            {/* Progress Summary */}
             {displaySteps && displaySteps.length > 0 && (
                 <div className="steps-summary mt-4">
                     <div className="summary-card card">
@@ -302,7 +314,6 @@ const StepList = ({ recipeId, steps, onCompleteStep, completedSteps = [], sessio
                                 </div>
                             </div>
 
-                            {/* Progress bar */}
                             <div className="progress-container mt-2">
                                 <div
                                     className="progress-bar progress-bar-exp"
