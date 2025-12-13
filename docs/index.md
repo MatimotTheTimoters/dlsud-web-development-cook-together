@@ -1,10 +1,934 @@
 # 🎮 Features
 
+## 👤 User Account Features
+
+### 1. User Registration
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ RegisterForm│────▶│register.php │────▶│ users table │
+│ .jsx        │     │             │     │             │
+│             │     │ AuthHelper  │     │ User_Stats  │
+│ submit form │     │ .php        │     │ table       │
+│ with user   │     │             │     │             │
+│ data        │     │ validate &  │     │ Insert new  │
+│             │     │ hash pass   │     │ user record │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              generate JWT              │
+       │              token & return            │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Response with             │
+       │              user data & token         │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Store token       Log activity        User created
+  in localStorage   in logging.php      with default
+                      │                  stats
+                      ▼
+                Return success
+```
+
+**Files & Functions:**
+- **Frontend:** `RegisterForm.jsx` → `handleSubmit()` → `api/auth.js` → `register()`
+- **Backend:** `api/auth/register.php` → `AuthHelper.php` → `hashPassword()`, `generateToken()`
+- **Database:** `users` table (insert), `user_stats` table (insert default stats)
+
+### 2. User Login
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ LoginForm   │────▶│ login.php   │────▶│ users table │
+│ .jsx        │     │             │     │             │
+│             │     │ AuthHelper  │     │ user_stats  │
+│ submit      │     │ .php        │     │ table       │
+│ credentials │     │             │     │             │
+│             │     │ verify pass │     │ Select user │
+│             │     │ & generate  │     │ & stats     │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              validate &                │
+       │              create token              │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Update login              │
+       │              streak in stats           │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Response with             │
+       │              user data, stats & token │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Store token       Log activity        Update login
+  in AuthContext    in logging.php      streak count
+```
+
+**Files & Functions:**
+- **Frontend:** `LoginForm.jsx` → `handleSubmit()` → `api/auth.js` → `login()`
+- **Backend:** `api/auth/login.php` → `AuthHelper.php` → `verifyPassword()`, `generateToken()`
+- **Database:** `users` table (select), `user_stats` table (update login_streak)
+
+### 3. Edit User Profile
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ UserProfile │────▶│ update.php  │────▶│ users table │
+│ .jsx        │     │             │     │             │
+│             │     │ validation  │     │             │
+│ Submit      │     │ .php        │     │ Validate &  │
+│ profile     │     │             │     │ update user │
+│ updates     │     │ AuthHelper  │     │ record      │
+│             │     │ .php        │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Validate token            │
+       │              & permissions             │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Process image             │
+       │              upload if present         │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Update user              │
+       │              record in DB             │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return updated           │
+       │              user profile             │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Update UI with      Log activity        Profile updated
+  new profile data    in logging.php      successfully
+```
+
+**Files & Functions:**
+- **Frontend:** `UserProfile.jsx` → `handleProfileUpdate()` → `api/users.js` → `updateProfile()`
+- **Backend:** `api/users/update.php` → `validation.php` → `validateEmail()`, `fileUpload.php` → `uploadImage()`
+- **Database:** `users` table (update)
+
+## 🧑‍🍳 Recipe Features
+
+### 4. Create Recipe
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ RecipeForm  │────▶│ create.php  │────▶│ recipes     │
+│ .jsx        │     │             │     │ table       │
+│             │     │ Database-   │     │             │
+│ Submit      │     │ Helper.php  │     │ recipe_     │
+│ recipe data │     │             │     │ ingredients │
+│ with        │     │ uuidHelper  │     │ table       │
+│ ingredients │     │ .php        │     │             │
+│ & steps     │     │             │     │ recipe_steps│
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Validate input            │
+       │              & user auth               │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Generate recipe           │
+       │              ID & calculate            │
+       │              rewards                   │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Insert recipe             │
+       │              master record             │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Insert ingredients        │
+       │              & steps records           │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Update recipe             │
+       │              metadata & user           │
+       │              stats                     │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Show success       Return recipe      Recipe created
+  message &          ID & rewards       with all related
+  redirect to                           data
+  recipe page
+```
+
+**Files & Functions:**
+- **Frontend:** `RecipeForm.jsx` → `handleSubmit()` → `api/recipes.js` → `createRecipe()`
+- **Backend:** `api/recipes/create.php` → `DatabaseHelper.php` → `createRecipe()`, `UserCalculations.php` → `calculateRecipeRewards()`
+- **Database:** `recipes`, `recipe_ingredients`, `recipe_steps`, `recipe_metadata` tables (insert)
+
+### 5. View Recipe Details
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ RecipeDetail│────▶│ show.php    │────▶│ recipes     │
+│ .jsx        │     │             │     │ table       │
+│             │     │ Database-   │     │             │
+│ Request     │     │ Helper.php  │     │ recipe_     │
+│ recipe by   │     │             │     │ ingredients │
+│ ID          │     │             │     │ table       │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Check user                │
+       │              access to recipe          │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Retrieve recipe           │
+       │              with all related          │
+       │              data (JOIN queries)       │
+       │                    │                    │
+       │                    ▼                    │
+       │              Format response           │
+       │              with complete             │
+       │              recipe structure          │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Display recipe      Return recipe      Data retrieved
+  with all details    data in JSON       from multiple
+  & interactions      format             tables
+```
+
+**Files & Functions:**
+- **Frontend:** `RecipeDetail.jsx` → `loadRecipe()` → `api/recipes.js` → `getRecipe()`
+- **Backend:** `api/recipes/show.php` → `DatabaseHelper.php` → `getRecipe()`
+- **Database:** `recipes`, `recipe_ingredients`, `recipe_steps`, `recipe_metadata` tables (select with joins)
+
+### 6. Purchase Recipe
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ Purchase-   │────▶│ purchase.php│────▶│ user_stats  │
+│ Modal.jsx   │     │             │     │ table       │
+│             │     │ UserCalcul- │     │             │
+│ User selects│     │ ations.php  │     │ user_recipe_│
+│ currency &  │     │             │     │ access table│
+│ confirms    │     │ Database-   │     │             │
+│ purchase    │     │ Helper.php  │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Validate user             │
+       │              can afford recipe         │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Deduct currency           │
+       │              from user stats           │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Grant recipe              │
+       │              access to user           │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Update recipe             │
+       │              purchase count            │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return success            │
+       │              with updated              │
+       │              balances                  │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Show purchase       Log transaction    Currency deducted
+  success &           & update activity  & access granted
+  update UI           feed
+```
+
+**Files & Functions:**
+- **Frontend:** `PurchaseModal.jsx` → `processPurchase()` → `api/purchase.js` → `purchaseRecipe()`
+- **Backend:** `api/recipes/purchase.php` → `DatabaseHelper.php` → `purchaseRecipe()`, `UserCalculations.php` → `calculateMaxPrices()`
+- **Database:** `user_stats` (update gold/gem count), `user_recipe_access` (insert), `recipe_metadata` (update purchase_count)
+
+### 7. Recipe Interactions (Like/Save)
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ RecipeCard  │────▶│ interact.php│────▶│ recipe_     │
+│ .jsx        │     │             │     │ interactions│
+│             │     │ Database-   │     │ table       │
+│ User clicks │     │ Helper.php  │     │             │
+│ like/save   │     │             │     │ recipe_     │
+│ button      │     │             │     │ metadata    │
+│             │     │             │     │ table       │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Check if user             │
+       │              already interacted        │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Insert/update            │
+       │              interaction record       │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Update recipe            │
+       │              like/save counts         │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return updated           │
+       │              interaction counts       │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Update button       Log interaction    Interaction
+  state & counts      in activity feed   recorded &
+                      │                  counts updated
+                      ▼
+                Return success
+```
+
+**Files & Functions:**
+- **Frontend:** `RecipeCard.jsx` → `handleInteraction()` → `api/recipes.js` → `likeRecipe()`/`saveRecipe()`
+- **Backend:** `api/recipes/interact.php` → `DatabaseHelper.php` → `handleRecipeInteraction()`
+- **Database:** `recipe_interactions` (insert/update), `recipe_metadata` (update like_count/save_count)
+
+## 🍳 Cooking Session Features
+
+### 8. Create Cooking Session
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ RecipeDetail│────▶│ create.php  │────▶│ cooking_    │
+│ .jsx        │     │             │     │ sessions    │
+│             │     │ Database-   │     │ table       │
+│ Click "Start│     │ Helper.php  │     │             │
+│ Cooking"    │     │             │     │ cooking_    │
+│ button      │     │ uuidHelper  │     │ session_    │
+│             │     │ .php        │     │ details     │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Check user access         │
+       │              to recipe                 │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Create session            │
+       │              record with host          │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Add host as               │
+       │              participant               │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Create session            │
+       │              details record            │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return session            │
+       │              ID & data                 │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Redirect to        Log session        Session created
+  session page       creation           with all initial
+                      │                  data
+                      ▼
+                Return success
+```
+
+**Files & Functions:**
+- **Frontend:** `RecipeDetail.jsx` → `handleStartCooking()` → `api/cooking-sessions.js` → `createSession()`
+- **Backend:** `api/cooking-sessions/create.php` → `DatabaseHelper.php` → `createCookingSession()`
+- **Database:** `cooking_sessions`, `cooking_session_details`, `cooking_session_participants` tables (insert)
+
+### 9. Join Cooking Session
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ Cooking-    │────▶│ join.php    │────▶│ cooking_    │
+│ Session.jsx │     │             │     │ session_    │
+│             │     │ Database-   │     │ participants│
+│ Click "Join │     │ Helper.php  │     │ table       │
+│ Session"    │     │             │     │             │
+│ button      │     │             │     │             │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Check session             │
+       │              visibility & status       │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Check if user             │
+       │              already joined            │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Add participant           │
+       │              record                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return updated            │
+       │              participant list          │
+       │                    │                    │
+       │                    ▼                    │
+       │              Send system               │
+       │              chat message              │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Update UI with      Log join activity  Participant added
+  participant list    & notify host      to session
+```
+
+**Files & Functions:**
+- **Frontend:** `CookingSession.jsx` → `handleJoin()` → `api/cooking-sessions.js` → `joinSession()`
+- **Backend:** `api/cooking-sessions/join.php` → `DatabaseHelper.php` → `joinCookingSession()`
+- **Database:** `cooking_session_participants` (insert), `session_chat_messages` (insert system message)
+
+### 10. Complete Cooking Step
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ Cooking-    │────▶│ complete-   │────▶│ cooking_    │
+│ Session.jsx │     │ step.php    │     │ step_       │
+│             │     │             │     │ completions │
+│ Click       │     │ Database-   │     │ table       │
+│ "Complete   │     │ Helper.php  │     │             │
+│ Step"       │     │             │     │ cooking_    │
+│             │     │ UserCalcul- │     │ session_    │
+│             │     │ ations.php  │     │ details     │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Validate user             │
+       │              is in session             │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Record step               │
+       │              completion                │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Calculate &               │
+       │              award step rewards        │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Update session            │
+       │              progress                  │
+       │                    │                    │
+       │                    ▼                    │
+       │              Check if all              │
+       │              steps completed           │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Complete session          │
+       │              if finished               │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Update progress      Return rewards   Step completion
+  bar & show rewards   & next step      recorded & stats
+  notification                          updated
+```
+
+**Files & Functions:**
+- **Frontend:** `CookingSession.jsx` → `handleStepComplete()` → `api/cooking-sessions.js` → `completeStep()`
+- **Backend:** `api/cooking-sessions/complete-step.php` → `DatabaseHelper.php` → `completeCookingStep()`, `UserCalculations.php` → `calculateStepRewards()`
+- **Database:** `cooking_step_completions` (insert), `cooking_session_details` (update), `user_stats` (update exp/gold/gems)
+
+## 🏪 Shop & Inventory Features
+
+### 11. Purchase Shop Item
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ ShopItem.jsx│────▶│ purchase.php│────▶│ user_stats  │
+│             │     │             │     │ table       │
+│ Click       │     │ Database-   │     │             │
+│ "Purchase"  │     │ Helper.php  │     │ user_       │
+│ button      │     │             │     │ purchases   │
+│             │     │             │     │ table       │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Validate user             │
+       │              can afford item           │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Deduct currency           │
+       │              from user stats           │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Record purchase           │
+       │              transaction               │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Add item to user          │
+       │              inventory                 │
+       │                    │                    │
+       │                    ▼                    │
+       │              Update shop item          │
+       │              purchase count            │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return success            │
+       │              & updated balance         │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Show purchase       Log transaction    Currency deducted
+  success &           & send reward      & item added to
+  update balance      notification       inventory
+```
+
+**Files & Functions:**
+- **Frontend:** `ShopItem.jsx` → `purchaseItem()` → `api/shop.js` → `purchaseItem()`
+- **Backend:** `api/shop/purchase.php` → `DatabaseHelper.php` → `purchaseShopItem()`
+- **Database:** `user_stats` (update currency), `user_purchases` (insert), `user_inventory` (insert), `shop_items` (update purchase_count)
+
+### 12. Use Inventory Item
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ Inventory-  │────▶│ use.php     │────▶│ user_inventory│
+│ Item.jsx    │     │             │     │ table       │
+│             │     │ Database-   │     │             │
+│ Click "Use  │     │ Helper.php  │     │ user_stats  │
+│ Item"       │     │             │     │ table       │
+│ button      │     │ UserCalcul- │     │             │
+│             │     │ ations.php  │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Check item                │
+       │              quantity & type           │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Apply item effect         │
+       │              to user stats             │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Reduce item               │
+       │              quantity or remove        │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return updated            │
+       │              stats & inventory         │
+       │                    │                    │
+       │                    ▼                    │
+       │              Log consumable            │
+       │              use in activity           │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Show effect        Return success     Stats updated &
+  notification &                        inventory reduced
+  update UI
+```
+
+**Files & Functions:**
+- **Frontend:** `InventoryItem.jsx` → `useItem()` → `api/inventory.js` → `useConsumable()`
+- **Backend:** `api/inventory/use.php` → `DatabaseHelper.php` → `useInventoryItem()`, `UserCalculations.php` → `applyConsumableEffect()`
+- **Database:** `user_inventory` (update quantity/delete), `user_stats` (update stats)
+
+## 👥 Social Features
+
+### 13. Follow User
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ FollowButton│────▶│ follow.php  │────▶│ user_       │
+│ .jsx        │     │             │     │ relationships│
+│             │     │ Database-   │     │ table       │
+│ Click       │     │ Helper.php  │     │             │
+│ "Follow"    │     │             │     │             │
+│ button      │     │             │     │             │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Check if already          │
+       │              following/blocked         │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Create relationship       │
+       │              record                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return updated            │
+       │              relationship status       │
+       │                    │                    │
+       │                    ▼                    │
+       │              Send notification         │
+       │              to target user            │
+       │                    │                    │
+       │                    ▼                    │
+       │              Log follow action         │
+       │              in activity feed          │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Update button      Return success     Relationship
+  to "Following"                         created
+```
+
+**Files & Functions:**
+- **Frontend:** `FollowButton.jsx` → `toggleFollow()` → `api/relationships.js` → `followUser()`/`unfollowUser()`
+- **Backend:** `api/relationships/follow.php` → `DatabaseHelper.php` → `manageRelationship()`
+- **Database:** `user_relationships` (insert/update/delete)
+
+### 14. Send Friend Request
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ UserProfile │────▶│ friends.php │────▶│ user_       │
+│ .jsx        │     │             │     │ relationships│
+│             │     │ Database-   │     │ table       │
+│ Click "Add  │     │ Helper.php  │     │             │
+│ Friend"     │     │             │     │             │
+│             │     │             │     │             │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Check existing            │
+       │              relationships             │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Create friend             │
+       │              request record            │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return request            │
+       │              status                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Send notification         │
+       │              to target user            │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Show "Request      Return success     Friend request
+  Sent" status                           created with
+                                         "pending" status
+```
+
+**Files & Functions:**
+- **Frontend:** `UserProfile.jsx` → `sendFriendRequest()` → `api/relationships.js` → friend request functions
+- **Backend:** `api/relationships/friends.php` → `DatabaseHelper.php` → `manageRelationship()`
+- **Database:** `user_relationships` (insert with status='pending')
+
+## 📖 Cookbook Features
+
+### 15. Create Cookbook
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ Cookbooks-  │────▶│ create.php  │────▶│ cookbooks   │
+│ Page.jsx    │     │             │     │ table       │
+│             │     │ Database-   │     │             │
+│ Submit      │     │ Helper.php  │     │             │
+│ cookbook    │     │             │     │             │
+│ form        │     │ uuidHelper  │     │             │
+│             │     │ .php        │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Validate input            │
+       │              & permissions             │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Create cookbook           │
+       │              record                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return cookbook           │
+       │              ID & data                 │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Add to cookbook    Return success     Cookbook created
+  list & show                           with owner info
+  success message
+```
+
+**Files & Functions:**
+- **Frontend:** `CookbooksPage.jsx` → `createCookbook()` → `api/cookbooks.js` → `createCookbook()`
+- **Backend:** `api/cookbooks/create.php` → `DatabaseHelper.php` → `createCookbook()`
+- **Database:** `cookbooks` table (insert)
+
+### 16. Add Recipe to Cookbook
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ RecipeDetail│────▶│ add-recipe  │────▶│ cookbook_   │
+│ .jsx        │     │ .php        │     │ recipes     │
+│             │     │             │     │ table       │
+│ Click "Add  │     │ Database-   │     │             │
+│ to Cookbook"│     │ Helper.php  │     │             │
+│             │     │             │     │             │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Check user owns           │
+       │              cookbook & has            │
+       │              recipe access             │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Check if recipe           │
+       │              already in cookbook       │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Add recipe to             │
+       │              cookbook                  │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return success            │
+       │              & updated cookbook        │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Show success       Log activity        Recipe added to
+  message            in feed             cookbook
+```
+
+**Files & Functions:**
+- **Frontend:** `RecipeDetail.jsx` → `addToCookbook()` → `api/cookbooks.js` → `addRecipeToCookbook()`
+- **Backend:** `api/cookbooks/add-recipe.php` → `DatabaseHelper.php` → `manageCookbookRecipe()`
+- **Database:** `cookbook_recipes` table (insert)
+
+## 💬 Chat Features
+
+### 17. Send Session Chat Message
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ SessionChat │────▶│ messages.php│────▶│ session_    │
+│ .jsx        │     │             │     │ chat_messages│
+│             │     │ Database-   │     │ table       │
+│ User types  │     │ Helper.php  │     │             │
+│ & sends     │     │             │     │             │
+│ message     │     │             │     │             │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Validate user             │
+       │              is in session             │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Save message              │
+       │              to database               │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return message            │
+       │              with ID & timestamp       │
+       │                    │                    │
+       │                    ▼                    │
+       │              Broadcast to              │
+       │              other participants        │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Add message to      Return success     Message saved
+  chat display                            with sender info
+```
+
+**Files & Functions:**
+- **Frontend:** `SessionChat.jsx` → `sendMessage()` → `api/chat.js` → `sendChatMessage()`
+- **Backend:** `api/chat/messages.php` → `DatabaseHelper.php` → `saveChatMessage()`
+- **Database:** `session_chat_messages` table (insert)
+
+## 🎮 Gamification Features
+
+### 18. Level Up
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ Level-      │────▶│ (automatic) │────▶│ user_stats  │
+│ Progress.jsx│     │ on various  │     │ table       │
+│             │     │ actions     │     │             │
+│ Shows level │     │ UserCalcul- │     │             │
+│ progress    │     │ ations.php  │     │             │
+│             │     │             │     │             │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              After any EXP              │
+       │              earning action:            │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Check if EXP               │
+       │              reaches next level         │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Increment level            │
+       │              & reset EXP                │
+       │                    │                    │
+       │                    ▼                    │
+       │              Calculate new              │
+       │              level requirements         │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Award level-up             │
+       │              rewards                    │
+       │                    │                    │
+       │                    ▼                    │
+       │              Send level-up              │
+       │              notification               │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Show level-up      Return level-up    Level incremented
+  animation &        data & rewards     & EXP reset
+  rewards
+```
+
+**Files & Functions:**
+- **Frontend:** `LevelProgress.jsx` → `calculateProgress()` → `utils/userCalculations.js` → `checkLevelUp()`
+- **Backend:** `UserCalculations.php` → `checkLevelUp()` (called after any EXP update)
+- **Database:** `user_stats` table (update level, current_exp, current_level_ceiling)
+
+### 19. Daily Login Bonus
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ LoginForm   │────▶│ login.php   │────▶│ user_stats  │
+│ .jsx        │     │             │     │ table       │
+│             │     │ UserCalcul- │     │             │
+│ User logs   │     │ ations.php  │     │             │
+│ in          │     │             │     │             │
+│             │     │             │     │             │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              After successful           │
+       │              login:                     │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Check last login          │
+       │              date                      │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Calculate login           │
+       │              streak                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Award daily               │
+       │              login bonus               │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Update login              │
+       │              streak & rewards          │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return bonus              │
+       │              notification              │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Show daily         Return bonus       Streak & rewards
+  bonus              details            updated
+  notification
+```
+
+**Files & Functions:**
+- **Frontend:** `LoginForm.jsx` → shows bonus notification from response
+- **Backend:** `api/auth/login.php` → `UserCalculations.php` → `calculateDailyLoginBonus()`
+- **Database:** `user_stats` table (update login_streak, gold_count, gem_count, current_exp)
+
+## 📰 Activity Feed
+
+### 20. View Activity Feed
+**Flow Chart:**
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  FRONTEND   │     │   BACKEND   │     │  DATABASE   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ HomePage    │────▶│ feed.php    │────▶│ logging     │
+│ .jsx        │     │             │     │ system &    │
+│             │     │ Database-   │     │ various     │
+│ Load home   │     │ Helper.php  │     │ activity    │
+│ page        │     │             │     │ tables      │
+│             │     │             │     │             │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                    │                    │
+       │                    │                    │
+       │              Get user's                 │
+       │              following list             │
+       │                    │                    │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Query recent               │
+       │              activities from            │
+       │              multiple sources           │
+       │                    │                    │
+       │                    ▼                    ▼
+       │              Format activities          │
+       │              with user info             │
+       │                    │                    │
+       │                    ▼                    │
+       │              Return paginated          │
+       │              activity feed             │
+       │                    │                    │
+       ▼                    ▼                    ▼
+  Display activity    Return activity    Activities
+  feed with icons     feed JSON          aggregated from
+  & timestamps                          multiple tables
+```
+
+**Files & Functions:**
+- **Frontend:** `HomePage.jsx` → `getRecentActivities()` → `api/activity.js` → activity functions
+- **Backend:** `api/activity/feed.php` → `DatabaseHelper.php` → `getActivityFeed()`
+- **Database:** Multiple tables aggregated (recipe_interactions, cooking_sessions, user_relationships, etc.)
+
 ---
 
 # 🏛️ Directory Structure
 
-## Frontend
+## ✨ Frontend
 frontend/
 ├── .env
 ├── .gitignore
@@ -111,7 +1035,7 @@ frontend/
         ├── userCalculations.js
         └── validators.js
 
-## Backend
+## ⚙️ Backend
 backend/
 ├── .htaccess
 ├── index.php
