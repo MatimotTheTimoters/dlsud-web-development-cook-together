@@ -1,90 +1,86 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../classes/AuthHelper.php';
-require_once __DIR__ . '/../../classes/DatabaseHelper.php';
-require_once __DIR__ . '/../../classes/ResponseFormatter.php';
-require_once __DIR__ . '/../../utils/uuidHelper.php';
+require_once '../../config/database.php';
+require_once '../../classes/AuthHelper.php';
+require_once '../../classes/DatabaseHelper.php';
+require_once '../../classes/ResponseFormatter.php';
+require_once '../../utils/uuidHelper.php';
 
-// Set CORS headers
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
+header('Content-Type: application/json');
 
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+$response = new ResponseFormatter();
+
+// Check if it's a POST request
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $response->error('Method not allowed', 405);
+    exit;
 }
 
 try {
-    // Validate request method
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        ResponseFormatter::error('Method not allowed', 405);
-        exit();
+    // Get authorization header
+    $token = AuthHelper::getBearerToken();
+    if (!$token) {
+        $response->unauthorized('Authentication required');
+        exit;
     }
 
-    // Get and validate authorization header
-    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    if (empty($authHeader) || !preg_match('/Bearer\s+(.+)$/i', $authHeader, $matches)) {
-        ResponseFormatter::unauthorized('No authentication token provided');
-        exit();
-    }
-
-    $token = $matches[1];
+    // Validate token
     $userData = AuthHelper::validateToken($token);
-
     if (!$userData) {
-        ResponseFormatter::unauthorized('Invalid or expired token');
-        exit();
+        $response->unauthorized('Invalid or expired token');
+        exit;
     }
 
-    // Get request body
-    $rawData = file_get_contents('php://input');
-    $data = json_decode($rawData, true);
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        ResponseFormatter::error('Invalid JSON data', 400);
-        exit();
+    $user_id = $userData['user_id'];
+    
+    // Get POST data
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!$input) {
+        $response->badRequest('Invalid JSON input');
+        exit;
     }
 
     // Validate required fields
-    $requiredFields = ['name'];
-    foreach ($requiredFields as $field) {
-        if (!isset($data[$field]) || empty(trim($data[$field]))) {
-            ResponseFormatter::validationError(["$field" => "$field is required"]);
-            exit();
-        }
+    if (empty($input['name'])) {
+        $response->validationError(['name' => 'Cookbook name is required']);
+        exit;
     }
 
     // Prepare cookbook data
     $cookbookData = [
-        'user_id' => $userData['user_id'],
-        'name' => trim($data['name']),
-        'description' => isset($data['description']) ? trim($data['description']) : null,
-        'is_public' => isset($data['is_public']) ? (bool)$data['is_public'] : false
+        'id' => makeId(),
+        'user_id' => $user_id,
+        'name' => trim($input['name']),
+        'description' => isset($input['description']) ? trim($input['description']) : null,
+        'is_public' => isset($input['is_public']) ? (bool)$input['is_public'] : false
     ];
 
     // Create cookbook
-    $cookbookId = DatabaseHelper::createCookbook($cookbookData);
-
+    $dbHelper = new DatabaseHelper();
+    $cookbookId = $dbHelper->createCookbook($cookbookData);
+    
     if (!$cookbookId) {
-        ResponseFormatter::error('Failed to create cookbook', 500);
-        exit();
+        $response->error('Failed to create cookbook', 500);
+        exit;
     }
 
-    // Get the newly created cookbook
-    $cookbook = DatabaseHelper::getCookbooks($userData['user_id'], false);
-    $newCookbook = null;
-    foreach ($cookbook as $cb) {
-        if ($cb['id'] === $cookbookId) {
-            $newCookbook = $cb;
-            break;
-        }
-    }
+    // Get the created cookbook
+    $cookbook = $dbHelper->getCookbook($cookbookId, false);
+    
+    // Log activity
+    $dbHelper->logActivity($user_id, 'cookbook_created', [
+        'cookbook_id' => $cookbookId,
+        'cookbook_name' => $cookbookData['name']
+    ]);
 
-    ResponseFormatter::success($newCookbook, 'Cookbook created successfully', 201);
+    $response->created($cookbook, 'Cookbook created successfully');
+    
 } catch (Exception $e) {
     error_log("Cookbook create error: " . $e->getMessage());
-    ResponseFormatter::error('Internal server error', 500, ['message' => $e->getMessage()]);
+    $response->error('Server error: ' . $e->getMessage(), 500);
 }
+?>
