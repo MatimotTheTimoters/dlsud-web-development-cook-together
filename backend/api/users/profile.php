@@ -76,7 +76,8 @@ try {
             'recipes_created' => 0,
             'recipes_cooked' => 0,
             'challenges_completed' => 0,
-            'recipes_sold' => 0
+            'recipes_sold' => 0,
+            'total_cooking_time' => 0
         ];
     }
     
@@ -86,30 +87,30 @@ try {
         $stats['current_exp']
     );
     
+    // Get level title
+    $level_title = UserCalculations::getLevelTitle($stats['level']);
+    
     // Check if current user follows target user
     $is_following = false;
     $is_friend = false;
     
     if ($current_user_id !== $target_user_id) {
         $is_following = DatabaseHelper::isFollowing($current_user_id, $target_user_id);
-        
-        // Check friendship status (simplified - in real app would check friend relationships)
-        $is_friend = false; // To be implemented with friend system
     }
     
     // Prepare response data per api_contract.md
     $response_data = [
-        'profile' => [
-            'id' => $user['id'],
-            'full_name' => $user['full_name'],
-            'profile_picture' => $user['profile_picture'] ?? null,
-            'age' => $user['age'] ?? null,
-            'gender' => $user['gender'] ?? null,
-            'email' => $user['email'],
-            'created_at' => $user['created_at'] ?? date('Y-m-d H:i:s')
-        ],
+        'id' => $user['id'],
+        'full_name' => $user['full_name'],
+        'profile_picture' => $user['profile_picture'] ?? null,
+        'age' => $user['age'] ?? null,
+        'gender' => $user['gender'] ?? null,
+        'email' => $user['email'],
+        'created_at' => $user['created_at'] ?? date('Y-m-d H:i:s'),
+        'updated_at' => $user['updated_at'] ?? date('Y-m-d H:i:s'),
         'stats' => [
             'level' => $stats['level'],
+            'level_title' => $level_title,
             'current_exp' => $stats['current_exp'],
             'current_level_ceiling' => $stats['current_level_ceiling'] ?? 100,
             'gold_count' => $stats['gold_count'],
@@ -117,7 +118,9 @@ try {
             'login_streak' => $stats['login_streak'],
             'recipes_created' => $stats['recipes_created'],
             'recipes_cooked' => $stats['recipes_cooked'],
-            'challenges_completed' => $stats['challenges_completed']
+            'challenges_completed' => $stats['challenges_completed'],
+            'recipes_sold' => $stats['recipes_sold'],
+            'total_cooking_time' => $stats['total_cooking_time'] ?? 0
         ],
         'level_progress' => $level_progress,
         'is_following' => $is_following,
@@ -129,5 +132,6 @@ try {
     
 } catch (Exception $e) {
     error_log("Profile endpoint error: " . $e->getMessage());
-    ResponseFormatter::error("Internal server error: " . $e->getMessage(), 500);
+    ResponseFormatter::error("Internal server error", 500);
 }
+?>

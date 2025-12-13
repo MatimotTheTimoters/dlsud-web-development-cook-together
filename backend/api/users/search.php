@@ -7,6 +7,7 @@
 
 // Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../classes/AuthHelper.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 
@@ -26,22 +27,27 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
-    // Get authorization header (optional for search, but recommended)
+    // Get authorization header
     $headers = getallheaders();
     $authHeader = $headers['Authorization'] ?? '';
-    $current_user_id = null;
     
-    // Extract token if provided
-    if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
-        $token = $matches[1];
-        
-        // Try to validate token to get current user
-        require_once __DIR__ . '/../../classes/AuthHelper.php';
-        $tokenData = AuthHelper::validateToken($token);
-        if ($tokenData) {
-            $current_user_id = $tokenData['user_id'];
-        }
+    // Extract token
+    if (!preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+        ResponseFormatter::unauthorized("No authentication token provided");
+        exit;
     }
+    
+    $token = $matches[1];
+    
+    // Validate token
+    $tokenData = AuthHelper::validateToken($token);
+    
+    if (!$tokenData) {
+        ResponseFormatter::unauthorized("Invalid or expired token");
+        exit;
+    }
+    
+    $current_user_id = $tokenData['user_id'];
     
     // Get query parameters
     $query = $_GET['q'] ?? '';
@@ -59,7 +65,7 @@ try {
     
     $offset = ($page - 1) * $limit;
     
-    // Search users
+    // Search users using DatabaseHelper's searchUsers method
     $search_result = DatabaseHelper::searchUsers($query, $limit, $offset);
     
     // Process users
@@ -69,15 +75,23 @@ try {
             'id' => $user['id'],
             'full_name' => $user['full_name'],
             'profile_picture' => $user['profile_picture'] ?? null,
+            'email' => $user['email'],
             'level' => $user['level'] ?? 1,
             'recipes_created' => $user['recipes_created'] ?? 0,
             'recipes_cooked' => $user['recipes_cooked'] ?? 0
         ];
         
-        // Add following status if current user is authenticated
-        if ($current_user_id) {
-            $user_data['is_following'] = DatabaseHelper::isFollowing($current_user_id, $user['id']);
+        // Check following status using DatabaseHelper's getRelationships method
+        $relationships = DatabaseHelper::getRelationships($current_user_id, 'following');
+        $is_following = false;
+        foreach ($relationships as $relationship) {
+            if ($relationship['target_user_id'] === $user['id']) {
+                $is_following = true;
+                break;
+            }
         }
+        
+        $user_data['is_following'] = $is_following;
         
         $users[] = $user_data;
     }
@@ -102,5 +116,6 @@ try {
     
 } catch (Exception $e) {
     error_log("User search endpoint error: " . $e->getMessage());
-    ResponseFormatter::error("Internal server error: " . $e->getMessage(), 500);
+    ResponseFormatter::error("Internal server error", 500);
 }
+?>
