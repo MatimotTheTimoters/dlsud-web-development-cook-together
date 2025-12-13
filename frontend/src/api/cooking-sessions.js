@@ -1,19 +1,17 @@
+// frontend/src/api/cooking-sessions.js
+// Required Imports: api from '../utils/api'
+
 import api from '../utils/api';
 
 /**
- * Cooking Sessions API Module
- * Handles all cooking session related API calls
- */
-
-/**
- * Create a new cooking session
- * @param {Object} sessionData - Session data including recipe_id, mode, visibility
- * @returns {Promise} API response
+ * Creates a new cooking session
+ * @param {Object} sessionData - Session data including recipe_id, mode, visibility, etc.
+ * @returns {Promise} Promise with created session data
  */
 export const createSession = async (sessionData) => {
     try {
-        const response = await api.post('cooking-sessions/create.php', sessionData);
-        return response;
+        const response = await api.post('/api/cooking-sessions/create.php', sessionData);
+        return response.data;
     } catch (error) {
         console.error('Error creating cooking session:', error);
         throw error;
@@ -21,14 +19,14 @@ export const createSession = async (sessionData) => {
 };
 
 /**
- * Get cooking session details
+ * Gets detailed information about a specific cooking session
  * @param {string} sessionId - Session ID
- * @returns {Promise} API response with session details
+ * @returns {Promise} Promise with session data
  */
 export const getSession = async (sessionId) => {
     try {
-        const response = await api.get(`cooking-sessions/show.php?id=${sessionId}`);
-        return response;
+        const response = await api.get(`/api/cooking-sessions/show.php?id=${sessionId}`);
+        return response.data;
     } catch (error) {
         console.error('Error getting cooking session:', error);
         throw error;
@@ -36,73 +34,42 @@ export const getSession = async (sessionId) => {
 };
 
 /**
- * Join an existing cooking session
- * @param {string} sessionId - Session ID
- * @returns {Promise} API response
+ * Lists cooking sessions with optional filters
+ * @param {Object} params - Filter parameters (status, visibility, mode, recipe_id, host_id, limit, offset)
+ * @returns {Promise} Promise with list of sessions
  */
-export const joinSession = async (sessionId) => {
+export const getSessions = async (params = {}) => {
     try {
-        const response = await api.post(`cooking-sessions/join.php`, { session_id: sessionId });
-        return response;
-    } catch (error) {
-        console.error('Error joining cooking session:', error);
-        throw error;
-    }
-};
-
-/**
- * Leave a cooking session
- * @param {string} sessionId - Session ID
- * @returns {Promise} API response
- */
-export const leaveSession = async (sessionId) => {
-    try {
-        // Note: backend_files.md doesn't have a leave endpoint, we'll use update or custom logic
-        const response = await api.put(`cooking-sessions/update.php`, {
-            session_id: sessionId,
-            action: 'leave'
+        const queryParams = new URLSearchParams();
+        
+        Object.keys(params).forEach(key => {
+            if (params[key] !== undefined && params[key] !== null) {
+                queryParams.append(key, params[key]);
+            }
         });
-        return response;
+        
+        const url = `/api/cooking-sessions/index.php${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+        const response = await api.get(url);
+        return response.data;
     } catch (error) {
-        console.error('Error leaving cooking session:', error);
+        console.error('Error listing cooking sessions:', error);
         throw error;
     }
 };
 
 /**
- * Complete a cooking step in a session
+ * Updates an existing cooking session
  * @param {string} sessionId - Session ID
- * @param {string} stepId - Step ID to complete
- * @param {Object} stepData - Additional step data (duration, notes, etc.)
- * @returns {Promise} API response with rewards earned
- */
-export const completeStep = async (sessionId, stepId, stepData = {}) => {
-    try {
-        const response = await api.post(`cooking-sessions/complete-step.php`, {
-            session_id: sessionId,
-            step_id: stepId,
-            ...stepData
-        });
-        return response;
-    } catch (error) {
-        console.error('Error completing cooking step:', error);
-        throw error;
-    }
-};
-
-/**
- * Update cooking session details
- * @param {string} sessionId - Session ID
- * @param {Object} updates - Session updates (status, current_step, etc.)
- * @returns {Promise} API response
+ * @param {Object} updates - Fields to update
+ * @returns {Promise} Promise with updated session data
  */
 export const updateSession = async (sessionId, updates) => {
     try {
-        const response = await api.put(`cooking-sessions/update.php`, {
+        const response = await api.put('/api/cooking-sessions/update.php', {
             session_id: sessionId,
-            ...updates
+            updates
         });
-        return response;
+        return response.data;
     } catch (error) {
         console.error('Error updating cooking session:', error);
         throw error;
@@ -110,38 +77,120 @@ export const updateSession = async (sessionId, updates) => {
 };
 
 /**
- * Vote to skip a timer or step in cooking session
+ * Joins a cooking session
  * @param {string} sessionId - Session ID
- * @param {string} voteType - Type of vote ('skip_read_timer', 'skip_step', 'other')
- * @param {boolean} voteValue - Vote value (true/false)
- * @returns {Promise} API response
+ * @returns {Promise} Promise with updated session data
  */
-export const voteSkip = async (sessionId, voteType, voteValue = true) => {
+export const joinSession = async (sessionId) => {
     try {
-        const response = await api.post(`cooking-sessions/vote.php`, {
-            session_id: sessionId,
-            vote_type: voteType,
-            vote_value: voteValue
+        const response = await api.post('/api/cooking-sessions/join.php', {
+            session_id: sessionId
         });
-        return response;
+        return response.data;
     } catch (error) {
-        console.error('Error voting to skip:', error);
+        console.error('Error joining cooking session:', error);
         throw error;
     }
 };
 
 /**
- * Get list of cooking sessions (with optional filters)
- * @param {Object} params - Filter parameters (status, mode, visibility, etc.)
- * @returns {Promise} API response with sessions list
+ * Leaves a cooking session
+ * @param {string} sessionId - Session ID
+ * @returns {Promise} Promise with success message
  */
-export const getSessions = async (params = {}) => {
+export const leaveSession = async (sessionId) => {
     try {
-        const queryParams = new URLSearchParams(params).toString();
-        const response = await api.get(`cooking-sessions/index.php${queryParams ? `?${queryParams}` : ''}`);
-        return response;
+        const response = await api.post('/api/cooking-sessions/leave.php', {
+            session_id: sessionId
+        });
+        return response.data;
     } catch (error) {
-        console.error('Error getting cooking sessions list:', error);
+        console.error('Error leaving cooking session:', error);
+        throw error;
+    }
+};
+
+/**
+ * Completes a cooking step
+ * @param {string} sessionId - Session ID
+ * @param {string} stepId - Step ID
+ * @param {Object} completionData - Additional completion data
+ * @returns {Promise} Promise with updated session and rewards
+ */
+export const completeStep = async (sessionId, stepId, completionData = {}) => {
+    try {
+        const response = await api.post('/api/cooking-sessions/complete-step.php', {
+            session_id: sessionId,
+            step_id: stepId,
+            completion_data: completionData
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error completing cooking step:', error);
+        throw error;
+    }
+};
+
+/**
+ * Votes in a cooking session (skip step, skip timer, etc.)
+ * @param {string} sessionId - Session ID
+ * @param {string} voteType - Type of vote ('skip_read_timer', 'skip_step', 'other')
+ * @param {boolean} voteValue - Vote value (true/false)
+ * @returns {Promise} Promise with vote results
+ */
+export const voteSkip = async (sessionId, voteType, voteValue) => {
+    try {
+        const response = await api.post('/api/cooking-sessions/vote.php', {
+            session_id: sessionId,
+            vote_type: voteType,
+            vote_value: voteValue
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error voting in cooking session:', error);
+        throw error;
+    }
+};
+
+/**
+ * Gets user's cooking session history
+ * @param {Object} params - Parameters (limit, offset, status, etc.)
+ * @returns {Promise} Promise with session history
+ */
+export const getSessionHistory = async (params = {}) => {
+    try {
+        const queryParams = new URLSearchParams();
+        
+        Object.keys(params).forEach(key => {
+            if (params[key] !== undefined && params[key] !== null) {
+                queryParams.append(key, params[key]);
+            }
+        });
+        
+        const url = `/api/sessions/history.php${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+        const response = await api.get(url);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting session history:', error);
+        throw error;
+    }
+};
+
+/**
+ * Gets cooking session statistics for a user
+ * @param {string} userId - User ID (optional, defaults to current user)
+ * @returns {Promise} Promise with session statistics
+ */
+export const getSessionStatistics = async (userId = null) => {
+    try {
+        const url = userId 
+            ? `/api/sessions/history.php?stats=true&user_id=${userId}`
+            : '/api/sessions/history.php?stats=true';
+        
+        const response = await api.get(url);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting session statistics:', error);
         throw error;
     }
 };
@@ -149,10 +198,12 @@ export const getSessions = async (params = {}) => {
 export default {
     createSession,
     getSession,
+    getSessions,
+    updateSession,
     joinSession,
     leaveSession,
     completeStep,
-    updateSession,
     voteSkip,
-    getSessions
+    getSessionHistory,
+    getSessionStatistics
 };
