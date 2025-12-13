@@ -259,7 +259,7 @@
 **Files & Functions:**
 - **Frontend:** `PurchaseModal.jsx` → `processPurchase()` → `api/purchase.js` → `purchaseRecipe()`
 - **Backend:** `api/recipes/purchase.php` → `DatabaseHelper.php` → `purchaseRecipe()`, `UserCalculations.php` → `calculateMaxPrices()`
-- **Database:** `user_stats` (update gold/gem count), `user_recipe_access` (insert), `recipe_metadata` (update purchase_count)
+- **Database:** `user_stats` (update gold/gem count), `user_recipe_purchases` (insert), `recipe_metadata` (update purchase_count)
 
 ### 7. Recipe Interactions (Like/Save)
 **Flow Chart:**
@@ -1534,11 +1534,7 @@ backend/
 - `updateRecipe(string $recipe_id, array $recipe_data, array $ingredients = [], array $steps = []) -> bool`: Updates recipe
 - `deleteRecipe(string $recipe_id) -> bool`: Deletes recipe and related data
 - `getRecipes(array $filters = [], int $limit = 20, int $offset = 0) -> array`: Gets recipes with filters
-
-**Recipe Access & Purchase**:
-- `checkRecipeAccess(string $user_id, string $recipe_id) -> array|false`: Checks access (purchased/created/free)
 - `purchaseRecipe(string $user_id, string $recipe_id, string $currency_type, int $price) -> bool`: Processes recipe purchase
-- `grantRecipeAccess(string $user_id, string $recipe_id, string $access_type, array $purchase_data = null) -> bool`: Grants recipe access
 
 **Recipe Interactions**:
 - `handleRecipeInteraction(string $user_id, string $recipe_id, string $interaction_type, array $metadata = []) -> bool`: Handles like/dislike/save
@@ -1767,16 +1763,6 @@ backend/
   - `validateRecipePurchase(user_id, recipe_id, currency_type) -> bool`: Validates recipe purchase request
   - `processRecipePurchase(user_id, recipe_id, currency_type) -> array`: Processes the recipe purchase transaction
   - `checkRecipeOwnership(user_id, recipe_id) -> bool`: Checks if user already owns recipe
-  - `grantRecipeAccess(user_id, recipe_id, currency_type, price) -> bool`: Grants access to recipe after purchase
-
-### api/recipes/access.php
-- **Description**: Checks if user has access to a recipe (purchased, created, or free)
-- **Required Imports**: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
-- **Frontend Consumers**: RecipeDetail.jsx access check, api/purchase.js checkRecipeAccess()
-- **Functions**:
-  - `checkRecipeAccess(user_id, recipe_id) -> array`: Checks access and returns access type
-  - `getAccessibleRecipes(user_id) -> array`: Gets all recipes user can access
-  - `validateRecipePurchaseRequired(recipe_id) -> bool`: Checks if recipe requires purchase
 
 ### api/recipes/create.php
 - **Description**: Creates a new recipe
@@ -2687,7 +2673,6 @@ backend/
   - `purchaseRecipe(recipeId, currencyType) -> promise`: Purchases a recipe
   - `purchaseItem(itemId, currencyType) -> promise`: Purchases a shop item
   - `getPurchaseHistory() -> promise`: Gets user's purchase history
-  - `checkRecipeAccess(recipeId) -> promise`: Checks if user has access to recipe
 
 ### src/api/chat.js
 - **Description**: API functions for chat operations
