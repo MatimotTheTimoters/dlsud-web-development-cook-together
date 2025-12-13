@@ -164,30 +164,6 @@
 }
 
 /* ============================================
-   Sidebar Layout
-   ============================================ */
-.sidebar-layout {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: var(--spacing-lg);
-    min-height: calc(100vh - 120px);
-}
-
-@media (max-width: 1024px) {
-    .sidebar-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar-layout aside {
-        order: 2;
-    }
-
-    .sidebar-layout main {
-        order: 1;
-    }
-}
-
-/* ============================================
    Two-Column Layout
    ============================================ */
 .two-column-layout {
@@ -305,35 +281,6 @@
 }
 
 /* ============================================
-   Form Layouts
-   ============================================ */
-.form-layout {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: var(--spacing-xl);
-    background: var(--card-bg);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-}
-
-@media (max-width: 640px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
-
-.form-group {
-    margin-bottom: var(--spacing-lg);
-}
-
-/* ============================================
    Tab Content Layout
    ============================================ */
 .tab-container {
@@ -369,58 +316,6 @@
 }
 
 /* ============================================
-   List Layouts
-   ============================================ */
-.list-layout {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.list-item {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-md);
-    background: var(--card-bg);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-light);
-    transition: all var(--transition-fast);
-}
-
-.list-item:hover {
-    border-color: var(--chef-red);
-    transform: translateX(4px);
-}
-
-.list-icon {
-    margin-right: var(--spacing-md);
-    color: var(--chef-red);
-    font-size: 1.25rem;
-}
-
-.list-content {
-    flex: 1;
-}
-
-/* ============================================
-   Centered Layouts
-   ============================================ */
-.center-layout {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 70vh;
-    text-align: center;
-    padding: var(--spacing-xl);
-}
-
-.center-content {
-    max-width: 500px;
-    width: 100%;
-}
-
-/* ============================================
    Responsive Breakpoints
    ============================================ */
 @media (max-width: 640px) {
@@ -430,10 +325,6 @@
 
     .hero-section {
         padding: var(--spacing-2xl) var(--spacing-md);
-    }
-
-    .form-layout {
-        padding: var(--spacing-lg);
     }
 }
 

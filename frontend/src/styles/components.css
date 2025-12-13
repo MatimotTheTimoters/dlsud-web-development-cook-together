@@ -46,7 +46,7 @@
 .btn-rpg-primary {
     background: linear-gradient(145deg, var(--chef-red), var(--sizzling-orange));
     color: white;
-    border-bottom-color: var(--chef-red-dark);
+    border-bottom-color: #cc5959;
     box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
 }
 
@@ -60,28 +60,28 @@
 .btn-rpg-success {
     background: linear-gradient(145deg, var(--success-green), #27AE60);
     color: white;
-    border-bottom-color: var(--success-green-dark);
+    border-bottom-color: #27AE60;
     box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
 }
 
 .btn-rpg-gold {
-    background: var(--gradient-gold);
+    background: linear-gradient(145deg, #FFD93D, #FFC107);
     color: var(--warm-gray-dark);
-    border-bottom-color: var(--gold-coin-dark);
+    border-bottom-color: #e6b300;
     box-shadow: 0 4px 15px rgba(255, 217, 61, 0.4);
 }
 
 .btn-rpg-gem {
-    background: var(--gradient-gem);
+    background: linear-gradient(145deg, #6C5CE7, #5A4BD6);
     color: white;
-    border-bottom-color: var(--rare-gem-dark);
+    border-bottom-color: #4A3BC5;
     box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
 }
 
 .btn-rpg-xp {
-    background: var(--gradient-xp);
+    background: linear-gradient(145deg, #A55EEA, #9447D8);
     color: white;
-    border-bottom-color: var(--xp-purple-dark);
+    border-bottom-color: #8330C6;
     box-shadow: 0 4px 15px rgba(165, 94, 234, 0.4);
 }
 
@@ -106,13 +106,21 @@
     transform: none !important;
 }
 
+/* Game-like UI enhancements from index.md */
+.game-button {
+    background: linear-gradient(145deg, #ff6b6b, #ff8a8a);
+    border: 3px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 /* ============================================
-   Cards
+   Cards (Recipe & Shop Items)
    ============================================ */
 .card {
     background: var(--card-bg);
-    border-radius: var(--card-border-radius);
-    box-shadow: var(--card-shadow);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     transition: all var(--transition-normal);
     border: 1px solid var(--border-light);
@@ -120,14 +128,14 @@
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: var(--card-shadow-hover);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     border-color: var(--chef-red);
 }
 
 .card-header {
     padding: var(--spacing-lg);
     border-bottom: 2px solid var(--border-light);
-    background: var(--creamy-white-off);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .card-body {
@@ -137,14 +145,10 @@
 .card-footer {
     padding: var(--spacing-lg);
     border-top: 2px solid var(--border-light);
-    background: var(--creamy-white-off);
+    background: rgba(255, 255, 255, 0.5);
 }
 
-/* Card Variants */
-.card-recipe {
-    position: relative;
-}
-
+/* Recipe Card specific styles */
 .card-recipe-image {
     width: 100%;
     height: 200px;
@@ -164,11 +168,7 @@
     font-weight: var(--font-bold);
 }
 
-.card-user {
-    text-align: center;
-    padding: var(--spacing-lg);
-}
-
+/* User Card specific styles */
 .card-user-avatar {
     width: 100px;
     height: 100px;
@@ -181,26 +181,14 @@
 .card-user-level {
     display: inline-block;
     padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--gradient-gold);
+    background: linear-gradient(145deg, #FFD93D, #FFC107);
     color: var(--warm-gray-dark);
     border-radius: var(--radius-full);
     font-weight: var(--font-bold);
     margin-bottom: var(--spacing-sm);
 }
 
-.card-shop-item {
-    text-align: center;
-    position: relative;
-}
-
-.card-shop-item-premium::before {
-    content: '💎';
-    position: absolute;
-    top: var(--spacing-md);
-    left: var(--spacing-md);
-    font-size: 1.5rem;
-}
-
+/* Shop Item Card specific styles */
 .card-shop-item-image {
     width: 100%;
     height: 150px;
@@ -259,19 +247,19 @@
 }
 
 .progress-bar-exp {
-    background: var(--progress-bar-exp);
+    background: var(--xp-purple);
 }
 
 .progress-bar-gold {
-    background: var(--progress-bar-gold);
+    background: var(--gold-coin);
 }
 
 .progress-bar-gem {
-    background: var(--progress-bar-gem);
+    background: var(--rare-gem);
 }
 
 .progress-bar-success {
-    background: var(--progress-bar-success);
+    background: var(--success-green);
 }
 
 .progress-label {
@@ -287,11 +275,9 @@
     color: var(--warm-gray-dark);
 }
 
-/* Level Progress */
-.level-progress {
-    text-align: center;
-}
-
+/* ============================================
+   Level Progress Component
+   ============================================ */
 .level-badge-large {
     font-size: 3rem;
     margin-bottom: var(--spacing-md);
@@ -306,10 +292,9 @@
 .level-number {
     font-size: 2.5rem;
     font-weight: var(--font-extrabold);
-    background: var(--gradient-gold);
+    background: linear-gradient(45deg, #4CAF50, #FFC107, #FF6B6B);
     -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    -webkit-text-fill-color: transparent;
     margin-bottom: var(--spacing-md);
 }
 
@@ -391,36 +376,32 @@
     border: 2px solid currentColor;
 }
 
-/* Achievement Badges */
-.badge-achievement {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    background: var(--gradient-gold);
-    color: var(--warm-gray-dark);
-    box-shadow: var(--shadow-md);
+/* Difficulty Badges */
+.badge-easy {
+    background-color: #4CAF50;
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: var(--font-bold);
 }
 
-.badge-achievement-locked {
-    filter: grayscale(1);
-    opacity: 0.7;
+.badge-medium {
+    background-color: #FF9800;
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: var(--font-bold);
 }
 
-.badge-achievement::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    border-radius: 50%;
-    border: 2px solid var(--gold-coin);
-    z-index: -1;
+.badge-hard {
+    background-color: #F44336;
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: var(--font-bold);
 }
 
 /* ============================================
@@ -474,7 +455,7 @@
 }
 
 .nav-link:hover {
-    background: var(--creamy-white-off);
+    background: rgba(255, 255, 255, 0.5);
     color: var(--chef-red);
 }
 
@@ -510,12 +491,12 @@
         background: var(--card-bg);
         flex-direction: column;
         padding: var(--spacing-lg);
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         transform: translateY(-100%);
         opacity: 0;
         visibility: hidden;
         transition: all var(--transition-normal);
-        z-index: var(--z-dropdown);
+        z-index: 1000;
     }
 
     .nav-menu.open {
@@ -610,7 +591,7 @@
 }
 
 /* ============================================
-   Loading Spinner
+   Loading Spinner (Cooking themed)
    ============================================ */
 .loading-spinner {
     display: flex;
@@ -655,12 +636,12 @@
     position: fixed;
     top: var(--spacing-lg);
     right: var(--spacing-lg);
-    z-index: var(--z-notification);
+    z-index: 1050;
     min-width: 300px;
     max-width: 400px;
     background: var(--card-bg);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     padding: var(--spacing-lg);
     display: flex;
     align-items: flex-start;
@@ -737,23 +718,6 @@
     color: var(--rare-gem);
 }
 
-/* Toast Notification */
-.notification.toast {
-    animation: toastIn 0.3s ease forwards;
-}
-
-@keyframes toastIn {
-    from {
-        transform: translateX(100%) translateY(0);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0) translateY(0);
-        opacity: 1;
-    }
-}
-
 /* ============================================
    Reward Notification
    ============================================ */
@@ -762,10 +726,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.8);
-    z-index: var(--z-modal);
+    z-index: 1060;
     background: var(--card-bg);
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     padding: var(--spacing-2xl);
     text-align: center;
     min-width: 300px;
@@ -834,6 +798,41 @@
 }
 
 .reward-close:hover {
-    background: var(--chef-red-dark);
+    background: #e05555;
     transform: translateY(-2px);
+}
+
+/* ============================================
+   Error Boundary Styling
+   ============================================ */
+.error-boundary {
+    text-align: center;
+    padding: var(--spacing-2xl);
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.error-boundary-icon {
+    font-size: 4rem;
+    color: var(--chef-red);
+    margin-bottom: var(--spacing-lg);
+}
+
+.error-boundary-title {
+    font-size: 1.5rem;
+    font-weight: var(--font-bold);
+    color: var(--warm-gray-dark);
+    margin-bottom: var(--spacing-md);
+}
+
+.error-boundary-message {
+    color: var(--warm-gray-medium);
+    margin-bottom: var(--spacing-lg);
+}
+
+.error-boundary-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
 }
