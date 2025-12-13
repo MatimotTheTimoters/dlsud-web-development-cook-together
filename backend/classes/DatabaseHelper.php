@@ -377,232 +377,46 @@ class DatabaseHelper
         return Database::update('user_relationships', ['status' => $status], "id = '$relationship_id'") > 0;
     }
     
-// Cookbook Operations
-public function createCookbook(array $cookbook_data) {
-    try {
-        $sql = "INSERT INTO cookbooks (id, user_id, name, description, is_public) 
-                VALUES (:id, :user_id, :name, :description, :is_public)";
-        
-        $params = [
-            ':id' => $cookbook_data['id'],
-            ':user_id' => $cookbook_data['user_id'],
-            ':name' => $cookbook_data['name'],
-            ':description' => $cookbook_data['description'],
-            ':is_public' => $cookbook_data['is_public'] ? 1 : 0
-        ];
-        
-        $stmt = $this->query($sql, $params);
-        return $cookbook_data['id'];
-    } catch (Exception $e) {
-        error_log("Create cookbook error: " . $e->getMessage());
-        return false;
+    // Cookbook Operations
+    public static function createCookbook($cookbook_data) {
+        $cookbook_id = generateUniqueId('cookbooks', 'id');
+        $cookbook_data['id'] = $cookbook_id;
+        return Database::insert('cookbooks', $cookbook_data) ? $cookbook_id : false;
     }
-}
-
-public function getCookbook(string $cookbook_id, bool $include_recipes = true) {
-    try {
-        // Get basic cookbook info
-        $sql = "SELECT c.*, 
-                       u.full_name as owner_name,
-                       u.profile_picture as owner_picture,
-                       COUNT(cr.id) as recipe_count
-                FROM cookbooks c
-                LEFT JOIN users u ON c.user_id = u.id
-                LEFT JOIN cookbook_recipes cr ON c.id = cr.cookbook_id
-                WHERE c.id = :cookbook_id
-                GROUP BY c.id";
+    
+    public static function getCookbook($cookbook_id, $include_recipes = true) {
+        $sql = "SELECT c.*, u.full_name as owner_name FROM cookbooks c LEFT JOIN users u ON c.user_id = u.id WHERE c.id = :cookbook_id";
+        $cookbook = Database::fetchOne($sql, ['cookbook_id' => $cookbook_id]);
         
-        $cookbook = $this->fetchOne($sql, [':cookbook_id' => $cookbook_id]);
-        
-        if (!$cookbook) {
-            return false;
-        }
-        
-        if ($include_recipes) {
-            $cookbook['recipes'] = $this->getCookbookRecipes($cookbook_id);
+        if ($cookbook && $include_recipes) {
+            $sql = "SELECT r.* FROM recipes r INNER JOIN cookbook_recipes cr ON r.id = cr.recipe_id WHERE cr.cookbook_id = :cookbook_id";
+            $cookbook['recipes'] = Database::fetchAll($sql, ['cookbook_id' => $cookbook_id]);
         }
         
         return $cookbook;
-    } catch (Exception $e) {
-        error_log("Get cookbook error: " . $e->getMessage());
-        return false;
     }
-}
-
-public function getUserCookbooks(string $user_id, bool $include_public = false, int $limit = 20, int $offset = 0) {
-    try {
-        if ($include_public) {
-            $sql = "SELECT c.*, 
-                           COUNT(cr.id) as recipe_count,
-                           u.full_name as owner_name
-                    FROM cookbooks c
-                    LEFT JOIN cookbook_recipes cr ON c.id = cr.cookbook_id
-                    LEFT JOIN users u ON c.user_id = u.id
-                    WHERE c.user_id = :user_id OR c.is_public = 1
-                    GROUP BY c.id
-                    ORDER BY c.updated_at DESC
-                    LIMIT :limit OFFSET :offset";
+    
+    public static function updateCookbook($cookbook_id, $updates) {
+        return Database::update('cookbooks', $updates, "id = '$cookbook_id'") > 0;
+    }
+    
+    public static function manageCookbookRecipe($cookbook_id, $recipe_id, $action, $user_id) {
+        if ($action === 'add') {
+            if (Database::fetchOne("SELECT 1 FROM cookbook_recipes WHERE cookbook_id = :cookbook_id AND recipe_id = :recipe_id", 
+                ['cookbook_id' => $cookbook_id, 'recipe_id' => $recipe_id])) return true;
             
-            $params = [
-                ':user_id' => $user_id,
-                ':limit' => $limit,
-                ':offset' => $offset
-            ];
+            $entry_id = generateUniqueId('cookbook_recipes', 'id');
+            $entry_data = ['id' => $entry_id, 'cookbook_id' => $cookbook_id, 'recipe_id' => $recipe_id, 'added_by' => $user_id];
+            return Database::insert('cookbook_recipes', $entry_data);
         } else {
-            $sql = "SELECT c.*, 
-                           COUNT(cr.id) as recipe_count
-                    FROM cookbooks c
-                    LEFT JOIN cookbook_recipes cr ON c.id = cr.cookbook_id
-                    WHERE c.user_id = :user_id
-                    GROUP BY c.id
-                    ORDER BY c.updated_at DESC
-                    LIMIT :limit OFFSET :offset";
-            
-            $params = [
-                ':user_id' => $user_id,
-                ':limit' => $limit,
-                ':offset' => $offset
-            ];
-        }
-        
-        $stmt = $this->query($sql, $params);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        error_log("Get user cookbooks error: " . $e->getMessage());
-        return [];
-    }
-}
-
-public function getCookbooks(array $filters = [], int $limit = 20, int $offset = 0) {
-    try {
-        $where = [];
-        $params = [];
-        
-        if (isset($filters['is_public'])) {
-            $where[] = "c.is_public = :is_public";
-            $params[':is_public'] = $filters['is_public'] ? 1 : 0;
-        }
-        
-        if (isset($filters['user_id'])) {
-            $where[] = "c.user_id = :user_id";
-            $params[':user_id'] = $filters['user_id'];
-        }
-        
-        if (isset($filters['search'])) {
-            $where[] = "(c.name LIKE :search OR c.description LIKE :search)";
-            $params[':search'] = '%' . $filters['search'] . '%';
-        }
-        
-        $whereClause = $where ? "WHERE " . implode(' AND ', $where) : "";
-        
-        $sql = "SELECT c.*, 
-                       COUNT(cr.id) as recipe_count,
-                       u.full_name as owner_name,
-                       u.profile_picture as owner_picture
-                FROM cookbooks c
-                LEFT JOIN cookbook_recipes cr ON c.id = cr.cookbook_id
-                LEFT JOIN users u ON c.user_id = u.id
-                $whereClause
-                GROUP BY c.id
-                ORDER BY c.updated_at DESC
-                LIMIT :limit OFFSET :offset";
-        
-        $params[':limit'] = $limit;
-        $params[':offset'] = $offset;
-        
-        $stmt = $this->query($sql, $params);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        error_log("Get cookbooks error: " . $e->getMessage());
-        return [];
-    }
-    }
-    
-    public function manageCookbookRecipe(string $cookbook_id, string $recipe_id, string $action, string $user_id) {
-        try {
-            if ($action === 'add') {
-                $sql = "INSERT INTO cookbook_recipes (id, cookbook_id, recipe_id, added_by) 
-                        VALUES (:id, :cookbook_id, :recipe_id, :added_by)";
-                
-                $params = [
-                    ':id' => $this->generateUniqueId('cookbook_recipes', 'id'),
-                    ':cookbook_id' => $cookbook_id,
-                    ':recipe_id' => $recipe_id,
-                    ':added_by' => $user_id
-                ];
-                
-                $this->query($sql, $params);
-                return true;
-            } elseif ($action === 'remove') {
-                $sql = "DELETE FROM cookbook_recipes 
-                        WHERE cookbook_id = :cookbook_id 
-                        AND recipe_id = :recipe_id";
-                
-                $params = [
-                    ':cookbook_id' => $cookbook_id,
-                    ':recipe_id' => $recipe_id
-                ];
-                
-                $this->query($sql, $params);
-                return true;
-            }
-            
-            return false;
-        } catch (Exception $e) {
-            error_log("Manage cookbook recipe error: " . $e->getMessage());
-            return false;
+            return Database::delete('cookbook_recipes', "cookbook_id = '$cookbook_id' AND recipe_id = '$recipe_id'") > 0;
         }
     }
     
-    public function checkRecipeInCookbook(string $cookbook_id, string $recipe_id) {
-        try {
-            $sql = "SELECT id FROM cookbook_recipes 
-                    WHERE cookbook_id = :cookbook_id 
-                    AND recipe_id = :recipe_id";
-            
-            $result = $this->fetchOne($sql, [
-                ':cookbook_id' => $cookbook_id,
-                ':recipe_id' => $recipe_id
-            ]);
-            
-            return $result !== false;
-        } catch (Exception $e) {
-            error_log("Check recipe in cookbook error: " . $e->getMessage());
-            return false;
-        }
-    }
-    
-    public function getCookbookRecipes(string $cookbook_id) {
-        try {
-            $sql = "SELECT r.*, 
-                           rm.*,
-                           u.full_name as author_name,
-                           u.profile_picture as author_picture,
-                           cr.added_at,
-                           cr.added_by,
-                           u2.full_name as added_by_name
-                    FROM cookbook_recipes cr
-                    JOIN recipes r ON cr.recipe_id = r.id
-                    LEFT JOIN recipe_metadata rm ON r.id = rm.recipe_id
-                    LEFT JOIN users u ON r.user_id = u.id
-                    LEFT JOIN users u2 ON cr.added_by = u2.id
-                    WHERE cr.cookbook_id = :cookbook_id
-                    ORDER BY cr.added_at DESC";
-            
-            $stmt = $this->query($sql, [':cookbook_id' => $cookbook_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            error_log("Get cookbook recipes error: " . $e->getMessage());
-            return [];
-        }
+    public static function getUserCookbooks($user_id, $include_public = false) {
+        $where = "c.user_id = :user_id" . ($include_public ? " OR c.is_public = 1" : "");
+        $sql = "SELECT c.* FROM cookbooks c WHERE $where ORDER BY c.created_at DESC";
+        return Database::fetchAll($sql, ['user_id' => $user_id]);
     }
     
     // Shop & Inventory Operations
@@ -620,7 +434,7 @@ public function getCookbooks(array $filters = [], int $limit = 20, int $offset =
             $params['item_type'] = $filters['item_type'];
         }
         
-        $sql = "SELECT * FROM shop_items WHERE " . implode(' AND ', $where) . " LIMIT :limit";
+        $sql = "SELECT * FROM shop_items WHERE " . implode(' AND ', $where) . " ORDER BY category, name LIMIT :limit";
         return Database::fetchAll($sql, $params);
     }
     
@@ -628,50 +442,124 @@ public function getCookbooks(array $filters = [], int $limit = 20, int $offset =
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
         
-        $item = Database::fetchOne("SELECT * FROM shop_items WHERE id = :item_id AND is_available = 1", ['item_id' => $item_id]);
-        if (!$item) return $pdo->rollBack() && false;
-        
-        $currency_field = $currency_type . '_count';
-        $user_currency = Database::fetchOne("SELECT $currency_field FROM user_stats WHERE user_id = :user_id", ['user_id' => $user_id]);
-        if (!$user_currency || $user_currency[$currency_field] < $price) return $pdo->rollBack() && false;
-        
-        $sql = "UPDATE user_stats SET $currency_field = $currency_field - :price WHERE user_id = :user_id";
-        if (!Database::query($sql, ['user_id' => $user_id, 'price' => $price])) return $pdo->rollBack() && false;
-        
-        $purchase_id = generateUniqueId('user_shop_purchases', 'id');
-        $purchase_data = [
-            'id' => $purchase_id, 'user_id' => $user_id, 'item_id' => $item_id,
-            'currency_type' => $currency_type, 'price' => $price,
-            'expires_at' => $item['duration_days'] ? date('Y-m-d H:i:s', strtotime("+{$item['duration_days']} days")) : null
-        ];
-        
-        if (!Database::insert('user_shop_purchases', $purchase_data)) return $pdo->rollBack() && false;
-        
-        $inventory_id = generateUniqueId('user_inventory', 'id');
-        $inventory_data = [
-            'id' => $inventory_id, 'user_id' => $user_id, 'item_id' => $item_id,
-            'quantity' => 1, 'expires_at' => $purchase_data['expires_at']
-        ];
-        
-        if (!Database::insert('user_inventory', $inventory_data)) return $pdo->rollBack() && false;
-        
-        Database::query("UPDATE shop_items SET purchase_count = purchase_count + 1 WHERE id = :item_id", ['item_id' => $item_id]);
-        
-        $pdo->commit();
-        return true;
+        try {
+            // Get item
+            $item = Database::fetchOne(
+                "SELECT * FROM shop_items WHERE id = :item_id AND is_available = 1", 
+                ['item_id' => $item_id]
+            );
+            
+            if (!$item) {
+                $pdo->rollBack();
+                return false;
+            }
+            
+            // Check user currency
+            $currency_field = $currency_type . '_count';
+            $user_currency = Database::fetchOne(
+                "SELECT $currency_field FROM user_stats WHERE user_id = :user_id", 
+                ['user_id' => $user_id]
+            );
+            
+            if (!$user_currency || $user_currency[$currency_field] < $price) {
+                $pdo->rollBack();
+                return false;
+            }
+            
+            // Deduct currency
+            $sql = "UPDATE user_stats SET $currency_field = $currency_field - :price WHERE user_id = :user_id";
+            $deducted = Database::query($sql, ['user_id' => $user_id, 'price' => $price]);
+            
+            if (!$deducted) {
+                $pdo->rollBack();
+                return false;
+            }
+            
+            // Record purchase
+            $purchase_id = generateUniqueId('user_shop_purchases', 'id');
+            $expires_at = null;
+            if ($item['duration_days']) {
+                $expires_at = date('Y-m-d H:i:s', strtotime("+{$item['duration_days']} days"));
+            }
+            
+            $purchase_data = [
+                'id' => $purchase_id,
+                'user_id' => $user_id,
+                'item_id' => $item_id,
+                'currency_type' => $currency_type,
+                'price' => $price,
+                'expires_at' => $expires_at
+            ];
+            
+            $purchased = Database::insert('user_shop_purchases', $purchase_data);
+            
+            if (!$purchased) {
+                $pdo->rollBack();
+                return false;
+            }
+            
+            // Add to inventory
+            $inventory_id = generateUniqueId('user_inventory', 'id');
+            $inventory_data = [
+                'id' => $inventory_id,
+                'user_id' => $user_id,
+                'item_id' => $item_id,
+                'quantity' => 1,
+                'expires_at' => $expires_at
+            ];
+            
+            $added = Database::insert('user_inventory', $inventory_data);
+            
+            if (!$added) {
+                $pdo->rollBack();
+                return false;
+            }
+            
+            // Update purchase count
+            Database::query(
+                "UPDATE shop_items SET purchase_count = purchase_count + 1 WHERE id = :item_id", 
+                ['item_id' => $item_id]
+            );
+            
+            $pdo->commit();
+            return true;
+            
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            error_log('Purchase shop item error: ' . $e->getMessage());
+            return false;
+        }
     }
     
     public static function addToInventory($user_id, $item_id, $quantity = 1, $item_data = []) {
-        $existing = Database::fetchOne("SELECT id, quantity FROM user_inventory WHERE user_id = :user_id AND item_id = :item_id", 
-            ['user_id' => $user_id, 'item_id' => $item_id]);
-        
-        if ($existing) {
-            return Database::query("UPDATE user_inventory SET quantity = quantity + :quantity WHERE id = :id", 
-                ['id' => $existing['id'], 'quantity' => $quantity]);
-        } else {
-            $inventory_id = generateUniqueId('user_inventory', 'id');
-            $inventory_data = ['id' => $inventory_id, 'user_id' => $user_id, 'item_id' => $item_id, 'quantity' => $quantity];
-            return Database::insert('user_inventory', $inventory_data);
+        try {
+            // Check if item already exists in inventory
+            $existing = Database::fetchOne(
+                "SELECT id, quantity FROM user_inventory WHERE user_id = :user_id AND item_id = :item_id",
+                ['user_id' => $user_id, 'item_id' => $item_id]
+            );
+            
+            if ($existing) {
+                // Update quantity
+                return Database::query(
+                    "UPDATE user_inventory SET quantity = quantity + :quantity WHERE id = :id",
+                    ['id' => $existing['id'], 'quantity' => $quantity]
+                );
+            } else {
+                // Insert new item
+                $inventory_id = generateUniqueId('user_inventory', 'id');
+                $inventory_data = array_merge([
+                    'id' => $inventory_id,
+                    'user_id' => $user_id,
+                    'item_id' => $item_id,
+                    'quantity' => $quantity
+                ], $item_data);
+                
+                return Database::insert('user_inventory', $inventory_data);
+            }
+        } catch (Exception $e) {
+            error_log('Add to inventory error: ' . $e->getMessage());
+            return false;
         }
     }
     
@@ -684,6 +572,7 @@ public function getCookbooks(array $filters = [], int $limit = 20, int $offset =
             $params['category'] = $category;
         }
         
+        $sql .= " ORDER BY si.category, si.name";
         return Database::fetchAll($sql, $params);
     }
     
@@ -691,30 +580,218 @@ public function getCookbooks(array $filters = [], int $limit = 20, int $offset =
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
         
-        $sql = "SELECT ui.*, si.* FROM user_inventory ui LEFT JOIN shop_items si ON ui.item_id = si.id WHERE ui.id = :inventory_id AND ui.user_id = :user_id";
-        $item = Database::fetchOne($sql, ['inventory_id' => $inventory_id, 'user_id' => $user_id]);
-        
-        if (!$item) return $pdo->rollBack() && false;
-        
-        if ($item['quantity'] > 1) {
-            Database::query("UPDATE user_inventory SET quantity = quantity - 1 WHERE id = :id", ['id' => $inventory_id]);
-        } else {
-            Database::delete('user_inventory', "id = '$inventory_id'");
+        try {
+            $sql = "SELECT ui.*, si.* FROM user_inventory ui LEFT JOIN shop_items si ON ui.item_id = si.id WHERE ui.id = :inventory_id AND ui.user_id = :user_id";
+            $item = Database::fetchOne($sql, ['inventory_id' => $inventory_id, 'user_id' => $user_id]);
+            
+            if (!$item) {
+                $pdo->rollBack();
+                return false;
+            }
+            
+            if ($item['quantity'] > 1) {
+                // Reduce quantity
+                Database::query("UPDATE user_inventory SET quantity = quantity - 1 WHERE id = :id", ['id' => $inventory_id]);
+            } else {
+                // Remove item
+                Database::delete('user_inventory', "id = '$inventory_id'");
+            }
+            
+            $pdo->commit();
+            
+            return [
+                'effect_type' => $item['item_type'],
+                'effect_value' => $item['effect_value'],
+                'duration' => $item['duration_days'],
+                'item_name' => $item['name'],
+                'item_description' => $item['description'],
+                'item_id' => $item['item_id'],
+                'inventory_id' => $inventory_id,
+                'remaining_quantity' => max(0, $item['quantity'] - 1)
+            ];
+            
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            error_log('Use inventory item error: ' . $e->getMessage());
+            return false;
         }
-        
-        $pdo->commit();
-        
-        return [
-            'effect_type' => $item['item_type'], 'effect_value' => $item['effect_value'],
-            'duration' => $item['duration_days'], 'item_name' => $item['name'],
-            'item_description' => $item['description']
-        ];
     }
     
     public static function getEquippedItems($user_id) {
         $sql = "SELECT ui.*, si.* FROM user_inventory ui LEFT JOIN shop_items si ON ui.item_id = si.id WHERE ui.user_id = :user_id AND ui.is_equipped = 1";
         return Database::fetchAll($sql, ['user_id' => $user_id]);
     }
+    
+    
+    /**
+     * Gets detailed information about an inventory item
+     * 
+     * @param string $item_id Item ID from shop_items table
+     * @return array Item details
+     */
+    public static function getItemDetails($item_id) {
+        return Database::fetchOne("SELECT * FROM shop_items WHERE id = :item_id", ['item_id' => $item_id]);
+    }
+    
+    /**
+     * Gets list of possible consumable effects
+     * 
+     * @return array Consumable effects
+     */
+    public static function getConsumableEffects() {
+        return [
+            'exp_boost' => [
+                'name' => 'EXP Boost',
+                'description' => 'Increases EXP earned from activities',
+                'max_effect' => 100
+            ],
+            'gold_boost' => [
+                'name' => 'Gold Boost',
+                'description' => 'Increases Gold earned from activities',
+                'max_effect' => 100
+            ],
+            'stamina' => [
+                'name' => 'Stamina Restore',
+                'description' => 'Restores cooking stamina',
+                'max_effect' => 100
+            ],
+            'cooking_speed' => [
+                'name' => 'Cooking Speed',
+                'description' => 'Reduces cooking time',
+                'max_effect' => 50
+            ],
+            'luck' => [
+                'name' => 'Luck Boost',
+                'description' => 'Increases chance of rare drops',
+                'max_effect' => 30
+            ]
+        ];
+    }
+    
+    /**
+     * Equips or unequips an inventory item
+     * 
+     * @param string $user_id User ID
+     * @param string $inventory_id Inventory item ID
+     * @param string $action 'equip' or 'unequip'
+     * @return bool Success status
+     */
+    public static function equipInventoryItem($user_id, $inventory_id, $action) {
+        $pdo = Database::getConnection();
+        $pdo->beginTransaction();
+        
+        try {
+            // Get inventory item details
+            $sql = "SELECT ui.*, si.* FROM user_inventory ui 
+                    LEFT JOIN shop_items si ON ui.item_id = si.id 
+                    WHERE ui.id = :inventory_id AND ui.user_id = :user_id";
+            $item = Database::fetchOne($sql, ['inventory_id' => $inventory_id, 'user_id' => $user_id]);
+            
+            if (!$item) {
+                $pdo->rollBack();
+                return false;
+            }
+            
+            // Only equipment items can be equipped
+            if ($item['item_type'] !== 'equipment') {
+                $pdo->rollBack();
+                return false;
+            }
+            
+            $category = $item['category'];
+            
+            if ($action === 'equip') {
+                // Unequip any other item in the same category first
+                $sql = "UPDATE user_inventory ui
+                        JOIN shop_items si ON ui.item_id = si.id
+                        SET ui.is_equipped = 0
+                        WHERE ui.user_id = :user_id 
+                        AND si.category = :category 
+                        AND ui.is_equipped = 1
+                        AND ui.id != :inventory_id";
+                Database::query($sql, [
+                    'user_id' => $user_id,
+                    'category' => $category,
+                    'inventory_id' => $inventory_id
+                ]);
+                
+                // Equip the selected item
+                Database::query("UPDATE user_inventory SET is_equipped = 1 WHERE id = :id", ['id' => $inventory_id]);
+            } else { // unequip
+                Database::query("UPDATE user_inventory SET is_equipped = 0 WHERE id = :id", ['id' => $inventory_id]);
+            }
+            
+            $pdo->commit();
+            return true;
+            
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            error_log('Equip inventory item error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Validates if a consumable can be used
+     * 
+     * @param string $user_id User ID
+     * @param string $inventory_id Inventory item ID
+     * @return array Validation result
+     */
+    public static function validateConsumableUse($user_id, $inventory_id) {
+        try {
+            $sql = "SELECT ui.*, si.* FROM user_inventory ui 
+                    LEFT JOIN shop_items si ON ui.item_id = si.id 
+                    WHERE ui.id = :inventory_id AND ui.user_id = :user_id";
+            $item = Database::fetchOne($sql, ['inventory_id' => $inventory_id, 'user_id' => $user_id]);
+            
+            if (!$item) {
+                return ['valid' => false, 'message' => 'Item not found'];
+            }
+            
+            if ($item['item_type'] !== 'consumable') {
+                return ['valid' => false, 'message' => 'Only consumable items can be used'];
+            }
+            
+            if ($item['quantity'] <= 0) {
+                return ['valid' => false, 'message' => 'Item quantity is zero'];
+            }
+            
+            if ($item['expires_at'] && strtotime($item['expires_at']) < time()) {
+                return ['valid' => false, 'message' => 'Item has expired'];
+            }
+            
+            return [
+                'valid' => true,
+                'item' => $item,
+                'can_use' => true
+            ];
+            
+        } catch (Exception $e) {
+            return ['valid' => false, 'message' => 'Validation error: ' . $e->getMessage()];
+        }
+    }
+    
+    /**
+     * Logs user activity
+     * 
+     * @param string $user_id User ID
+     * @param string $action Action type
+     * @param array $details Action details
+     * @return bool Success status
+     */
+    public static function logActivity($user_id, $action, $details = []) {
+        try {
+            // Note: This would normally insert into an activity_log table
+            // For now, we'll just log to error_log for debugging
+            error_log("Activity logged - User: $user_id, Action: $action, Details: " . json_encode($details));
+            return true;
+        } catch (Exception $e) {
+            error_log('Log activity error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     
     // Activity Feed Operations
     public static function getActivityFeed($user_id = null, $limit = 20, $offset = 0) {
