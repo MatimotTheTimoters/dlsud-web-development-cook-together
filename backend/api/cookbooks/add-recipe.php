@@ -1,84 +1,116 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../classes/AuthHelper.php';
-require_once __DIR__ . '/../../classes/DatabaseHelper.php';
-require_once __DIR__ . '/../../classes/ResponseFormatter.php';
+require_once '../../config/database.php';
+require_once '../../classes/AuthHelper.php';
+require_once '../../classes/DatabaseHelper.php';
+require_once '../../classes/ResponseFormatter.php';
 
-// Set CORS headers
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
+header('Content-Type: application/json');
 
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+$response = new ResponseFormatter();
+
+// Check if it's a POST request
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $response->error('Method not allowed', 405);
+    exit;
 }
 
 try {
-    // Validate request method
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        ResponseFormatter::error('Method not allowed', 405);
-        exit();
+    // Get authorization header
+    $token = AuthHelper::getBearerToken();
+    if (!$token) {
+        $response->unauthorized('Authentication required');
+        exit;
     }
 
-    // Get and validate authorization header
-    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    if (empty($authHeader) || !preg_match('/Bearer\s+(.+)$/i', $authHeader, $matches)) {
-        ResponseFormatter::unauthorized('No authentication token provided');
-        exit();
-    }
-
-    $token = $matches[1];
+    // Validate token
     $userData = AuthHelper::validateToken($token);
-
     if (!$userData) {
-        ResponseFormatter::unauthorized('Invalid or expired token');
-        exit();
+        $response->unauthorized('Invalid or expired token');
+        exit;
     }
 
-    // Get cookbook ID from URL
-    $url_parts = explode('/', $_SERVER['REQUEST_URI']);
-    $cookbook_id_index = array_search('add-recipe', $url_parts);
-    $cookbook_id = $url_parts[$cookbook_id_index - 1] ?? null;
-
-    // Validate cookbook ID
-    if (empty($cookbook_id) || !preg_match('/^[a-f0-9\-]+$/i', $cookbook_id)) {
-        ResponseFormatter::error('Invalid cookbook ID format', 400);
-        exit();
-    }
-
-    // Get request body
-    $rawData = file_get_contents('php://input');
-    $data = json_decode($rawData, true);
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        ResponseFormatter::error('Invalid JSON data', 400);
-        exit();
+    $user_id = $userData['user_id'];
+    
+    // Get POST data
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!$input) {
+        $response->badRequest('Invalid JSON input');
+        exit;
     }
 
     // Validate required fields
-    if (!isset($data['recipe_id']) || empty(trim($data['recipe_id']))) {
-        ResponseFormatter::validationError(['recipe_id' => 'recipe_id is required']);
-        exit();
+    if (empty($input['cookbook_id'])) {
+        $response->validationError(['cookbook_id' => 'Cookbook ID is required']);
+        exit;
+    }
+
+    if (empty($input['recipe_id'])) {
+        $response->validationError(['recipe_id' => 'Recipe ID is required']);
+        exit;
+    }
+
+    $cookbook_id = $input['cookbook_id'];
+    $recipe_id = $input['recipe_id'];
+    
+    $dbHelper = new DatabaseHelper();
+    
+    // Check if cookbook exists and user owns it
+    $cookbook = $dbHelper->getCookbook($cookbook_id, false);
+    if (!$cookbook) {
+        $response->notFound('Cookbook not found');
+        exit;
+    }
+    
+    if ($cookbook['user_id'] !== $user_id) {
+        $response->forbidden('You do not own this cookbook');
+        exit;
+    }
+
+    // Check if recipe exists
+    $recipe = $dbHelper->getRecipe($recipe_id, $user_id);
+    if (!$recipe) {
+        $response->notFound('Recipe not found');
+        exit;
+    }
+
+    // Check if user has access to recipe
+    if ($recipe['is_paid'] && !$recipe['has_access'] && $recipe['user_id'] !== $user_id) {
+        $response->forbidden('You do not have access to this recipe');
+        exit;
+    }
+
+    // Check if recipe already in cookbook
+    $existing = $dbHelper->checkRecipeInCookbook($cookbook_id, $recipe_id);
+    if ($existing) {
+        $response->error('Recipe already exists in this cookbook', 409);
+        exit;
     }
 
     // Add recipe to cookbook
-    $recipe_id = trim($data['recipe_id']);
-    $entry_id = DatabaseHelper::addRecipeToCookbook($cookbook_id, $recipe_id, $userData['user_id']);
-
-    if (!$entry_id) {
-        ResponseFormatter::error('Failed to add recipe to cookbook', 500);
-        exit();
+    $success = $dbHelper->manageCookbookRecipe($cookbook_id, $recipe_id, 'add', $user_id);
+    
+    if (!$success) {
+        $response->error('Failed to add recipe to cookbook', 500);
+        exit;
     }
 
-    ResponseFormatter::success(
-        ['entry_id' => $entry_id, 'cookbook_id' => $cookbook_id, 'recipe_id' => $recipe_id],
-        'Recipe added to cookbook successfully',
-        201
-    );
+    // Log activity
+    $dbHelper->logActivity($user_id, 'recipe_added_to_cookbook', [
+        'cookbook_id' => $cookbook_id,
+        'cookbook_name' => $cookbook['name'],
+        'recipe_id' => $recipe_id,
+        'recipe_title' => $recipe['title']
+    ]);
+
+    $response->success([
+        'cookbook_id' => $cookbook_id,
+        'recipe_id' => $recipe_id,
+        'added_at' => date('Y-m-d H:i:s')
+    ], 'Recipe added to cookbook successfully');
+    
 } catch (Exception $e) {
     error_log("Add recipe to cookbook error: " . $e->getMessage());
-    ResponseFormatter::error('Internal server error', 500, ['message' => $e->getMessage()]);
+    $response->error('Server error', 500);
 }
+?>
