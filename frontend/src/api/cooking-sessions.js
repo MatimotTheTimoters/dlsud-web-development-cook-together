@@ -1,6 +1,3 @@
-// frontend/src/api/cooking-sessions.js
-// Required Imports: api from '../utils/api'
-
 import api from '../utils/api';
 
 /**
@@ -91,14 +88,15 @@ export const completeStep = async (sessionId, stepId) => {
 };
 
 /**
- * Updates cooking session
+ * Votes to skip timer or step
  * @param {string} sessionId - Session ID
- * @param {Object} updates - Session updates
+ * @param {string} voteType - Type of vote
+ * @param {boolean} voteValue - Vote value
  * @returns {Promise} API response
  */
 export const voteSkip = async (sessionId, voteType, voteValue) => {
     try {
-        const response = await api.put('/cooking-sessions/update.php', {
+        const response = await api.post('/cooking-sessions/vote.php', {
             session_id: sessionId,
             vote_type: voteType,
             vote_value: voteValue
@@ -110,13 +108,7 @@ export const voteSkip = async (sessionId, voteType, voteValue) => {
     }
 };
 
-/**
- * Votes to skip timer or step
- * @param {string} sessionId - Session ID
- * @param {string} voteType - Type of vote
- * @param {boolean} voteValue - Vote value
- * @returns {Promise} API response
- */
+
 export const getSessionHistory = async (params = {}) => {
     try {
         const response = await api.post('/cooking-sessions/vote.php', {
@@ -141,6 +133,25 @@ export const getSessions = async () => {
         return response;
     } catch (error) {
         console.error('Error getting session statistics:', error);
+        throw error;
+    }
+};
+
+/**
+ * Updates cooking session
+ * @param {string} sessionId - Session ID
+ * @param {Object} updates - Session updates
+ * @returns {Promise} API response
+ */
+export const updateSession = async (sessionId, updates) => {
+    try {
+        const response = await api.put('/cooking-sessions/update.php', {
+            session_id: sessionId,
+            ...updates
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating cooking session:', error);
         throw error;
     }
 };
