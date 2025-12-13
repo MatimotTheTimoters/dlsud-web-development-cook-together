@@ -19,64 +19,52 @@ const LoadingSpinner = ({
         }
     };
 
-    const getColorClass = () => {
-        switch (color) {
-            case 'gold': return 'text-gold-coin';
-            case 'gem': return 'text-rare-gem';
-            case 'xp': return 'text-xp-purple';
-            case 'success': return 'text-success-green';
-            case 'user': return 'text-chef-red';
-            case 'recipe': return 'text-sizzling-orange';
-            default: return 'text-chef-red';
-        }
-    };
-
     const getSpinnerIcons = () => {
         switch (type) {
             case 'user':
                 return (
                     <>
-                        <FaUser className={`spinner-icon user-icon ${getColorClass()}`} />
-                        <FaChartLine className={`spinner-icon chart-icon ${getColorClass()}`} />
+                        <FaUser className="spinner-icon user-icon" />
+                        <FaChartLine className="spinner-icon chart-icon" />
                     </>
                 );
             case 'recipe':
                 return (
                     <>
-                        <FaUtensilSpoon className={`spinner-icon spoon-icon ${getColorClass()}`} />
-                        <FaCarrot className={`spinner-icon carrot-icon ${getColorClass()}`} />
-                        <FaBreadSlice className={`spinner-icon bread-icon ${getColorClass()}`} />
+                        <FaUtensilSpoon className="spinner-icon spoon-icon" />
+                        <FaCarrot className="spinner-icon carrot-icon" />
+                        <FaBreadSlice className="spinner-icon bread-icon" />
                     </>
                 );
             case 'recipe-list':
                 return (
                     <>
-                        <FaSeedling className={`spinner-icon seedling-icon ${getColorClass()}`} />
-                        <FaUtensilSpoon className={`spinner-icon spoon-icon ${getColorClass()}`} />
-                        <FaBlender className={`spinner-icon blender-icon ${getColorClass()}`} />
+                        <FaSeedling className="spinner-icon seedling-icon" />
+                        <FaUtensilSpoon className="spinner-icon spoon-icon" />
+                        <FaBlender className="spinner-icon blender-icon" />
                     </>
                 );
             case 'recipe-detail':
                 return (
                     <>
-                        <FaCarrot className={`spinner-icon carrot-icon ${getColorClass()}`} />
-                        <FaUtensilSpoon className={`spinner-icon spoon-icon ${getColorClass()}`} />
-                        <FaFire className={`spinner-icon fire-icon ${getColorClass()}`} />
+                        <FaCarrot className="spinner-icon carrot-icon" />
+                        <FaUtensilSpoon className="spinner-icon spoon-icon" />
+                        <FaFire className="spinner-icon fire-icon" />
                     </>
                 );
             case 'cooking':
                 return (
                     <>
-                        <FaFire className={`spinner-icon fire-icon ${getColorClass()}`} />
-                        <FaCookieBite className={`spinner-icon cookie-icon ${getColorClass()}`} />
+                        <FaFire className="spinner-icon fire-icon" />
+                        <FaCookieBite className="spinner-icon cookie-icon" />
                     </>
                 );
             default:
                 return (
                     <>
-                        <FaUtensilSpoon className={`spinner-icon spoon-icon ${getColorClass()}`} />
-                        <FaBlender className={`spinner-icon blender-icon ${getColorClass()}`} />
-                        <FaFire className={`spinner-icon fire-icon ${getColorClass()}`} />
+                        <FaUtensilSpoon className="spinner-icon spoon-icon" />
+                        <FaBlender className="spinner-icon blender-icon" />
+                        <FaFire className="spinner-icon fire-icon" />
                     </>
                 );
         }
@@ -101,101 +89,15 @@ const LoadingSpinner = ({
         }
     };
 
-    const getRewardMessage = () => {
-        switch (type) {
-            case 'user':
-                return '+5 EXP for checking stats';
-            case 'recipe':
-                return '+20 EXP for recipe creation';
-            case 'recipe-list':
-                return '+10 EXP for recipe discovery';
-            case 'recipe-detail':
-                return '+15 EXP for recipe preparation';
-            case 'cooking':
-                return '+25 EXP for cooking patience';
-            default:
-                return '+10 EXP for your patience!';
-        }
-    };
-
-    const getProgressLabel = () => {
-        switch (type) {
-            case 'recipe':
-                return 'Recipe Creation Progress';
-            case 'recipe-list':
-                return 'Loading Recipes';
-            case 'recipe-detail':
-                return 'Fetching Recipe Data';
-            default:
-                return 'Loading Progress';
-        }
-    };
-
     return (
         <div className={`loading-spinner ${getSizeClass()}`}>
-            <div className="spinner-container animate__animated animate__pulse">
+            <div className="spinner-container">
                 <div className="spinner-icon-container">
                     {getSpinnerIcons()}
                 </div>
 
                 <div className="spinner-text-container">
                     <h3 className="spinner-title">{getLoadingMessage()}</h3>
-                    <p className="spinner-subtitle">
-                        <span className="spinner-dots">
-                            <span className="dot">⚙️</span>
-                            <span className="dot">⚙️</span>
-                            <span className="dot">⚙️</span>
-                        </span>
-                    </p>
-
-                    <div className="spinner-reward-note">
-                        <span className="reward-icon">🎁</span>
-                        <span className="reward-text">{getRewardMessage()}</span>
-                    </div>
-
-                    {/* Progress indicator for recipe data loading */}
-                    {(progress !== null || ['recipe', 'recipe-list', 'recipe-detail'].includes(type)) && (
-                        <div className="recipe-loading-progress mt-4">
-                            <div className="progress-label">
-                                <span>{getProgressLabel()}</span>
-                                <span className="progress-value">
-                                    {progress !== null ? `${progress}%` : 'Loading...'}
-                                </span>
-                            </div>
-                            <div className="progress-container">
-                                <div
-                                    className="progress-bar progress-bar-exp"
-                                    style={{
-                                        width: progress !== null ? `${progress}%` : '70%'
-                                    }}
-                                ></div>
-                            </div>
-                            {type === 'recipe' && (
-                                <div className="progress-steps mt-2 text-xs text-warm-gray-medium">
-                                    <span>Preparing ingredients...</span>
-                                </div>
-                            )}
-                            {type === 'recipe-detail' && (
-                                <div className="progress-steps mt-2 text-xs text-warm-gray-medium">
-                                    <span>Loading ingredients and steps...</span>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Recipe-specific loading tips */}
-                    {['recipe', 'recipe-list', 'recipe-detail'].includes(type) && (
-                        <div className="loading-tips mt-3">
-                            <div className="tips-card card">
-                                <div className="card-body p-2">
-                                    <p className="text-xs text-warm-gray-medium">
-                                        <FaUtensilSpoon className="inline mr-1" />
-                                        Tip: Great recipes take time to prepare!
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

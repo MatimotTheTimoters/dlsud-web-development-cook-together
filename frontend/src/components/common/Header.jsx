@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import { useData } from '../../contexts/DataContext';
-import * as userAPI from '../../api/users';
+import { useAuth } from '../../contexts/AuthContext';
+import * as usersApi from '../../api/users';
 import {
   FaHome, FaUtensils, FaUsers, FaBook,
   FaUser, FaCoins, FaGem, FaSignOutAlt,
@@ -12,10 +11,8 @@ import {
 
 const Header = () => {
   const { logout, user, isAuthenticated } = useAuth();
-  const { userData, fetchUserData } = useData();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [notifications, setNotifications] = useState([]);
   const [userStats, setUserStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,7 +22,7 @@ const Header = () => {
 
     setLoadingStats(true);
     try {
-      const response = await userAPI.getUserStats();
+      const response = await usersApi.getUserStats();
       if (response.success) {
         setUserStats(response.data);
       }
@@ -62,7 +59,6 @@ const Header = () => {
 
   useEffect(() => {
     if (user) {
-      fetchUserData();
       loadUserStats();
     }
   }, [user]);
@@ -144,14 +140,14 @@ const Header = () => {
           <div className="user-profile-mini">
             <Link to="/profile" className="profile-link">
               <img
-                src={userData?.profile_picture || '/default-avatar.png'}
-                alt={userData?.full_name || 'User'}
+                src={user?.profile_picture || '/default-avatar.png'}
+                alt={user?.full_name || 'User'}
                 className="card-user-avatar"
               />
               <div className="profile-info">
                 <span className="profile-greeting">{getGreeting()},</span>
                 <span className="profile-name">
-                  {userData?.full_name || 'Chef'}
+                  {user?.full_name || 'Chef'}
                 </span>
                 <div className="level-badge badge">
                   <FaTrophy /> Lvl {userStats?.level || 1}
@@ -198,11 +194,6 @@ const Header = () => {
         <div className="nav-actions">
           <button className="nav-action-button notification-button">
             <FaBell />
-            {notifications.length > 0 && (
-              <span className="badge badge-primary notification-badge">
-                {notifications.length}
-              </span>
-            )}
           </button>
           <button
             onClick={handleLogout}
