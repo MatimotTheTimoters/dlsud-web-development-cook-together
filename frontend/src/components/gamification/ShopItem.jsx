@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FaShoppingCart, FaLock, FaCheck, FaCoins, FaGem, FaExclamationTriangle } from 'react-icons/fa';
 import { purchaseItem } from '../../api/shop';
 import { useAuth } from '../../hooks/useAuth';
-import './ShopItem.css';
 
 /**
  * ShopItem component for displaying shop items with purchase functionality
