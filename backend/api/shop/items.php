@@ -1,92 +1,118 @@
 <?php
+// backend/api/shop/items.php
 header('Content-Type: application/json');
+require_once '../../config/cors.php';
 require_once '../../config/database.php';
 require_once '../../classes/AuthHelper.php';
 require_once '../../classes/DatabaseHelper.php';
 require_once '../../classes/ResponseFormatter.php';
 
-// Enable CORS
-require_once '../../config/cors.php';
-setCorsHeaders();
+$response = new ResponseFormatter();
+$authHelper = new AuthHelper();
+$dbHelper = new DatabaseHelper();
 
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    handlePreflight();
+// Check if it's a GET request
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    $response->error('Method not allowed', 405);
     exit;
 }
 
-$responseFormatter = new ResponseFormatter();
-
-try {
-    // Verify authentication
-    $authHelper = new AuthHelper();
-    $token = getAuthorizationToken();
-
-    if (!$token || !$authHelper->validateToken($token)) {
-        $responseFormatter->unauthorized('Authentication required');
-        exit;
-    }
-
-    $decodedToken = $authHelper->validateToken($token);
-    if (!$decodedToken) {
-        $responseFormatter->unauthorized('Invalid token');
-        exit;
-    }
-
-    // Get shop items with optional filters
-    $databaseHelper = new DatabaseHelper();
-
-    // Get query parameters
-    $category = $_GET['category'] ?? null;
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
-    $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
-
-    // Build filters array
-    $filters = [];
-    if ($category) {
-        $filters['category'] = $category;
-    }
-
-    // Get shop items from database
-    $shopItems = $databaseHelper->getShopItems($filters, $limit, $offset);
-
-    if ($shopItems === false) {
-        $responseFormatter->error('Failed to fetch shop items', 500);
-        exit;
-    }
-
-    // Get item categories for filtering
-    $categories = $databaseHelper->getItemCategories();
-
-    $responseData = [
-        'success' => true,
-        'data' => [
-            'items' => $shopItems,
-            'categories' => $categories,
-            'pagination' => [
-                'limit' => $limit,
-                'offset' => $offset,
-                'total' => count($shopItems)
-            ]
-        ],
-        'message' => 'Shop items retrieved successfully'
-    ];
-
-    echo json_encode($responseData);
-} catch (Exception $e) {
-    error_log('Shop items error: ' . $e->getMessage());
-    $responseFormatter->error('Internal server error', 500, $e->getMessage());
+// Get authorization token
+$token = $authHelper->getBearerToken();
+if (!$token) {
+    $response->unauthorized('No authentication token provided');
+    exit;
 }
 
-// Helper function to get authorization token from headers
-function getAuthorizationToken()
-{
+// Validate token
+$userData = $authHelper->validateToken($token);
+if (!$userData) {
+    $response->unauthorized('Invalid or expired token');
+    exit;
+}
+
+$userId = $userData['user_id'];
+
+try {
+    // Get optional filters
+    $filters = [];
+    if (isset($_GET['category']) && !empty($_GET['category'])) {
+        $filters['category'] = $_GET['category'];
+    }
+    if (isset($_GET['item_type']) && !empty($_GET['item_type'])) {
+        $filters['item_type'] = $_GET['item_type'];
+    }
+    
+    // Get shop items
+    $items = $dbHelper->getShopItems($filters);
+    
+    // Get user stats to check affordability
+    $userStats = $dbHelper->getUserStats($userId);
+    
+    // Format response with affordability info
+    $formattedItems = [];
+    foreach ($items as $item) {
+        $formattedItem = [
+            'id' => $item['id'],
+            'name' => $item['name'],
+            'description' => $item['description'],
+            'item_type' => $item['item_type'],
+            'category' => $item['category'],
+            'gold_price' => (int)$item['gold_price'],
+            'gem_price' => (int)$item['gem_price'],
+            'effect_value' => $item['effect_value'] ? (int)$item['effect_value'] : null,
+            'duration_days' => $item['duration_days'] ? (int)$item['duration_days'] : null,
+            'image_url' => $item['image_url'],
+            'is_available' => (bool)$item['is_available'],
+            'purchase_count' => (int)$item['purchase_count']
+        ];
+        
+        // Check affordability
+        if ($userStats) {
+            $formattedItem['can_afford_gold'] = $userStats['gold_count'] >= $item['gold_price'];
+            $formattedItem['can_afford_gem'] = $userStats['gem_count'] >= $item['gem_price'];
+            $formattedItem['user_gold'] = (int)$userStats['gold_count'];
+            $formattedItem['user_gems'] = (int)$userStats['gem_count'];
+        }
+        
+        $formattedItems[] = $formattedItem;
+    }
+    
+    // Get categories for filtering
+    $categories = array_unique(array_column($items, 'category'));
+    $itemTypes = array_unique(array_column($items, 'item_type'));
+    
+    $result = [
+        'items' => $formattedItems,
+        'total_items' => count($formattedItems),
+        'categories' => array_values($categories),
+        'item_types' => array_values($itemTypes),
+        'currency_rates' => [
+            'gold_to_gem' => 10, // 10 gold = 1 gem (example rate)
+            'gem_to_gold' => 0.1 // 1 gem = 10 gold
+        ]
+    ];
+    
+    $response->success($result, 'Shop items retrieved successfully', 200);
+    
+} catch (Exception $e) {
+    error_log('Shop items error: ' . $e->getMessage());
+    $response->error('Failed to retrieve shop items: ' . $e->getMessage(), 500);
+}
+
+/**
+ * Extracts Bearer token from Authorization header
+ * 
+ * @return string|null Token or null if not found
+ */
+function getAuthorizationToken(): ?string {
     $headers = getallheaders();
     if (isset($headers['Authorization'])) {
         $authHeader = $headers['Authorization'];
-        if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+        if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
             return $matches[1];
         }
     }
     return null;
 }
+?>
