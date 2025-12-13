@@ -1,89 +1,78 @@
 <?php
+// backend/api/cooking-sessions/index.php
+// Required Imports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 
-// Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 
-// Set CORS headers
 header('Content-Type: application/json');
-require_once __DIR__ . '/../../config/cors.php';
 
-$responseFormatter = new ResponseFormatter();
+// Check if it's a GET request
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    ResponseFormatter::error('Method not allowed', 405);
+    exit;
+}
 
 try {
-    // Check request method
-    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        $responseFormatter->error("Method not allowed", 405);
-        exit;
-    }
-    
-    // Get query parameters
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    $status = isset($_GET['status']) ? $_GET['status'] : null;
-    $user_id = isset($_GET['user_id']) ? $_GET['user_id'] : null;
-    $visibility = isset($_GET['visibility']) ? $_GET['visibility'] : null;
-    
     $dbHelper = new DatabaseHelper();
     
-    if ($user_id) {
-        // Get user's cooking sessions
-        $sessions = $dbHelper->getUserCookingSessions($user_id, $status);
-        
-        if ($sessions === false) {
-            throw new Exception("Failed to fetch user cooking sessions");
-        }
-        
-        $responseData = [
-            'sessions' => $sessions,
-            'total' => count($sessions)
-        ];
-    } else {
-        // Get public cooking sessions
-        $sessions = $dbHelper->getPublicCookingSessions($limit);
-        
-        if ($sessions === false) {
-            throw new Exception("Failed to fetch public cooking sessions");
-        }
-        
-        // Filter by visibility if specified
-        if ($visibility) {
-            $sessions = array_filter($sessions, function($session) use ($visibility) {
-                return $session['visibility'] === $visibility;
-            });
-            $sessions = array_values($sessions); // Reindex array
-        }
-        
-        // Filter by status if specified
-        if ($status) {
-            $sessions = array_filter($sessions, function($session) use ($status) {
-                return $session['status'] === $status;
-            });
-            $sessions = array_values($sessions); // Reindex array
-        }
-        
-        // Pagination
-        $totalSessions = count($sessions);
-        $totalPages = ceil($totalSessions / $limit);
-        $offset = ($page - 1) * $limit;
-        $paginatedSessions = array_slice($sessions, $offset, $limit);
-        
-        $responseData = [
-            'sessions' => $paginatedSessions,
-            'pagination' => [
-                'page' => $page,
-                'limit' => $limit,
-                'total' => $totalSessions,
-                'total_pages' => $totalPages,
-                'has_next' => $page < $totalPages,
-                'has_prev' => $page > 1
-            ]
-        ];
+    // Get query parameters
+    $filters = [];
+    
+    if (isset($_GET['status'])) {
+        $filters['status'] = $_GET['status'];
     }
     
-    $responseFormatter->success($responseData, "Cooking sessions retrieved successfully", 200);
+    if (isset($_GET['visibility'])) {
+        $filters['visibility'] = $_GET['visibility'];
+    }
+    
+    if (isset($_GET['mode'])) {
+        $filters['mode'] = $_GET['mode'];
+    }
+    
+    if (isset($_GET['recipe_id'])) {
+        $filters['recipe_id'] = $_GET['recipe_id'];
+    }
+    
+    if (isset($_GET['host_id'])) {
+        $filters['host_id'] = $_GET['host_id'];
+    }
+    
+    // Pagination
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+    $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+    
+    // Check for user authentication to show private sessions
+    $user_id = null;
+    if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+        require_once __DIR__ . '/../../classes/AuthHelper.php';
+        $authHelper = new AuthHelper();
+        $token = $authHelper->getBearerToken();
+        
+        if ($token) {
+            $tokenData = $authHelper->validateToken($token);
+            if ($tokenData) {
+                $user_id = $tokenData['user_id'];
+                $filters['user_id'] = $user_id; // For showing user's sessions
+            }
+        }
+    }
+    
+    // Get cooking sessions
+    $sessions = $dbHelper->getCookingSessions($filters, $limit, $offset);
+    
+    // Get total count for pagination
+    $total = $dbHelper->getCookingSessionsCount($filters);
+    
+    ResponseFormatter::paginated([
+        'sessions' => $sessions,
+        'filters' => $filters
+    ], $total, ceil($offset / $limit) + 1, $limit, 'Cooking sessions retrieved successfully');
     
 } catch (Exception $e) {
-    $responseFormatter->error("Failed to retrieve cooking sessions: " . $e->getMessage(), 500);
+    error_log('Error listing cooking sessions: ' . $e->getMessage());
+    ResponseFormatter::error('Server error: ' . $e->getMessage(), 500);
 }
+?>
