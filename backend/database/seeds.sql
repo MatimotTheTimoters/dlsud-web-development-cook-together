@@ -1,12 +1,10 @@
--- CookTogether Test Seed Data
--- Use this after creating the database schema
-
 USE cooktogether;
 
 -- Disable foreign key checks temporarily for easier insertion
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Clear existing data (optional, for clean seeding)
+DELETE FROM session_chat_messages;
 DELETE FROM cookbook_recipes;
 DELETE FROM cookbooks;
 DELETE FROM cooking_session_votes;
@@ -15,12 +13,16 @@ DELETE FROM cooking_session_participants;
 DELETE FROM cooking_session_details;
 DELETE FROM cooking_sessions;
 DELETE FROM recipe_interactions;
+DELETE FROM user_recipe_purchases;
 DELETE FROM recipe_steps;
 DELETE FROM recipe_ingredients;
 DELETE FROM recipe_metadata;
 DELETE FROM recipes;
 DELETE FROM user_relationships;
 DELETE FROM user_stats;
+DELETE FROM user_inventory;
+DELETE FROM user_shop_purchases;
+DELETE FROM shop_items;
 DELETE FROM users;
 
 -- Enable foreign key checks
@@ -40,12 +42,12 @@ INSERT INTO users (id, full_name, email, password_hash, age, gender, profile_pic
 -- ====================
 -- 2. USER STATS
 -- ====================
-INSERT INTO user_stats (id, user_id, level, current_exp, current_level_ceiling, gold_count, gem_count, login_streak, recipes_created, recipes_cooked, challenges_completed, max_exp_reward, max_gold_reward, max_gem_reward, last_limit_update) VALUES
-('stat_001', 'usr_001', 5, 320, 500, 1250, 45, 7, 3, 12, 2, 150, 75, 8, '2024-01-10 08:00:00'),
-('stat_002', 'usr_002', 8, 780, 1000, 3200, 120, 14, 7, 25, 5, 200, 100, 12, '2024-01-10 09:30:00'),
-('stat_003', 'usr_003', 3, 80, 200, 450, 15, 3, 1, 5, 1, 120, 60, 6, '2024-01-10 10:15:00'),
-('stat_004', 'usr_004', 6, 420, 600, 1800, 65, 10, 4, 18, 3, 170, 85, 10, '2024-01-10 11:45:00'),
-('stat_005', 'usr_005', 2, 30, 150, 200, 8, 2, 0, 3, 0, 110, 55, 5, '2024-01-10 13:20:00');
+INSERT INTO user_stats (id, user_id, level, current_exp, current_level_ceiling, gold_count, gem_count, login_streak, recipes_created, recipes_cooked, challenges_completed, recipes_sold, total_cooking_time, max_exp_reward, max_gold_reward, max_gem_reward, max_gold_price, max_gem_price, last_limit_update) VALUES
+('stat_001', 'usr_001', 5, 320, 500, 1250, 45, 7, 3, 12, 2, 1, 5400, 150, 75, 8, 100, 10, '2024-01-10 08:00:00'),
+('stat_002', 'usr_002', 8, 780, 1000, 3200, 120, 14, 7, 25, 5, 3, 9000, 200, 100, 12, 200, 20, '2024-01-10 09:30:00'),
+('stat_003', 'usr_003', 3, 80, 200, 450, 15, 3, 1, 5, 1, 0, 1800, 120, 60, 6, 80, 8, '2024-01-10 10:15:00'),
+('stat_004', 'usr_004', 6, 420, 600, 1800, 65, 10, 4, 18, 3, 2, 7200, 170, 85, 10, 150, 15, '2024-01-10 11:45:00'),
+('stat_005', 'usr_005', 2, 30, 150, 200, 8, 2, 0, 3, 0, 0, 900, 110, 55, 5, 70, 7, '2024-01-10 13:20:00');
 
 -- ====================
 -- 3. USER RELATIONSHIPS
@@ -101,20 +103,20 @@ INSERT INTO recipe_ingredients (id, recipe_id, name, amount, unit, notes, order_
 -- ====================
 -- 7. RECIPE STEPS
 -- ====================
-INSERT INTO recipe_steps (id, recipe_id, description, read_timer_duration, timer_duration, timer_unit, exp_reward, gold_reward, order_index) VALUES
+INSERT INTO recipe_steps (id, recipe_id, description, read_timer_duration, timer_duration, timer_unit, exp_reward, gold_reward, gem_reward, order_index) VALUES
 -- Spaghetti Carbonara steps
-('step_001', 'rec_001', 'Bring a large pot of salted water to boil. Add spaghetti and cook according to package instructions until al dente.', 15, 600, 'seconds', 5, 3, 1),
-('step_002', 'rec_001', 'While pasta cooks, dice pancetta into small cubes. Cook in a large skillet over medium heat until crispy, about 5-7 minutes.', 15, 300, 'seconds', 5, 3, 2),
-('step_003', 'rec_001', 'In a bowl, whisk together eggs, grated pecorino cheese, and freshly ground black pepper.', 10, NULL, NULL, 3, 2, 3),
-('step_004', 'rec_001', 'When pasta is done, reserve 1 cup of pasta water, then drain pasta. Quickly add hot pasta to skillet with pancetta and mix.', 15, 60, 'seconds', 5, 3, 4),
-('step_005', 'rec_001', 'Remove skillet from heat. Add egg mixture and toss quickly to coat pasta. Add pasta water as needed to create creamy sauce. Serve immediately.', 20, NULL, NULL, 7, 4, 5),
+('step_001', 'rec_001', 'Bring a large pot of salted water to boil. Add spaghetti and cook according to package instructions until al dente.', 15, 600, 'seconds', 5, 3, 0, 1),
+('step_002', 'rec_001', 'While pasta cooks, dice pancetta into small cubes. Cook in a large skillet over medium heat until crispy, about 5-7 minutes.', 15, 300, 'seconds', 5, 3, 0, 2),
+('step_003', 'rec_001', 'In a bowl, whisk together eggs, grated pecorino cheese, and freshly ground black pepper.', 10, NULL, NULL, 3, 2, 0, 3),
+('step_004', 'rec_001', 'When pasta is done, reserve 1 cup of pasta water, then drain pasta. Quickly add hot pasta to skillet with pancetta and mix.', 15, 60, 'seconds', 5, 3, 0, 4),
+('step_005', 'rec_001', 'Remove skillet from heat. Add egg mixture and toss quickly to coat pasta. Add pasta water as needed to create creamy sauce. Serve immediately.', 20, NULL, NULL, 7, 4, 1, 5),
 
 -- Vegetable Stir Fry steps
-('step_006', 'rec_002', 'Prepare all vegetables: cut broccoli into florets, slice bell peppers, and thinly slice carrots.', 15, 300, 'seconds', 4, 2, 1),
-('step_007', 'rec_002', 'Press tofu to remove excess water, then cut into 1-inch cubes.', 10, 180, 'seconds', 3, 2, 2),
-('step_008', 'rec_002', 'Heat oil in a wok or large skillet over high heat. Add tofu and cook until golden brown on all sides, about 5 minutes.', 15, 300, 'seconds', 5, 3, 3),
-('step_009', 'rec_002', 'Add vegetables to the wok and stir fry for 4-5 minutes until crisp-tender.', 10, 240, 'seconds', 4, 2, 4),
-('step_010', 'rec_002', 'Add soy sauce and stir to combine. Cook for 1 more minute, then serve hot with rice.', 10, 60, 'seconds', 4, 2, 5);
+('step_006', 'rec_002', 'Prepare all vegetables: cut broccoli into florets, slice bell peppers, and thinly slice carrots.', 15, 300, 'seconds', 4, 2, 0, 1),
+('step_007', 'rec_002', 'Press tofu to remove excess water, then cut into 1-inch cubes.', 10, 180, 'seconds', 3, 2, 0, 2),
+('step_008', 'rec_002', 'Heat oil in a wok or large skillet over high heat. Add tofu and cook until golden brown on all sides, about 5 minutes.', 15, 300, 'seconds', 5, 3, 0, 3),
+('step_009', 'rec_002', 'Add vegetables to the wok and stir fry for 4-5 minutes until crisp-tender.', 10, 240, 'seconds', 4, 2, 0, 4),
+('step_010', 'rec_002', 'Add soy sauce and stir to combine. Cook for 1 more minute, then serve hot with rice.', 10, 60, 'seconds', 4, 2, 0, 5);
 
 -- ====================
 -- 8. RECIPE INTERACTIONS
@@ -126,14 +128,46 @@ INSERT INTO recipe_interactions (id, user_id, recipe_id, interaction_type, creat
 ('int_004', 'usr_003', 'rec_003', 'like', '2024-01-08 14:20:00'),
 ('int_005', 'usr_003', 'rec_003', 'save', '2024-01-08 14:21:00'),
 ('int_006', 'usr_004', 'rec_001', 'like', '2024-01-09 11:15:00'),
-('int_007', 'usr_005', 'rec_005', 'like', '2024-01-10 09:30:00'),
-('int_008', 'usr_001', 'rec_004', 'purchase', '2024-01-10 16:45:00');
-
--- Add metadata for purchase interaction
-UPDATE recipe_interactions SET metadata = '{"purchase_price_gold": 50, "purchase_price_gems": 5}' WHERE id = 'int_008';
+('int_007', 'usr_005', 'rec_005', 'like', '2024-01-10 09:30:00');
 
 -- ====================
--- 9. COOKING SESSIONS
+-- 9. USER RECIPE PURCHASES
+-- ====================
+INSERT INTO user_recipe_purchases (id, user_id, recipe_id, purchased_at, currency_used, price_paid, expires_at) VALUES
+('urp_001', 'usr_001', 'rec_004', '2024-01-10 16:45:00', 'gold', 50, NULL),
+('urp_002', 'usr_003', 'rec_004', '2024-01-09 14:30:00', 'gem', 5, NULL);
+
+-- ====================
+-- 10. SHOP ITEMS
+-- ====================
+INSERT INTO shop_items (id, name, description, item_type, category, gold_price, gem_price, effect_value, duration_days, image_url, is_available, purchase_count) VALUES
+('shop_001', 'EXP Booster', 'Gain 50% more EXP from cooking sessions for 7 days', 'boost', 'boost', 500, 50, 50, 7, 'https://images.unsplash.com/photo-1519681393784-d120267933ba', TRUE, 12),
+('shop_002', 'Gold Doubler', 'Double gold rewards from completed recipes for 3 days', 'boost', 'boost', 300, 30, 100, 3, 'https://images.unsplash.com/photo-1614786269829-d24616faf56d', TRUE, 8),
+('shop_003', 'Rare Recipe: Dragon Fruit Smoothie', 'Exclusive recipe with special ingredients', 'consumable', 'recipe', 1500, 150, 0, NULL, 'https://images.unsplash.com/photo-1571934811356-5cc061b6821f', TRUE, 3),
+('shop_004', 'Golden Cooking Utensils', 'Cosmetic golden cooking tools for your profile', 'consumable', 'cosmetic', 2000, 200, 0, NULL, 'https://images.unsplash.com/photo-1583394838336-acd977736f90', TRUE, 5),
+('shop_005', 'Gem Pack (50)', 'Purchase 50 gems to use in the shop', 'currency', 'currency', 0, 500, 50, NULL, 'https://images.unsplash.com/photo-1563013544-824ae1b704d3', TRUE, 25),
+('shop_006', 'Gold Pack (1000)', 'Purchase 1000 gold coins for recipes and items', 'currency', 'currency', 0, 100, 1000, NULL, 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43', TRUE, 18);
+
+-- ====================
+-- 11. USER SHOP PURCHASES
+-- ====================
+INSERT INTO user_shop_purchases (id, user_id, item_id, currency_type, price, purchased_at, expires_at, is_active) VALUES
+('usp_001', 'usr_001', 'shop_001', 'gold', 500, '2024-01-05 14:30:00', '2024-01-12 14:30:00', FALSE),
+('usp_002', 'usr_002', 'shop_002', 'gem', 30, '2024-01-08 10:15:00', '2024-01-11 10:15:00', TRUE),
+('usp_003', 'usr_001', 'shop_003', 'gold', 1500, '2024-01-07 16:45:00', NULL, TRUE),
+('usp_004', 'usr_003', 'shop_005', 'gem', 500, '2024-01-09 09:30:00', NULL, TRUE);
+
+-- ====================
+-- 12. USER INVENTORY
+-- ====================
+INSERT INTO user_inventory (id, user_id, item_id, quantity, purchased_at, is_equipped, expires_at) VALUES
+('inv_001', 'usr_001', 'shop_003', 1, '2024-01-07 16:45:00', TRUE, NULL),
+('inv_002', 'usr_002', 'shop_004', 1, '2024-01-06 11:20:00', TRUE, NULL),
+('inv_003', 'usr_001', 'shop_001', 2, '2024-01-05 14:30:00', FALSE, '2024-01-12 14:30:00'),
+('inv_004', 'usr_003', 'shop_006', 1, '2024-01-09 09:30:00', FALSE, NULL);
+
+-- ====================
+-- 13. COOKING SESSIONS
 -- ====================
 INSERT INTO cooking_sessions (id, recipe_id, host_id, mode, visibility, status, started_at, completed_at, notes, created_at) VALUES
 ('sess_001', 'rec_001', 'usr_001', 'solo', 'private', 'completed', '2024-01-06 18:30:00', '2024-01-06 19:15:00', 'My first time making carbonara!', '2024-01-06 18:25:00'),
@@ -143,7 +177,7 @@ INSERT INTO cooking_sessions (id, recipe_id, host_id, mode, visibility, status, 
 ('sess_005', 'rec_002', 'usr_004', 'multiplayer', 'public', 'preparing', NULL, NULL, 'Join me for vegetarian cooking!', '2024-01-10 17:30:00');
 
 -- ====================
--- 10. COOKING SESSION DETAILS
+-- 14. COOKING SESSION DETAILS
 -- ====================
 INSERT INTO cooking_session_details (id, cooking_session_id, current_step_index, total_steps, completed_steps, total_duration, exp_earned, gold_earned, gems_earned, cook_duration) VALUES
 ('detail_001', 'sess_001', 5, 5, 5, 2700, 25, 15, 1, 45),
@@ -153,7 +187,7 @@ INSERT INTO cooking_session_details (id, cooking_session_id, current_step_index,
 ('detail_005', 'sess_005', 1, 5, 0, NULL, 0, 0, 0, NULL);
 
 -- ====================
--- 11. COOKING SESSION PARTICIPANTS
+-- 15. COOKING SESSION PARTICIPANTS
 -- ====================
 INSERT INTO cooking_session_participants (id, cooking_session_id, user_id, role, status, joined_at) VALUES
 ('part_001', 'sess_001', 'usr_001', 'host', 'active', '2024-01-06 18:25:00'),
@@ -166,19 +200,30 @@ INSERT INTO cooking_session_participants (id, cooking_session_id, user_id, role,
 ('part_008', 'sess_005', 'usr_005', 'participant', 'joined', '2024-01-10 17:35:00');
 
 -- ====================
--- 12. COOKING STEP COMPLETIONS
+-- 16. COOKING STEP COMPLETIONS
 -- ====================
-INSERT INTO cooking_step_completions (id, cooking_session_id, recipe_step_id, step_index, completed_at, duration_seconds, was_skipped, exp_earned, gold_earned) VALUES
-('comp_001', 'sess_001', 'step_001', 1, '2024-01-06 18:35:00', 620, FALSE, 5, 3),
-('comp_002', 'sess_001', 'step_002', 2, '2024-01-06 18:42:00', 420, FALSE, 5, 3),
-('comp_003', 'sess_001', 'step_003', 3, '2024-01-06 18:45:00', 180, FALSE, 3, 2),
-('comp_004', 'sess_001', 'step_004', 4, '2024-01-06 18:50:00', 90, FALSE, 5, 3),
-('comp_005', 'sess_001', 'step_005', 5, '2024-01-06 18:55:00', 300, FALSE, 7, 4),
-('comp_006', 'sess_003', 'step_006', 1, '2024-01-08 14:05:00', 320, FALSE, 4, 2),
-('comp_007', 'sess_003', 'step_007', 2, '2024-01-08 14:10:00', 200, FALSE, 3, 2);
+INSERT INTO cooking_step_completions (id, cooking_session_id, recipe_step_id, step_index, completed_at, duration_seconds, was_skipped, exp_earned, gold_earned, gems_earned) VALUES
+('comp_001', 'sess_001', 'step_001', 1, '2024-01-06 18:35:00', 620, FALSE, 5, 3, 0),
+('comp_002', 'sess_001', 'step_002', 2, '2024-01-06 18:42:00', 420, FALSE, 5, 3, 0),
+('comp_003', 'sess_001', 'step_003', 3, '2024-01-06 18:45:00', 180, FALSE, 3, 2, 0),
+('comp_004', 'sess_001', 'step_004', 4, '2024-01-06 18:50:00', 90, FALSE, 5, 3, 0),
+('comp_005', 'sess_001', 'step_005', 5, '2024-01-06 18:55:00', 300, FALSE, 7, 4, 1),
+('comp_006', 'sess_003', 'step_006', 1, '2024-01-08 14:05:00', 320, FALSE, 4, 2, 0),
+('comp_007', 'sess_003', 'step_007', 2, '2024-01-08 14:10:00', 200, FALSE, 3, 2, 0);
 
 -- ====================
--- 13. COOKBOOKS
+-- 17. SESSION CHAT MESSAGES
+-- ====================
+INSERT INTO session_chat_messages (id, cooking_session_id, user_id, message, message_type, created_at, is_read) VALUES
+('msg_001', 'sess_002', 'usr_002', 'Welcome everyone to the cooking session!', 'system', '2024-01-07 18:45:00', TRUE),
+('msg_002', 'sess_002', 'usr_001', 'Excited to cook with you all!', 'text', '2024-01-07 18:46:00', TRUE),
+('msg_003', 'sess_002', 'usr_004', 'I''m ready to start when you are!', 'text', '2024-01-07 18:47:00', TRUE),
+('msg_004', 'sess_002', 'usr_002', 'Let''s begin with preparing the vegetables', 'system', '2024-01-07 18:48:00', TRUE),
+('msg_005', 'sess_005', 'usr_004', 'Anyone want to join my vegetarian cooking session?', 'text', '2024-01-10 17:30:00', FALSE),
+('msg_006', 'sess_005', 'usr_005', 'I''d love to join!', 'text', '2024-01-10 17:31:00', FALSE);
+
+-- ====================
+-- 18. COOKBOOKS
 -- ====================
 INSERT INTO cookbooks (id, user_id, name, description, is_public, created_at) VALUES
 ('book_001', 'usr_001', 'My Favorite Italian Recipes', 'Collection of authentic Italian dishes I love to cook', TRUE, '2024-01-07 11:30:00'),
@@ -186,7 +231,7 @@ INSERT INTO cookbooks (id, user_id, name, description, is_public, created_at) VA
 ('book_003', 'usr_004', 'Dessert Collection', 'Sweet treats for every occasion', FALSE, '2024-01-09 14:20:00');
 
 -- ====================
--- 14. COOKBOOK RECIPES
+-- 19. COOKBOOK RECIPES
 -- ====================
 INSERT INTO cookbook_recipes (id, cookbook_id, recipe_id, added_by, notes, added_at) VALUES
 ('cb_rec_001', 'book_001', 'rec_001', 'usr_001', 'My go-to carbonara recipe, perfect every time!', '2024-01-07 11:35:00'),
@@ -195,7 +240,7 @@ INSERT INTO cookbook_recipes (id, cookbook_id, recipe_id, added_by, notes, added
 ('cb_rec_004', 'book_003', 'rec_003', 'usr_004', 'Everyone loves these cookies!', '2024-01-09 14:25:00');
 
 -- ====================
--- 15. UPDATE USER STATS BASED ON ACTIVITIES
+-- 20. UPDATE USER STATS BASED ON ACTIVITIES
 -- ====================
 -- Update recipes_cooked count based on completed sessions
 UPDATE user_stats us
@@ -216,6 +261,28 @@ SET recipes_created = (
 )
 WHERE user_id IN ('usr_001', 'usr_002', 'usr_003', 'usr_004', 'usr_005');
 
+-- Update recipes_sold count
+UPDATE user_stats us
+SET recipes_sold = (
+    SELECT COUNT(DISTINCT urp.recipe_id) 
+    FROM user_recipe_purchases urp 
+    JOIN recipes r ON urp.recipe_id = r.id 
+    WHERE r.user_id = us.user_id
+)
+WHERE user_id IN ('usr_001', 'usr_002', 'usr_003', 'usr_004', 'usr_005');
+
+-- Update total_cooking_time (in minutes)
+UPDATE user_stats us
+SET total_cooking_time = (
+    SELECT COALESCE(SUM(cd.cook_duration), 0)
+    FROM cooking_sessions cs
+    JOIN cooking_session_details cd ON cs.id = cd.cooking_session_id
+    WHERE cs.host_id = us.user_id 
+    AND cs.status = 'completed'
+    AND cd.cook_duration IS NOT NULL
+)
+WHERE user_id IN ('usr_001', 'usr_002', 'usr_003', 'usr_004', 'usr_005');
+
 -- ====================
 -- FINAL MESSAGE
 -- ====================
@@ -233,6 +300,11 @@ SELECT cs.id, r.title as recipe, u.full_name as host, cs.status
 FROM cooking_sessions cs 
 JOIN recipes r ON cs.recipe_id = r.id 
 JOIN users u ON cs.host_id = u.id;
+
+SELECT 'Shop Items Available:' AS info;
+SELECT id, name, item_type, gold_price, gem_price 
+FROM shop_items 
+WHERE is_available = TRUE;
 
 SELECT 'Ready for testing! Use these credentials to login:' AS instructions;
 SELECT 'Email: alex@example.com, Password: password123' AS test_account_1;

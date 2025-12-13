@@ -1,9 +1,9 @@
--- CookTogether Database Schema
--- Created for XAMPP/MySQL
 -- Create database if not exists
 CREATE DATABASE IF NOT EXISTS cooktogether;
 USE cooktogether;
+
 -- Drop existing tables if migrating (in correct order for foreign key constraints)
+DROP TABLE IF EXISTS session_chat_messages;
 DROP TABLE IF EXISTS cookbook_recipes;
 DROP TABLE IF EXISTS cookbooks;
 DROP TABLE IF EXISTS cooking_session_votes;
@@ -12,13 +12,18 @@ DROP TABLE IF EXISTS cooking_session_participants;
 DROP TABLE IF EXISTS cooking_session_details;
 DROP TABLE IF EXISTS cooking_sessions;
 DROP TABLE IF EXISTS recipe_interactions;
+DROP TABLE IF EXISTS user_recipe_purchases;
 DROP TABLE IF EXISTS recipe_steps;
 DROP TABLE IF EXISTS recipe_ingredients;
 DROP TABLE IF EXISTS recipe_metadata;
 DROP TABLE IF EXISTS recipes;
 DROP TABLE IF EXISTS user_relationships;
 DROP TABLE IF EXISTS user_stats;
+DROP TABLE IF EXISTS user_inventory;
+DROP TABLE IF EXISTS user_shop_purchases;
+DROP TABLE IF EXISTS shop_items;
 DROP TABLE IF EXISTS users;
+
 -- Users Table
 CREATE TABLE users (
     id VARCHAR(255) PRIMARY KEY,
@@ -33,6 +38,7 @@ CREATE TABLE users (
     INDEX idx_email (email),
     INDEX idx_created_at (created_at)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- User_Stats Table
 CREATE TABLE user_stats (
     id VARCHAR(255) PRIMARY KEY,
@@ -47,6 +53,7 @@ CREATE TABLE user_stats (
     recipes_cooked INT DEFAULT 0,
     challenges_completed INT DEFAULT 0,
     recipes_sold INT DEFAULT 0,
+    total_cooking_time INT DEFAULT 0,
     max_exp_reward INT DEFAULT 100,
     max_gold_reward INT DEFAULT 50,
     max_gem_reward INT DEFAULT 5,
@@ -60,6 +67,7 @@ CREATE TABLE user_stats (
     INDEX idx_user_id (user_id),
     INDEX idx_level (level)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- User_Relationships Table
 CREATE TABLE user_relationships (
     id VARCHAR(255) PRIMARY KEY,
@@ -83,6 +91,7 @@ CREATE TABLE user_relationships (
     INDEX idx_relationship_type (relationship_type),
     INDEX idx_status (status)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Recipes Table
 CREATE TABLE recipes (
     id VARCHAR(255) PRIMARY KEY,
@@ -106,6 +115,7 @@ CREATE TABLE recipes (
     INDEX idx_is_public (is_public),
     FULLTEXT INDEX idx_search (title, description, origin)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Recipe_Metadata Table
 CREATE TABLE recipe_metadata (
     id VARCHAR(255) PRIMARY KEY,
@@ -132,6 +142,7 @@ CREATE TABLE recipe_metadata (
     INDEX idx_like_count (like_count),
     INDEX idx_cook_count (cook_count)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Recipe_Ingredients Table
 CREATE TABLE recipe_ingredients (
     id VARCHAR(255) PRIMARY KEY,
@@ -152,6 +163,7 @@ CREATE TABLE recipe_ingredients (
     INDEX idx_order_index (order_index),
     INDEX idx_name (name)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Recipe_Steps Table
 CREATE TABLE recipe_steps (
     id VARCHAR(255) PRIMARY KEY,
@@ -171,13 +183,14 @@ CREATE TABLE recipe_steps (
     INDEX idx_recipe_id (recipe_id),
     INDEX idx_order_index (order_index)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Recipe_Interactions Table
 CREATE TABLE recipe_interactions (
     id VARCHAR(255) PRIMARY KEY,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id VARCHAR(255) NOT NULL,
     recipe_id VARCHAR(255) NOT NULL,
-    interaction_type ENUM('like', 'dislike', 'save', 'purchase') NOT NULL,
+    interaction_type ENUM('like', 'dislike', 'save') NOT NULL,
     metadata JSON NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_interaction (user_id, recipe_id, interaction_type),
@@ -188,6 +201,25 @@ CREATE TABLE recipe_interactions (
     INDEX idx_interaction_type (interaction_type),
     INDEX idx_created_at (created_at)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- User_Recipe_Purchases Table
+CREATE TABLE user_recipe_purchases (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    recipe_id VARCHAR(255) NOT NULL,
+    purchased_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    currency_used ENUM('gold', 'gem') NULL,
+    price_paid INT NULL,
+    expires_at DATETIME NULL,
+    UNIQUE KEY unique_user_recipe (user_id, recipe_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_recipe_id (recipe_id),
+    INDEX idx_purchased_at (purchased_at),
+    INDEX idx_expires_at (expires_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Cooking_Sessions Table
 CREATE TABLE cooking_sessions (
     id VARCHAR(255) PRIMARY KEY,
@@ -219,6 +251,7 @@ CREATE TABLE cooking_sessions (
     INDEX idx_mode (mode),
     INDEX idx_created_at (created_at)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Cooking_Session_Details Table
 CREATE TABLE cooking_session_details (
     id VARCHAR(255) PRIMARY KEY,
@@ -241,6 +274,7 @@ CREATE TABLE cooking_session_details (
     INDEX idx_cooking_session_id (cooking_session_id),
     INDEX idx_timer_ends_at (timer_ends_at)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Cooking_Session_Participants Table
 CREATE TABLE cooking_session_participants (
     id VARCHAR(255) PRIMARY KEY,
@@ -260,6 +294,7 @@ CREATE TABLE cooking_session_participants (
     INDEX idx_status (status),
     INDEX idx_role (role)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Cooking_Step_Completions Table
 CREATE TABLE cooking_step_completions (
     id VARCHAR(255) PRIMARY KEY,
@@ -281,6 +316,7 @@ CREATE TABLE cooking_step_completions (
     INDEX idx_step_index (step_index),
     INDEX idx_completed_at (completed_at)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Cooking_Session_Votes Table
 CREATE TABLE cooking_session_votes (
     id VARCHAR(255) PRIMARY KEY,
@@ -297,6 +333,25 @@ CREATE TABLE cooking_session_votes (
     INDEX idx_vote_type (vote_type),
     INDEX idx_created_at (created_at)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Session_Chat_Messages Table
+CREATE TABLE session_chat_messages (
+    id VARCHAR(255) PRIMARY KEY,
+    cooking_session_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    message_type ENUM('text', 'system', 'vote') DEFAULT 'text',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (cooking_session_id) REFERENCES cooking_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    INDEX idx_cooking_session_id (cooking_session_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_message_type (message_type),
+    INDEX idx_created_at (created_at),
+    INDEX idx_is_read (is_read)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Cookbooks Table
 CREATE TABLE cookbooks (
     id VARCHAR(255) PRIMARY KEY,
@@ -312,6 +367,7 @@ CREATE TABLE cookbooks (
     INDEX idx_created_at (created_at),
     FULLTEXT INDEX idx_cookbook_search (name, description)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Cookbook_Recipes Table
 CREATE TABLE cookbook_recipes (
     id VARCHAR(255) PRIMARY KEY,
@@ -330,18 +386,19 @@ CREATE TABLE cookbook_recipes (
     INDEX idx_added_by (added_by),
     INDEX idx_added_at (added_at)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
--- Shop_Items Table (for gamification shop)
+
+-- Shop_Items Table
 CREATE TABLE shop_items (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    description TEXT,
-    item_type ENUM('cosmetic', 'tool', 'recipe', 'boost', 'other') NOT NULL,
+    description TEXT NULL,
+    item_type ENUM('boost', 'currency', 'consumable') NOT NULL,
     category VARCHAR(100) NOT NULL,
     gold_price INT DEFAULT 0,
     gem_price INT DEFAULT 0,
     effect_value INT DEFAULT 0,
-    duration_days INT DEFAULT NULL,
-    image_url VARCHAR(500),
+    duration_days INT NULL,
+    image_url VARCHAR(500) NULL,
     is_available BOOLEAN DEFAULT TRUE,
     purchase_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -354,8 +411,9 @@ CREATE TABLE shop_items (
     INDEX idx_created_at (created_at),
     FULLTEXT INDEX idx_shop_search (name, description, category)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
--- User_Purchases Table (tracks shop item purchases)
-CREATE TABLE user_purchases (
+
+-- User_Shop_Purchases Table
+CREATE TABLE user_shop_purchases (
     id VARCHAR(255) PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
     item_id VARCHAR(255) NOT NULL,
@@ -374,8 +432,24 @@ CREATE TABLE user_purchases (
     INDEX idx_expires_at (expires_at),
     INDEX idx_is_active (is_active)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
--- Insert some initial test data (optional for development)
--- INSERT INTO users (id, full_name, email, password_hash) VALUES 
--- ('test_user_1', 'Test User', 'test@example.com', '$2y$10$hashedpasswordhere');
+
+-- User_Inventory Table
+CREATE TABLE user_inventory (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    item_id VARCHAR(255) NOT NULL,
+    quantity INT DEFAULT 1,
+    purchased_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_equipped BOOLEAN DEFAULT FALSE,
+    expires_at DATETIME NULL,
+    UNIQUE KEY unique_user_item (user_id, item_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES shop_items(id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_item_id (item_id),
+    INDEX idx_is_equipped (is_equipped),
+    INDEX idx_expires_at (expires_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- Success message
 SELECT 'Database schema created successfully!' as message;
