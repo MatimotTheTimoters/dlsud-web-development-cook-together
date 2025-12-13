@@ -1,144 +1,77 @@
 <?php
+// backend/api/cooking-sessions/vote.php
+// Required Imports: ../../config/database.php, ../../classes/AuthHelper.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
 
-// Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../classes/AuthHelper.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 
-// Set CORS headers
 header('Content-Type: application/json');
-require_once __DIR__ . '/../../config/cors.php';
 
-$responseFormatter = new ResponseFormatter();
-$authHelper = new AuthHelper();
+// Check if it's a POST request
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    ResponseFormatter::error('Method not allowed', 405);
+    exit;
+}
 
 try {
-    // Check authentication
-    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    if (empty($authHeader) || !str_starts_with($authHeader, 'Bearer ')) {
-        $responseFormatter->unauthorized("Authentication required");
+    // Get authorization token
+    $authHelper = new AuthHelper();
+    $token = $authHelper->getBearerToken();
+    
+    if (!$token) {
+        ResponseFormatter::unauthorized('No authentication token provided');
         exit;
     }
     
-    $token = str_replace('Bearer ', '', $authHeader);
-    $decoded = $authHelper->validateToken($token);
-    
-    if (!$decoded) {
-        $responseFormatter->unauthorized("Invalid or expired token");
+    // Validate token
+    $tokenData = $authHelper->validateToken($token);
+    if (!$tokenData) {
+        ResponseFormatter::unauthorized('Invalid or expired token');
         exit;
     }
     
-    $userId = $decoded['user_id'];
+    $user_id = $tokenData['user_id'];
     
-    // Get session ID from URL
-    $url_parts = explode('/', $_SERVER['REQUEST_URI']);
-    $session_id = end($url_parts);
+    // Get input
+    $input = json_decode(file_get_contents('php://input'), true);
     
-    if (empty($session_id)) {
-        $responseFormatter->error("Session ID is required", 400);
+    if (!isset($input['session_id']) || !isset($input['vote_type']) || !isset($input['vote_value'])) {
+        ResponseFormatter::error('Session ID, vote type, and vote value are required', 400);
         exit;
     }
     
-    // Check request method
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        $responseFormatter->error("Method not allowed", 405);
-        exit;
-    }
-    
-    // Get input data
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (empty($data['vote_type'])) {
-        $responseFormatter->error("Vote type is required", 400);
-        exit;
-    }
-    
-    $vote_type = $data['vote_type'];
-    $vote_value = $data['vote_value'] ?? true;
-    
-    // Validate vote type
-    $allowedVoteTypes = ['skip_read_timer', 'skip_step', 'other'];
-    if (!in_array($vote_type, $allowedVoteTypes)) {
-        $responseFormatter->error("Invalid vote type. Allowed: " . implode(', ', $allowedVoteTypes), 400);
-        exit;
-    }
+    $session_id = $input['session_id'];
+    $vote_type = $input['vote_type'];
+    $vote_value = (bool)$input['vote_value'];
     
     $dbHelper = new DatabaseHelper();
     
-    // Get session
-    $sessionData = $dbHelper->getCookingSession($session_id);
-    
-    if (!$sessionData) {
-        $responseFormatter->notFound("Cooking session not found");
+    // Validate user is in session
+    if (!$dbHelper->isUserInSession($session_id, $user_id)) {
+        ResponseFormatter::error('User is not in this cooking session', 403);
         exit;
     }
     
-    $session = $sessionData['session'];
+    // Handle session vote
+    $success = $dbHelper->handleSessionVote($session_id, $user_id, $vote_type, $vote_value);
     
-    // Check if user is a participant
-    $isParticipant = false;
-    foreach ($sessionData['participants'] as $participant) {
-        if ($participant['user_id'] === $userId && $participant['status'] === 'joined') {
-            $isParticipant = true;
-            break;
-        }
-    }
-    
-    if (!$isParticipant) {
-        $responseFormatter->unauthorized("You are not a participant in this session");
+    if (!$success) {
+        ResponseFormatter::error('Failed to process vote', 500);
         exit;
     }
     
-    // Check session status
-    if ($session['status'] !== 'cooking' && $session['status'] !== 'preparing') {
-        $responseFormatter->error("Cannot vote in a session that is " . $session['status'], 400);
-        exit;
-    }
+    // Get vote results
+    $voteResults = $dbHelper->getSessionVoteResults($session_id, $vote_type);
     
-    // Submit vote
-    $voted = $dbHelper->voteInCookingSession($session_id, $userId, $vote_type, $vote_value);
-    
-    if (!$voted) {
-        throw new Exception("Failed to submit vote");
-    }
-    
-    // Get vote counts
-    $votesSql = "SELECT 
-                    vote_type,
-                    SUM(CASE WHEN vote_value = 1 THEN 1 ELSE 0 END) as yes_votes,
-                    SUM(CASE WHEN vote_value = 0 THEN 1 ELSE 0 END) as no_votes,
-                    COUNT(*) as total_votes
-                FROM cooking_session_votes 
-                WHERE cooking_session_id = :session_id 
-                GROUP BY vote_type";
-    
-    $voteCounts = Database::fetchAll($votesSql, ['session_id' => $session_id]);
-    
-    // Calculate if vote passed (simple majority)
-    $voteResults = [];
-    foreach ($voteCounts as $voteCount) {
-        $voteResults[$voteCount['vote_type']] = [
-            'yes' => (int)$voteCount['yes_votes'],
-            'no' => (int)$voteCount['no_votes'],
-            'total' => (int)$voteCount['total_votes'],
-            'passed' => $voteCount['yes_votes'] > $voteCount['no_votes']
-        ];
-    }
-    
-    $responseData = [
-        'vote' => [
-            'type' => $vote_type,
-            'value' => $vote_value,
-            'user_id' => $userId
-        ],
+    ResponseFormatter::success([
         'vote_results' => $voteResults,
-        'current_votes' => $voteResults[$vote_type] ?? null,
-        'message' => 'Vote submitted successfully'
-    ];
-    
-    $responseFormatter->success($responseData, "Vote submitted successfully", 200);
+        'message' => 'Vote recorded successfully'
+    ], 'Vote recorded', 200);
     
 } catch (Exception $e) {
-    $responseFormatter->error("Failed to submit vote: " . $e->getMessage(), 500);
+    error_log('Error processing vote: ' . $e->getMessage());
+    ResponseFormatter::error('Server error: ' . $e->getMessage(), 500);
 }
+?>
