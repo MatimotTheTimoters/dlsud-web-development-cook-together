@@ -1,345 +1,138 @@
 <?php
-
-/**
- * POST /api/relationships/friends
- * Manage friend relationships (send request, accept, reject, remove)
- */
-
+// backend/api/relationships/friends.php
 require_once __DIR__ . '/../../config/cors.php';
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../classes/AuthHelper.php';
-require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 
-// Handle preflight requests
+// Handle preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+    ResponseFormatter::handlePreflight();
+    exit;
 }
+
+// Set CORS headers for actual request
+ResponseFormatter::setCorsHeaders();
 
 // Check request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     ResponseFormatter::error('Method not allowed', 405);
-    exit();
 }
 
-// Get and validate JWT token
-$headers = apache_request_headers();
-$token = isset($headers['Authorization']) ? str_replace('Bearer ', '', $headers['Authorization']) : null;
-
-if (!$token) {
-    ResponseFormatter::error('No authentication token provided', 401);
-    exit();
-}
-
-$user_data = AuthHelper::validateToken($token);
-if (!$user_data) {
-    ResponseFormatter::error('Invalid or expired token', 401);
-    exit();
-}
-
-$user_id = $user_data['user_id'];
-
-// Get and validate request data
-$input = json_decode(file_get_contents('php://input'), true);
-
-if (!$input || !isset($input['action'])) {
-    ResponseFormatter::error('Missing required field: action', 400);
-    exit();
-}
-
-$action = $input['action'];
-
-try {
-    switch ($action) {
-        case 'send_request':
-            // Send friend request
-            if (!isset($input['target_user_id'])) {
-                ResponseFormatter::error('Missing required field: target_user_id', 400);
-                exit();
-            }
-
-            $target_user_id = $input['target_user_id'];
-            $message = $input['message'] ?? null;
-
-            // Check if target user exists
-            $target_user = DatabaseHelper::getUserById($target_user_id);
-            if (!$target_user) {
-                ResponseFormatter::error('Target user not found', 404);
-                exit();
-            }
-
-            // Prevent sending request to oneself
-            if ($user_id === $target_user_id) {
-                ResponseFormatter::error('Cannot send friend request to yourself', 400);
-                exit();
-            }
-
-            $success = DatabaseHelper::sendFriendRequest($user_id, $target_user_id, $message);
-
-            if ($success) {
-                ResponseFormatter::success([
-                    'request_sent' => true,
-                    'message' => 'Friend request sent successfully'
-                ], 'Friend request sent', 200);
-            } else {
-                ResponseFormatter::error('Failed to send friend request. Request may already exist.', 400);
-            }
-            break;
-
-        case 'respond_request':
-            // Respond to friend request
-            if (!isset($input['request_id']) || !isset($input['response'])) {
-                ResponseFormatter::error('Missing required fields: request_id and response', 400);
-                exit();
-            }
-
-            $request_id = $input['request_id'];
-            $response = $input['response']; // 'accept' or 'reject'
-
-            if (!in_array($response, ['accept', 'reject'])) {
-                ResponseFormatter::error('Invalid response. Must be "accept" or "reject"', 400);
-                exit();
-            }
-
-            $status = $response === 'accept' ? 'accepted' : 'rejected';
-            $success = DatabaseHelper::respondToFriendRequest($request_id, $status);
-
-            if ($success) {
-                ResponseFormatter::success([
-                    'request_processed' => true,
-                    'status' => $status,
-                    'message' => 'Friend request ' . $response . 'ed successfully'
-                ], 'Friend request ' . $response . 'ed', 200);
-            } else {
-                ResponseFormatter::error('Failed to process friend request. Request may not exist or already processed.', 400);
-            }
-            break;
-
-        case 'remove_friend':
-            // Remove friend
-            if (!isset($input['friend_id'])) {
-                ResponseFormatter::error('Missing required field: friend_id', 400);
-                exit();
-            }
-
-            $friend_id = $input['friend_id'];
-
-            // Check if friend exists
-            $friend = DatabaseHelper::getUserById($friend_id);
-            if (!$friend) {
-                ResponseFormatter::error('Friend not found', 404);
-                exit();
-            }
-
-            $success = DatabaseHelper::removeFriend($user_id, $friend_id);
-
-            if ($success) {
-                ResponseFormatter::success([
-                    'friend_removed' => true,
-                    'message' => 'Friend removed successfully'
-                ], 'Friend removed', 200);
-            } else {
-                ResponseFormatter::error('Failed to remove friend. Friendship may not exist.', 400);
-            }
-            break;
-
-        default:
-            ResponseFormatter::error('Invalid action. Must be "send_request", "respond_request", or "remove_friend"', 400);
-            break;
-    }
-} catch (Exception $e) {
-    error_log('Friend management error: ' . $e->getMessage());
-    ResponseFormatter::error('Internal server error', 500);
-}<?php
-
-/**
- * POST /api/relationships/friends
- * Manage friend relationships (send, accept, reject, cancel, remove)
- */
-
-// Required imports per backend_files.md
+// Include required classes
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../classes/AuthHelper.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 
-// Set CORS headers
-require_once __DIR__ . '/../../config/cors.php';
-
-// Handle preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    ResponseFormatter::success(null, "Preflight request successful", 200);
-    exit;
-}
-
-// Only POST method allowed
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    ResponseFormatter::error("Method not allowed", 405);
-    exit;
-}
-
 try {
-    // Get authorization header
-    $headers = getallheaders();
-    $authHeader = $headers['Authorization'] ?? '';
+    // Get token from Authorization header
+    $token = AuthHelper::getBearerToken();
     
-    // Extract token
-    if (!preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
-        ResponseFormatter::unauthorized("No authentication token provided");
-        exit;
+    if (!$token) {
+        ResponseFormatter::unauthorized('No authentication token provided');
     }
-    
-    $token = $matches[1];
     
     // Validate token
-    $tokenData = AuthHelper::validateToken($token);
+    $payload = AuthHelper::validateToken($token);
     
-    if (!$tokenData) {
-        ResponseFormatter::unauthorized("Invalid or expired token");
-        exit;
+    if (!$payload) {
+        ResponseFormatter::unauthorized('Invalid or expired token');
     }
     
-    $current_user_id = $tokenData['user_id'];
+    $current_user_id = $payload['user_id'];
     
-    // Get request body
-    $input = json_decode(file_get_contents('php://input'), true);
+    // Get and decode JSON input
+    $json_input = file_get_contents('php://input');
+    $input = json_decode($json_input, true);
     
     if (!$input) {
-        ResponseFormatter::error("Invalid JSON input", 400);
-        exit;
+        ResponseFormatter::error('Invalid JSON input', 400);
     }
     
     // Validate required fields
-    if (!isset($input['target_user_id'])) {
-        ResponseFormatter::error("target_user_id is required", 400);
-        exit;
+    if (empty($input['target_user_id'])) {
+        ResponseFormatter::validationError([
+            'target_user_id' => 'Target user ID is required'
+        ]);
     }
     
-    if (!isset($input['action'])) {
-        ResponseFormatter::error("action is required", 400);
-        exit;
+    if (empty($input['action'])) {
+        ResponseFormatter::validationError([
+            'action' => 'Action is required (follow, unfollow, or specific friend actions)'
+        ]);
     }
     
     $target_user_id = $input['target_user_id'];
-    $action = strtolower($input['action']);
+    $action = $input['action'];
     $message = $input['message'] ?? null;
     
-    // Validate action
-    $valid_actions = ['send_request', 'accept_request', 'reject_request', 'cancel_request', 'remove_friend'];
-    if (!in_array($action, $valid_actions)) {
-        ResponseFormatter::error("Invalid action. Valid actions are: " . implode(', ', $valid_actions), 400);
-        exit;
-    }
-    
-    // Check if user is trying to friend themselves
+    // Check if user is trying to interact with themselves
     if ($current_user_id === $target_user_id) {
-        ResponseFormatter::error("Cannot send friend request to yourself", 400);
-        exit;
+        ResponseFormatter::error('Cannot perform friend action on yourself', 400);
     }
     
     // Check if target user exists
     $target_user = DatabaseHelper::getUserById($target_user_id);
+    
     if (!$target_user) {
-        ResponseFormatter::notFound("Target user not found");
-        exit;
+        ResponseFormatter::notFound('Target user not found');
     }
     
-    // Perform the action
-    $success = false;
-    $status_message = "";
+    // Prepare relationship data
+    $relationship_data = [
+        'type' => 'following', // Default type
+        'status' => 'pending'  // Default status
+    ];
     
+    // Handle different actions
     switch ($action) {
-        case 'send_request':
-            // Check if already friends or request exists
-            if (DatabaseHelper::areFriends($current_user_id, $target_user_id)) {
-                ResponseFormatter::error("Already friends with this user", 409);
-                exit;
-            }
+        case 'follow':
+            $relationship_data['type'] = 'following';
+            $relationship_data['status'] = 'accepted';
+            $success_action = 'create';
+            break;
             
-            $success = DatabaseHelper::manageFriendRelationships('send_request', $current_user_id, $target_user_id, $message);
-            $status_message = "Friend request sent successfully";
+        case 'unfollow':
+            $success_action = 'delete';
+            $relationship_data['type'] = 'following';
+            break;
+            
+        case 'send_request':
+            $relationship_data['type'] = 'friend';
+            $relationship_data['status'] = 'pending';
+            $success_action = 'create';
             break;
             
         case 'accept_request':
-            // Check if request exists
-            $requests = DatabaseHelper::getFriendRequests($current_user_id, 'received');
-            $has_request = false;
-            foreach ($requests as $request) {
-                if ($request['source_user_id'] === $target_user_id) {
-                    $has_request = true;
-                    break;
-                }
-            }
-            
-            if (!$has_request) {
-                ResponseFormatter::error("No pending friend request from this user", 404);
-                exit;
-            }
-            
-            $success = DatabaseHelper::manageFriendRelationships('accept_request', $current_user_id, $target_user_id);
-            $status_message = "Friend request accepted successfully";
+            $relationship_data['type'] = 'friend';
+            $relationship_data['status'] = 'accepted';
+            $success_action = 'create';
             break;
             
         case 'reject_request':
-            // Check if request exists
-            $requests = DatabaseHelper::getFriendRequests($current_user_id, 'received');
-            $has_request = false;
-            foreach ($requests as $request) {
-                if ($request['source_user_id'] === $target_user_id) {
-                    $has_request = true;
-                    break;
-                }
-            }
-            
-            if (!$has_request) {
-                ResponseFormatter::error("No pending friend request from this user", 404);
-                exit;
-            }
-            
-            $success = DatabaseHelper::manageFriendRelationships('reject_request', $current_user_id, $target_user_id);
-            $status_message = "Friend request rejected successfully";
-            break;
-            
         case 'cancel_request':
-            // Check if request exists
-            $requests = DatabaseHelper::getFriendRequests($current_user_id, 'sent');
-            $has_request = false;
-            foreach ($requests as $request) {
-                if ($request['source_user_id'] === $current_user_id) {
-                    $has_request = true;
-                    break;
-                }
-            }
-            
-            if (!$has_request) {
-                ResponseFormatter::error("No pending friend request sent to this user", 404);
-                exit;
-            }
-            
-            $success = DatabaseHelper::manageFriendRelationships('cancel_request', $current_user_id, $target_user_id);
-            $status_message = "Friend request cancelled successfully";
-            break;
-            
         case 'remove_friend':
-            // Check if they are friends
-            if (!DatabaseHelper::areFriends($current_user_id, $target_user_id)) {
-                ResponseFormatter::error("Not friends with this user", 404);
-                exit;
-            }
-            
-            $success = DatabaseHelper::manageFriendRelationships('remove_friend', $current_user_id, $target_user_id);
-            $status_message = "Friend removed successfully";
+            $success_action = 'delete';
+            $relationship_data['type'] = 'friend';
             break;
+            
+        default:
+            ResponseFormatter::error('Invalid action', 400);
     }
+    
+    // Manage relationship using DatabaseHelper
+    $success = DatabaseHelper::manageRelationship($current_user_id, $target_user_id, $success_action, $relationship_data);
     
     if (!$success) {
-        ResponseFormatter::error("Failed to process friend action", 500);
-        exit;
+        ResponseFormatter::error('Failed to process friend action', 500);
     }
     
-    // Get updated friendship status
-    $are_friends = DatabaseHelper::areFriends($current_user_id, $target_user_id);
+    // Check if users are now friends by querying the database
+    $sql = "SELECT 1 FROM user_relationships 
+            WHERE ((source_user_id = :user1 AND target_user_id = :user2) 
+                   OR (source_user_id = :user2 AND target_user_id = :user1))
+            AND relationship_type = 'friend' AND status = 'accepted'";
+    
+    $are_friends = Database::fetchOne($sql, ['user1' => $current_user_id, 'user2' => $target_user_id]) ? true : false;
     
     // Prepare response data
     $response_data = [
@@ -356,10 +149,24 @@ try {
         ]
     ];
     
+    // Set appropriate success message
+    $messages = [
+        'follow' => 'Successfully followed user',
+        'unfollow' => 'Successfully unfollowed user',
+        'send_request' => 'Friend request sent successfully',
+        'accept_request' => 'Friend request accepted successfully',
+        'reject_request' => 'Friend request rejected successfully',
+        'cancel_request' => 'Friend request cancelled successfully',
+        'remove_friend' => 'Friend removed successfully'
+    ];
+    
+    $message = $messages[$action] ?? 'Action completed successfully';
+    
     // Return success response
-    ResponseFormatter::success($response_data, $status_message);
+    ResponseFormatter::success($response_data, $message);
     
 } catch (Exception $e) {
-    error_log("Friends endpoint error: " . $e->getMessage());
-    ResponseFormatter::error("Internal server error: " . $e->getMessage(), 500);
+    error_log('Friends error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+    ResponseFormatter::error('An error occurred while processing friend request', 500);
 }
+?>
