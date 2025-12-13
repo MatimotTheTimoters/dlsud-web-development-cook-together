@@ -1,18 +1,17 @@
 import api from '../utils/api';
 
 /**
- * Cooking Sessions API Module
- * Handles all cooking session related API calls
+ * Cooking Sessions API functions for cooking session operations
  */
 
 /**
- * Create a new cooking session
- * @param {Object} sessionData - Session data including recipe_id, mode, visibility
+ * Creates cooking session
+ * @param {Object} sessionData - Session data
  * @returns {Promise} API response
  */
 export const createSession = async (sessionData) => {
     try {
-        const response = await api.post('cooking-sessions/create.php', sessionData);
+        const response = await api.post('/cooking-sessions/create.php', sessionData);
         return response;
     } catch (error) {
         console.error('Error creating cooking session:', error);
@@ -21,13 +20,13 @@ export const createSession = async (sessionData) => {
 };
 
 /**
- * Get cooking session details
+ * Gets session details
  * @param {string} sessionId - Session ID
  * @returns {Promise} API response with session details
  */
 export const getSession = async (sessionId) => {
     try {
-        const response = await api.get(`cooking-sessions/show.php?id=${sessionId}`);
+        const response = await api.get(`/cooking-sessions/show.php?id=${sessionId}`);
         return response;
     } catch (error) {
         console.error('Error getting cooking session:', error);
@@ -36,13 +35,13 @@ export const getSession = async (sessionId) => {
 };
 
 /**
- * Join an existing cooking session
+ * Joins cooking session
  * @param {string} sessionId - Session ID
  * @returns {Promise} API response
  */
 export const joinSession = async (sessionId) => {
     try {
-        const response = await api.post(`cooking-sessions/join.php`, { session_id: sessionId });
+        const response = await api.post('/cooking-sessions/join.php', { session_id: sessionId });
         return response;
     } catch (error) {
         console.error('Error joining cooking session:', error);
@@ -51,14 +50,13 @@ export const joinSession = async (sessionId) => {
 };
 
 /**
- * Leave a cooking session
+ * Leaves cooking session
  * @param {string} sessionId - Session ID
  * @returns {Promise} API response
  */
 export const leaveSession = async (sessionId) => {
     try {
-        // Note: backend_files.md doesn't have a leave endpoint, we'll use update or custom logic
-        const response = await api.put(`cooking-sessions/update.php`, {
+        const response = await api.post('/cooking-sessions/join.php', {
             session_id: sessionId,
             action: 'leave'
         });
@@ -70,18 +68,16 @@ export const leaveSession = async (sessionId) => {
 };
 
 /**
- * Complete a cooking step in a session
+ * Completes cooking step in session
  * @param {string} sessionId - Session ID
  * @param {string} stepId - Step ID to complete
- * @param {Object} stepData - Additional step data (duration, notes, etc.)
  * @returns {Promise} API response with rewards earned
  */
-export const completeStep = async (sessionId, stepId, stepData = {}) => {
+export const completeStep = async (sessionId, stepId) => {
     try {
-        const response = await api.post(`cooking-sessions/complete-step.php`, {
+        const response = await api.post('/cooking-sessions/complete-step.php', {
             session_id: sessionId,
-            step_id: stepId,
-            ...stepData
+            step_id: stepId
         });
         return response;
     } catch (error) {
@@ -91,14 +87,14 @@ export const completeStep = async (sessionId, stepId, stepData = {}) => {
 };
 
 /**
- * Update cooking session details
+ * Updates cooking session
  * @param {string} sessionId - Session ID
- * @param {Object} updates - Session updates (status, current_step, etc.)
+ * @param {Object} updates - Session updates
  * @returns {Promise} API response
  */
 export const updateSession = async (sessionId, updates) => {
     try {
-        const response = await api.put(`cooking-sessions/update.php`, {
+        const response = await api.put('/cooking-sessions/update.php', {
             session_id: sessionId,
             ...updates
         });
@@ -110,15 +106,15 @@ export const updateSession = async (sessionId, updates) => {
 };
 
 /**
- * Vote to skip a timer or step in cooking session
+ * Votes to skip timer or step
  * @param {string} sessionId - Session ID
- * @param {string} voteType - Type of vote ('skip_read_timer', 'skip_step', 'other')
- * @param {boolean} voteValue - Vote value (true/false)
+ * @param {string} voteType - Type of vote
+ * @param {boolean} voteValue - Vote value
  * @returns {Promise} API response
  */
 export const voteSkip = async (sessionId, voteType, voteValue = true) => {
     try {
-        const response = await api.post(`cooking-sessions/vote.php`, {
+        const response = await api.post('/cooking-sessions/vote.php', {
             session_id: sessionId,
             vote_type: voteType,
             vote_value: voteValue
@@ -131,14 +127,12 @@ export const voteSkip = async (sessionId, voteType, voteValue = true) => {
 };
 
 /**
- * Get list of cooking sessions (with optional filters)
- * @param {Object} params - Filter parameters (status, mode, visibility, etc.)
+ * Gets list of cooking sessions
  * @returns {Promise} API response with sessions list
  */
-export const getSessions = async (params = {}) => {
+export const getSessions = async () => {
     try {
-        const queryParams = new URLSearchParams(params).toString();
-        const response = await api.get(`cooking-sessions/index.php${queryParams ? `?${queryParams}` : ''}`);
+        const response = await api.get('/cooking-sessions/index.php');
         return response;
     } catch (error) {
         console.error('Error getting cooking sessions list:', error);

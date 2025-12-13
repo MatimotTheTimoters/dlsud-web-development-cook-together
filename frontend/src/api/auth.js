@@ -1,35 +1,19 @@
 import api from '../utils/api';
 
 /**
- * Authentication API Module
- * Handles all authentication related API calls to PHP backend
+ * Authentication API functions for authentication operations
  */
 
 /**
- * Register a new user
- * @param {Object} userData - User registration data
- * @returns {Promise} Registration response
- */
-export const register = async (userData) => {
-    try {
-        const response = await api.post('/auth/register.php', userData);
-        return response.data;
-    } catch (error) {
-        console.error('Error registering user:', error);
-        throw error;
-    }
-};
-
-/**
- * Login user
+ * Authenticates user
  * @param {string} email - User email
  * @param {string} password - User password
- * @returns {Promise} Login response with JWT token
+ * @returns {Promise} Promise with authentication data
  */
 export const login = async (email, password) => {
     try {
         const response = await api.post('/auth/login.php', { email, password });
-        return response.data;
+        return response;
     } catch (error) {
         console.error('Error logging in:', error);
         throw error;
@@ -37,27 +21,28 @@ export const login = async (email, password) => {
 };
 
 /**
- * Get current user data
- * @returns {Promise} Current user data
+ * Registers new user
+ * @param {Object} userData - User registration data
+ * @returns {Promise} Promise with registration data
  */
-export const getCurrentUser = async () => {
+export const register = async (userData) => {
     try {
-        const response = await api.get('/auth/me.php');
-        return response.data;
+        const response = await api.post('/auth/register.php', userData);
+        return response;
     } catch (error) {
-        console.error('Error getting current user:', error);
+        console.error('Error registering user:', error);
         throw error;
     }
 };
 
 /**
- * Logout user
- * @returns {Promise} Logout response
+ * Logs out user
+ * @returns {Promise} Promise with logout result
  */
 export const logout = async () => {
     try {
         const response = await api.post('/auth/logout.php');
-        return response.data;
+        return response;
     } catch (error) {
         console.error('Error logging out:', error);
         throw error;
@@ -65,13 +50,27 @@ export const logout = async () => {
 };
 
 /**
- * Refresh authentication token
- * @returns {Promise} New token response
+ * Gets current user data
+ * @returns {Promise} Promise with current user data
+ */
+export const getCurrentUser = async () => {
+    try {
+        const response = await api.get('/auth/me.php');
+        return response;
+    } catch (error) {
+        console.error('Error getting current user:', error);
+        throw error;
+    }
+};
+
+/**
+ * Refreshes authentication token
+ * @returns {Promise} Promise with refreshed token data
  */
 export const refreshToken = async () => {
     try {
         const response = await api.post('/auth/refresh-token.php');
-        return response.data;
+        return response;
     } catch (error) {
         console.error('Error refreshing token:', error);
         throw error;
@@ -79,9 +78,9 @@ export const refreshToken = async () => {
 };
 
 export default {
-    register,
     login,
-    getCurrentUser,
+    register,
     logout,
+    getCurrentUser,
     refreshToken
 };
