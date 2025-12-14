@@ -561,3 +561,24 @@
 .view-btn:hover {
     background: #45a049;
 }
+
+/* Join Session Button Styles */
+.join-session-btn {
+    padding: 10px 20px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.3s;
+}
+
+.join-session-btn:hover:not(:disabled) {
+    background: #1976D2;
+}
+
+.join-session-btn:disabled {
+    background: #4CAF50;
+    cursor: default;
+}
