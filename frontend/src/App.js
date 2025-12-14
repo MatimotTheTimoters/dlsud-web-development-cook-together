@@ -4,6 +4,7 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import './App.css';
 import ProfilePage from './pages/ProfilePage';
+import CreateRecipePage from './pages/CreateRecipePage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
               <Link to="/login" className="nav-link">Login</Link>
               <Link to="/about" className="nav-link">About</Link>
               <Link to="/profile" className="nav-link">Profile</Link>
+              <Link to="/create-recipe" className="nav-link">Create Recipe</Link>
             </div>
           </div>
         </nav>
@@ -31,6 +33,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/create-recipe" element={<CreateRecipePage />} />
           </Routes>
         </main>
 
