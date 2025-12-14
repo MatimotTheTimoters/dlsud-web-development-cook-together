@@ -44,8 +44,8 @@
   <meta name="apple-mobile-web-app-title" content="CookTogether">
 
   <!-- Preload critical assets -->
-  <link rel="preload" href="%PUBLIC_URL%/fonts/Poppins-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="%PUBLIC_URL%/fonts/Rubik-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Rubik-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Poppins-Regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- Inline critical CSS for performance -->
   <style>
@@ -158,18 +158,18 @@
       });
     }
 
-    // Service Worker registration for PWA
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registered:', registration);
-          })
-          .catch(error => {
-            console.log('ServiceWorker registration failed:', error);
-          });
-      });
-    }
+    // // Service Worker registration for PWA
+    // if ('serviceWorker' in navigator) {
+    //   window.addEventListener('load', () => {
+    //     navigator.serviceWorker.register('/service-worker.js')
+    //       .then(registration => {
+    //         console.log('ServiceWorker registered:', registration);
+    //       })
+    //       .catch(error => {
+    //         console.log('ServiceWorker registration failed:', error);
+    //       });
+    //   });
+    // }
   </script>
 </body>
 

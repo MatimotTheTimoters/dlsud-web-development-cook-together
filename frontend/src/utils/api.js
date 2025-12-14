@@ -7,7 +7,7 @@ import axios from 'axios';
 
 // Get base URL from environment
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ||
-    'http://localhost/dlsud-web-development-cook-together/backend/api';
+    'http://localhost:8080/dlsud-web-development-cook-together/backend';
 
 // Create axios instance
 const api = axios.create({
@@ -16,7 +16,6 @@ const api = axios.create({
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     },
-    withCredentials: true, // Important for sessions/cookies
 });
 
 // JWT token storage key

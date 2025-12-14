@@ -1,18 +1,12 @@
 <?php
-// backend/index.php
+
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
 
 // Define application root
 define('APP_ROOT', dirname(__FILE__));
-
-// Load CORS configuration first
-require_once APP_ROOT . '/config/cors.php';
-setCorsHeaders();
-
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    handlePreflight();
-    exit();
-}
 
 // Include required classes and utilities
 require_once APP_ROOT . '/config/database.php';
