@@ -1,5 +1,10 @@
 <?php
-// backend/api/shop/items.php
+
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
+
 header('Content-Type: application/json');
 require_once '../../config/cors.php';
 require_once '../../config/database.php';

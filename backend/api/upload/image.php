@@ -1,16 +1,12 @@
 <?php
-// backend/api/upload/image.php
+
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
+
 require_once __DIR__ . '/../../config/cors.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
-
-// Handle preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    ResponseFormatter::handlePreflight();
-    exit;
-}
-
-// Set CORS headers for actual request
-ResponseFormatter::setCorsHeaders();
 
 // Check request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

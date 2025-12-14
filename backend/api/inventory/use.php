@@ -1,12 +1,14 @@
 <?php
-// backend/api/inventory/use.php
-header('Content-Type: application/json');
-require_once '../../config/cors.php';
-require_once '../../config/database.php';
-require_once '../../classes/AuthHelper.php';
-require_once '../../classes/DatabaseHelper.php';
-require_once '../../classes/ResponseFormatter.php';
-require_once '../../classes/UserCalculations.php';
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
+
+require_once __DIR__ . '/../../config/database.php';  // This provides Database class
+require_once __DIR__ . '/../../classes/AuthHelper.php';
+require_once __DIR__ . '/../../classes/DatabaseHelper.php';
+require_once __DIR__ . '/../../classes/ResponseFormatter.php';
+require_once __DIR__ . '/../../classes/UserCalculations.php';
 
 $response = new ResponseFormatter();
 $authHelper = new AuthHelper();
@@ -46,8 +48,10 @@ if (!isset($input['inventory_id'])) {
 $inventoryId = $input['inventory_id'];
 
 try {
+    // Use Database::getConnection() instead of connect()
+    $conn = Database::getConnection();
+
     // Get inventory item details
-    $conn = connect();
     $stmt = $conn->prepare("
         SELECT ui.*, si.* 
         FROM user_inventory ui 
@@ -56,62 +60,64 @@ try {
     ");
     $stmt->execute([$inventoryId, $userId]);
     $item = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if (!$item) {
         $response->notFound('Inventory item not found');
         exit;
     }
-    
+
     // Validate item can be used
     if ($item['item_type'] !== 'consumable') {
         $response->badRequest('Only consumable items can be used');
         exit;
     }
-    
+
     if ($item['quantity'] <= 0) {
         $response->badRequest('Item quantity is zero');
         exit;
     }
-    
+
     if ($item['expires_at'] && strtotime($item['expires_at']) < time()) {
         $response->badRequest('Item has expired');
         exit;
     }
-    
-    // Get current user stats
-    $stmt = $conn->prepare("SELECT * FROM user_stats WHERE user_id = ?");
-    $stmt->execute([$userId]);
-    $userStats = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
+    // Get current user stats using DatabaseHelper method instead
+    $userStats = $dbHelper->getUserStats($userId);
+
     if (!$userStats) {
         $response->error('User stats not found', 404);
         exit;
     }
-    
+
     // Apply consumable effect
     $effectData = $userCalculations->applyConsumableEffect($userStats, $item['item_type'], $item['effect_value']);
-    
+
     // Start transaction
     $conn->beginTransaction();
-    
+
     try {
-        // Update user stats
-        foreach ($effectData['updated_stats'] as $field => $value) {
-            $stmt = $conn->prepare("UPDATE user_stats SET $field = ? WHERE user_id = ?");
-            $stmt->execute([$value, $userId]);
+        // Update user stats using DatabaseHelper instead of direct PDO
+        $updateSuccess = $dbHelper->updateUserStats($userId, $effectData['updated_stats']);
+
+        if (!$updateSuccess) {
+            throw new Exception('Failed to update user stats');
         }
-        
-        // Reduce item quantity or remove if quantity becomes 0
-        if ($item['quantity'] > 1) {
-            $stmt = $conn->prepare("UPDATE user_inventory SET quantity = quantity - 1 WHERE id = ?");
-            $stmt->execute([$inventoryId]);
-            $remaining = $item['quantity'] - 1;
+
+        // Reduce item quantity using DatabaseHelper method
+        $remaining = $item['quantity'] - 1;
+        if ($remaining > 0) {
+            // Update quantity
+            $sql = "UPDATE user_inventory SET quantity = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$remaining, $inventoryId]);
         } else {
-            $stmt = $conn->prepare("DELETE FROM user_inventory WHERE id = ?");
+            // Remove item
+            $sql = "DELETE FROM user_inventory WHERE id = ?";
+            $stmt = $conn->prepare($sql);
             $stmt->execute([$inventoryId]);
-            $remaining = 0;
         }
-        
+
         // Log activity
         $activityData = [
             'item_name' => $item['name'],
@@ -119,10 +125,10 @@ try {
             'inventory_id' => $inventoryId
         ];
         $dbHelper->logActivity($userId, 'use_item', $activityData);
-        
+
         // Commit transaction
         $conn->commit();
-        
+
         // Format response
         $result = [
             'success' => true,
@@ -132,16 +138,13 @@ try {
             'updated_stats' => $effectData['updated_stats'],
             'message' => 'Item used successfully'
         ];
-        
+
         $response->success($result, 'Item used successfully', 200);
-        
     } catch (Exception $e) {
         $conn->rollBack();
         throw $e;
     }
-    
 } catch (Exception $e) {
     error_log('Use item error: ' . $e->getMessage());
     $response->error('Failed to use item: ' . $e->getMessage(), 500);
 }
-?>

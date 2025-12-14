@@ -1,5 +1,8 @@
 <?php
 
+CORS::setCorsHeaders();
+CORS::handlePreflight();
+
 /**
  * CORS Configuration
  * Handles Cross-Origin Resource Sharing headers
@@ -14,9 +17,9 @@ class CORS
     public static function setCorsHeaders()
     {
         // For development only - allow all origins
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Headers: Content-Type");
-        header("Access-Control-Allow-Methods: DELETE, OPTIONS");
+        header("Access-Control-Allow-Origin: http://localhost:3000");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
         header("Content-Type: application/json");
     }
 

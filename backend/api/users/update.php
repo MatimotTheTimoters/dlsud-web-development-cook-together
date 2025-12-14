@@ -1,10 +1,14 @@
 <?php
-// backend/api/users/update.php
 
 /**
  * PUT /api/users/update
  * Update user profile information
  */
+
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
 
 // Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
@@ -13,15 +17,6 @@ require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 require_once __DIR__ . '/../../utils/validation.php';
 require_once __DIR__ . '/../../utils/fileUpload.php';
-
-// Set CORS headers
-require_once __DIR__ . '/../../config/cors.php';
-
-// Handle preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    ResponseFormatter::success(null, "Preflight request successful", 200);
-    exit;
-}
 
 // Only PUT method allowed
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {

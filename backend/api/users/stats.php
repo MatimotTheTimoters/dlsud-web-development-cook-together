@@ -1,10 +1,14 @@
 <?php
-// backend/api/users/stats.php
 
 /**
  * GET /api/users/stats
  * Get detailed user statistics
  */
+
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
 
 // Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
@@ -12,15 +16,6 @@ require_once __DIR__ . '/../../classes/AuthHelper.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
 require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 require_once __DIR__ . '/../../classes/UserCalculations.php';
-
-// Set CORS headers
-require_once __DIR__ . '/../../config/cors.php';
-
-// Handle preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    ResponseFormatter::success(null, "Preflight request successful", 200);
-    exit;
-}
 
 // Only GET method allowed
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {

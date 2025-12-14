@@ -172,7 +172,7 @@ class UserCalculations
      * @param int $level User level
      * @return string Level title
      */
-    private static function getLevelTitle($level)
+    public static function getLevelTitle($level)
     {
         $titles = [
             1 => 'Novice Cook',

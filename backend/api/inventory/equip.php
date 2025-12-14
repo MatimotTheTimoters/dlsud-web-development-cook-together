@@ -1,11 +1,14 @@
 <?php
-// backend/api/inventory/equip.php
-header('Content-Type: application/json');
-require_once '../../config/cors.php';
-require_once '../../config/database.php';
-require_once '../../classes/AuthHelper.php';
-require_once '../../classes/DatabaseHelper.php';
-require_once '../../classes/ResponseFormatter.php';
+
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
+
+require_once __DIR__ . '/../../config/database.php';  // This provides Database class
+require_once __DIR__ . '/../../classes/AuthHelper.php';
+require_once __DIR__ . '/../../classes/DatabaseHelper.php';
+require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 
 $response = new ResponseFormatter();
 $authHelper = new AuthHelper();
@@ -50,8 +53,9 @@ if (!in_array($action, ['equip', 'unequip'])) {
 }
 
 try {
-    $conn = connect();
-    
+    // Use Database::getConnection() instead of connect()
+    $conn = Database::getConnection();
+
     // Get inventory item details
     $stmt = $conn->prepare("
         SELECT ui.*, si.* 
@@ -61,24 +65,24 @@ try {
     ");
     $stmt->execute([$inventoryId, $userId]);
     $item = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if (!$item) {
         $response->notFound('Inventory item not found');
         exit;
     }
-    
+
     // Validate item can be equipped
     if ($item['item_type'] !== 'equipment') {
         $response->badRequest('Only equipment items can be equipped');
         exit;
     }
-    
+
     // Check category limits (e.g., only one item per category can be equipped)
     $category = $item['category'];
-    
+
     // Start transaction
     $conn->beginTransaction();
-    
+
     try {
         if ($action === 'equip') {
             // Unequip any other item in the same category first
@@ -92,21 +96,20 @@ try {
                 AND ui.id != ?
             ");
             $stmt->execute([$userId, $category, $inventoryId]);
-            
+
             // Equip the selected item
             $stmt = $conn->prepare("UPDATE user_inventory SET is_equipped = 1 WHERE id = ?");
             $stmt->execute([$inventoryId]);
-            
+
             $message = "{$item['name']} equipped successfully";
-            
         } else { // unequip
             // Unequip the item
             $stmt = $conn->prepare("UPDATE user_inventory SET is_equipped = 0 WHERE id = ?");
             $stmt->execute([$inventoryId]);
-            
+
             $message = "{$item['name']} unequipped successfully";
         }
-        
+
         // Log activity
         $activityData = [
             'item_name' => $item['name'],
@@ -115,13 +118,13 @@ try {
             'inventory_id' => $inventoryId
         ];
         $dbHelper->logActivity($userId, 'equip_item', $activityData);
-        
+
         // Commit transaction
         $conn->commit();
-        
+
         // Get updated equipped items
         $equippedItems = $dbHelper->getEquippedItems($userId);
-        
+
         $result = [
             'success' => true,
             'action' => $action,
@@ -130,16 +133,13 @@ try {
             'equipped_items' => $equippedItems,
             'message' => $message
         ];
-        
+
         $response->success($result, $message, 200);
-        
     } catch (Exception $e) {
         $conn->rollBack();
         throw $e;
     }
-    
 } catch (Exception $e) {
     error_log('Equip item error: ' . $e->getMessage());
     $response->error('Failed to equip/unequip item: ' . $e->getMessage(), 500);
 }
-?>

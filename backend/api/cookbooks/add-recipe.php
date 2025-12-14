@@ -1,4 +1,10 @@
 <?php
+
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
+
 require_once '../../config/database.php';
 require_once '../../classes/AuthHelper.php';
 require_once '../../classes/DatabaseHelper.php';

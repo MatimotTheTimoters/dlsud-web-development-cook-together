@@ -1,6 +1,9 @@
 <?php
-// backend/api/cooking-sessions/index.php
-// Required Imports: ../../config/database.php, ../../classes/DatabaseHelper.php, ../../classes/ResponseFormatter.php
+
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../classes/DatabaseHelper.php';
