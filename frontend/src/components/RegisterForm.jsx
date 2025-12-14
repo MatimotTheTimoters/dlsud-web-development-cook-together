@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api/axiosConfig';
 
 const RegisterForm = () => {
     const navigate = useNavigate();
@@ -69,20 +70,15 @@ const RegisterForm = () => {
         setSuccessMessage('');
 
         try {
-            const response = await fetch('http://localhost/backend/api/register.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: formData.username,
-                    email: formData.email,
-                    password: formData.password,
-                    full_name: formData.full_name
-                })
+            // Use axios
+            const response = await api.post('/register.php', {
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
+                full_name: formData.full_name
             });
 
-            const data = await response.json();
+            const data = response.data;
 
             if (data.success) {
                 setSuccessMessage(data.message);
@@ -100,9 +96,23 @@ const RegisterForm = () => {
                 });
             }
         } catch (error) {
-            setErrors({
-                server: 'Network error. Please check your connection.'
-            });
+            // Error handling
+            if (error.response) {
+                // Server responded with error status
+                setErrors({
+                    server: error.response.data?.message || 'Registration failed'
+                });
+            } else if (error.request) {
+                // Request made but no response
+                setErrors({
+                    server: 'Network error. Please check your connection.'
+                });
+            } else {
+                // Something else went wrong
+                setErrors({
+                    server: 'An error occurred. Please try again.'
+                });
+            }
         } finally {
             setIsLoading(false);
         }
