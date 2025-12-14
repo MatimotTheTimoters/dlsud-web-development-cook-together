@@ -1,46 +1,41 @@
 <?php
-
-/**
- * validation.php - Input validation and sanitization functions
- * @see index.md: Input validation and sanitization functions
- */
-
-function validateEmail($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-}
-
-function validatePassword($password) {
-    // Password must be at least 8 characters with at least one letter and one number
-    if (strlen($password) < 8) {
-        return false;
+class Validation
+{
+    public static function validateEmail($email)
+    {
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
-    
-    // Check for at least one letter
-    if (!preg_match('/[a-zA-Z]/', $password)) {
-        return false;
-    }
-    
-    // Check for at least one number
-    if (!preg_match('/[0-9]/', $password)) {
-        return false;
-    }
-    
-    return true;
-}
 
-function sanitizeInput($input) {
-    if (is_array($input)) {
-        foreach ($input as $key => $value) {
-            $input[$key] = sanitizeInput($value);
+    public static function validatePassword($password)
+    {
+        // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
+        return strlen($password) >= 8 &&
+            preg_match('/[A-Z]/', $password) &&
+            preg_match('/[a-z]/', $password) &&
+            preg_match('/[0-9]/', $password);
+    }
+
+    public static function validateUsername($username)
+    {
+        // 3-20 characters, letters, numbers, underscores only
+        return preg_match('/^[a-zA-Z0-9_]{3,20}$/', $username);
+    }
+
+    public static function sanitizeInput($input)
+    {
+        if (is_array($input)) {
+            return array_map([self::class, 'sanitizeInput'], $input);
         }
-        return $input;
+        return htmlspecialchars(stripslashes(trim($input)));
     }
-    
-    if (is_string($input)) {
-        $input = trim($input);
-        $input = stripslashes($input);
-        $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
+
+    public static function hashPassword($password)
+    {
+        return password_hash($password, PASSWORD_DEFAULT);
     }
-    
-    return $input;
+
+    public static function verifyPassword($password, $hash)
+    {
+        return password_verify($password, $hash);
+    }
 }
