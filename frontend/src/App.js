@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import './App.css';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
               <Link to="/register" className="nav-link">Register</Link>
               <Link to="/login" className="nav-link">Login</Link>
               <Link to="/about" className="nav-link">About</Link>
+              <Link to="/profile" className="nav-link">Profile</Link>
             </div>
           </div>
         </nav>
@@ -26,8 +28,9 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/login" element={<LoginPage />} /> {/* Uses actual LoginPage */}
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </main>
 
