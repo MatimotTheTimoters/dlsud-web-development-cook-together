@@ -82,16 +82,14 @@ try {
     }
     $checkStmt->close();
 
-    // SIMPLIFIED: Store plain password for now (TEMPORARY - INSECURE)
-    // In production, always use password_hash()
-    $password_hash = $password; // Storing plain password temporarily
+    $password = $password;
 
     // Insert user
     $stmt = $conn->prepare("
-        INSERT INTO users (username, email, password_hash, full_name) 
+        INSERT INTO users (username, email, password, full_name) 
         VALUES (?, ?, ?, ?)
     ");
-    $stmt->bind_param("ssss", $username, $email, $password_hash, $full_name);
+    $stmt->bind_param("ssss", $username, $email, $password, $full_name);
 
     if ($stmt->execute()) {
         $user_id = $stmt->insert_id;

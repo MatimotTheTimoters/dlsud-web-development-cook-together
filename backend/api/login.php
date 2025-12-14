@@ -52,8 +52,8 @@ try {
     $db = new Database();
     $conn = $db->getConnection();
 
-    // Find user by email - include password_hash for comparison
-    $stmt = $conn->prepare("SELECT id, username, email, password_hash, full_name FROM users WHERE email = ?");
+    // Find user by email - include password for comparison
+    $stmt = $conn->prepare("SELECT id, username, email, password, full_name FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -73,9 +73,7 @@ try {
     $user = $result->fetch_assoc();
     $stmt->close();
 
-    // SIMPLIFIED: Check if password matches (plain text comparison for now)
-    // In production, use: password_verify($password, $user['password_hash'])
-    if ($password !== $user['password_hash']) {
+    if ($password !== $user['password']) {
         $db->closeConnection();
 
         http_response_code(401);
