@@ -473,3 +473,91 @@
     background: #cccccc;
     cursor: not-allowed;
 }
+
+/* Recipe Card Styles */
+.recipe-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+}
+
+.recipe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+}
+
+.recipe-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.difficulty {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.difficulty.easy {
+    background: #d4edda;
+    color: #155724;
+}
+
+.difficulty.medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.difficulty.hard {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.recipe-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+}
+
+.recipe-description {
+    color: #444;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.recipe-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category {
+    color: #666;
+    font-size: 13px;
+}
+
+.view-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.view-btn:hover {
+    background: #45a049;
+}

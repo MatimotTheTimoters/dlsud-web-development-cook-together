@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import './App.css';
 import ProfilePage from './pages/ProfilePage';
 import CreateRecipePage from './pages/CreateRecipePage';
+import RecipesPage from './pages/RecipesPage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
               <Link to="/about" className="nav-link">About</Link>
               <Link to="/profile" className="nav-link">Profile</Link>
               <Link to="/create-recipe" className="nav-link">Create Recipe</Link>
+              <Link to="/recipes" className="nav-link">Recipes</Link>
             </div>
           </div>
         </nav>
@@ -34,6 +36,7 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/create-recipe" element={<CreateRecipePage />} />
+            <Route path="/recipes" element={<RecipesPage />} />
           </Routes>
         </main>
 
