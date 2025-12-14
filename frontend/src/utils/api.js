@@ -7,7 +7,7 @@ import axios from 'axios';
 
 // Get base URL from environment
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ||
-    'http://localhost/dlsud-web-development-cook-together/backend/utils';
+    'http://localhost/dlsud-web-development-cook-together/backend/api';
 
 // Create axios instance
 const api = axios.create({
