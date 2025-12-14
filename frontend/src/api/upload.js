@@ -1,4 +1,4 @@
-import api from '../utils/api';
+import api, { upload as apiUpload } from '../utils/api';
 
 /**
  * Upload utility functions for handling file uploads
@@ -18,15 +18,11 @@ export const uploadImage = async (file, type, userId) => {
     formData.append('userId', userId);
 
     try {
-        const response = await api.post('/upload/image.php', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return response.data;
+        const response = await apiUpload('/api/upload/image.php', formData);
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Upload error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 

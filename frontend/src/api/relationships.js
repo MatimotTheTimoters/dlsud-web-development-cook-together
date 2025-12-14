@@ -13,16 +13,15 @@ import api from '../utils/api';
  */
 export const followUser = async (targetUserId, message = null) => {
     try {
-        const response = await api.post('/relationships/follow.php', {
+        const response = await api.post('/api/relationships/follow.php', {
             target_user_id: targetUserId,
             action: 'follow',
             message: message
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Follow user error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -33,15 +32,14 @@ export const followUser = async (targetUserId, message = null) => {
  */
 export const unfollowUser = async (targetUserId) => {
     try {
-        const response = await api.post('/relationships/follow.php', {
+        const response = await api.post('/api/relationships/follow.php', {
             target_user_id: targetUserId,
             action: 'unfollow'
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Unfollow user error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -53,16 +51,15 @@ export const unfollowUser = async (targetUserId) => {
  */
 export const sendFriendRequest = async (targetUserId, message = null) => {
     try {
-        const response = await api.post('/relationships/friends.php', {
+        const response = await api.post('/api/relationships/friends.php', {
             action: 'send_request',
             target_user_id: targetUserId,
             message: message
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Send friend request error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -75,18 +72,17 @@ export const sendFriendRequest = async (targetUserId, message = null) => {
  */
 export const getFriendRequests = async (type = 'received', limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/relationships/list.php', {
+        const response = await api.get('/api/relationships/list.php', {
             params: {
                 type: type === 'received' ? 'requests_received' : 'requests_sent',
                 limit: limit,
                 offset: offset
             }
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Get friend requests error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -97,16 +93,15 @@ export const getFriendRequests = async (type = 'received', limit = 50, offset = 
  */
 export const acceptFriendRequest = async (requestId) => {
     try {
-        const response = await api.post('/relationships/friends.php', {
+        const response = await api.post('/api/relationships/friends.php', {
             action: 'respond_request',
             request_id: requestId,
             response: 'accept'
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Accept friend request error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -117,16 +112,15 @@ export const acceptFriendRequest = async (requestId) => {
  */
 export const rejectFriendRequest = async (requestId) => {
     try {
-        const response = await api.post('/relationships/friends.php', {
+        const response = await api.post('/api/relationships/friends.php', {
             action: 'respond_request',
             request_id: requestId,
             response: 'reject'
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Reject friend request error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -137,15 +131,14 @@ export const rejectFriendRequest = async (requestId) => {
  */
 export const removeFriend = async (friendId) => {
     try {
-        const response = await api.post('/relationships/friends.php', {
+        const response = await api.post('/api/relationships/friends.php', {
             action: 'remove_friend',
             friend_id: friendId
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Remove friend error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -158,18 +151,17 @@ export const removeFriend = async (friendId) => {
  */
 export const getFollowers = async (userId, limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/relationships/list.php', {
+        const response = await api.get('/api/relationships/list.php', {
             params: {
                 type: 'followers',
                 limit: limit,
                 offset: offset
             }
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Get followers error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -182,18 +174,17 @@ export const getFollowers = async (userId, limit = 50, offset = 0) => {
  */
 export const getFollowing = async (userId, limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/relationships/list.php', {
+        const response = await api.get('/api/relationships/list.php', {
             params: {
                 type: 'following',
                 limit: limit,
                 offset: offset
             }
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Get following error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -206,18 +197,17 @@ export const getFollowing = async (userId, limit = 50, offset = 0) => {
  */
 export const getFriends = async (userId, limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/relationships/list.php', {
+        const response = await api.get('/api/relationships/list.php', {
             params: {
                 type: 'friends',
                 limit: limit,
                 offset: offset
             }
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Get friends error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -245,16 +235,15 @@ export const isFollowing = async (targetUserId) => {
  */
 export const getAllRelationships = async (limit = 10) => {
     try {
-        const response = await api.get('/relationships/list.php', {
+        const response = await api.get('/api/relationships/list.php', {
             params: {
                 type: 'all',
                 limit: limit
             }
         });
-
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Get all relationships error:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };

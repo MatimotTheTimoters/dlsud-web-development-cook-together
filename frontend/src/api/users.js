@@ -17,11 +17,11 @@ export const getProfile = async (userId = null) => {
       params.user_id = userId;
     }
 
-    const response = await api.get('/users/profile.php', { params });
-    return response.data;
+    const response = await api.get('/api/users/profile.php', { params });
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error fetching user profile:', error);
-    throw error;
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
@@ -36,7 +36,9 @@ export const updateProfile = async (profileData, profilePicture = null) => {
     // If there's a profile picture, upload it first
     if (profilePicture && profilePicture instanceof File) {
       const userId = profileData.id || localStorage.getItem('user_id');
-      const uploadResponse = await uploadProfilePicture(profilePicture, userId);
+      // Use the uploadImage function from upload.js
+      const { uploadImage } = await import('./upload');
+      const uploadResponse = await uploadImage(profilePicture, 'profile', userId);
 
       if (uploadResponse.success) {
         profileData.profile_picture = uploadResponse.data.url;
@@ -45,11 +47,11 @@ export const updateProfile = async (profileData, profilePicture = null) => {
       }
     }
 
-    const response = await api.put('/users/update.php', profileData);
-    return response.data;
+    const response = await api.put('/api/users/update.php', profileData);
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error updating profile:', error);
-    throw error;
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
@@ -65,11 +67,11 @@ export const getUserStats = async (userId = null) => {
       params.user_id = userId;
     }
 
-    const response = await api.get('/users/stats.php', { params });
-    return response.data;
+    const response = await api.get('/api/users/stats.php', { params });
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error fetching user stats:', error);
-    throw error;
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
@@ -82,13 +84,13 @@ export const getUserStats = async (userId = null) => {
  */
 export const searchUsers = async (query, page = 1, limit = 20) => {
   try {
-    const response = await api.get('/users/search.php', {
+    const response = await api.get('/api/users/search.php', {
       params: { q: query, page, limit }
     });
-    return response.data;
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error searching users:', error);
-    throw error;
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
@@ -99,13 +101,13 @@ export const searchUsers = async (query, page = 1, limit = 20) => {
  */
 export const getFollowers = async (userId) => {
   try {
-    // This will be implemented when relationships API is ready
-    // For now, return empty array
-    console.warn('getFollowers not yet implemented - relationships API pending');
-    return { followers: [] };
+    const response = await api.get('/api/relationships/list.php', {
+      params: { user_id: userId, type: 'followers' }
+    });
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error fetching followers:', error);
-    throw error;
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
@@ -116,13 +118,13 @@ export const getFollowers = async (userId) => {
  */
 export const getFollowing = async (userId) => {
   try {
-    // This will be implemented when relationships API is ready
-    // For now, return empty array
-    console.warn('getFollowing not yet implemented - relationships API pending');
-    return { following: [] };
+    const response = await api.get('/api/relationships/list.php', {
+      params: { user_id: userId, type: 'following' }
+    });
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error fetching following:', error);
-    throw error;
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
@@ -139,15 +141,15 @@ export const uploadProfilePicture = async (file, userId) => {
     formData.append('type', 'profile_picture');
     formData.append('user_id', userId);
 
-    const response = await api.post('/upload/image.php', formData, {
+    const response = await api.post('/api/upload/image.php', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-    return response.data;
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error uploading profile picture:', error);
-    throw error;
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 

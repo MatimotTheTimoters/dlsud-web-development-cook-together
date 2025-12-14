@@ -12,13 +12,13 @@ import api from '../utils/api';
  */
 export const getActivityFeed = async (limit = 20, offset = 0) => {
     try {
-        const response = await api.get('/activity/feed.php', {
+        const response = await api.get('/api/activity/feed.php', {
             params: { limit, offset }
         });
-        return response;
+        return response.data; // axios returns data in response.data
     } catch (error) {
         console.error('Error fetching activity feed:', error);
-        throw error;
+        throw error.response?.data || error;
     }
 };
 
@@ -29,13 +29,13 @@ export const getActivityFeed = async (limit = 20, offset = 0) => {
  */
 export const getUserActivities = async (userId) => {
     try {
-        const response = await api.get('/activity/feed.php', {
+        const response = await api.get('/api/activity/feed.php', {
             params: { user_id: userId }
         });
-        return response;
+        return response.data;
     } catch (error) {
         console.error('Error fetching user activities:', error);
-        throw error;
+        throw error.response?.data || error;
     }
 };
 

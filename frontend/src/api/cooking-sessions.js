@@ -11,11 +11,11 @@ import api from '../utils/api';
  */
 export const createSession = async (sessionData) => {
     try {
-        const response = await api.post('/cooking-sessions/create.php', sessionData);
-        return response;
+        const response = await api.post('/api/cooking-sessions/create.php', sessionData);
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error creating cooking session:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -26,11 +26,11 @@ export const createSession = async (sessionData) => {
  */
 export const getSession = async (sessionId) => {
     try {
-        const response = await api.get(`cooking-sessions/show.php?id=${sessionId}`);
-        return response;
+        const response = await api.get(`/api/cooking-sessions/show.php?id=${sessionId}`);
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error getting cooking session:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -41,11 +41,11 @@ export const getSession = async (sessionId) => {
  */
 export const joinSession = async (sessionId) => {
     try {
-        const response = await api.post('/cooking-sessions/join.php', { session_id: sessionId });
-        return response;
+        const response = await api.post('/api/cooking-sessions/join.php', { session_id: sessionId });
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error joining cooking session:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -56,14 +56,14 @@ export const joinSession = async (sessionId) => {
  */
 export const leaveSession = async (sessionId) => {
     try {
-        const response = await api.post('/cooking-sessions/join.php', {
+        const response = await api.post('/api/cooking-sessions/join.php', {
             session_id: sessionId,
             action: 'leave'
         });
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error leaving cooking session:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -76,14 +76,14 @@ export const leaveSession = async (sessionId) => {
  */
 export const completeStep = async (sessionId, stepId) => {
     try {
-        const response = await api.post('/cooking-sessions/complete-step.php', {
+        const response = await api.post('/api/cooking-sessions/complete-step.php', {
             session_id: sessionId,
             step_id: stepId
         });
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error completing cooking step:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -96,18 +96,17 @@ export const completeStep = async (sessionId, stepId) => {
  */
 export const voteSkip = async (sessionId, voteType, voteValue) => {
     try {
-        const response = await api.post('/cooking-sessions/vote.php', {
+        const response = await api.post('/api/cooking-sessions/vote.php', {
             session_id: sessionId,
             vote_type: voteType,
             vote_value: voteValue
         });
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error voting in cooking session:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
-
 
 /**
  * Gets user's cooking session history
@@ -116,12 +115,11 @@ export const voteSkip = async (sessionId, voteType, voteValue) => {
  */
 export const getSessionHistory = async (params = {}) => {
     try {
-        // Should be calling the history endpoint, not vote endpoint
-        const response = await api.get('/sessions/history.php', { params });
-        return response.data;
+        const response = await api.get('/api/sessions/history.php', { params });
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error getting session history:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -132,13 +130,13 @@ export const getSessionHistory = async (params = {}) => {
  */
 export const getSessionStatistics = async (userId) => {
     try {
-        const response = await api.get('/sessions/history.php', {
+        const response = await api.get('/api/sessions/history.php', {
             params: { user_id: userId, stats: true }
         });
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error getting session statistics:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -148,11 +146,11 @@ export const getSessionStatistics = async (userId) => {
  */
 export const getSessions = async () => {
     try {
-        const response = await api.get('/cooking-sessions/index.php');
-        return response;
+        const response = await api.get('/api/cooking-sessions/index.php');
+        return response.data; // Changed: use response.data
     } catch (error) {
-        console.error('Error getting session statistics:', error);
-        throw error;
+        console.error('Error getting sessions:', error);
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -164,14 +162,14 @@ export const getSessions = async () => {
  */
 export const updateSession = async (sessionId, updates) => {
     try {
-        const response = await api.put('/cooking-sessions/update.php', {
+        const response = await api.put('/api/cooking-sessions/update.php', {
             session_id: sessionId,
             ...updates
         });
-        return response.data;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error updating cooking session:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 

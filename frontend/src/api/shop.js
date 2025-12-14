@@ -14,23 +14,14 @@ import api from '../utils/api';
  */
 export const getShopItems = async (filters = {}, limit = 50, offset = 0) => {
     try {
-        const params = new URLSearchParams();
+        const params = { limit, offset };
+        if (filters.category) params.category = filters.category;
 
-        // Add filters to params
-        if (filters.category) params.append('category', filters.category);
-        params.append('limit', limit.toString());
-        params.append('offset', offset.toString());
-
-        const queryString = params.toString() ? `?${params.toString()}` : '';
-        const response = await api.get(`/shop/items.php${queryString}`);
-
-        if (response.success) {
-            return response.data;
-        }
-        throw new Error(response.message || 'Failed to fetch shop items');
+        const response = await api.get('/api/shop/items.php', { params });
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error fetching shop items:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -45,15 +36,11 @@ export const purchaseItem = async (itemId) => {
             throw new Error('Item ID is required');
         }
 
-        const response = await api.post('/shop/purchase.php', { item_id: itemId });
-
-        if (response.success) {
-            return response.data;
-        }
-        throw new Error(response.message || 'Purchase failed');
+        const response = await api.post('/api/shop/purchase.php', { item_id: itemId });
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error purchasing item:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -66,17 +53,23 @@ export const purchaseItem = async (itemId) => {
  */
 export const getUserPurchases = async (userId) => {
     try {
-        // TODO: Implement backend endpoint for user purchases
-        // For now, return empty array or fetch from local storage
-        console.warn('getUserPurchases backend endpoint not yet implemented');
+        // Try to get purchases from backend if endpoint exists
+        try {
+            const response = await api.get('/api/purchase/item.php', {
+                params: { user_id: userId }
+            });
+            return response.data; // Changed: use response.data
+        } catch (backendError) {
+            // Fallback to local storage if backend endpoint doesn't exist
+            console.warn('Backend purchases endpoint not available, using local storage');
 
-        // Check localStorage for cached purchases
-        const cachedPurchases = localStorage.getItem(`user_purchases_${userId}`);
-        if (cachedPurchases) {
-            return JSON.parse(cachedPurchases);
+            // Check localStorage for cached purchases
+            const cachedPurchases = localStorage.getItem(`user_purchases_${userId}`);
+            if (cachedPurchases) {
+                return JSON.parse(cachedPurchases);
+            }
+            return [];
         }
-
-        return [];
     } catch (error) {
         console.error('Error fetching user purchases:', error);
         return [];

@@ -19,74 +19,37 @@ const uploadImage = async (file, type, userId) => {
     formData.append('type', type);
     formData.append('user_id', userId);
 
-    const response = await api.post('/upload/image.php', formData, {
+    const response = await api.post('/api/upload/image.php', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-
-    return response;
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error(`Error uploading ${type} image:`, error);
-    throw error;
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Get all recipes with optional filtering
 export const getAllRecipes = async (params = {}) => {
   try {
-    const queryParams = new URLSearchParams(params).toString();
-    const endpoint = queryParams ? `/recipes/index.php?${queryParams}` : '/recipes/index.php';
-    const response = await api.get(endpoint);
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to fetch recipes',
-        error: response.error
-      };
-    }
+    const response = await api.get('/api/recipes/index.php', { params });
+    return response.data; // Changed: axios returns data in response.data
   } catch (error) {
     console.error('Error in getAllRecipes:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to fetch recipes',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Get single recipe by ID with full details
 export const getRecipe = async (recipeId) => {
   try {
-    const response = await api.get(`/recipes/show.php?id=${recipeId}`);
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Recipe not found',
-        error: response.error
-      };
-    }
+    const response = await api.get(`/api/recipes/show.php?id=${recipeId}`);
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in getRecipe:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to fetch recipe',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
@@ -105,11 +68,7 @@ export const createRecipe = async (recipeData) => {
       if (uploadResponse.success) {
         recipeData.cover_image = uploadResponse.data.url;
       } else {
-        return {
-          success: false,
-          message: 'Failed to upload recipe image',
-          error: uploadResponse.error
-        };
+        throw new Error('Failed to upload recipe image');
       }
     }
 
@@ -132,28 +91,11 @@ export const createRecipe = async (recipeData) => {
     }
 
     // Create recipe
-    const response = await api.post('/recipes/create.php', recipeData);
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to create recipe',
-        error: response.error
-      };
-    }
+    const response = await api.post('/api/recipes/create.php', recipeData);
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in createRecipe:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to create recipe',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
@@ -171,11 +113,7 @@ export const updateRecipe = async (recipeId, recipeData) => {
       if (uploadResponse.success) {
         recipeData.cover_image = uploadResponse.data.url;
       } else {
-        return {
-          success: false,
-          message: 'Failed to upload recipe image',
-          error: uploadResponse.error
-        };
+        throw new Error('Failed to upload recipe image');
       }
     }
 
@@ -197,281 +135,117 @@ export const updateRecipe = async (recipeId, recipeData) => {
       }
     }
 
-    const response = await api.put(`/recipes/update.php`, {
+    const response = await api.put('/api/recipes/update.php', {
       ...recipeData,
       recipe_id: recipeId
     });
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to update recipe',
-        error: response.error
-      };
-    }
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in updateRecipe:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to update recipe',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Delete recipe
 export const deleteRecipe = async (recipeId) => {
   try {
-    const response = await api.delete(`/recipes/delete.php?id=${recipeId}`);
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to delete recipe',
-        error: response.error
-      };
-    }
+    const response = await api.delete(`/api/recipes/delete.php?id=${recipeId}`);
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in deleteRecipe:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to delete recipe',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Like a recipe
 export const likeRecipe = async (recipeId) => {
   try {
-    const response = await api.post(`/recipes/interact.php`, {
+    const response = await api.post('/api/recipes/interact.php', {
       recipe_id: recipeId,
       interaction_type: 'like'
     });
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to like recipe',
-        error: response.error
-      };
-    }
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in likeRecipe:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to like recipe',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Save recipe to cookbook
 export const saveRecipe = async (recipeId, cookbookId = null) => {
   try {
-    const response = await api.post(`/recipes/interact.php`, {
+    const response = await api.post('/api/recipes/interact.php', {
       recipe_id: recipeId,
       interaction_type: 'save',
       metadata: cookbookId ? { cookbook_id: cookbookId } : null
     });
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to save recipe',
-        error: response.error
-      };
-    }
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in saveRecipe:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to save recipe',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Get recipe interactions
 export const getRecipeInteractions = async (recipeId) => {
   try {
-    const response = await api.get(`/recipes/show.php?id=${recipeId}`);
-
-    if (response.success) {
-      const { counts, user_interaction } = response.data;
-      return {
-        success: true,
-        data: {
-          counts,
-          user_interaction
-        },
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to get recipe interactions',
-        error: response.error
-      };
-    }
+    const response = await api.get(`/api/recipes/show.php?id=${recipeId}`);
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in getRecipeInteractions:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to get recipe interactions',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Purchase recipe
 export const purchaseRecipe = async (recipeId) => {
   try {
-    const response = await api.post(`/recipes/interact.php`, {
-      recipe_id: recipeId,
-      interaction_type: 'purchase'
+    const response = await api.post('/api/recipes/purchase.php', {
+      recipe_id: recipeId
     });
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to purchase recipe',
-        error: response.error
-      };
-    }
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in purchaseRecipe:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to purchase recipe',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Get user's recipes
 export const getUserRecipes = async (userId, params = {}) => {
   try {
-    const queryParams = new URLSearchParams({
-      ...params,
-      user_id: userId
-    }).toString();
-
-    const endpoint = `/recipes/index.php?${queryParams}`;
-    const response = await api.get(endpoint);
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to fetch user recipes',
-        error: response.error
-      };
-    }
+    const response = await api.get('/api/recipes/index.php', {
+      params: { ...params, user_id: userId }
+    });
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in getUserRecipes:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to fetch user recipes',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Search recipes
 export const searchRecipes = async (query, filters = {}) => {
   try {
-    const queryParams = new URLSearchParams({
-      search: query,
-      ...filters
-    }).toString();
-
-    const endpoint = `/recipes/index.php?${queryParams}`;
-    const response = await api.get(endpoint);
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to search recipes',
-        error: response.error
-      };
-    }
+    const response = await api.get('/api/recipes/index.php', {
+      params: { search: query, ...filters }
+    });
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in searchRecipes:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to search recipes',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 
 // Get trending recipes
 export const getTrendingRecipes = async (limit = 10) => {
   try {
-    const response = await api.get(`/recipes/index.php?limit=${limit}&sort=popular`);
-
-    if (response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Failed to fetch trending recipes',
-        error: response.error
-      };
-    }
+    const response = await api.get('/api/recipes/index.php', {
+      params: { limit, sort: 'popular' }
+    });
+    return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in getTrendingRecipes:', error);
-    return {
-      success: false,
-      message: error.message || 'Failed to fetch trending recipes',
-      error: error
-    };
+    throw error.response?.data || error; // Changed: better error handling
   }
 };
 

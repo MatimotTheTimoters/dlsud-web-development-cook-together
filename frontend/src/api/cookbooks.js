@@ -10,11 +10,11 @@ import api from '../utils/api';
  */
 export const getCookbooks = async () => {
     try {
-        const response = await api.get('/cookbooks/index.php');
-        return response;
+        const response = await api.get('/api/cookbooks/index.php');
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error fetching cookbooks:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -25,11 +25,11 @@ export const getCookbooks = async () => {
  */
 export const createCookbook = async (data) => {
     try {
-        const response = await api.post('/cookbooks/create.php', data);
-        return response;
+        const response = await api.post('/api/cookbooks/create.php', data);
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error creating cookbook:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -40,11 +40,11 @@ export const createCookbook = async (data) => {
  */
 export const getCookbookRecipes = async (cookbookId) => {
     try {
-        const response = await api.get(`/cookbooks/show.php?id=${cookbookId}`);
-        return response;
+        const response = await api.get(`/api/cookbooks/show.php?id=${cookbookId}`);
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error fetching cookbook recipes:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -56,14 +56,14 @@ export const getCookbookRecipes = async (cookbookId) => {
  */
 export const addRecipeToCookbook = async (cookbookId, recipeId) => {
     try {
-        const response = await api.post('/cookbooks/add-recipe.php', {
+        const response = await api.post('/api/cookbooks/add-recipe.php', {
             cookbook_id: cookbookId,
             recipe_id: recipeId
         });
-        return response;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error adding recipe to cookbook:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
@@ -75,16 +75,16 @@ export const addRecipeToCookbook = async (cookbookId, recipeId) => {
  */
 export const removeRecipeFromCookbook = async (cookbookId, recipeId) => {
     try {
-        const response = await api.delete('/cookbooks/remove-recipe.php', {
+        const response = await api.delete('/api/cookbooks/remove-recipe.php', {
             params: {
                 cookbook_id: cookbookId,
                 recipe_id: recipeId
             }
         });
-        return response;
+        return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error removing recipe from cookbook:', error);
-        throw error;
+        throw error.response?.data || error; // Changed: better error handling
     }
 };
 
