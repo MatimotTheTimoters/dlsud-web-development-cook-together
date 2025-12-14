@@ -1,3 +1,11 @@
+# Changelog
+- frontend/src/api/axiosConfig.js - Axios configuration for API calls
+- frontend/src/styles/index.css - Unified CSS file (replaced separate component CSS files)
+    - frontend/src/styles/components.css
+    - frontend/src/styles/pages.css
+
+---
+
 # Features
 
 ## Feature 1: User Registration
