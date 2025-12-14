@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FaCheck, FaTimes, FaBox, FaFire, FaClock, FaInfoCircle } from 'react-icons/fa';
 import { useConsumable } from '../../api/inventory';
-import './InventoryItem.css';
 
 /**
  * InventoryItem component for displaying inventory item with use functionality for consumables

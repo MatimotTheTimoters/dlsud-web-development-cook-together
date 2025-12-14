@@ -3,7 +3,6 @@ import { FaFilter, FaSort, FaSearch, FaBoxOpen } from 'react-icons/fa';
 import InventoryItem from './InventoryItem';
 import { getUserInventory } from '../../api/inventory';
 import { useAuth } from '../../hooks/useAuth';
-import './InventoryList.css';
 
 /**
  * InventoryList component for displaying user's inventory with filtering
