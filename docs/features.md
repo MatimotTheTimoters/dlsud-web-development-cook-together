@@ -415,6 +415,8 @@ database/
 
 ---
 
+Perfect! Here's Feature 7 expanded with the subtasks you requested, using the existing .md syntax:
+
 ## Feature 7: Start Cooking Session
 
 **Flow:**
@@ -481,6 +483,294 @@ database/
 
 ---
 
+## Feature 7.1: Session Type Selection Modal
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │     │          │     │          │
+│          │     │          │     │          │
+│  Recipe  │     │   Show   │     │   User   │
+│  Detail  │────▶│ Session  │────▶│ Selects  │
+│   Page   │     │  Type    │     │   Type   │
+│          │     │  Modal   │     │          │
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │                ▼                │
+       │         Based on Selection     │
+       │                │                │
+       │                ▼                │
+       │     Create Solo or Multiplayer │
+       │                │                │
+       ▼                ▼                ▼
+  Create Solo      Create Multi      Redirect to
+  Session          Session &         Appropriate
+                   Show Session      Page
+                   Code for
+                   Sharing
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `frontend/src/pages/RecipeDetailPage.jsx` - Add modal trigger
+- `frontend/src/styles/components.css` - Modal styles
+- `database/schema.sql` - Add session_type field
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/SessionTypeModal.jsx` - Session type selection modal
+- `backend/api/session/create.php` - Update to handle session_type parameter
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── styles/
+│   │   └── components.css
+│   ├── components/
+│   │   └── SessionTypeModal.jsx
+│   └── pages/
+│       └── RecipeDetailPage.jsx
+backend/
+├── api/
+│   └── session/
+│       └── create.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 7.2: Solo Cooking Session
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │────▶│ Backend  │────▶│ Database │
+│          │     │          │     │          │
+│   Solo   │     │  Create  │     │ Create   │
+│ Session  │     │  Solo    │     │  Solo    │
+│  Choice  │     │ Session  │     │ Session  │
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │    Create Solo Session         │
+       │    (type: solo, private)       │
+       │                │                │
+       │                ▼                │
+       │         Return Session ID      │
+       │                │                │
+       ▼                ▼                ▼
+  Redirect to     Log Solo        Session Created
+  Solo Cooking    Session         with Solo Flag
+  Session Page    Creation
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `backend/api/session/create.php` - Handle solo session creation
+- `database/schema.sql` - Add session_type and visibility fields
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/SoloCookingPage.jsx` - Solo cooking session page
+- Modify: `frontend/src/pages/CookingSessionPage.jsx` - Rename to MultiplayerCookingPage.jsx
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── pages/
+│   │   ├── SoloCookingPage.jsx
+│   │   └── MultiplayerCookingPage.jsx
+│   └── App.js
+backend/
+├── api/
+│   └── session/
+│       └── create.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 7.3: Multiplayer Session Creation
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │────▶│ Backend  │────▶│ Database │
+│          │     │          │     │          │
+│ Multi-   │     │  Create  │     │ Create   │
+│ player   │     │  Multi   │     │  Multi   │
+│ Session  │     │ Session  │     │ Session  │
+│ Choice   │     │          │     │          │
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │  Create Multi Session          │
+       │  (type: multiplayer, public)   │
+       │                │                │
+       │                ▼                │
+       │   Return Session ID + Code     │
+       │                │                │
+       ▼                ▼                ▼
+  Show Session     Log Multi      Session Created
+  Code & Share     Session        with Multi Flag
+  Options          Creation       & Join Code
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `backend/api/session/create.php` - Handle multiplayer session creation
+- `database/schema.sql` - Add join_code field
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `backend/api/session/generate-code.php` - Generate unique session code
+- `frontend/src/components/SessionShareModal.jsx` - Share session code modal
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   └── SessionShareModal.jsx
+│   └── pages/
+│       └── MultiplayerCookingPage.jsx
+backend/
+├── api/
+│   └── session/
+│       ├── create.php
+│       └── generate-code.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 7.4: Session Code Generation
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │     │ Backend  │     │ Database │
+│          │     │          │     │          │
+│ Request  │────▶│Generate  │────▶│ Check    │
+│ Session  │     │  Unique  │     │ Code     │
+│  Code    │     │   Code   │     │ Uniqueness
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │                ▼                │
+       │         Generate 6-char Code   │
+       │                │                │
+       │                ▼                │
+       │       Verify Not in Use        │
+       │                │                │
+       ▼                ▼                ▼
+  Receive Unique  Log Code        Store Code
+  Session Code    Generation      with Session
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `backend/api/session/create.php` - Call code generator
+- `database/schema.sql` - Ensure join_code is unique
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `backend/api/session/generate-code.php` - Code generation endpoint
+- `backend/utils/code-generator.php` - Reusable code generator
+
+**Directory Structure:**
+
+```
+backend/
+├── api/
+│   └── session/
+│       ├── create.php
+│       └── generate-code.php
+├── utils/
+│   └── code-generator.php
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 7.5: Session Invitation Sharing
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │     │          │     │          │
+│          │     │          │     │          │
+│  Share   │────▶│ Display  │────▶│  User    │
+│ Session  │     │  Share   │     │ Copies   │
+│  Button  │     │ Options  │     │ Code or  │
+│          │     │          │     │  Link    │
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │                ▼                │
+       │    Show: Code, Link, QR Code   │
+       │                │                │
+       │                ▼                │
+       │         User Selects Method    │
+       │                │                │
+       ▼                ▼                ▼
+  Copy to         Log Share      Invitation
+  Clipboard       Action         Sent/Shared
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `frontend/src/components/SessionShareModal.jsx` - Add share functionality
+- `frontend/src/styles/components.css` - Share modal styles
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/ShareOptions.jsx` - Share options component
+- `frontend/src/utils/copyToClipboard.js` - Clipboard utility
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── SessionShareModal.jsx
+│   │   └── ShareOptions.jsx
+│   ├── utils/
+│   │   └── copyToClipboard.js
+│   └── styles/
+│       └── components.css
+```
+
+---
+
 ## Feature 8: Join Cooking Session
 
 **Flow:**
@@ -536,6 +826,310 @@ backend/
 ├── api/
 │   └── session/
 │       └── join.php
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 8.1: Sessions List Page
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │────▶│ Backend  │────▶│ Database │
+│          │     │          │     │          │
+│ Sessions │     │ Sessions │     │  Fetch   │
+│   List   │     │   List   │     │  Active  │
+│   Page   │     │   API    │     │ Sessions │
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │         Get Active Sessions    │
+       │                │                │
+       │                ▼                │
+       │         Return Session List    │
+       │                │                │
+       ▼                ▼                ▼
+  Display List    Log Request      Data Retrieved
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `frontend/src/App.js` - Add route for SessionsPage
+- `frontend/src/api/axiosConfig.js` - Sessions API calls
+- `frontend/src/styles/pages.css` - SessionsPage styles
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/SessionsPage.jsx` - Sessions list page
+- `backend/api/session/list.php` - Active sessions API endpoint
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── SessionsPage.jsx
+│   ├── App.js
+│   └── index.js
+backend/
+├── api/
+│   └── session/
+│       └── list.php
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 8.2: Session Detail Page
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │────▶│ Backend  │────▶│ Database │
+│          │     │          │     │          │
+│ Session  │     │ Session  │     │  Fetch   │
+│  Detail  │     │  Detail  │     │ Session  │
+│   Page   │     │   API    │     │ & Players│
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │    Get Session + Participants  │
+       │                │                │
+       │                ▼                │
+       │         Return Full Data       │
+       │                │                │
+       ▼                ▼                ▼
+  Display Details Log View        Data Retrieved
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `frontend/src/App.js` - Add route for SessionDetailPage
+- `frontend/src/api/axiosConfig.js` - Session detail API
+- `frontend/src/styles/pages.css` - SessionDetailPage styles
+- `database/schema.sql` - Add status field to participants
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/SessionDetailPage.jsx` - Session detail page
+- `backend/api/session/detail.php` - Session detail API endpoint
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── SessionDetailPage.jsx
+│   ├── App.js
+│   └── index.js
+backend/
+├── api/
+│   └── session/
+│       └── detail.php
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 8.3: Player Ready Status
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │────▶│ Backend  │────▶│ Database │
+│          │     │          │     │          │
+│ Ready/Not│     │  Ready   │     │ Update   │
+│  Button  │     │   API    │     │ Status   │
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │    Toggle Ready Status         │
+       │                │                │
+       │                ▼                │
+       │    Return Updated Status       │
+       │                │                │
+       ▼                ▼                ▼
+  Update Button    Log Status      Status Updated
+                   Change
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `frontend/src/api/axiosConfig.js` - Session API
+- `frontend/src/styles/components.css` - ReadyButton styles
+- `database/schema.sql` - Add ready_status field
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/ReadyButton.jsx` - Ready button component
+- `backend/api/session/ready.php` - Ready status API endpoint
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   └── components.css
+│   ├── components/
+│   │   └── ReadyButton.jsx
+│   └── App.js
+backend/
+├── api/
+│   └── session/
+│       └── ready.php
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 8.4: Host Kick Player
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │────▶│ Backend  │────▶│ Database │
+│          │     │          │     │          │
+│   Kick   │     │   Kick   │     │ Remove   │
+│  Button  │     │   API    │     │ Player   │
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │    Verify Host Permission      │
+       │                │                │
+       │                ▼                │
+       │         Remove Participant     │
+       │                │                │
+       ▼                ▼                ▼
+  Remove Player    Log Kick       Player Removed
+  from UI
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `frontend/src/api/axiosConfig.js` - Session API
+- `frontend/src/styles/components.css` - KickButton styles
+- `database/schema.sql` - Ensure session ownership
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/KickButton.jsx` - Kick button component
+- `backend/api/session/kick.php` - Kick player API endpoint
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   └── components.css
+│   ├── components/
+│   │   └── KickButton.jsx
+│   └── App.js
+backend/
+├── api/
+│   └── session/
+│       └── kick.php
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
+```
+
+---
+
+## Feature 8.5: Host Start Session
+
+**Flow:**
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Frontend │────▶│ Backend  │────▶│ Database │
+│          │     │          │     │          │
+│   Start  │     │  Start   │     │ Update   │
+│ Session  │     │ Session  │     │ Session  │
+│  Button  │     │   API    │     │  Status  │
+└──────────┘     └──────────┘     └──────────┘
+       │                │                │
+       │                │                │
+       │    Verify Host & Readiness     │
+       │                │                │
+       │                ▼                │
+       │    Mark Session as Started     │
+       │                │                │
+       ▼                ▼                ▼
+  Redirect to     Log Start       Status Updated
+  Cooking Page                    & Timer Started
+```
+
+**Files Needed:**
+*What existing files should be referenced or modified?*
+
+- `frontend/src/api/axiosConfig.js` - Session API
+- `frontend/src/styles/components.css` - StartSessionButton styles
+- `database/schema.sql` - Add session_status field
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/StartSessionButton.jsx` - Start session button
+- `backend/api/session/start.php` - Start session API endpoint
+
+**Directory Structure:**
+
+```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   └── components.css
+│   ├── components/
+│   │   └── StartSessionButton.jsx
+│   └── App.js
+backend/
+├── api/
+│   └── session/
+│       └── start.php
 ├── db/
 │   └── connection.php
 database/
