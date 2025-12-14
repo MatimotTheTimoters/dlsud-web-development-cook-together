@@ -164,16 +164,3 @@ initializeApi();
 
 // Export the axios instance and helper functions
 export default api;
-export {
-    getAuthToken,
-    getRefreshToken,
-    setAuthToken,
-    clearAuthTokens,
-    isAuthenticated,
-    upload,
-    testApiConnection,
-    initializeApi,
-    API_BASE_URL,
-    TOKEN_STORAGE_KEY,
-    REFRESH_TOKEN_STORAGE_KEY
-};
