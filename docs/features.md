@@ -1,16 +1,3 @@
-# Changelog
-
-- Updated features.md to include all core application files and proper dependency tracking
-- Added required files for each feature including:
-  - `frontend/src/api/axiosConfig.js` - Axios configuration
-  - `frontend/src/styles/index.css` - Unified CSS imports
-  - `frontend/src/styles/components.css` - Component styles
-  - `frontend/src/styles/pages.css` - Page styles
-  - `frontend/src/App.js` - Main React application
-  - `frontend/src/index.js` - React entry point
-
----
-
 # Features
 
 ## Feature 1: User Registration
@@ -26,7 +13,7 @@
 └──────────┘     └──────────┘     └──────────┘
        │                │                │
        │                │                │
-       │         Validate & Hash        │
+       │         Validate Input         │
        │                │                │
        │                │                │
        │                ▼                │
@@ -37,19 +24,24 @@
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for RegisterPage
 - `frontend/src/index.js` - App entry point
 - `frontend/src/api/axiosConfig.js` - Axios API configuration
-- `frontend/src/pages/RegisterPage.jsx`
-- `frontend/src/components/RegisterForm.jsx`
 - `frontend/src/styles/index.css` - Import component styles
 - `frontend/src/styles/components.css` - RegisterForm styles
 - `frontend/src/styles/pages.css` - RegisterPage styles
-- `backend/api/register.php`
-- `backend/db/connection.php`
-- `backend/utils/validation.php`
-- `database/schema.sql` (users table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Users table structure
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/RegisterPage.jsx` - Registration page component
+- `frontend/src/components/RegisterForm.jsx` - Registration form component
+- `backend/api/register.php` - User registration API endpoint
+- `backend/utils/validation.php` - Input validation utilities
 
 **Directory Structure:**
 
@@ -94,27 +86,33 @@ database/
 └──────────┘     └──────────┘     └──────────┘
        │                │                │
        │                │                │
-       │         Verify Password        │
+       │      Verify Credentials        │
        │                │                │
        │                ▼                │
-       │         Generate Token         │
+       │         Return User Data       │
        │                │                │
        ▼                ▼                ▼
-  Store Token    Return User Data   Update Last Login
+  Store User ID   Return Success   Update Last Login
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for LoginPage
 - `frontend/src/api/axiosConfig.js` - Configure API calls
-- `frontend/src/pages/LoginPage.jsx`
-- `frontend/src/components/LoginForm.jsx`
 - `frontend/src/styles/index.css` - Import CSS files
 - `frontend/src/styles/components.css` - LoginForm styles
 - `frontend/src/styles/pages.css` - LoginPage styles
-- `backend/api/login.php`
 - `backend/db/connection.php` - Database connection
-- `backend/utils/validation.php` - Password validation
+- `backend/utils/validation.php` - Input validation
+- `database/schema.sql` - Users table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/LoginPage.jsx` - Login page component
+- `frontend/src/components/LoginForm.jsx` - Login form component
+- `backend/api/login.php` - User login API endpoint
 
 **Directory Structure:**
 
@@ -141,7 +139,7 @@ backend/
 ├── utils/
 │   └── validation.php
 database/
-└── schema.sql (user_tokens table)
+└── schema.sql
 ```
 
 ---
@@ -159,7 +157,7 @@ database/
 └──────────┘     └──────────┘     └──────────┘
        │                │                │
        │                │                │
-       │          Verify Token          │
+       │     Check User Session        │
        │                │                │
        │                ▼                │
        │         Return Profile         │
@@ -169,15 +167,20 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
-- `frontend/src/App.js` - Add protected route for ProfilePage
-- `frontend/src/api/axiosConfig.js` - Configure auth headers
-- `frontend/src/pages/ProfilePage.jsx`
+- `frontend/src/App.js` - Add route for ProfilePage
+- `frontend/src/api/axiosConfig.js` - Configure user API calls
 - `frontend/src/styles/index.css` - Import CSS files
 - `frontend/src/styles/pages.css` - ProfilePage styles
-- `backend/api/profile.php`
-- `backend/db/connection.php`
-- `database/schema.sql` - Add profile fields, user_stats, user_achievements, user_tokens tables
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Add profile fields and user_stats table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/ProfilePage.jsx` - User profile page component
+- `backend/api/profile.php` - User profile API endpoint
 
 **Directory Structure:**
 
@@ -228,18 +231,23 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for CreateRecipePage
 - `frontend/src/api/axiosConfig.js` - Recipe API calls
-- `frontend/src/pages/CreateRecipePage.jsx`
-- `frontend/src/components/RecipeForm.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - RecipeForm styles
 - `frontend/src/styles/pages.css` - CreateRecipePage styles
-- `backend/api/recipe/create.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
 - `backend/utils/validation.php` - Recipe validation
-- `database/schema.sql` (recipes, ingredients, steps tables)
+- `database/schema.sql` - Recipes, ingredients, steps tables
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/CreateRecipePage.jsx` - Recipe creation page
+- `frontend/src/components/RecipeForm.jsx` - Recipe form component
+- `backend/api/recipe/create.php` - Recipe creation API endpoint
 
 **Directory Structure:**
 
@@ -296,17 +304,22 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for RecipesPage
 - `frontend/src/api/axiosConfig.js` - Recipe list API
-- `frontend/src/pages/RecipesPage.jsx`
-- `frontend/src/components/RecipeCard.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - RecipeCard styles
 - `frontend/src/styles/pages.css` - RecipesPage styles
-- `backend/api/recipe/list.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
 - `database/schema.sql` - Ensure recipes table exists
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/RecipesPage.jsx` - Recipe list page
+- `frontend/src/components/RecipeCard.jsx` - Recipe card component
+- `backend/api/recipe/list.php` - Recipe list API endpoint
 
 **Directory Structure:**
 
@@ -361,15 +374,20 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for RecipeDetailPage
 - `frontend/src/api/axiosConfig.js` - Recipe detail API
-- `frontend/src/pages/RecipeDetailPage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - RecipeDetailPage styles
-- `backend/api/recipe/get.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (recipe details tables: ingredients, steps, etc.)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Recipe details tables
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/RecipeDetailPage.jsx` - Recipe detail page
+- `backend/api/recipe/get.php` - Single recipe API endpoint
 
 **Directory Structure:**
 
@@ -422,15 +440,20 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for CookingSessionPage
 - `frontend/src/api/axiosConfig.js` - Session API calls
-- `frontend/src/pages/CookingSessionPage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - CookingSessionPage styles
-- `backend/api/session/create.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (cooking_sessions table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Cooking_sessions table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/CookingSessionPage.jsx` - Cooking session page
+- `backend/api/session/create.php` - Session creation API endpoint
 
 **Directory Structure:**
 
@@ -482,14 +505,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Session API
-- `frontend/src/components/JoinSessionButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - JoinSessionButton styles
-- `backend/api/session/join.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (session_participants table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Session_participants table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/JoinSessionButton.jsx` - Join session button component
+- `backend/api/session/join.php` - Join session API endpoint
 
 **Directory Structure:**
 
@@ -540,14 +568,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Session API
-- `frontend/src/components/CompleteStepButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - CompleteStepButton styles
-- `backend/api/session/complete-step.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (step_completions table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Step_completions table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/CompleteStepButton.jsx` - Complete step button component
+- `backend/api/session/complete-step.php` - Complete step API endpoint
 
 **Directory Structure:**
 
@@ -597,14 +630,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/LikeButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - LikeButton styles
-- `backend/api/recipe/like.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (likes table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Likes table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/LikeButton.jsx` - Like button component
+- `backend/api/recipe/like.php` - Recipe like API endpoint
 
 **Directory Structure:**
 
@@ -654,14 +692,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Cookbook API
-- `frontend/src/components/SaveRecipeButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - SaveRecipeButton styles
-- `backend/api/cookbook/save.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (cookbooks table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Cookbooks table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/SaveRecipeButton.jsx` - Save recipe button component
+- `backend/api/cookbook/save.php` - Cookbook save API endpoint
 
 **Directory Structure:**
 
@@ -712,14 +755,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for CookbookPage
 - `frontend/src/api/axiosConfig.js` - Cookbook API
-- `frontend/src/pages/CookbookPage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - CookbookPage styles
-- `backend/api/cookbook/list.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/CookbookPage.jsx` - Cookbook page component
+- `backend/api/cookbook/list.php` - Cookbook list API endpoint
 
 **Directory Structure:**
 
@@ -760,7 +808,7 @@ database/
 └──────────┘     └──────────┘     └──────────┘
        │                │                │
        │                │                │
-       │         Process Payment        │
+       │         Process Purchase       │
        │                │                │
        │                ▼                │
        │         Return Success         │
@@ -770,14 +818,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Purchase API
-- `frontend/src/components/PurchaseButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - PurchaseButton styles
-- `backend/api/purchase/recipe.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (user_balance and purchases tables)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - User_balance and purchases tables
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/PurchaseButton.jsx` - Purchase button component
+- `backend/api/purchase/recipe.php` - Recipe purchase API endpoint
 
 **Directory Structure:**
 
@@ -828,17 +881,22 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for ShopPage
 - `frontend/src/api/axiosConfig.js` - Shop API
-- `frontend/src/pages/ShopPage.jsx`
-- `frontend/src/components/ShopItem.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - ShopItem styles
 - `frontend/src/styles/pages.css` - ShopPage styles
-- `backend/api/shop/purchase.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (shop_items and inventory tables)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Shop_items and inventory tables
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/ShopPage.jsx` - Shop page component
+- `frontend/src/components/ShopItem.jsx` - Shop item component
+- `backend/api/shop/purchase.php` - Shop purchase API endpoint
 
 **Directory Structure:**
 
@@ -892,15 +950,20 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Chat API
-- `frontend/src/components/ChatInput.jsx`
-- `frontend/src/components/ChatMessage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - Chat components styles
-- `backend/api/chat/send.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (chat_messages table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Chat_messages table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/ChatInput.jsx` - Chat input component
+- `frontend/src/components/ChatMessage.jsx` - Chat message component
+- `backend/api/chat/send.php` - Chat send API endpoint
 
 **Directory Structure:**
 
@@ -952,15 +1015,20 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for ActivityPage
 - `frontend/src/api/axiosConfig.js` - Activity API
-- `frontend/src/pages/ActivityPage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - ActivityPage styles
-- `backend/api/activity/feed.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (activities table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Activities table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/ActivityPage.jsx` - Activity feed page
+- `backend/api/activity/feed.php` - Activity feed API endpoint
 
 **Directory Structure:**
 
@@ -1012,14 +1080,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - User API
-- `frontend/src/components/FollowButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - FollowButton styles
-- `backend/api/user/follow.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (follows/user_relationships table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Follows/user_relationships table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/FollowButton.jsx` - Follow button component
+- `backend/api/user/follow.php` - Follow user API endpoint
 
 **Directory Structure:**
 
@@ -1071,14 +1144,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - User API
-- `frontend/src/components/LevelUpNotification.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - LevelUpNotification styles
-- `backend/api/user/check-level.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (user_stats table with level/XP fields)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - User_stats table with level/XP fields
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/LevelUpNotification.jsx` - Level up notification component
+- `backend/api/user/check-level.php` - Level check API endpoint
 
 **Directory Structure:**
 
@@ -1129,11 +1207,16 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
-- `backend/api/user/daily-bonus.php`
-- Modify: `backend/api/login.php` to call bonus check
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
 - `database/schema.sql` - Add last_login and streak tracking
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `backend/api/user/daily-bonus.php` - Daily bonus API endpoint
+- Modify: `backend/api/login.php` to call bonus check
 
 **Directory Structure:**
 
@@ -1175,14 +1258,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add home route
 - `frontend/src/api/axiosConfig.js` - Home API
-- `frontend/src/pages/HomePage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - HomePage styles
-- `backend/api/home.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/HomePage.jsx` - Home page component
+- `backend/api/home.php` - Home API endpoint
 
 **Directory Structure:**
 
@@ -1233,14 +1321,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - User API
-- `frontend/src/components/EditProfileForm.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - EditProfileForm styles
-- `backend/api/user/update.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
 - `backend/utils/validation.php` - Profile validation
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/EditProfileForm.jsx` - Edit profile form component
+- `backend/api/user/update.php` - User update API endpoint
 
 **Directory Structure:**
 
@@ -1294,13 +1387,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/DeleteRecipeButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - DeleteRecipeButton styles
-- `backend/api/recipe/delete.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/DeleteRecipeButton.jsx` - Delete recipe button component
+- `backend/api/recipe/delete.php` - Recipe delete API endpoint
 
 **Directory Structure:**
 
@@ -1350,13 +1448,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/SearchBar.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - SearchBar styles
-- `backend/api/recipe/search.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/SearchBar.jsx` - Search bar component
+- `backend/api/recipe/search.php` - Recipe search API endpoint
 
 **Directory Structure:**
 
@@ -1406,13 +1509,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/RecipeFilters.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - RecipeFilters styles
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/RecipeFilters.jsx` - Recipe filters component
 - Modify: `backend/api/recipe/list.php` to handle filters
-- `backend/db/connection.php`
 
 **Directory Structure:**
 
@@ -1462,14 +1570,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/RatingStars.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - RatingStars styles
-- `backend/api/recipe/rate.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (ratings table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Ratings table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/RatingStars.jsx` - Rating stars component
+- `backend/api/recipe/rate.php` - Recipe rating API endpoint
 
 **Directory Structure:**
 
@@ -1519,15 +1632,20 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/CommentForm.jsx`
-- `frontend/src/components/CommentItem.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - Comment components styles
-- `backend/api/recipe/comment.php`
-- `backend/db/connection.php`
-- `database/schema.sql` (comments table)
+- `backend/db/connection.php` - Database connection
+- `database/schema.sql` - Comments table
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/CommentForm.jsx` - Comment form component
+- `frontend/src/components/CommentItem.jsx` - Comment item component
+- `backend/api/recipe/comment.php` - Recipe comment API endpoint
 
 **Directory Structure:**
 
@@ -1579,14 +1697,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Upload API with multipart/form-data
-- `frontend/src/components/ImageUpload.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - ImageUpload styles
-- `backend/api/upload/image.php`
-- `backend/uploads/` directory
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+- `backend/uploads/` directory - Image storage
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/ImageUpload.jsx` - Image upload component
+- `backend/api/upload/image.php` - Image upload API endpoint
 
 **Directory Structure:**
 
@@ -1639,13 +1762,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/ShareButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - ShareButton styles
-- `backend/api/recipe/share.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/ShareButton.jsx` - Share button component
+- `backend/api/recipe/share.php` - Recipe share API endpoint
 
 **Directory Structure:**
 
@@ -1697,13 +1825,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/RecipeStats.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - RecipeStats styles
-- `backend/api/recipe/stats.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/RecipeStats.jsx` - Recipe statistics component
+- `backend/api/recipe/stats.php` - Recipe statistics API endpoint
 
 **Directory Structure:**
 
@@ -1754,13 +1887,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Session API
-- `frontend/src/components/SessionTimer.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - SessionTimer styles
-- `backend/api/session/timer.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/SessionTimer.jsx` - Session timer component
+- `backend/api/session/timer.php` - Session timer API endpoint
 
 **Directory Structure:**
 
@@ -1811,13 +1949,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Session API
-- `frontend/src/components/IngredientChecklist.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - IngredientChecklist styles
-- `backend/api/session/checklist.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/IngredientChecklist.jsx` - Ingredient checklist component
+- `backend/api/session/checklist.php` - Checklist API endpoint
 
 **Directory Structure:**
 
@@ -1868,13 +2011,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Session API
-- `frontend/src/components/SessionNotes.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - SessionNotes styles
-- `backend/api/session/notes.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/SessionNotes.jsx` - Session notes component
+- `backend/api/session/notes.php` - Session notes API endpoint
 
 **Directory Structure:**
 
@@ -1925,13 +2073,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Session API
-- `frontend/src/components/VoteButtons.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - VoteButtons styles
-- `backend/api/session/vote.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/VoteButtons.jsx` - Vote buttons component
+- `backend/api/session/vote.php` - Session vote API endpoint
 
 **Directory Structure:**
 
@@ -1983,13 +2136,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Session API
-- `frontend/src/components/SessionComplete.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - SessionComplete styles
-- `backend/api/session/complete.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/SessionComplete.jsx` - Session complete component
+- `backend/api/session/complete.php` - Session complete API endpoint
 
 **Directory Structure:**
 
@@ -2040,14 +2198,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for InventoryPage
 - `frontend/src/api/axiosConfig.js` - Inventory API
-- `frontend/src/pages/InventoryPage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - InventoryPage styles
-- `backend/api/inventory/manage.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/InventoryPage.jsx` - Inventory page component
+- `backend/api/inventory/manage.php` - Inventory management API endpoint
 
 **Directory Structure:**
 
@@ -2099,13 +2262,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Notifications API
-- `frontend/src/components/NotificationBell.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - NotificationBell styles
-- `backend/api/notifications/list.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/NotificationBell.jsx` - Notification bell component
+- `backend/api/notifications/list.php` - Notifications list API endpoint
 
 **Directory Structure:**
 
@@ -2156,14 +2324,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for SettingsPage
 - `frontend/src/api/axiosConfig.js` - User API
-- `frontend/src/pages/SettingsPage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - SettingsPage styles
-- `backend/api/user/settings.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/SettingsPage.jsx` - Settings page component
+- `backend/api/user/settings.php` - User settings API endpoint
 
 **Directory Structure:**
 
@@ -2204,25 +2377,30 @@ database/
 └──────────┘     └──────────┘     └──────────┘
        │                │                │
        │                │                │
-       │         Send Reset Email       │
+       │    Generate Reset Link        │
        │                │                │
        │                ▼                │
        │         Return Success         │
        │                │                │
        ▼                ▼                ▼
-  Show Email Sent Log Reset       Token Generated
-  Message          Request        & Stored
+  Show Email Sent Log Reset       Reset Link
+  Message          Request        Generated
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for ForgotPasswordPage
 - `frontend/src/api/axiosConfig.js` - Auth API
-- `frontend/src/pages/ForgotPasswordPage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - ForgotPasswordPage styles
-- `backend/api/auth/reset-password.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/ForgotPasswordPage.jsx` - Forgot password page
+- `backend/api/auth/reset-password.php` - Password reset API endpoint
 
 **Directory Structure:**
 
@@ -2263,7 +2441,7 @@ database/
 └──────────┘     └──────────┘     └──────────┘
        │                │                │
        │                │                │
-       │         Check Token           │
+       │    Check Verification Code    │
        │                │                │
        │                ▼                │
        │         Verify Account        │
@@ -2273,14 +2451,19 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/App.js` - Add route for VerifyEmailPage
 - `frontend/src/api/axiosConfig.js` - Auth API
-- `frontend/src/pages/VerifyEmailPage.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/pages.css` - VerifyEmailPage styles
-- `backend/api/auth/verify-email.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/pages/VerifyEmailPage.jsx` - Email verification page
+- `backend/api/auth/verify-email.php` - Email verification API endpoint
 
 **Directory Structure:**
 
@@ -2332,13 +2515,18 @@ database/
 ```
 
 **Files Needed:**
+*What existing files should be referenced or modified?*
 
 - `frontend/src/api/axiosConfig.js` - Recipe API
-- `frontend/src/components/ExportRecipeButton.jsx`
 - `frontend/src/styles/index.css` - Import CSS
 - `frontend/src/styles/components.css` - ExportRecipeButton styles
-- `backend/api/recipe/export.php`
-- `backend/db/connection.php`
+- `backend/db/connection.php` - Database connection
+
+**Files Created:**
+*Create these new files for this feature:*
+
+- `frontend/src/components/ExportRecipeButton.jsx` - Export recipe button component
+- `backend/api/recipe/export.php` - Recipe export API endpoint
 
 **Directory Structure:**
 
@@ -2362,3 +2550,5 @@ backend/
 database/
 └── schema.sql
 ```
+
+---
