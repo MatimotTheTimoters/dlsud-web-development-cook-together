@@ -17,7 +17,7 @@ export const getShopItems = async (filters = {}, limit = 50, offset = 0) => {
         const params = { limit, offset };
         if (filters.category) params.category = filters.category;
 
-        const response = await api.get('/api/shop/items.php', { params });
+        const response = await api.get('/shop/items.php', { params });
         return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error fetching shop items:', error);
@@ -36,7 +36,7 @@ export const purchaseItem = async (itemId) => {
             throw new Error('Item ID is required');
         }
 
-        const response = await api.post('/api/shop/purchase.php', { item_id: itemId });
+        const response = await api.post('/shop/purchase.php', { item_id: itemId });
         return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Error purchasing item:', error);
@@ -55,7 +55,7 @@ export const getUserPurchases = async (userId) => {
     try {
         // Try to get purchases from backend if endpoint exists
         try {
-            const response = await api.get('/api/purchase/item.php', {
+            const response = await api.get('/purchase/item.php', {
                 params: { user_id: userId }
             });
             return response.data; // Changed: use response.data

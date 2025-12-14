@@ -18,7 +18,7 @@ export const uploadImage = async (file, type, userId) => {
     formData.append('userId', userId);
 
     try {
-        const response = await apiUpload('/api/upload/image.php', formData);
+        const response = await apiUpload('/upload/image.php', formData);
         return response.data; // Changed: use response.data
     } catch (error) {
         console.error('Upload error:', error);

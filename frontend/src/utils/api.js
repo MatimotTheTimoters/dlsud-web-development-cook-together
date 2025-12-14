@@ -1,15 +1,15 @@
-/**
- * API Configuration and Helper Functions
- * Handles all HTTP requests to the PHP backend API
- */
+    /**
+     * API Configuration and Helper Functions
+     * Handles all HTTP requests to the PHP backend API
+     */
 
-import axios from 'axios';
+    import axios from 'axios';
 
-// Get base URL from environment
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ||
-    'http://localhost:8080/dlsud-web-development-cook-together/backend';
+    // Get base URL from environment
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ||
+        'http://localhost:8080/dlsud-web-development-cook-together/backend/api';
 
-// Create axios instance
+    // Create axios instance
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {

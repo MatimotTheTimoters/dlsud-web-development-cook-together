@@ -91,10 +91,9 @@ const LoginForm = () => {
             <div className="form-group">
               <label htmlFor="email" className="form-label">
                 <FaUser className="form-label-icon" />
-                <span>📧 Email:</span>
+                <span> Email:</span>
               </label>
               <div className="input-with-icon">
-                <FaUser className="input-icon" />
                 <input
                   type="email"
                   id="email"
@@ -111,10 +110,9 @@ const LoginForm = () => {
             <div className="form-group">
               <label htmlFor="password" className="form-label">
                 <FaLock className="form-label-icon" />
-                <span>🔒 Password:</span>
+                <span>Password:</span>
               </label>
               <div className="input-with-icon">
-                <FaLock className="input-icon" />
                 <input
                   type="password"
                   id="password"

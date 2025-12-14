@@ -12,7 +12,7 @@ import api from '../utils/api';
  */
 export const purchaseRecipe = async (recipeId, currencyType) => {
     try {
-        const response = await api.post('/api/recipes/purchase.php', {
+        const response = await api.post('/recipes/purchase.php', {
             recipe_id: recipeId,
             currency_type: currencyType
         });
@@ -31,7 +31,7 @@ export const purchaseRecipe = async (recipeId, currencyType) => {
  */
 export const purchaseItem = async (itemId, currencyType) => {
     try {
-        const response = await api.post('/api/shop/purchase.php', {
+        const response = await api.post('/shop/purchase.php', {
             item_id: itemId,
             currency_type: currencyType
         });
@@ -49,7 +49,7 @@ export const purchaseItem = async (itemId, currencyType) => {
  */
 export const getPurchaseHistory = async (params = {}) => {
     try {
-        const response = await api.get('/api/purchase/item.php', { params });
+        const response = await api.get('/purchase/item.php', { params });
         return response.data;
     } catch (error) {
         console.error('Error fetching purchase history:', error);

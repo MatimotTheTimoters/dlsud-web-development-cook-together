@@ -12,7 +12,7 @@ import api from '../utils/api';
  */
 export const getActivityFeed = async (limit = 20, offset = 0) => {
     try {
-        const response = await api.get('/api/activity/feed.php', {
+        const response = await api.get('/activity/feed.php', {
             params: { limit, offset }
         });
         return response.data; // axios returns data in response.data
@@ -29,7 +29,7 @@ export const getActivityFeed = async (limit = 20, offset = 0) => {
  */
 export const getUserActivities = async (userId) => {
     try {
-        const response = await api.get('/api/activity/feed.php', {
+        const response = await api.get('/activity/feed.php', {
             params: { user_id: userId }
         });
         return response.data;

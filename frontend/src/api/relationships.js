@@ -13,7 +13,7 @@ import api from '../utils/api';
  */
 export const followUser = async (targetUserId, message = null) => {
     try {
-        const response = await api.post('/api/relationships/follow.php', {
+        const response = await api.post('/relationships/follow.php', {
             target_user_id: targetUserId,
             action: 'follow',
             message: message
@@ -32,7 +32,7 @@ export const followUser = async (targetUserId, message = null) => {
  */
 export const unfollowUser = async (targetUserId) => {
     try {
-        const response = await api.post('/api/relationships/follow.php', {
+        const response = await api.post('/relationships/follow.php', {
             target_user_id: targetUserId,
             action: 'unfollow'
         });
@@ -51,7 +51,7 @@ export const unfollowUser = async (targetUserId) => {
  */
 export const sendFriendRequest = async (targetUserId, message = null) => {
     try {
-        const response = await api.post('/api/relationships/friends.php', {
+        const response = await api.post('/relationships/friends.php', {
             action: 'send_request',
             target_user_id: targetUserId,
             message: message
@@ -72,7 +72,7 @@ export const sendFriendRequest = async (targetUserId, message = null) => {
  */
 export const getFriendRequests = async (type = 'received', limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/api/relationships/list.php', {
+        const response = await api.get('/relationships/list.php', {
             params: {
                 type: type === 'received' ? 'requests_received' : 'requests_sent',
                 limit: limit,
@@ -93,7 +93,7 @@ export const getFriendRequests = async (type = 'received', limit = 50, offset = 
  */
 export const acceptFriendRequest = async (requestId) => {
     try {
-        const response = await api.post('/api/relationships/friends.php', {
+        const response = await api.post('/relationships/friends.php', {
             action: 'respond_request',
             request_id: requestId,
             response: 'accept'
@@ -112,7 +112,7 @@ export const acceptFriendRequest = async (requestId) => {
  */
 export const rejectFriendRequest = async (requestId) => {
     try {
-        const response = await api.post('/api/relationships/friends.php', {
+        const response = await api.post('/relationships/friends.php', {
             action: 'respond_request',
             request_id: requestId,
             response: 'reject'
@@ -131,7 +131,7 @@ export const rejectFriendRequest = async (requestId) => {
  */
 export const removeFriend = async (friendId) => {
     try {
-        const response = await api.post('/api/relationships/friends.php', {
+        const response = await api.post('/relationships/friends.php', {
             action: 'remove_friend',
             friend_id: friendId
         });
@@ -151,7 +151,7 @@ export const removeFriend = async (friendId) => {
  */
 export const getFollowers = async (userId, limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/api/relationships/list.php', {
+        const response = await api.get('/relationships/list.php', {
             params: {
                 type: 'followers',
                 limit: limit,
@@ -174,7 +174,7 @@ export const getFollowers = async (userId, limit = 50, offset = 0) => {
  */
 export const getFollowing = async (userId, limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/api/relationships/list.php', {
+        const response = await api.get('/relationships/list.php', {
             params: {
                 type: 'following',
                 limit: limit,
@@ -197,7 +197,7 @@ export const getFollowing = async (userId, limit = 50, offset = 0) => {
  */
 export const getFriends = async (userId, limit = 50, offset = 0) => {
     try {
-        const response = await api.get('/api/relationships/list.php', {
+        const response = await api.get('/relationships/list.php', {
             params: {
                 type: 'friends',
                 limit: limit,
@@ -235,7 +235,7 @@ export const isFollowing = async (targetUserId) => {
  */
 export const getAllRelationships = async (limit = 10) => {
     try {
-        const response = await api.get('/api/relationships/list.php', {
+        const response = await api.get('/relationships/list.php', {
             params: {
                 type: 'all',
                 limit: limit

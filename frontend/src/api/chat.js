@@ -12,7 +12,7 @@ import api from '../utils/api';
  */
 export const sendChatMessage = async (sessionId, message) => {
     try {
-        const response = await api.post('/api/chat/messages.php', {
+        const response = await api.post('/chat/messages.php', {
             cooking_session_id: sessionId,
             message: message
         });
@@ -31,7 +31,7 @@ export const sendChatMessage = async (sessionId, message) => {
  */
 export const getChatMessages = async (sessionId, limit = 100) => {
     try {
-        const response = await api.get('/api/chat/messages.php', {
+        const response = await api.get('/chat/messages.php', {
             params: {
                 cooking_session_id: sessionId,
                 limit: limit
@@ -51,7 +51,7 @@ export const getChatMessages = async (sessionId, limit = 100) => {
  */
 export const markMessagesAsRead = async (sessionId) => {
     try {
-        const response = await api.put('/api/chat/messages.php', {
+        const response = await api.put('/chat/messages.php', {
             cooking_session_id: sessionId,
             action: 'mark_read'
         });

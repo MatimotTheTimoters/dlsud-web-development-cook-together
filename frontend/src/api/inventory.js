@@ -12,7 +12,7 @@ import api from '../utils/api';
 export const getUserInventory = async (category = null) => {
     try {
         const params = category ? { category } : {};
-        const response = await api.get('/api/inventory/list.php', { params });
+        const response = await api.get('/inventory/list.php', { params });
         return response.data;
     } catch (error) {
         console.error('Error fetching inventory:', error);
@@ -27,7 +27,7 @@ export const getUserInventory = async (category = null) => {
  */
 export const useConsumable = async (inventoryId) => {
     try {
-        const response = await api.post('/api/inventory/use.php', {
+        const response = await api.post('/inventory/use.php', {
             inventory_id: inventoryId
         });
         return response.data;
@@ -43,7 +43,7 @@ export const useConsumable = async (inventoryId) => {
  */
 export const getItemCategories = async () => {
     try {
-        const response = await api.get('/api/inventory/list.php', {
+        const response = await api.get('/inventory/list.php', {
             params: { categories: true }
         });
         return response.data;
@@ -59,7 +59,7 @@ export const getItemCategories = async () => {
  */
 export const getEquippedItems = async () => {
     try {
-        const response = await api.get('/api/inventory/list.php', {
+        const response = await api.get('/inventory/list.php', {
             params: { equipped: true }
         });
         return response.data;

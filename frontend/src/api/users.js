@@ -17,7 +17,7 @@ export const getProfile = async (userId = null) => {
       params.user_id = userId;
     }
 
-    const response = await api.get('/api/users/profile.php', { params });
+    const response = await api.get('/users/profile.php', { params });
     return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error fetching user profile:', error);
@@ -47,7 +47,7 @@ export const updateProfile = async (profileData, profilePicture = null) => {
       }
     }
 
-    const response = await api.put('/api/users/update.php', profileData);
+    const response = await api.put('/users/update.php', profileData);
     return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -67,7 +67,7 @@ export const getUserStats = async (userId = null) => {
       params.user_id = userId;
     }
 
-    const response = await api.get('/api/users/stats.php', { params });
+    const response = await api.get('/users/stats.php', { params });
     return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error fetching user stats:', error);
@@ -84,7 +84,7 @@ export const getUserStats = async (userId = null) => {
  */
 export const searchUsers = async (query, page = 1, limit = 20) => {
   try {
-    const response = await api.get('/api/users/search.php', {
+    const response = await api.get('/users/search.php', {
       params: { q: query, page, limit }
     });
     return response.data; // Changed: use response.data
@@ -101,7 +101,7 @@ export const searchUsers = async (query, page = 1, limit = 20) => {
  */
 export const getFollowers = async (userId) => {
   try {
-    const response = await api.get('/api/relationships/list.php', {
+    const response = await api.get('/relationships/list.php', {
       params: { user_id: userId, type: 'followers' }
     });
     return response.data; // Changed: use response.data
@@ -118,7 +118,7 @@ export const getFollowers = async (userId) => {
  */
 export const getFollowing = async (userId) => {
   try {
-    const response = await api.get('/api/relationships/list.php', {
+    const response = await api.get('/relationships/list.php', {
       params: { user_id: userId, type: 'following' }
     });
     return response.data; // Changed: use response.data
@@ -141,7 +141,7 @@ export const uploadProfilePicture = async (file, userId) => {
     formData.append('type', 'profile_picture');
     formData.append('user_id', userId);
 
-    const response = await api.post('/api/upload/image.php', formData, {
+    const response = await api.post('/upload/image.php', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

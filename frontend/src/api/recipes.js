@@ -19,7 +19,7 @@ const uploadImage = async (file, type, userId) => {
     formData.append('type', type);
     formData.append('user_id', userId);
 
-    const response = await api.post('/api/upload/image.php', formData, {
+    const response = await api.post('/upload/image.php', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -34,7 +34,7 @@ const uploadImage = async (file, type, userId) => {
 // Get all recipes with optional filtering
 export const getAllRecipes = async (params = {}) => {
   try {
-    const response = await api.get('/api/recipes/index.php', { params });
+    const response = await api.get('/recipes/index.php', { params });
     return response.data; // Changed: axios returns data in response.data
   } catch (error) {
     console.error('Error in getAllRecipes:', error);
@@ -45,7 +45,7 @@ export const getAllRecipes = async (params = {}) => {
 // Get single recipe by ID with full details
 export const getRecipe = async (recipeId) => {
   try {
-    const response = await api.get(`/api/recipes/show.php?id=${recipeId}`);
+    const response = await api.get(`/recipes/show.php?id=${recipeId}`);
     return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in getRecipe:', error);
@@ -91,7 +91,7 @@ export const createRecipe = async (recipeData) => {
     }
 
     // Create recipe
-    const response = await api.post('/api/recipes/create.php', recipeData);
+    const response = await api.post('/recipes/create.php', recipeData);
     return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in createRecipe:', error);
@@ -135,7 +135,7 @@ export const updateRecipe = async (recipeId, recipeData) => {
       }
     }
 
-    const response = await api.put('/api/recipes/update.php', {
+    const response = await api.put('/recipes/update.php', {
       ...recipeData,
       recipe_id: recipeId
     });
@@ -149,7 +149,7 @@ export const updateRecipe = async (recipeId, recipeData) => {
 // Delete recipe
 export const deleteRecipe = async (recipeId) => {
   try {
-    const response = await api.delete(`/api/recipes/delete.php?id=${recipeId}`);
+    const response = await api.delete(`/recipes/delete.php?id=${recipeId}`);
     return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in deleteRecipe:', error);
@@ -160,7 +160,7 @@ export const deleteRecipe = async (recipeId) => {
 // Like a recipe
 export const likeRecipe = async (recipeId) => {
   try {
-    const response = await api.post('/api/recipes/interact.php', {
+    const response = await api.post('/recipes/interact.php', {
       recipe_id: recipeId,
       interaction_type: 'like'
     });
@@ -174,7 +174,7 @@ export const likeRecipe = async (recipeId) => {
 // Save recipe to cookbook
 export const saveRecipe = async (recipeId, cookbookId = null) => {
   try {
-    const response = await api.post('/api/recipes/interact.php', {
+    const response = await api.post('/recipes/interact.php', {
       recipe_id: recipeId,
       interaction_type: 'save',
       metadata: cookbookId ? { cookbook_id: cookbookId } : null
@@ -189,7 +189,7 @@ export const saveRecipe = async (recipeId, cookbookId = null) => {
 // Get recipe interactions
 export const getRecipeInteractions = async (recipeId) => {
   try {
-    const response = await api.get(`/api/recipes/show.php?id=${recipeId}`);
+    const response = await api.get(`/recipes/show.php?id=${recipeId}`);
     return response.data; // Changed: use response.data
   } catch (error) {
     console.error('Error in getRecipeInteractions:', error);
@@ -200,7 +200,7 @@ export const getRecipeInteractions = async (recipeId) => {
 // Purchase recipe
 export const purchaseRecipe = async (recipeId) => {
   try {
-    const response = await api.post('/api/recipes/purchase.php', {
+    const response = await api.post('/recipes/purchase.php', {
       recipe_id: recipeId
     });
     return response.data; // Changed: use response.data
@@ -213,7 +213,7 @@ export const purchaseRecipe = async (recipeId) => {
 // Get user's recipes
 export const getUserRecipes = async (userId, params = {}) => {
   try {
-    const response = await api.get('/api/recipes/index.php', {
+    const response = await api.get('/recipes/index.php', {
       params: { ...params, user_id: userId }
     });
     return response.data; // Changed: use response.data
@@ -226,7 +226,7 @@ export const getUserRecipes = async (userId, params = {}) => {
 // Search recipes
 export const searchRecipes = async (query, filters = {}) => {
   try {
-    const response = await api.get('/api/recipes/index.php', {
+    const response = await api.get('/recipes/index.php', {
       params: { search: query, ...filters }
     });
     return response.data; // Changed: use response.data
@@ -239,7 +239,7 @@ export const searchRecipes = async (query, filters = {}) => {
 // Get trending recipes
 export const getTrendingRecipes = async (limit = 10) => {
   try {
-    const response = await api.get('/api/recipes/index.php', {
+    const response = await api.get('/recipes/index.php', {
       params: { limit, sort: 'popular' }
     });
     return response.data; // Changed: use response.data

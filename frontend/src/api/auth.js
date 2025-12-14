@@ -12,7 +12,7 @@ import api, { setAuthToken, clearAuthTokens } from '../utils/api';
  */
 export const login = async (email, password) => {
     try {
-        const response = await api.post('/api/auth/login.php', { email, password });
+        const response = await api.post('/auth/login.php', { email, password });
         if (response.data.token) {
             // Store the token using the helper function
             setAuthToken(response.data.token, response.data.refresh_token);
@@ -31,7 +31,7 @@ export const login = async (email, password) => {
  */
 export const register = async (userData) => {
     try {
-        const response = await api.post('/api/auth/register.php', userData);
+        const response = await api.post('/auth/register.php', userData);
         if (response.data.token) {
             // Store the token using the helper function
             setAuthToken(response.data.token, response.data.refresh_token);
@@ -49,7 +49,7 @@ export const register = async (userData) => {
  */
 export const logout = async () => {
     try {
-        const response = await api.post('/api/auth/logout.php');
+        const response = await api.post('/auth/logout.php');
         clearAuthTokens(); // Clear tokens from storage
         return response.data;
     } catch (error) {
@@ -65,7 +65,7 @@ export const logout = async () => {
  */
 export const getCurrentUser = async () => {
     try {
-        const response = await api.get('/api/auth/me.php');
+        const response = await api.get('/auth/me.php');
         return response.data;
     } catch (error) {
         console.error('Error getting current user:', error);
@@ -80,7 +80,7 @@ export const getCurrentUser = async () => {
 export const refreshToken = async () => {
     try {
         const refreshToken = localStorage.getItem('cooktogether_refresh_token');
-        const response = await api.post('/api/auth/refresh-token.php', {
+        const response = await api.post('/auth/refresh-token.php', {
             refresh_token: refreshToken
         });
         if (response.data.token) {
