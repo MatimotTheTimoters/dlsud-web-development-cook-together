@@ -1,15 +1,22 @@
 # Changelog
-- frontend/src/api/axiosConfig.js - Axios configuration for API calls
-- frontend/src/styles/index.css - Unified CSS file (replaced separate component CSS files)
-    - frontend/src/styles/components.css
-    - frontend/src/styles/pages.css
+
+- Updated features.md to include all core application files and proper dependency tracking
+- Added required files for each feature including:
+  - `frontend/src/api/axiosConfig.js` - Axios configuration
+  - `frontend/src/styles/index.css` - Unified CSS imports
+  - `frontend/src/styles/components.css` - Component styles
+  - `frontend/src/styles/pages.css` - Page styles
+  - `frontend/src/App.js` - Main React application
+  - `frontend/src/index.js` - React entry point
 
 ---
 
 # Features
 
 ## Feature 1: User Registration
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -30,15 +37,37 @@
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for RegisterPage
+- `frontend/src/index.js` - App entry point
+- `frontend/src/api/axiosConfig.js` - Axios API configuration
 - `frontend/src/pages/RegisterPage.jsx`
 - `frontend/src/components/RegisterForm.jsx`
+- `frontend/src/styles/index.css` - Import component styles
+- `frontend/src/styles/components.css` - RegisterForm styles
+- `frontend/src/styles/pages.css` - RegisterPage styles
 - `backend/api/register.php`
 - `backend/db/connection.php`
 - `backend/utils/validation.php`
 - `database/schema.sql` (users table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   ├── components.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── RegisterPage.jsx
+│   ├── components/
+│   │   └── RegisterForm.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── register.php
@@ -46,12 +75,6 @@ backend/
 │   └── connection.php
 ├── utils/
 │   └── validation.php
-frontend/
-├── src/
-│   ├── pages/
-│   │   └── RegisterPage.jsx
-│   └── components/
-│       └── RegisterForm.jsx
 database/
 └── schema.sql
 ```
@@ -59,7 +82,9 @@ database/
 ---
 
 ## Feature 2: User Login
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -79,30 +104,52 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for LoginPage
+- `frontend/src/api/axiosConfig.js` - Configure API calls
 - `frontend/src/pages/LoginPage.jsx`
 - `frontend/src/components/LoginForm.jsx`
+- `frontend/src/styles/index.css` - Import CSS files
+- `frontend/src/styles/components.css` - LoginForm styles
+- `frontend/src/styles/pages.css` - LoginPage styles
 - `backend/api/login.php`
-- `backend/utils/auth.php`
+- `backend/db/connection.php` - Database connection
+- `backend/utils/validation.php` - Password validation
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   ├── components.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── LoginPage.jsx
+│   ├── components/
+│   │   └── LoginForm.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── login.php
+├── db/
+│   └── connection.php
 ├── utils/
-│   └── auth.php
-frontend/
-├── src/
-│   ├── pages/
-│   │   └── LoginPage.jsx
-│   └── components/
-│       └── LoginForm.jsx
+│   └── validation.php
+database/
+└── schema.sql (user_tokens table)
 ```
 
 ---
 
 ## Feature 3: View User Profile
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -122,19 +169,35 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add protected route for ProfilePage
+- `frontend/src/api/axiosConfig.js` - Configure auth headers
 - `frontend/src/pages/ProfilePage.jsx`
+- `frontend/src/styles/index.css` - Import CSS files
+- `frontend/src/styles/pages.css` - ProfilePage styles
 - `backend/api/profile.php`
-- `database/schema.sql` (add profile fields)
+- `backend/db/connection.php`
+- `database/schema.sql` - Add profile fields, user_stats, user_achievements, user_tokens tables
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── ProfilePage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── profile.php
-frontend/
-├── src/
-│   └── pages/
-│       └── ProfilePage.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -142,7 +205,9 @@ database/
 ---
 
 ## Feature 4: Create Recipe
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -163,23 +228,44 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for CreateRecipePage
+- `frontend/src/api/axiosConfig.js` - Recipe API calls
 - `frontend/src/pages/CreateRecipePage.jsx`
 - `frontend/src/components/RecipeForm.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - RecipeForm styles
+- `frontend/src/styles/pages.css` - CreateRecipePage styles
 - `backend/api/recipe/create.php`
-- `database/schema.sql` (recipes table)
+- `backend/db/connection.php`
+- `backend/utils/validation.php` - Recipe validation
+- `database/schema.sql` (recipes, ingredients, steps tables)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   ├── components.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── CreateRecipePage.jsx
+│   ├── components/
+│   │   └── RecipeForm.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── create.php
-frontend/
-├── src/
-│   ├── pages/
-│   │   └── CreateRecipePage.jsx
-│   └── components/
-│       └── RecipeForm.jsx
+├── db/
+│   └── connection.php
+├── utils/
+│   └── validation.php
 database/
 └── schema.sql
 ```
@@ -187,7 +273,9 @@ database/
 ---
 
 ## Feature 5: View Recipe List
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -208,28 +296,51 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for RecipesPage
+- `frontend/src/api/axiosConfig.js` - Recipe list API
 - `frontend/src/pages/RecipesPage.jsx`
 - `frontend/src/components/RecipeCard.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - RecipeCard styles
+- `frontend/src/styles/pages.css` - RecipesPage styles
 - `backend/api/recipe/list.php`
+- `backend/db/connection.php`
+- `database/schema.sql` - Ensure recipes table exists
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   ├── components.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── RecipesPage.jsx
+│   ├── components/
+│   │   └── RecipeCard.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── list.php
-frontend/
-├── src/
-│   ├── pages/
-│   │   └── RecipesPage.jsx
-│   └── components/
-│       └── RecipeCard.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 6: View Single Recipe
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -250,20 +361,36 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for RecipeDetailPage
+- `frontend/src/api/axiosConfig.js` - Recipe detail API
 - `frontend/src/pages/RecipeDetailPage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - RecipeDetailPage styles
 - `backend/api/recipe/get.php`
-- `database/schema.sql` (add recipe details tables)
+- `backend/db/connection.php`
+- `database/schema.sql` (recipe details tables: ingredients, steps, etc.)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── RecipeDetailPage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── get.php
-frontend/
-├── src/
-│   └── pages/
-│       └── RecipeDetailPage.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -271,7 +398,9 @@ database/
 ---
 
 ## Feature 7: Start Cooking Session
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -293,20 +422,36 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for CookingSessionPage
+- `frontend/src/api/axiosConfig.js` - Session API calls
 - `frontend/src/pages/CookingSessionPage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - CookingSessionPage styles
 - `backend/api/session/create.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (cooking_sessions table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── CookingSessionPage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── session/
 │       └── create.php
-frontend/
-├── src/
-│   └── pages/
-│       └── CookingSessionPage.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -314,7 +459,9 @@ database/
 ---
 
 ## Feature 8: Join Cooking Session
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -335,20 +482,34 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Session API
 - `frontend/src/components/JoinSessionButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - JoinSessionButton styles
 - `backend/api/session/join.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (session_participants table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── JoinSessionButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── session/
 │       └── join.php
-frontend/
-├── src/
-│   └── components/
-│       └── JoinSessionButton.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -356,7 +517,9 @@ database/
 ---
 
 ## Feature 9: Complete Cooking Step
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -377,20 +540,34 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Session API
 - `frontend/src/components/CompleteStepButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - CompleteStepButton styles
 - `backend/api/session/complete-step.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (step_completions table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── CompleteStepButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── session/
 │       └── complete-step.php
-frontend/
-├── src/
-│   └── components/
-│       └── CompleteStepButton.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -398,7 +575,9 @@ database/
 ---
 
 ## Feature 10: Like Recipe
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -418,20 +597,34 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/LikeButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - LikeButton styles
 - `backend/api/recipe/like.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (likes table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── LikeButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── like.php
-frontend/
-├── src/
-│   └── components/
-│       └── LikeButton.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -439,7 +632,9 @@ database/
 ---
 
 ## Feature 11: Save Recipe to Cookbook
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -459,20 +654,34 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Cookbook API
 - `frontend/src/components/SaveRecipeButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - SaveRecipeButton styles
 - `backend/api/cookbook/save.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (cookbooks table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── SaveRecipeButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── cookbook/
 │       └── save.php
-frontend/
-├── src/
-│   └── components/
-│       └── SaveRecipeButton.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -480,7 +689,9 @@ database/
 ---
 
 ## Feature 12: View Cookbook
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -501,25 +712,45 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for CookbookPage
+- `frontend/src/api/axiosConfig.js` - Cookbook API
 - `frontend/src/pages/CookbookPage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - CookbookPage styles
 - `backend/api/cookbook/list.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── CookbookPage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── cookbook/
 │       └── list.php
-frontend/
-├── src/
-│   └── pages/
-│       └── CookbookPage.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 13: Purchase Recipe
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -539,20 +770,34 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Purchase API
 - `frontend/src/components/PurchaseButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - PurchaseButton styles
 - `backend/api/purchase/recipe.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (user_balance and purchases tables)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── PurchaseButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── purchase/
 │       └── recipe.php
-frontend/
-├── src/
-│   └── components/
-│       └── PurchaseButton.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -560,7 +805,9 @@ database/
 ---
 
 ## Feature 14: Shop Item Purchase
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -581,23 +828,41 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for ShopPage
+- `frontend/src/api/axiosConfig.js` - Shop API
 - `frontend/src/pages/ShopPage.jsx`
 - `frontend/src/components/ShopItem.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - ShopItem styles
+- `frontend/src/styles/pages.css` - ShopPage styles
 - `backend/api/shop/purchase.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (shop_items and inventory tables)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   ├── components.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── ShopPage.jsx
+│   ├── components/
+│   │   └── ShopItem.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── shop/
 │       └── purchase.php
-frontend/
-├── src/
-│   ├── pages/
-│   │   └── ShopPage.jsx
-│   └── components/
-│       └── ShopItem.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -605,7 +870,9 @@ database/
 ---
 
 ## Feature 15: Send Chat Message
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -625,22 +892,36 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Chat API
 - `frontend/src/components/ChatInput.jsx`
 - `frontend/src/components/ChatMessage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - Chat components styles
 - `backend/api/chat/send.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (chat_messages table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   ├── ChatInput.jsx
+│   │   └── ChatMessage.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── chat/
 │       └── send.php
-frontend/
-├── src/
-│   └── components/
-│       ├── ChatInput.jsx
-│       └── ChatMessage.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -648,7 +929,9 @@ database/
 ---
 
 ## Feature 16: View Activity Feed
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -669,20 +952,36 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for ActivityPage
+- `frontend/src/api/axiosConfig.js` - Activity API
 - `frontend/src/pages/ActivityPage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - ActivityPage styles
 - `backend/api/activity/feed.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (activities table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── ActivityPage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── activity/
 │       └── feed.php
-frontend/
-├── src/
-│   └── pages/
-│       └── ActivityPage.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -690,7 +989,9 @@ database/
 ---
 
 ## Feature 17: Follow User
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -711,20 +1012,34 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - User API
 - `frontend/src/components/FollowButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - FollowButton styles
 - `backend/api/user/follow.php`
-- `database/schema.sql` (follows table)
+- `backend/db/connection.php`
+- `database/schema.sql` (follows/user_relationships table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── FollowButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── user/
 │       └── follow.php
-frontend/
-├── src/
-│   └── components/
-│       └── FollowButton.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -732,7 +1047,9 @@ database/
 ---
 
 ## Feature 18: Level Up Notification
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -754,20 +1071,34 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - User API
 - `frontend/src/components/LevelUpNotification.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - LevelUpNotification styles
 - `backend/api/user/check-level.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (user_stats table with level/XP fields)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── LevelUpNotification.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── user/
 │       └── check-level.php
-frontend/
-├── src/
-│   └── components/
-│       └── LevelUpNotification.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -775,7 +1106,9 @@ database/
 ---
 
 ## Feature 19: Daily Login Bonus
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -796,21 +1129,32 @@ database/
 ```
 
 **Files Needed:**
+
 - `backend/api/user/daily-bonus.php`
 - Modify: `backend/api/login.php` to call bonus check
+- `backend/db/connection.php`
+- `database/schema.sql` - Add last_login and streak tracking
 
 **Directory Structure:**
+
 ```
 backend/
 ├── api/
+│   ├── login.php
 │   └── user/
 │       └── daily-bonus.php
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 20: View Home Page
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -831,23 +1175,44 @@ backend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add home route
+- `frontend/src/api/axiosConfig.js` - Home API
 - `frontend/src/pages/HomePage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - HomePage styles
 - `backend/api/home.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── HomePage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── home.php
-frontend/
-├── src/
-│   └── pages/
-│       └── HomePage.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
+```
 
 ---
 
 ## Feature 21: Edit User Profile
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -868,25 +1233,46 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - User API
 - `frontend/src/components/EditProfileForm.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - EditProfileForm styles
 - `backend/api/user/update.php`
+- `backend/db/connection.php`
+- `backend/utils/validation.php` - Profile validation
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── EditProfileForm.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── user/
 │       └── update.php
-frontend/
-├── src/
-│   └── components/
-│       └── EditProfileForm.jsx
+├── db/
+│   └── connection.php
+├── utils/
+│   └── validation.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 22: Delete Recipe
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -908,25 +1294,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/DeleteRecipeButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - DeleteRecipeButton styles
 - `backend/api/recipe/delete.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── DeleteRecipeButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── delete.php
-frontend/
-├── src/
-│   └── components/
-│       └── DeleteRecipeButton.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 23: Search Recipes
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -946,25 +1350,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/SearchBar.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - SearchBar styles
 - `backend/api/recipe/search.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── SearchBar.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── search.php
-frontend/
-├── src/
-│   └── components/
-│       └── SearchBar.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 24: Filter Recipes
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -984,21 +1406,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/RecipeFilters.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - RecipeFilters styles
 - Modify: `backend/api/recipe/list.php` to handle filters
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
 frontend/
 ├── src/
-│   └── components/
-│       └── RecipeFilters.jsx
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── RecipeFilters.jsx
+│   └── App.js
+backend/
+├── api/
+│   └── recipe/
+│       └── list.php
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 25: Rate Recipe
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1018,20 +1462,34 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/RatingStars.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - RatingStars styles
 - `backend/api/recipe/rate.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (ratings table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── RatingStars.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── rate.php
-frontend/
-├── src/
-│   └── components/
-│       └── RatingStars.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -1039,7 +1497,9 @@ database/
 ---
 
 ## Feature 26: Add Recipe Comment
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1059,22 +1519,36 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/CommentForm.jsx`
 - `frontend/src/components/CommentItem.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - Comment components styles
 - `backend/api/recipe/comment.php`
+- `backend/db/connection.php`
 - `database/schema.sql` (comments table)
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   ├── CommentForm.jsx
+│   │   └── CommentItem.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── comment.php
-frontend/
-├── src/
-│   └── components/
-│       ├── CommentForm.jsx
-│       └── CommentItem.jsx
+├── db/
+│   └── connection.php
 database/
 └── schema.sql
 ```
@@ -1082,7 +1556,9 @@ database/
 ---
 
 ## Feature 27: Upload Recipe Image
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│  File    │
@@ -1103,28 +1579,46 @@ database/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Upload API with multipart/form-data
 - `frontend/src/components/ImageUpload.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - ImageUpload styles
 - `backend/api/upload/image.php`
 - `backend/uploads/` directory
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── ImageUpload.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── upload/
 │       └── image.php
 ├── uploads/
 │   └── recipes/
-frontend/
-├── src/
-│   └── components/
-│       └── ImageUpload.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 28: Share Recipe
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1145,25 +1639,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/ShareButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - ShareButton styles
 - `backend/api/recipe/share.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── ShareButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── share.php
-frontend/
-├── src/
-│   └── components/
-│       └── ShareButton.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 29: View Recipe Statistics
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1185,25 +1697,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/RecipeStats.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - RecipeStats styles
 - `backend/api/recipe/stats.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── RecipeStats.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── stats.php
-frontend/
-├── src/
-│   └── components/
-│       └── RecipeStats.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 30: Session Timer
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1224,25 +1754,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Session API
 - `frontend/src/components/SessionTimer.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - SessionTimer styles
 - `backend/api/session/timer.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── SessionTimer.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── session/
 │       └── timer.php
-frontend/
-├── src/
-│   └── components/
-│       └── SessionTimer.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 31: Ingredient Checklist
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1263,25 +1811,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Session API
 - `frontend/src/components/IngredientChecklist.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - IngredientChecklist styles
 - `backend/api/session/checklist.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── IngredientChecklist.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── session/
 │       └── checklist.php
-frontend/
-├── src/
-│   └── components/
-│       └── IngredientChecklist.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 32: Session Notes
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1302,25 +1868,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Session API
 - `frontend/src/components/SessionNotes.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - SessionNotes styles
 - `backend/api/session/notes.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── SessionNotes.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── session/
 │       └── notes.php
-frontend/
-├── src/
-│   └── components/
-│       └── SessionNotes.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 33: Cooking Session Voting
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1341,25 +1925,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Session API
 - `frontend/src/components/VoteButtons.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - VoteButtons styles
 - `backend/api/session/vote.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── VoteButtons.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── session/
 │       └── vote.php
-frontend/
-├── src/
-│   └── components/
-│       └── VoteButtons.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 34: Session Completion Rewards
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1381,25 +1983,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Session API
 - `frontend/src/components/SessionComplete.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - SessionComplete styles
 - `backend/api/session/complete.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── SessionComplete.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── session/
 │       └── complete.php
-frontend/
-├── src/
-│   └── components/
-│       └── SessionComplete.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 35: Inventory Management
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1420,25 +2040,45 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for InventoryPage
+- `frontend/src/api/axiosConfig.js` - Inventory API
 - `frontend/src/pages/InventoryPage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - InventoryPage styles
 - `backend/api/inventory/manage.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── InventoryPage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── inventory/
 │       └── manage.php
-frontend/
-├── src/
-│   └── pages/
-│       └── InventoryPage.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 36: User Notifications
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1459,25 +2099,43 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Notifications API
 - `frontend/src/components/NotificationBell.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - NotificationBell styles
 - `backend/api/notifications/list.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── NotificationBell.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── notifications/
 │       └── list.php
-frontend/
-├── src/
-│   └── components/
-│       └── NotificationBell.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 37: User Settings
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1498,25 +2156,45 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for SettingsPage
+- `frontend/src/api/axiosConfig.js` - User API
 - `frontend/src/pages/SettingsPage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - SettingsPage styles
 - `backend/api/user/settings.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── SettingsPage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── user/
 │       └── settings.php
-frontend/
-├── src/
-│   └── pages/
-│       └── SettingsPage.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 38: Password Reset
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1537,25 +2215,45 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for ForgotPasswordPage
+- `frontend/src/api/axiosConfig.js` - Auth API
 - `frontend/src/pages/ForgotPasswordPage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - ForgotPasswordPage styles
 - `backend/api/auth/reset-password.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── ForgotPasswordPage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── auth/
 │       └── reset-password.php
-frontend/
-├── src/
-│   └── pages/
-│       └── ForgotPasswordPage.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 39: Email Verification
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1575,25 +2273,45 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/App.js` - Add route for VerifyEmailPage
+- `frontend/src/api/axiosConfig.js` - Auth API
 - `frontend/src/pages/VerifyEmailPage.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/pages.css` - VerifyEmailPage styles
 - `backend/api/auth/verify-email.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── pages.css
+│   ├── pages/
+│   │   └── VerifyEmailPage.jsx
+│   ├── App.js
+│   └── index.js
 backend/
 ├── api/
 │   └── auth/
 │       └── verify-email.php
-frontend/
-├── src/
-│   └── pages/
-│       └── VerifyEmailPage.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
 
 ---
 
 ## Feature 40: Recipe Export/Print
+
 **Flow:**
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐
 │ Frontend │────▶│ Backend  │────▶│ Database │
@@ -1614,19 +2332,33 @@ frontend/
 ```
 
 **Files Needed:**
+
+- `frontend/src/api/axiosConfig.js` - Recipe API
 - `frontend/src/components/ExportRecipeButton.jsx`
+- `frontend/src/styles/index.css` - Import CSS
+- `frontend/src/styles/components.css` - ExportRecipeButton styles
 - `backend/api/recipe/export.php`
+- `backend/db/connection.php`
 
 **Directory Structure:**
+
 ```
+frontend/
+├── src/
+│   ├── api/
+│   │   └── axiosConfig.js
+│   ├── styles/
+│   │   ├── index.css
+│   │   └── components.css
+│   ├── components/
+│   │   └── ExportRecipeButton.jsx
+│   └── App.js
 backend/
 ├── api/
 │   └── recipe/
 │       └── export.php
-frontend/
-├── src/
-│   └── components/
-│       └── ExportRecipeButton.jsx
+├── db/
+│   └── connection.php
+database/
+└── schema.sql
 ```
-
----
