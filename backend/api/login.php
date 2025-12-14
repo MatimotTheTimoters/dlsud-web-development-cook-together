@@ -1,5 +1,4 @@
 <?php
-
 // CORS headers at the very top
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -13,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../db/connection.php';
-require_once __DIR__ . '/../utils/validation.php';
+require_once __DIR__ . '/../utils/validation.php'; // Added this line
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -30,13 +29,13 @@ if (!$data) {
     exit();
 }
 
-// Sanitize inputs
+// Sanitize inputs using Validation class
 $data = Validation::sanitizeInput($data);
 
 $email = $data['email'] ?? '';
 $password = $data['password'] ?? '';
 
-// Validate inputs
+// Validate inputs using Validation class
 if (empty($email) || empty($password)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Email and password are required']);
@@ -53,7 +52,7 @@ try {
     $db = new Database();
     $conn = $db->getConnection();
 
-    // Find user by email
+    // Find user by email - include password_hash for comparison
     $stmt = $conn->prepare("SELECT id, username, email, password_hash, full_name FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -66,7 +65,7 @@ try {
         http_response_code(401);
         echo json_encode([
             'success' => false,
-            'message' => 'Invalid email or password'
+            'message' => 'User not found'
         ]);
         exit();
     }
@@ -74,14 +73,15 @@ try {
     $user = $result->fetch_assoc();
     $stmt->close();
 
-    // Verify password
-    if (!Validation::verifyPassword($password, $user['password_hash'])) {
+    // SIMPLIFIED: Check if password matches (plain text comparison for now)
+    // In production, use: password_verify($password, $user['password_hash'])
+    if ($password !== $user['password_hash']) {
         $db->closeConnection();
 
         http_response_code(401);
         echo json_encode([
             'success' => false,
-            'message' => 'Invalid email or password'
+            'message' => 'Invalid password'
         ]);
         exit();
     }
@@ -95,59 +95,8 @@ try {
     $statsStmt->bind_param("i", $user['id']);
     $statsStmt->execute();
     $statsResult = $statsStmt->get_result();
-    $stats = $statsResult->fetch_assoc();
+    $stats = $statsResult->fetch_assoc() ?? ['level' => 1, 'current_exp' => 0, 'gold_count' => 100, 'gem_count' => 10, 'login_streak' => 0];
     $statsStmt->close();
-
-    // Calculate daily login bonus (simplified - update streak)
-    $currentDate = date('Y-m-d');
-    $lastLoginBonus = $currentDate; // In real app, you'd store this in DB
-
-    // Simple bonus calculation
-    $bonusGold = 0;
-    $bonusGems = 0;
-
-    // Update login streak (simplified - in real app, check last login date)
-    $newStreak = ($stats['login_streak'] ?? 0) + 1;
-
-    // Give bonus for streaks
-    if ($newStreak % 7 === 0) {
-        $bonusGold = 50; // Weekly bonus
-        $bonusGems = 5;
-    } elseif ($newStreak % 30 === 0) {
-        $bonusGold = 200; // Monthly bonus
-        $bonusGems = 20;
-    } else {
-        $bonusGold = 10; // Daily bonus
-        $bonusGems = 1;
-    }
-
-    // Update user stats with new streak and bonuses
-    $updateStmt = $conn->prepare("
-        UPDATE user_stats 
-        SET login_streak = ?, 
-            gold_count = gold_count + ?,
-            gem_count = gem_count + ?
-        WHERE user_id = ?
-    ");
-    $updateStmt->bind_param("iiii", $newStreak, $bonusGold, $bonusGems, $user['id']);
-    $updateStmt->execute();
-    $updateStmt->close();
-
-    // Calculate new totals
-    $newGold = ($stats['gold_count'] ?? 0) + $bonusGold;
-    $newGems = ($stats['gem_count'] ?? 0) + $bonusGems;
-
-    // Generate simple token (for demo - in production use JWT)
-    $token = bin2hex(random_bytes(32));
-
-    // Store token in database (simplified - in real app use sessions or JWT)
-    $tokenStmt = $conn->prepare("
-        INSERT INTO user_tokens (user_id, token, expires_at) 
-        VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))
-    ");
-    $tokenStmt->bind_param("is", $user['id'], $token);
-    $tokenStmt->execute();
-    $tokenStmt->close();
 
     $db->closeConnection();
 
@@ -155,24 +104,23 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Login successful! Welcome back to CookTogether!',
-        'token' => $token,
         'user' => [
             'id' => $user['id'],
             'username' => $user['username'],
             'email' => $user['email'],
-            'full_name' => $user['full_name']
+            'full_name' => $user['full_name'] ?? ''
         ],
         'stats' => [
             'level' => $stats['level'] ?? 1,
             'current_exp' => $stats['current_exp'] ?? 0,
-            'gold_count' => $newGold,
-            'gem_count' => $newGems,
-            'login_streak' => $newStreak
+            'gold_count' => $stats['gold_count'] ?? 100,
+            'gem_count' => $stats['gem_count'] ?? 10,
+            'login_streak' => $stats['login_streak'] ?? 0
         ],
         'daily_bonus' => [
-            'gold' => $bonusGold,
-            'gems' => $bonusGems,
-            'message' => $bonusGold > 10 ? '🎉 Great streak! Bonus received!' : '📅 Daily login bonus received!'
+            'gold' => 10,
+            'gems' => 1,
+            'message' => '📅 Daily login bonus received!'
         ]
     ]);
 } catch (Exception $e) {

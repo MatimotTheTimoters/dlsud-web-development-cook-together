@@ -52,17 +52,15 @@ const LoginForm = () => {
         setErrors({});
 
         try {
-            // Use axios instead of fetch
             const response = await api.post('/login.php', {
                 email: formData.email,
                 password: formData.password
             });
 
-            const data = response.data; // Axios stores response in .data
+            const data = response.data;
 
             if (data.success) {
-                // Store authentication data
-                localStorage.setItem('auth_token', data.token);
+                // Store authentication data - NO TOKEN, just user data
                 localStorage.setItem('user', JSON.stringify(data.user));
                 localStorage.setItem('user_stats', JSON.stringify(data.stats));
 
@@ -77,19 +75,15 @@ const LoginForm = () => {
                 });
             }
         } catch (error) {
-            // Axios error handling
             if (error.response) {
-                // Server responded with error status
                 setErrors({
                     server: error.response.data?.message || 'Login failed'
                 });
             } else if (error.request) {
-                // Request made but no response
                 setErrors({
                     server: 'Network error. Please check your connection.'
                 });
             } else {
-                // Something else went wrong
                 setErrors({
                     server: 'An error occurred. Please try again.'
                 });

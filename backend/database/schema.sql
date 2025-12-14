@@ -1,57 +1,47 @@
--- Create database if it doesn't exist
+-- Replace your schema.sql with this cleaner version:
 CREATE DATABASE IF NOT EXISTS cooktogether;
 USE cooktogether;
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100),
+    bio TEXT,
+    location VARCHAR(100),
+    profile_picture VARCHAR(255),
+    cooking_since YEAR,
+    last_login DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
--- User stats table (for future gamification)
-CREATE TABLE user_stats (
+-- User stats table
+CREATE TABLE IF NOT EXISTS user_stats (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT UNIQUE NOT NULL,
     login_streak INT DEFAULT 0,
     level INT DEFAULT 1,
     current_exp INT DEFAULT 0,
+    current_level_ceiling INT DEFAULT 100,
     gold_count INT DEFAULT 100,
-    -- Start with 100 gold
     gem_count INT DEFAULT 10,
-    -- Start with 10 gems
+    recipes_created INT DEFAULT 0,
+    recipes_cooked INT DEFAULT 0,
+    challenges_completed INT DEFAULT 0,
+    recipes_sold INT DEFAULT 0,
+    total_cooking_time INT DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
--- Add user_tokens table for authentication
-CREATE TABLE IF NOT EXISTS user_tokens (
+-- User achievements table
+CREATE TABLE IF NOT EXISTS user_achievements (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    token VARCHAR(64) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME NOT NULL,
+    achievement_type VARCHAR(50) NOT NULL,
+    achievement_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    icon VARCHAR(50),
+    achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_token (token),
-    INDEX idx_expires (expires_at)
+    INDEX idx_user_achievements (user_id, achievement_type)
 );
--- Add last_login field to users table
-ALTER TABLE users
-ADD COLUMN IF NOT EXISTS last_login DATETIME NULL;
--- Update validation utility to include verifyPassword function
--- (Already exists in your validation.php)
-USE cooktogether;
--- Add user_tokens table
-CREATE TABLE IF NOT EXISTS user_tokens (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    token VARCHAR(64) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_token (token),
-    INDEX idx_expires (expires_at)
-);
--- Add last_login to users table if not exists
-ALTER TABLE users
-ADD COLUMN IF NOT EXISTS last_login DATETIME NULL;

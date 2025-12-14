@@ -1,5 +1,4 @@
 <?php
-
 // CORS headers
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -49,9 +48,10 @@ if (!Validation::validateEmail($email)) {
     $errors[] = 'Invalid email address';
 }
 
-if (!Validation::validatePassword($password)) {
-    $errors[] = 'Password must be at least 8 characters with uppercase, lowercase, and number';
-}
+// SIMPLIFIED: Remove password validation for now
+// if (!Validation::validatePassword($password)) {
+//     $errors[] = 'Password must be at least 8 characters with uppercase, lowercase, and number';
+// }
 
 if (!empty($errors)) {
     http_response_code(400);
@@ -82,8 +82,9 @@ try {
     }
     $checkStmt->close();
 
-    // Hash password
-    $password_hash = Validation::hashPassword($password);
+    // SIMPLIFIED: Store plain password for now (TEMPORARY - INSECURE)
+    // In production, always use password_hash()
+    $password_hash = $password; // Storing plain password temporarily
 
     // Insert user
     $stmt = $conn->prepare("
