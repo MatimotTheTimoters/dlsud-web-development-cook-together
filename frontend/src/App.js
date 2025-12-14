@@ -6,6 +6,7 @@ import './App.css';
 import ProfilePage from './pages/ProfilePage';
 import CreateRecipePage from './pages/CreateRecipePage';
 import RecipesPage from './pages/RecipesPage';
+import RecipeDetailPage from './pages/RecipeDetailPage';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/create-recipe" element={<CreateRecipePage />} />
             <Route path="/recipes" element={<RecipesPage />} />
+            <Route path="/recipe/:id" element={<RecipeDetailPage />} />
           </Routes>
         </main>
 

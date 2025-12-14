@@ -1,16 +1,14 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function RecipeCard({ recipe }) {
-    // Convert to numbers and calculate total time
-    const prepTime = Number(recipe.prep_time) || 0;
-    const cookTime = Number(recipe.cook_time) || 0;
-    const totalTime = prepTime + cookTime;
+    const totalTime = (+recipe.prep_time || 0) + (+recipe.cook_time || 0);
 
     return (
         <div className="recipe-card">
             <div className="recipe-header">
                 <h3>{recipe.title}</h3>
-                <span className={`difficulty ${recipe.difficulty?.toLowerCase() || 'medium'}`}>
+                <span className={`difficulty ${(recipe.difficulty || 'Medium').toLowerCase()}`}>
                     {recipe.difficulty || 'Medium'}
                 </span>
             </div>
@@ -27,7 +25,9 @@ function RecipeCard({ recipe }) {
 
             <div className="recipe-footer">
                 <span className="category">#{recipe.category || 'Uncategorized'}</span>
-                <button className="view-btn">View Recipe</button>
+                <Link to={`/recipe/${recipe.id}`} className="view-btn">
+                    View Recipe
+                </Link>
             </div>
         </div>
     );
