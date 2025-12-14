@@ -1,5 +1,10 @@
 <?php
 
+// Set CORS headers
+require_once __DIR__ . '/../../config/cors.php';
+CORS::setCorsHeaders();
+CORS::handlePreflight();
+
 // Required imports per backend_files.md
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../classes/AuthHelper.php';
@@ -8,10 +13,6 @@ require_once __DIR__ . '/../../classes/ResponseFormatter.php';
 require_once __DIR__ . '/../../classes/UserCalculations.php';
 require_once __DIR__ . '/../../utils/uuidHelper.php';
 require_once __DIR__ . '/../../utils/validation.php';
-
-// Set CORS headers
-header('Content-Type: application/json');
-require_once __DIR__ . '/../../config/cors.php';
 
 $responseFormatter = new ResponseFormatter();
 $authHelper = new AuthHelper();
