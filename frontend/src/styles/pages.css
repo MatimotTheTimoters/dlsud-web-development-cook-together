@@ -86,3 +86,23 @@
     font-size: 0.9rem;
     margin: 0;
 }
+
+/* Home Page Updates */
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.cta-button.secondary {
+    background: linear-gradient(135deg, #6c5ce7, #a55eea);
+}
+
+.user-stats {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem auto;
+    max-width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}

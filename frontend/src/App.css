@@ -127,3 +127,43 @@ body {
   margin: 0;
   opacity: 0.8;
 }
+
+/* Add these to your existing App.css */
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.cta-button.secondary {
+  background: linear-gradient(135deg, #6c5ce7, #a55eea);
+}
+
+.user-stats {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem auto;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Make sure the nav links are properly spaced */
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+/* Responsive navigation */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+}

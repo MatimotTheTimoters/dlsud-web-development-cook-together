@@ -24,3 +24,34 @@ CREATE TABLE user_stats (
     -- Start with 10 gems
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+-- Add user_tokens table for authentication
+CREATE TABLE IF NOT EXISTS user_tokens (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    token VARCHAR(64) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_token (token),
+    INDEX idx_expires (expires_at)
+);
+-- Add last_login field to users table
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS last_login DATETIME NULL;
+-- Update validation utility to include verifyPassword function
+-- (Already exists in your validation.php)
+USE cooktogether;
+-- Add user_tokens table
+CREATE TABLE IF NOT EXISTS user_tokens (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    token VARCHAR(64) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_token (token),
+    INDEX idx_expires (expires_at)
+);
+-- Add last_login to users table if not exists
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS last_login DATETIME NULL;
