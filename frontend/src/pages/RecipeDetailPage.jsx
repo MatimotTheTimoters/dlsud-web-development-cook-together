@@ -29,6 +29,31 @@ function RecipeDetailPage() {
 
     const totalTime = (+recipe.prep_time || 0) + (+recipe.cook_time || 0);
 
+    const startCookingSession = async () => {
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!user) {
+                alert('Please log in to start cooking');
+                return;
+            }
+
+            const response = await api.post('/session/create.php', {
+                recipe_id: id,
+                user_id: user.id
+            });
+
+            if (response.data.success) {
+                // Redirect to cooking session page
+                window.location.href = `/cooking-session/${response.data.session_id}`;
+            } else {
+                alert('Failed to start cooking session');
+            }
+        } catch (error) {
+            console.error('Error starting session:', error);
+            alert('Error starting cooking session');
+        }
+    };
+
     return (
         <div className="recipe-detail">
             <div className="recipe-header">
@@ -67,7 +92,9 @@ function RecipeDetailPage() {
             </div>
 
             <div className="recipe-actions">
-                <button className="btn-primary">Start Cooking</button>
+                <button className="btn-primary" onClick={startCookingSession}>
+                    Start Cooking
+                </button>
                 <button className="btn-secondary">Save Recipe</button>
             </div>
         </div>

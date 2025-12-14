@@ -73,3 +73,12 @@ CREATE TABLE IF NOT EXISTS recipe_steps (
     instruction TEXT NOT NULL,
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );
+-- Cooking sessions table
+CREATE TABLE IF NOT EXISTS cooking_sessions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    recipe_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

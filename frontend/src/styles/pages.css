@@ -356,3 +356,112 @@
     padding: 40px;
     font-size: 18px;
 }
+
+/* Cooking Session Page Styles */
+.cooking-session {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.session-message {
+    font-size: 1.2em;
+    margin: 20px 0;
+    padding: 10px;
+    background: #e6f7ff;
+    border-radius: 5px;
+}
+
+.session-info {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.session-info p {
+    margin: 8px 0;
+}
+
+.session-controls {
+    margin-top: 30px;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.btn-primary {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.current-step {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.step-card {
+    background: #f0f8ff;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+    min-height: 60px;
+}
+
+.step-controls {
+    margin: 20px 0;
+}
+
+.step-controls button {
+    margin: 0 10px;
+}
+
+/* All Steps List */
+.all-steps {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.all-steps ol {
+    padding-left: 20px;
+}
+
+.all-steps li {
+    margin: 8px 0;
+    padding: 5px;
+    border-left: 3px solid transparent;
+}
+
+.all-steps .active-step {
+    background: #e6f7ff;
+    border-left: 3px solid #4CAF50;
+    font-weight: bold;
+}
+
+/* Button states */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

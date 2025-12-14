@@ -387,40 +387,13 @@ VALUES -- Spaghetti Carbonara steps
         'Brush with egg wash and bake at 400°F for 25-30 minutes'
     );
 -- Insert cooking sessions (some completed, some active)
-INSERT INTO cooking_sessions (
-        recipe_id,
-        user_id,
-        status,
-        started_at,
-        completed_at,
-        total_time
-    )
-VALUES (
-        1,
-        1,
-        'completed',
-        '2024-01-14 18:00:00',
-        '2024-01-14 18:40:00',
-        40
-    ),
-    (
-        2,
-        2,
-        'completed',
-        '2024-01-14 15:30:00',
-        '2024-01-14 16:00:00',
-        30
-    ),
-    (
-        3,
-        3,
-        'completed',
-        '2024-01-13 19:00:00',
-        '2024-01-13 20:10:00',
-        70
-    ),
-    (4, 4, 'active', '2024-01-15 08:30:00', NULL, 0),
-    (2, 5, 'active', '2024-01-15 10:00:00', NULL, 0);
+-- Insert cooking sessions (using new table structure)
+INSERT INTO cooking_sessions (recipe_id, user_id, created_at)
+VALUES (1, 1, '2024-01-14 18:00:00'),
+    (2, 2, '2024-01-14 15:30:00'),
+    (3, 3, '2024-01-13 19:00:00'),
+    (4, 4, '2024-01-15 08:30:00'),
+    (2, 5, '2024-01-15 10:00:00');
 -- Display inserted data for verification
 SELECT '=== USERS ===' as '';
 SELECT id,
