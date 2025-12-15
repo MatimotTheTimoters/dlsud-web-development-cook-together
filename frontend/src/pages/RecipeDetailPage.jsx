@@ -2,24 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import SessionTypeModal from '../components/SessionTypeModal';
-import SessionShareModal from '../components/SessionShareModal'; // ADDED
+import SessionShareModal from '../components/SessionShareModal';
 import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from 'notistack'; // ADDED for notifications
+import { useSnackbar } from 'notistack'; // For notifications
 
 function RecipeDetailPage() {
     const { id } = useParams();
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showSessionModal, setShowSessionModal] = useState(false);
-    const [showShareModal, setShowShareModal] = useState(false); // ADDED
-    const [sessionData, setSessionData] = useState(null); // ADDED
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [sessionData, setSessionData] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null); // ADDED
     const navigate = useNavigate();
-    const { enqueueSnackbar } = useSnackbar(); // ADDED
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchRecipe();
+        // Get current user from localStorage
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        setCurrentUser(user);
     }, [id]);
-    
 
     const fetchRecipe = async () => {
         try {
@@ -29,12 +32,12 @@ function RecipeDetailPage() {
             }
         } catch (error) {
             console.error('Error fetching recipe:', error);
+            enqueueSnackbar('Error loading recipe', { variant: 'error' });
         } finally {
             setLoading(false);
         }
     };
 
-    // ADDED: Handle session creation callback
     const handleSessionCreated = (sessionResponse) => {
         if (sessionResponse.session_type === 'multiplayer') {
             // Store session data and show share modal
@@ -55,11 +58,22 @@ function RecipeDetailPage() {
         }
     };
 
-    // ADDED: Handle going to session lobby
+    // UPDATED: Changed to use cooking-session route instead of session-lobby
     const goToSessionLobby = () => {
         if (sessionData?.sessionId) {
-            navigate(`/session-lobby/${sessionData.sessionId}`);
+            navigate(`/cooking-session/${sessionData.sessionId}`);
+            setShowShareModal(false);
         }
+    };
+
+    // ADDED: Check if user is logged in before showing session modal
+    const handleStartCooking = () => {
+        if (!currentUser) {
+            enqueueSnackbar('Please log in to start cooking', { variant: 'warning' });
+            navigate('/login');
+            return;
+        }
+        setShowSessionModal(true);
     };
 
     if (loading) return <div className="loading">Loading recipe...</div>;
@@ -127,10 +141,10 @@ function RecipeDetailPage() {
             </div>
 
             <div className="recipe-actions">
-                {/* UPDATED: Changed from direct API call to modal trigger */}
+                {/* UPDATED: Added login check */}
                 <button 
                     className="btn-primary" 
-                    onClick={() => setShowSessionModal(true)}
+                    onClick={handleStartCooking}
                     style={{ background: '#E63946' }}
                 >
                     Start Cooking
@@ -144,17 +158,17 @@ function RecipeDetailPage() {
                 onClose={() => setShowSessionModal(false)}
                 recipeId={id}
                 recipeTitle={recipe?.title || 'Recipe'}
-                userId={1} // ADDED: You'll need to get current user ID
-                onSessionCreated={handleSessionCreated} // ADDED
+                userId={currentUser?.id || null} // UPDATED: Use actual user ID
+                onSessionCreated={handleSessionCreated}
             />
 
-            {/* ADDED: Session Share Modal (Feature 7.5) */}
+            {/* Session Share Modal (Feature 7.5) */}
             <SessionShareModal
                 open={showShareModal}
                 onClose={() => setShowShareModal(false)}
                 sessionCode={sessionData?.joinCode}
                 sessionId={sessionData?.sessionId}
-                onGoToLobby={goToSessionLobby} // ADDED
+                onGoToLobby={goToSessionLobby}
             />
         </div>
     );

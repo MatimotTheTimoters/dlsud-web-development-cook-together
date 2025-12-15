@@ -4,7 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import SessionShareModal from './SessionShareModal';
 import '../styles/components.css';
 
-function SessionTypeModal({ open, onClose, recipeId, recipeTitle }) {
+// Add these props to your SessionTypeModal component
+function SessionTypeModal({ 
+  open, 
+  onClose, 
+  recipeId, 
+  recipeTitle, 
+  userId, // ADD THIS
+  onSessionCreated // ADD THIS - callback function from parent
+}) {
     const [loading, setLoading] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [sessionData, setSessionData] = useState(null);
@@ -12,47 +20,67 @@ function SessionTypeModal({ open, onClose, recipeId, recipeTitle }) {
     
 
     const createSession = async (sessionType) => {
-    try {
-        setLoading(true);
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
-        
-        if (!user) {
-            alert('Please log in to start cooking');
-            onClose();
-            return;
-        }
-
-        // Make sure the URL is correct
-        const response = await api.post('/session/create.php', {
-            recipe_id: recipeId,
-            user_id: user.id,
-            session_type: sessionType
-        });
-
-        console.log('Response:', response.data); // Add this for debugging
-
-        if (response.data.success) {
-            if (sessionType === 'solo') {
-                navigate(`/cooking-session/${response.data.session_id}`);
-            } else if (sessionType === 'multiplayer') {
-                setSessionData({
-                    sessionId: response.data.session_id,
-                    joinCode: response.data.join_code
-                });
-                setShowShareModal(true);
+        try {
+            setLoading(true);
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const userIdToUse = userId || (user ? user.id : null);
+            
+            if (!userIdToUse) {
+                alert('Please log in to start cooking');
+                onClose();
+                return;
             }
-        } else {
-            alert('Failed to start cooking session: ' + (response.data.message || 'Unknown error'));
+
+            // Make sure the URL is correct
+            const response = await api.post('/session/create.php', {
+                recipe_id: recipeId,
+                user_id: userIdToUse, // Use userId prop or from localStorage
+                session_type: sessionType
+            });
+
+            console.log('Response:', response.data); // Add this for debugging
+
+            if (response.data.success) {
+                const sessionInfo = {
+                    session_type: sessionType,
+                    session_id: response.data.session_id,
+                    join_code: response.data.join_code
+                };
+                
+                // Call the parent callback if provided
+                if (onSessionCreated) {
+                    onSessionCreated(sessionInfo);
+                }
+                
+                if (sessionType === 'solo') {
+                    navigate(`/cooking-session/${response.data.session_id}`);
+                } else if (sessionType === 'multiplayer') {
+                    setSessionData({
+                        sessionId: response.data.session_id,
+                        joinCode: response.data.join_code
+                    });
+                    setShowShareModal(true);
+                }
+            } else {
+                alert('Failed to start cooking session: ' + (response.data.message || 'Unknown error'));
             }
-            } catch (error) {
+        } catch (error) {
             console.error('Error creating session:', error);
             console.error('Error details:', error.response?.data); // Log more details
             alert('Error starting cooking session. Check console for details.');
-            } finally {
+        } finally {
             setLoading(false);
         }
     };
 
+    // ADD THIS FUNCTION - it handles navigation when user clicks "Go to Session Lobby"
+    const handleSessionCreated = () => {
+        if (sessionData && sessionData.sessionId) {
+            navigate(`/cooking-session/${sessionData.sessionId}`);
+            setShowShareModal(false);
+            onClose();
+        }
+    };
 
     if (!open) return null;
 
