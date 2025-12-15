@@ -491,3 +491,48 @@
         background-position: 200% center;
     }
 }
+
+/* Sidebar Animations */
+.sidebar-item {
+    transition: all 0.2s ease !important;
+}
+
+.sidebar-item:hover {
+    transform: translateX(4px) !important;
+}
+
+/* Quick Actions Animation */
+.quick-action-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-8px) scale(1.05) !important;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .quick-action-card {
+        margin-bottom: 16px !important;
+    }
+
+    .navbar-menu-button {
+        margin-left: 8px !important;
+    }
+}
+
+/* Dialog Styling */
+.confirmation-dialog {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+
+.confirmation-dialog .MuiDialogTitle-root {
+    background-color: #F1FAEE;
+    color: #1D3557;
+}
+
+/* Smooth Transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}

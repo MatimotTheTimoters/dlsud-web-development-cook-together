@@ -2290,7 +2290,7 @@ database/
 
 ---
 
-## Feature 30: Session Timer
+## > Feature 30: Session Timer
 
 **Flow:**
 
@@ -2538,7 +2538,7 @@ database/
 
 ---
 
-## Feature 34: Session Completion Rewards
+## > Feature 34: Session Completion Rewards
 
 **Flow:**
 
