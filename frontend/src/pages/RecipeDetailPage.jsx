@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
 import RecipeHeader from '../components/RecipeHeader';
 import RecipeImage from '../components/RecipeImage';
-import RecipeIngredientList from '../components/RecipeIngredientList'; // CHANGED
-import RecipeStepList from '../components/RecipeStepList'; // CHANGED
+import RecipeIngredientList from '../components/RecipeIngredientList';
+import RecipeStepList from '../components/RecipeStepList';
 import StartCookingButton from '../components/StartCookingButton';
 import SaveRecipeButton from '../components/SaveRecipeButton';
 import CommentSection from '../components/CommentSection';

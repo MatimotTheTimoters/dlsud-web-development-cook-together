@@ -367,3 +367,12 @@
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+/* Complete Step Button */
+.complete-step-button {
+    transition: all 0.3s ease;
+}
+
+.complete-step-button:hover {
+    transform: translateY(-2px);
+}

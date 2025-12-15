@@ -98,3 +98,13 @@ CREATE TABLE IF NOT EXISTS session_participants (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY unique_participant (session_id, user_id)
 );
+-- Step completions table (Add this to your existing schema)
+CREATE TABLE IF NOT EXISTS step_completions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    session_id INT NOT NULL,
+    step_id INT NOT NULL,
+    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES cooking_sessions(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_step_completion (session_id, step_id),
+    INDEX idx_session_steps (session_id, step_id)
+);

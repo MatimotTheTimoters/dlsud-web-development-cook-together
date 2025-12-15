@@ -5,6 +5,7 @@ import { Timer, NavigateNext, NavigateBefore, CheckCircle } from '@mui/icons-mat
 import { motion } from 'framer-motion';
 import Confetti from 'react-confetti';
 import api from '../api/axiosConfig';
+import CompleteStepButton from '../components/CompleteStepButton';
 
 function CookingSessionPage() {
     const { sessionId } = useParams();
@@ -18,13 +19,7 @@ function CookingSessionPage() {
     const [checkedIngredients, setCheckedIngredients] = useState([]);
 
     useEffect(() => {
-        // Mock data for now
-        setSession({ id: sessionId, type: 'solo' });
-        setRecipe({
-            title: 'Spaghetti Carbonara',
-            steps: ['Boil water for pasta', 'Cook pancetta', 'Mix eggs and cheese', 'Combine everything'].join('.'),
-            ingredients: ['400g spaghetti', '200g pancetta', '4 eggs', '100g pecorino cheese'].join(',')
-        });
+        fetchSession();
     }, [sessionId]);
 
     useEffect(() => {
@@ -34,6 +29,31 @@ function CookingSessionPage() {
         }
         return () => clearInterval(timer);
     }, [running, completed]);
+
+    const fetchSession = async () => {
+        try {
+            // Fetch session details
+            const sessionRes = await api.get(`/session/get.php?id=${sessionId}`);
+            if (sessionRes.data.success) {
+                setSession(sessionRes.data.session);
+
+                // Fetch recipe details
+                const recipeRes = await api.get(`/recipe/get.php?id=${sessionRes.data.session.recipe_id}`);
+                if (recipeRes.data.success) {
+                    setRecipe(recipeRes.data.recipe);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching session:', error);
+            // Use mock data for testing
+            setSession({ id: sessionId, type: 'solo' });
+            setRecipe({
+                title: 'Spaghetti Carbonara',
+                steps: ['Boil water for pasta', 'Cook pancetta', 'Mix eggs and cheese', 'Combine everything'].join('.'),
+                ingredients: ['400g spaghetti', '200g pancetta', '4 eggs', '100g pecorino cheese'].join(',')
+            });
+        }
+    };
 
     const steps = recipe?.steps?.split('.').filter(s => s.trim()) || [];
     const ingredients = recipe?.ingredients?.split(',').filter(i => i.trim()) || [];
@@ -59,7 +79,8 @@ function CookingSessionPage() {
             {completed && <Confetti />}
 
             <Typography variant="h4" sx={{ color: '#E63946', mb: 3, textAlign: 'center' }}>
-                👨‍🍳 Cooking Session #{sessionId}
+                {session.type === 'multiplayer' ? '👥 ' : '👤 '}
+                {session.type === 'multiplayer' ? 'Multiplayer' : 'Solo'} Cooking Session #{sessionId}
             </Typography>
 
             {/* Timer */}
@@ -81,6 +102,19 @@ function CookingSessionPage() {
                 <Typography variant="h5" sx={{ color: '#1D3557' }}>
                     {steps[currentStep] || 'No steps available'}
                 </Typography>
+
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <CompleteStepButton
+                        sessionId={sessionId}
+                        stepId={currentStep}
+                        onComplete={() => {
+                            // Auto-advance to next step after completing
+                            if (currentStep < steps.length - 1) {
+                                setCurrentStep(currentStep + 1);
+                            }
+                        }}
+                    />
+                </Box>
             </Paper>
 
             {/* Step Navigation */}
