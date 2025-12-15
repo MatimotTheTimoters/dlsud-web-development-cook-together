@@ -393,3 +393,27 @@
 .like-button.unliked {
     color: #757575;
 }
+
+/* Save Recipe Button Styles */
+.save-recipe-button {
+    transition: all 0.3s ease;
+}
+
+.save-recipe-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Cookbook Page Styles */
+.cookbook-page {
+    min-height: 100vh;
+}
+
+.cookbook-category-tab {
+    border-radius: 8px !important;
+    margin: 0 4px !important;
+}
+
+.cookbook-category-tab.Mui-selected {
+    background-color: #457B9D !important;
+    color: white !important;
+}

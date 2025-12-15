@@ -11,7 +11,8 @@ import RecipeStepList from '../components/RecipeStepList';
 import StartCookingButton from '../components/StartCookingButton';
 import SaveRecipeButton from '../components/SaveRecipeButton';
 import CommentSection from '../components/CommentSection';
-import LikeButton from '../components/LikeButton'; // FIXED: Changed path
+import LikeButton from '../components/LikeButton';
+import PurchaseButton from '../components/PurchaseButton';
 
 function RecipeDetailPage() {
     const { id } = useParams();
@@ -57,8 +58,9 @@ function RecipeDetailPage() {
 
             <Box className="recipe-actions" sx={{ display: 'flex', gap: '20px', mt: 3 }}>
                 <StartCookingButton recipeId={id} />
-                <SaveRecipeButton recipeId={id} />
+                <SaveRecipeButton recipeId={id} initialSaved={recipe.saved || false} />
                 <LikeButton recipeId={id} initialLikes={recipe.likes || 0} />
+                <PurchaseButton recipeId={id} recipeTitle={recipe.title} />
             </Box>
 
             <Divider sx={{ my: 4 }} />
