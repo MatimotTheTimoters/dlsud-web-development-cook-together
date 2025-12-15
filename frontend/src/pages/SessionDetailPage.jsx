@@ -149,12 +149,7 @@ function SessionDetailPage() {
             <Paper sx={{ bgcolor: 'white', p: 2, mb: 4 }}>
                 <List>
                     {participants.map((player, index) => (
-                        <motion.div
-                            key={player.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                        >
+                        <div key={player.id}>
                             <ListItem
                                 sx={{
                                     borderBottom: '1px solid #E0E0E0',
@@ -204,7 +199,7 @@ function SessionDetailPage() {
                                     }
                                 />
                             </ListItem>
-                        </motion.div>
+                        </div>
                     ))}
 
                     {/* Empty slots */}
