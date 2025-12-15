@@ -3,7 +3,6 @@ import api from '../api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import SessionShareModal from './SessionShareModal';
 import '../styles/components.css';
-import SessionShareModal from './SessionShareModal';
 
 function SessionTypeModal({ open, onClose, recipeId, recipeTitle }) {
     const [loading, setLoading] = useState(false);
