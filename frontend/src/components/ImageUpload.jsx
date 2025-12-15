@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react'; // Added useRef
 import { Button, Box, Typography, Paper } from '@mui/material';
-import { CloudUpload, Image } from '@mui/icons-material';
+import { CloudUpload, Image, Close } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 
 function ImageUpload({ onImageSelect }) {
     const [preview, setPreview] = useState(null);
+    const fileInputRef = useRef(null); // Create a ref for the file input
     const { enqueueSnackbar } = useSnackbar();
 
     const handleFileChange = (e) => {
@@ -24,13 +25,43 @@ function ImageUpload({ onImageSelect }) {
 
             // Create preview
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result);
-                onImageSelect(file);
+            reader.onload = () => {
+                const base64String = reader.result;
+                setPreview(base64String);
+                onImageSelect(base64String); // Send base64 string
             };
             reader.readAsDataURL(file);
 
             enqueueSnackbar('✅ Image selected!', { variant: 'success' });
+        }
+    };
+
+    const handleRemoveImage = (e) => {
+        e.stopPropagation();
+        setPreview(null);
+        onImageSelect(null); // Clear image
+
+        // Reset file input properly
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+
+        enqueueSnackbar('🗑️ Image removed', { variant: 'info' });
+    };
+
+    const handleReplaceImage = () => {
+        // Directly trigger the file input click
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handlePaperClick = () => {
+        // Only open file dialog if there's no preview
+        if (!preview) {
+            if (fileInputRef.current) {
+                fileInputRef.current.click();
+            }
         }
     };
 
@@ -46,33 +77,66 @@ function ImageUpload({ onImageSelect }) {
                     border: '2px dashed #A8DADC',
                     textAlign: 'center',
                     backgroundColor: '#F1FAEE',
-                    cursor: 'pointer',
-                    '&:hover': { borderColor: '#457B9D' }
+                    cursor: preview ? 'default' : 'pointer', // Change cursor if has preview
+                    '&:hover': {
+                        borderColor: preview ? '#A8DADC' : '#457B9D',
+                        backgroundColor: preview ? '#F1FAEE' : '#f8f9fa'
+                    }
                 }}
-                onClick={() => document.getElementById('image-upload').click()}
+                onClick={handlePaperClick}
             >
                 {preview ? (
-                    <Box>
-                        <img
-                            src={preview}
-                            alt="Preview"
-                            style={{
-                                maxWidth: '100%',
-                                maxHeight: '200px',
-                                borderRadius: '8px',
-                                marginBottom: '10px'
-                            }}
-                        />
-                        <Button
-                            variant="outlined"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setPreview(null);
-                                onImageSelect(null);
-                            }}
-                        >
-                            Remove Image
-                        </Button>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center'
+                    }}>
+                        <Box sx={{ position: 'relative', width: '100%', mb: 2 }}>
+                            <img
+                                src={preview}
+                                alt="Preview"
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '200px',
+                                    borderRadius: '8px',
+                                    objectFit: 'contain'
+                                }}
+                            />
+                            <Button
+                                size="small"
+                                sx={{
+                                    position: 'absolute',
+                                    top: 8,
+                                    right: 8,
+                                    minWidth: 'auto',
+                                    padding: '4px 8px',
+                                    backgroundColor: 'rgba(0,0,0,0.5)',
+                                    color: 'white',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(0,0,0,0.7)'
+                                    }
+                                }}
+                                onClick={handleRemoveImage}
+                            >
+                                <Close fontSize="small" />
+                            </Button>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <Button
+                                variant="outlined"
+                                onClick={handleReplaceImage}
+                            >
+                                Replace Image
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={handleRemoveImage}
+                            >
+                                Remove
+                            </Button>
+                        </Box>
                     </Box>
                 ) : (
                     <>
@@ -86,6 +150,7 @@ function ImageUpload({ onImageSelect }) {
                     </>
                 )}
                 <input
+                    ref={fileInputRef}
                     id="image-upload"
                     type="file"
                     accept="image/*"
