@@ -348,3 +348,22 @@
 .comment-item {
     margin-bottom: 15px;
 }
+
+/* JoinSessionButton Styles */
+.join-session-button {
+    transition: all 0.3s ease;
+}
+
+.join-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.session-code-input input {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}

@@ -297,3 +297,82 @@ body {
     background-color: white;
     border: 1px solid #E0E0E0;
 }
+
+/* SessionsPage Styles */
+.sessions-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #F1FAEE 0%, #FFFFFF 100%);
+}
+
+.session-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.session-card:hover {
+    transform: translateY(-4px);
+}
+
+.session-header {
+    background: linear-gradient(90deg, #457B9D, #1D3557);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+}
+
+.session-code-badge {
+    background: #FFD700;
+    color: #1D3557;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* SessionDetailPage Styles */
+.session-detail-page {
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFFFFF 100%);
+    min-height: 100vh;
+}
+
+.session-lobby-header {
+    background: linear-gradient(90deg, #457B9D, #1D3557);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.player-list-item {
+    transition: background-color 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.player-list-item:hover {
+    background-color: #F5F5F5;
+}
+
+.ready-badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.empty-slot {
+    background-color: #F9F9F9;
+    border: 2px dashed #E0E0E0;
+    border-radius: 8px;
+}
