@@ -1,4 +1,20 @@
 import React, { useState } from 'react';
+import {
+    TextField,
+    Select,
+    MenuItem,
+    Button,
+    FormControl,
+    InputLabel,
+    Box,
+    Typography,
+    Grid,
+    Alert,
+    CircularProgress
+} from '@mui/material';
+import { Add, Timer, Restaurant } from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { useSnackbar } from 'notistack';
 import api from '../api/axiosConfig';
 
 function RecipeForm() {
@@ -7,34 +23,32 @@ function RecipeForm() {
         description: '',
         ingredients: '',
         steps: '',
-        prep_time: 0,
-        cook_time: 0,
-        servings: 1,
+        prep_time: '',
+        cook_time: '',
+        servings: '',
         difficulty: 'Medium',
         category: ''
     });
-    const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleChange = (e) => {
-        const value = e.target.type === 'number' ? parseInt(e.target.value) || 0 : e.target.value;
-        setForm({ ...form, [e.target.name]: value });
+        setForm({ ...form, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setMessage('');
 
         // Basic validation
         if (!form.title.trim()) {
-            setMessage('❌ Recipe title is required');
+            enqueueSnackbar('❌ Recipe title is required', { variant: 'error' });
             setLoading(false);
             return;
         }
 
         if (!form.ingredients.trim()) {
-            setMessage('❌ Ingredients are required');
+            enqueueSnackbar('❌ Ingredients are required', { variant: 'error' });
             setLoading(false);
             return;
         }
@@ -42,153 +56,164 @@ function RecipeForm() {
         try {
             const response = await api.post('/recipe/create.php', {
                 ...form,
+                prep_time: parseInt(form.prep_time) || 0,
+                cook_time: parseInt(form.cook_time) || 0,
+                servings: parseInt(form.servings) || 1,
                 user_id: 1
             });
 
-            console.log("Response:", response.data);
-
             if (response.data.success) {
-                setMessage(`✅ Recipe created! ID: ${response.data.recipe_id}`);
+                enqueueSnackbar(`✅ Recipe created! ID: ${response.data.recipe_id}`, { variant: 'success' });
+
                 // Reset form
                 setForm({
                     title: '',
                     description: '',
                     ingredients: '',
                     steps: '',
-                    prep_time: 0,
-                    cook_time: 0,
-                    servings: 1,
+                    prep_time: '',
+                    cook_time: '',
+                    servings: '',
                     difficulty: 'Medium',
                     category: ''
                 });
             } else {
-                setMessage(`❌ ${response.data.message}`);
+                enqueueSnackbar(`❌ ${response.data.message}`, { variant: 'error' });
             }
         } catch (error) {
             console.error("Error:", error);
-            setMessage('❌ Failed to create recipe');
+            enqueueSnackbar('❌ Failed to create recipe', { variant: 'error' });
         } finally {
             setLoading(false);
         }
     };
 
+    const timeFields = [
+        { label: 'Prep Time (min)', name: 'prep_time', icon: <Timer /> },
+        { label: 'Cook Time (min)', name: 'cook_time', icon: <Timer /> },
+        { label: 'Servings', name: 'servings', icon: <Restaurant /> }
+    ];
+
     return (
-        <form className="recipe-form" onSubmit={handleSubmit}>
-            <h2>🍳 Create New Recipe</h2>
+        <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto' }}>
+            {/* Title */}
+            <TextField
+                fullWidth
+                label="Recipe Title *"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                sx={{ mb: 3, '& .MuiOutlinedInput-root': { borderColor: '#A8DADC' } }}
+                placeholder="e.g., Chocolate Chip Cookies"
+                required
+            />
 
-            <div className="form-group">
-                <label>Recipe Title *</label>
-                <input
-                    type="text"
-                    name="title"
-                    value={form.title}
-                    onChange={handleChange}
-                    placeholder="e.g., Chocolate Chip Cookies"
-                    required
-                />
-            </div>
+            {/* Description */}
+            <TextField
+                fullWidth
+                label="Description"
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                multiline
+                rows={2}
+                sx={{ mb: 3 }}
+                placeholder="A delicious recipe that everyone will love!"
+            />
 
-            <div className="form-group">
-                <label>Ingredients *</label>
-                <textarea
-                    name="ingredients"
-                    value={form.ingredients}
-                    onChange={handleChange}
-                    placeholder="Flour, Sugar, Eggs, Butter"
-                    rows="3"
-                    required
-                />
-            </div>
+            {/* Time Fields Row */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                {timeFields.map((field) => (
+                    <Grid item xs={12} sm={4} key={field.name}>
+                        <TextField
+                            fullWidth
+                            label={field.label}
+                            name={field.name}
+                            type="number"
+                            value={form[field.name]}
+                            onChange={handleChange}
+                            InputProps={{ startAdornment: field.icon }}
+                            sx={{ '& .MuiOutlinedInput-root': { borderColor: '#A8DADC' } }}
+                        />
+                    </Grid>
+                ))}
+                <Grid item xs={12} sm={4}>
+                    <FormControl fullWidth>
+                        <InputLabel>Difficulty</InputLabel>
+                        <Select
+                            name="difficulty"
+                            value={form.difficulty}
+                            onChange={handleChange}
+                            label="Difficulty"
+                            sx={{ '& .MuiOutlinedInput-root': { borderColor: '#457B9D' } }}
+                        >
+                            <MenuItem value="Easy">Easy</MenuItem>
+                            <MenuItem value="Medium">Medium</MenuItem>
+                            <MenuItem value="Hard">Hard</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Grid>
+            </Grid>
 
-            <div className="form-group">
-                <label>Steps</label>
-                <textarea
-                    name="steps"
-                    value={form.steps}
-                    onChange={handleChange}
-                    placeholder="1. Mix dry ingredients. 2. Add wet ingredients. 3. Bake at 350°F for 20 minutes."
-                    rows="3"
-                />
-            </div>
+            {/* Category */}
+            <TextField
+                fullWidth
+                label="Category"
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                sx={{ mb: 3 }}
+                placeholder="Main Dish, Dessert, etc."
+            />
 
-            <div className="form-row">
-                <div className="form-group">
-                    <label>Prep Time (minutes)</label>
-                    <input
-                        type="number"
-                        name="prep_time"
-                        value={form.prep_time}
-                        onChange={handleChange}
-                        min="0"
-                    />
-                </div>
+            {/* Ingredients */}
+            <Typography variant="h6" sx={{ color: '#1D3557', mb: 2 }}>
+                INGREDIENTS *
+            </Typography>
+            <TextField
+                fullWidth
+                name="ingredients"
+                value={form.ingredients}
+                onChange={handleChange}
+                multiline
+                rows={3}
+                sx={{ mb: 3, '& .MuiOutlinedInput-root': { borderColor: '#A8DADC' } }}
+                placeholder="Flour, Sugar, Eggs, Butter..."
+                required
+            />
 
-                <div className="form-group">
-                    <label>Cook Time (minutes)</label>
-                    <input
-                        type="number"
-                        name="cook_time"
-                        value={form.cook_time}
-                        onChange={handleChange}
-                        min="0"
-                    />
-                </div>
+            {/* Steps */}
+            <Typography variant="h6" sx={{ color: '#1D3557', mb: 2 }}>
+                STEPS
+            </Typography>
+            <TextField
+                fullWidth
+                name="steps"
+                value={form.steps}
+                onChange={handleChange}
+                multiline
+                rows={3}
+                sx={{ mb: 3, '& .MuiOutlinedInput-root': { borderColor: '#A8DADC' } }}
+                placeholder="1. Mix dry ingredients. 2. Add wet ingredients. 3. Bake at 350°F for 20 minutes."
+            />
 
-                <div className="form-group">
-                    <label>Servings</label>
-                    <input
-                        type="number"
-                        name="servings"
-                        value={form.servings}
-                        onChange={handleChange}
-                        min="1"
-                    />
-                </div>
-            </div>
-
-            <div className="form-group">
-                <label>Description</label>
-                <textarea
-                    name="description"
-                    value={form.description}
-                    onChange={handleChange}
-                    placeholder="A delicious recipe that everyone will love!"
-                    rows="2"
-                />
-            </div>
-
-            <div className="form-row">
-                <div className="form-group">
-                    <label>Difficulty</label>
-                    <select name="difficulty" value={form.difficulty} onChange={handleChange}>
-                        <option value="Easy">Easy</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Hard">Hard</option>
-                    </select>
-                </div>
-
-                <div className="form-group">
-                    <label>Category</label>
-                    <input
-                        type="text"
-                        name="category"
-                        value={form.category}
-                        onChange={handleChange}
-                        placeholder="Dessert, Main Course, etc."
-                    />
-                </div>
-            </div>
-
-            <button type="submit" className="submit-btn" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Recipe'}
-            </button>
-
-            {message && (
-                <div className={`form-message ${message.includes('✅') ? 'success' : 'error'}`}>
-                    {message}
-                </div>
-            )}
-        </form>
+            {/* Action Buttons */}
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                <Button
+                    type="submit"
+                    variant="contained"
+                    startIcon={<Add />}
+                    disabled={loading}
+                    sx={{
+                        backgroundColor: '#E63946',
+                        '&:hover': { backgroundColor: '#d32f2f' },
+                        flex: 1
+                    }}
+                >
+                    {loading ? <CircularProgress size={24} /> : 'Create Recipe'}
+                </Button>
+            </Box>
+        </Box>
     );
 }
 
