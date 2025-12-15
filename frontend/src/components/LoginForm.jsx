@@ -1,186 +1,169 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
+import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import {
+    TextField,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    Divider,
+    Box,
+    Typography,
+    IconButton,
+    InputAdornment,
+} from '@mui/material';
+import { Google, Facebook, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
 import api from '../api/axiosConfig';
 
 const LoginForm = () => {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: ''
-    });
-    const [errors, setErrors] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
     const [showPassword, setShowPassword] = useState(false);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm();
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: '' }));
-        }
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Invalid email address';
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
-        setIsLoading(true);
-        setErrors({});
-
+    const onSubmit = async (data) => {
         try {
             const response = await api.post('/login.php', {
-                email: formData.email,
-                password: formData.password
+                email: data.email,
+                password: data.password,
             });
 
-            const data = response.data;
+            if (response.data.success) {
+                // Store authentication data
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                if (response.data.stats) {
+                    localStorage.setItem('user_stats', JSON.stringify(response.data.stats));
+                }
 
-            if (data.success) {
-                // Store authentication data - NO TOKEN, just user data
-                localStorage.setItem('user', JSON.stringify(data.user));
-                localStorage.setItem('user_stats', JSON.stringify(data.stats));
-
-                // Show success message
-                alert(`✅ ${data.message}\n\n🎁 Daily Bonus: +${data.daily_bonus.gold} Gold, +${data.daily_bonus.gems} Gems`);
+                // Show success notification with daily bonus
+                enqueueSnackbar(
+                    `🎉 Welcome back! Daily Bonus: +${response.data.daily_bonus?.gold || 10} Gold, +${response.data.daily_bonus?.gems || 1} Gems`,
+                    { variant: 'success', autoHideDuration: 3000 }
+                );
 
                 // Redirect to home page
                 navigate('/');
             } else {
-                setErrors({
-                    server: data.message || 'Login failed'
+                enqueueSnackbar(response.data.message || 'Login failed', {
+                    variant: 'error',
                 });
             }
         } catch (error) {
-            if (error.response) {
-                setErrors({
-                    server: error.response.data?.message || 'Login failed'
-                });
-            } else if (error.request) {
-                setErrors({
-                    server: 'Network error. Please check your connection.'
-                });
-            } else {
-                setErrors({
-                    server: 'An error occurred. Please try again.'
-                });
-            }
-        } finally {
-            setIsLoading(false);
+            enqueueSnackbar(
+                error.response?.data?.message || 'Network error. Please try again.',
+                { variant: 'error' }
+            );
         }
     };
 
-    const toggleShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
-
     return (
-        <div className="login-form-container">
-            <h2 className="login-title">Welcome Back! 👨‍🍳</h2>
-            <p className="login-subtitle">Sign in to continue your cooking journey</p>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+            <Typography variant="h5" align="center" color="primary" gutterBottom>
+                WELCOME BACK!
+            </Typography>
 
-            {errors.server && (
-                <div className="error-message">
-                    ❌ {errors.server}
-                </div>
-            )}
+            <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
+                <TextField
+                    fullWidth
+                    label="Email"
+                    type="email"
+                    {...register('email', {
+                        required: 'Email is required',
+                        pattern: {
+                            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                            message: 'Invalid email address',
+                        },
+                    })}
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    margin="normal"
+                    disabled={isSubmitting}
+                    InputProps={{
+                        endAdornment: <Lock color="action" />,
+                    }}
+                />
 
-            <form onSubmit={handleSubmit} className="login-form">
-                <div className="form-group">
-                    <label htmlFor="email">Email Address *</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="your@email.com"
-                        className={errors.email ? 'error' : ''}
-                        disabled={isLoading}
-                        autoComplete="email"
+                <TextField
+                    fullWidth
+                    label="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    {...register('password', {
+                        required: 'Password is required',
+                    })}
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                    margin="normal"
+                    disabled={isSubmitting}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    edge="end"
+                                >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                    <FormControlLabel
+                        control={<Checkbox color="primary" />}
+                        label="Remember me"
                     />
-                    {errors.email && <span className="error-text">{errors.email}</span>}
-                </div>
+                    <Link to="/forgot-password" style={{ color: '#E63946', textDecoration: 'none' }}>
+                        Forgot Password?
+                    </Link>
+                </Box>
 
-                <div className="form-group">
-                    <label htmlFor="password">Password *</label>
-                    <div className="password-input-container">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            placeholder="Enter your password"
-                            className={errors.password ? 'error' : ''}
-                            disabled={isLoading}
-                            autoComplete="current-password"
-                        />
-                        <button
-                            type="button"
-                            className="show-password-btn"
-                            onClick={toggleShowPassword}
-                            tabIndex="-1"
-                        >
-                            {showPassword ? '🙈' : '👁️'}
-                        </button>
-                    </div>
-                    {errors.password && <span className="error-text">{errors.password}</span>}
-                </div>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        size="large"
+                        disabled={isSubmitting}
+                        sx={{ mt: 3, mb: 2, py: 1.5 }}
+                    >
+                        {isSubmitting ? 'Signing In...' : '🍳 LOGIN'}
+                    </Button>
+                </motion.div>
 
-                <div className="form-options">
-                    <label className="remember-me">
-                        <input type="checkbox" />
-                        <span>Remember me</span>
-                    </label>
-                    <a href="/forgot-password" className="forgot-password">
-                        Forgot password?
-                    </a>
-                </div>
+                <Divider sx={{ my: 2 }}>or continue with</Divider>
 
-                <button
-                    type="submit"
-                    className="submit-button"
-                    disabled={isLoading}
-                >
-                    {isLoading ? 'Signing In...' : 'Sign In 🍳'}
-                </button>
-
-                <div className="bonus-info">
-                    <h4>📅 Daily Login Bonus:</h4>
-                    <p>• <span className="gold-text">+10 Gold</span> every day</p>
-                    <p>• <span className="gem-text">+1 Gem</span> daily reward</p>
-                    <p>• <span className="xp-text">Streak bonuses</span> every 7 days</p>
-                </div>
-
-                <div className="register-link">
-                    New to CookTogether? <a href="/register">Create an account</a>
-                </div>
-            </form>
-        </div>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                    <Button
+                        variant="outlined"
+                        startIcon={<Google />}
+                        sx={{ flex: 1 }}
+                        disabled={isSubmitting}
+                    >
+                        Google
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        startIcon={<Facebook />}
+                        sx={{ flex: 1 }}
+                        disabled={isSubmitting}
+                    >
+                        Facebook
+                    </Button>
+                </Box>
+            </Box>
+        </motion.div>
     );
 };
 
