@@ -3,19 +3,21 @@ import {
     TextField,
     Select,
     MenuItem,
-    Button,
     FormControl,
     InputLabel,
     Box,
     Typography,
     Grid,
-    Alert,
     CircularProgress
 } from '@mui/material';
-import { Add, Timer, Restaurant } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import { Timer, Restaurant } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import api from '../api/axiosConfig';
+import IngredientList from './IngredientList';
+import StepList from './StepList';
+import ImageUpload from './ImageUpload';
+import SaveRecipeButton from './SaveRecipeButton';
+import CancelButton from './CancelButton';
 
 function RecipeForm() {
     const [form, setForm] = useState({
@@ -29,6 +31,7 @@ function RecipeForm() {
         difficulty: 'Medium',
         category: ''
     });
+    const [image, setImage] = useState(null);
     const [loading, setLoading] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
 
@@ -48,22 +51,28 @@ function RecipeForm() {
         }
 
         if (!form.ingredients.trim()) {
-            enqueueSnackbar('❌ Ingredients are required', { variant: 'error' });
+            enqueueSnackbar('❌ Add at least one ingredient', { variant: 'error' });
             setLoading(false);
             return;
         }
 
         try {
+            // Get user ID from localStorage
+            const user = JSON.parse(localStorage.getItem('user') || '{"id": 1}');
+
             const response = await api.post('/recipe/create.php', {
                 ...form,
                 prep_time: parseInt(form.prep_time) || 0,
                 cook_time: parseInt(form.cook_time) || 0,
                 servings: parseInt(form.servings) || 1,
-                user_id: 1
+                user_id: user.id || 1
             });
 
             if (response.data.success) {
-                enqueueSnackbar(`✅ Recipe created! ID: ${response.data.recipe_id}`, { variant: 'success' });
+                enqueueSnackbar(`✅ Recipe created! ID: ${response.data.recipe_id}`, {
+                    variant: 'success',
+                    autoHideDuration: 3000
+                });
 
                 // Reset form
                 setForm({
@@ -77,6 +86,7 @@ function RecipeForm() {
                     difficulty: 'Medium',
                     category: ''
                 });
+                setImage(null);
             } else {
                 enqueueSnackbar(`❌ ${response.data.message}`, { variant: 'error' });
             }
@@ -121,7 +131,7 @@ function RecipeForm() {
                 placeholder="A delicious recipe that everyone will love!"
             />
 
-            {/* Time Fields Row */}
+            {/* Time & Difficulty Row */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 {timeFields.map((field) => (
                     <Grid item xs={12} sm={4} key={field.name}>
@@ -166,52 +176,31 @@ function RecipeForm() {
                 placeholder="Main Dish, Dessert, etc."
             />
 
+            {/* Image Upload */}
+            <ImageUpload onImageSelect={setImage} />
+
             {/* Ingredients */}
             <Typography variant="h6" sx={{ color: '#1D3557', mb: 2 }}>
                 INGREDIENTS *
             </Typography>
-            <TextField
-                fullWidth
-                name="ingredients"
+            <IngredientList
                 value={form.ingredients}
-                onChange={handleChange}
-                multiline
-                rows={3}
-                sx={{ mb: 3, '& .MuiOutlinedInput-root': { borderColor: '#A8DADC' } }}
-                placeholder="Flour, Sugar, Eggs, Butter..."
-                required
+                onChange={(value) => setForm({ ...form, ingredients: value })}
             />
 
             {/* Steps */}
-            <Typography variant="h6" sx={{ color: '#1D3557', mb: 2 }}>
+            <Typography variant="h6" sx={{ color: '#1D3557', mb: 2, mt: 3 }}>
                 STEPS
             </Typography>
-            <TextField
-                fullWidth
-                name="steps"
+            <StepList
                 value={form.steps}
-                onChange={handleChange}
-                multiline
-                rows={3}
-                sx={{ mb: 3, '& .MuiOutlinedInput-root': { borderColor: '#A8DADC' } }}
-                placeholder="1. Mix dry ingredients. 2. Add wet ingredients. 3. Bake at 350°F for 20 minutes."
+                onChange={(value) => setForm({ ...form, steps: value })}
             />
 
             {/* Action Buttons */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                <Button
-                    type="submit"
-                    variant="contained"
-                    startIcon={<Add />}
-                    disabled={loading}
-                    sx={{
-                        backgroundColor: '#E63946',
-                        '&:hover': { backgroundColor: '#d32f2f' },
-                        flex: 1
-                    }}
-                >
-                    {loading ? <CircularProgress size={24} /> : 'Create Recipe'}
-                </Button>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 4 }}>
+                <CancelButton />
+                <SaveRecipeButton loading={loading} onClick={handleSubmit} />
             </Box>
         </Box>
     );

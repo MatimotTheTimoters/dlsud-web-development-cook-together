@@ -57,10 +57,11 @@ try {
     $difficulty = $conn->real_escape_string($difficulty);
     $category = $conn->real_escape_string($category);
 
-    // Insert recipe using simple query (avoid bind_param issues)
-    $sql = "INSERT INTO recipes (user_id, title, description, prep_time, cook_time, servings, difficulty, category) 
-            VALUES ($userId, '$title', '$description', $prepTime, $cookTime, $servings, '$difficulty', '$category')";
+    $imageUrl = Validation::sanitizeInput($data['image_url'] ?? '');
 
+    $sql = "INSERT INTO recipes (user_id, title, description, prep_time, cook_time, servings, difficulty, category, image_url) 
+        VALUES ($userId, '$title', '$description', $prepTime, $cookTime, $servings, '$difficulty', '$category', '$imageUrl')";
+        
     if ($conn->query($sql)) {
         $recipeId = $conn->insert_id;
 

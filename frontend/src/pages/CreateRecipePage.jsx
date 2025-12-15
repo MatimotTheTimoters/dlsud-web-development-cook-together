@@ -32,7 +32,7 @@ function CreateRecipePage() {
                         <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center' }}>
                             CREATE NEW RECIPE
                         </Typography>
-                        <Box sx={{ width: 40 }} /> {/* Spacer for symmetry */}
+                        <Box sx={{ width: 40 }} />
                     </Toolbar>
                 </AppBar>
 
