@@ -479,36 +479,36 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 20px;
-    margin-bottom: 30px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #E63946;
+    margin-bottom: 20px;
 }
 
 .session-header h1 {
-    color: #1D3557;
+    color: #E63946;
     margin: 0;
 }
 
-.back-btn {
+.back-button {
     padding: 8px 16px;
     background: #457B9D;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 14px;
 }
+
 
 .back-btn:hover {
     background: #1D3557;
 }
 
 .session-timer {
-    background: white;
+    background: #FFF8E1;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #FF9800;
 }
 
 .timer-display {
@@ -516,7 +516,9 @@ button:disabled {
     color: #E63946;
     font-weight: bold;
     margin-bottom: 15px;
+    font-family: monospace;
 }
+
 
 .timer-controls {
     display: flex;
@@ -529,7 +531,7 @@ button:disabled {
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #A8DADC;
 }
 
 .current-step h2 {
@@ -538,18 +540,21 @@ button:disabled {
     margin-bottom: 15px;
 }
 
+.current-step h2 {
+    color: #1D3557;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
 .step-content {
     background: #F1FAEE;
-    padding: 15px;
+    padding: 20px;
     border-radius: 6px;
     margin-bottom: 15px;
     min-height: 100px;
-}
-
-.step-navigation {
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 .ingredient-checklist {
@@ -560,36 +565,39 @@ button:disabled {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.checklist-items {
-    margin: 15px 0;
+.step-navigation {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
 }
 
 .checklist-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
-    padding: 8px;
-    background: #F9F9F9;
-    border-radius: 4px;
+    margin-bottom: 10px;
 }
 
 .checklist-item input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     accent-color: #4CAF50;
 }
 
 .checklist-item label {
+    font-size: 16px;
     color: #1D3557;
     cursor: pointer;
 }
 
 .checklist-progress {
     text-align: center;
+    margin-top: 15px;
     color: #457B9D;
     font-weight: bold;
-    margin-top: 15px;
+    padding: 10px;
+    background: #F1FAEE;
+    border-radius: 4px;
 }
 
 .session-notes {

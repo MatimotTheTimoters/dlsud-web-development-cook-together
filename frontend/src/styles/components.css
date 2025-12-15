@@ -582,3 +582,369 @@
     background: #4CAF50;
     cursor: default;
 }
+
+/* Session type modal Styles */
+.session-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.session-modal {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    width: 400px;
+    max-width: 90%;
+    padding: 30px;
+}
+
+.session-modal-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.session-modal-header h2 {
+    color: #1D3557;
+    margin: 0 0 10px 0;
+    font-size: 24px;
+}
+
+.modal-divider {
+    color: #E63946;
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+.session-modal-content {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.session-modal-content p {
+    color: #1D3557;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.session-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.session-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.session-option button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s;
+}
+
+.session-option button:hover {
+    transform: scale(1.02);
+}
+
+.session-option button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.session-icon {
+    font-size: 20px;
+}
+
+.session-text {
+    font-size: 16px;
+}
+
+.solo-btn {
+    background: #457B9D;
+    color: white;
+}
+
+.solo-btn:hover {
+    background: #1D3557;
+}
+
+.multiplayer-btn {
+    background: #E63946;
+    color: white;
+}
+
+.multiplayer-btn:hover {
+    background: #B71C1C;
+}
+
+.session-description {
+    margin: 8px 0 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.session-modal-footer {
+    text-align: center;
+}
+
+.cancel-btn {
+    padding: 10px 30px;
+    background: white;
+    border: 2px solid #1D3557;
+    color: #1D3557;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+    border-color: #457B9D;
+    color: #457B9D;
+}
+
+.cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Session Share Modal Styles */
+.session-share-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.session-share-modal {
+    background: white;
+    border-radius: 12px;
+    width: 500px;
+    max-width: 90%;
+    padding: 30px;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.share-modal-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.share-modal-header h2 {
+    color: #E63946;
+    margin: 0 0 10px 0;
+    font-size: 28px;
+}
+
+.share-modal-header p {
+    color: #1D3557;
+    font-size: 16px;
+}
+
+.session-code-display {
+    background: #F1FAEE;
+    border: 3px dashed #4CAF50;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.code-wrapper {
+    margin-bottom: 15px;
+}
+
+.code-label {
+    display: block;
+    color: #457B9D;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.code-value {
+    font-size: 48px;
+    font-weight: bold;
+    letter-spacing: 5px;
+    color: #E63946;
+    font-family: monospace;
+}
+
+.copy-btn {
+    padding: 12px 30px;
+    background: #457B9D;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    background: #1D3557;
+    transform: scale(1.05);
+}
+
+.share-options {
+    margin-bottom: 25px;
+}
+
+.share-title {
+    color: #1D3557;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.share-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.share-facebook,
+.share-twitter,
+.share-copy {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.share-facebook {
+    background: #1877F2;
+    color: white;
+}
+
+.share-facebook:hover {
+    background: #0D65D9;
+}
+
+.share-twitter {
+    background: #1DA1F2;
+    color: white;
+}
+
+.share-twitter:hover {
+    background: #0C8BD9;
+}
+
+.share-copy {
+    background: #4CAF50;
+    color: white;
+}
+
+.share-copy:hover {
+    background: #3D8B40;
+}
+
+.share-link {
+    margin-bottom: 25px;
+}
+
+.share-link p {
+    color: #1D3557;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.link-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.link-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #A8DADC;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #666;
+    background: #F9F9F9;
+}
+
+.copy-link-btn {
+    padding: 10px 15px;
+    background: #FF9800;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.copy-link-btn:hover {
+    background: #E68900;
+}
+
+.session-share-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.session-share-actions .btn-primary {
+    background: #E63946;
+    padding: 12px 25px;
+    font-size: 16px;
+}
+
+.session-share-actions .btn-secondary {
+    background: #757575;
+    padding: 12px 25px;
+    font-size: 16px;
+}
+
+.copy-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; transform: translateY(-10px); }
+    10%, 90% { opacity: 1; transform: translateY(0); }
+}
