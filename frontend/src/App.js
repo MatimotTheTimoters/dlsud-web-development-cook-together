@@ -8,6 +8,7 @@ import CreateRecipePage from './pages/CreateRecipePage';
 import RecipesPage from './pages/RecipesPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
 import CookingSessionPage from './pages/CookingSessionPage';
+import SoloCookingPage from './pages/SoloCookingPage';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
             <Route path="/recipes" element={<RecipesPage />} />
             <Route path="/recipe/:id" element={<RecipeDetailPage />} />
             <Route path="/cooking-session/:sessionId" element={<CookingSessionPage />} />
+            <Route path="/cooking-session/:sessionId" element={<SoloCookingPage />} />
           </Routes>
         </main>
 

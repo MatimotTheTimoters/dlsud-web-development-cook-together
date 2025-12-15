@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from '../api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
-import './SessionTypeModal.css'; // We'll create this
+import '../styles/components.css';
 
 function SessionTypeModal({ open, onClose, recipeId }) {
     const [loading, setLoading] = useState(false);
