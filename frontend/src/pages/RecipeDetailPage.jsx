@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api/axiosConfig';
+import SessionTypeModal from '../components/SessionTypeModal';
+import { useNavigate } from 'react-router-dom';
 
 function RecipeDetailPage() {
     const { id } = useParams();
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showSessionModal, setShowSessionModal] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchRecipe();
@@ -29,46 +33,40 @@ function RecipeDetailPage() {
 
     const totalTime = (+recipe.prep_time || 0) + (+recipe.cook_time || 0);
 
-    const startCookingSession = async () => {
-        try {
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
-            if (!user) {
-                alert('Please log in to start cooking');
-                return;
-            }
-
-            const response = await api.post('/session/create.php', {
-                recipe_id: id,
-                user_id: user.id
-            });
-
-            if (response.data.success) {
-                // Redirect to cooking session page
-                window.location.href = `/cooking-session/${response.data.session_id}`;
-            } else {
-                alert('Failed to start cooking session');
-            }
-        } catch (error) {
-            console.error('Error starting session:', error);
-            alert('Error starting cooking session');
-        }
-    };
-
     return (
         <div className="recipe-detail">
+            <button 
+                onClick={() => navigate(-1)}
+                className="back-button"
+            >
+                ← Back
+            </button>
+
             <div className="recipe-header">
                 <h1>{recipe.title}</h1>
                 <div className="recipe-meta">
-                    <span className="author">👤 By {recipe.username || 'Anonymous'}</span>
-                    <span className="difficulty">{recipe.difficulty}</span>
-                    <span className="time">⏱️ {totalTime} min</span>
-                    <span className="servings">🍽️ {recipe.servings} servings</span>
-                    <span className="category">#{recipe.category || 'Uncategorized'}</span>
+                    <span className="author" style={{ background: '#457B9D', color: 'white' }}>
+                        👤 {recipe.username || 'Anonymous'}
+                    </span>
+                    <span className="difficulty" style={{ background: '#FF9800', color: 'white' }}>
+                        {recipe.difficulty}
+                    </span>
+                    <span className="time" style={{ background: '#E63946', color: 'white' }}>
+                        ⏱️ {totalTime} min
+                    </span>
+                    <span className="servings" style={{ background: '#4CAF50', color: 'white' }}>
+                        🍽️ {recipe.servings} servings
+                    </span>
+                    {recipe.category && (
+                        <span className="category" style={{ background: '#A8DADC', color: '#1D3557' }}>
+                            #{recipe.category}
+                        </span>
+                    )}
                 </div>
             </div>
 
             <div className="recipe-description">
-                <p>{recipe.description}</p>
+                <p>{recipe.description || 'No description available.'}</p>
             </div>
 
             <div className="recipe-grid">
@@ -76,7 +74,10 @@ function RecipeDetailPage() {
                     <h2>📝 Ingredients</h2>
                     <ul>
                         {recipe.ingredients && recipe.ingredients.split(',').map((item, index) => (
-                            <li key={index}>{item.trim()}</li>
+                            <li key={index}>
+                                <span className="ingredient-checkbox"></span>
+                                {item.trim()}
+                            </li>
                         ))}
                     </ul>
                 </div>
@@ -92,11 +93,23 @@ function RecipeDetailPage() {
             </div>
 
             <div className="recipe-actions">
-                <button className="btn-primary" onClick={startCookingSession}>
+                {/* UPDATED: Changed from direct API call to modal trigger */}
+                <button 
+                    className="btn-primary" 
+                    onClick={() => setShowSessionModal(true)}
+                    style={{ background: '#E63946' }}
+                >
                     Start Cooking
                 </button>
                 <button className="btn-secondary">Save Recipe</button>
             </div>
+
+            {/* ADDED: Session Type Modal */}
+            <SessionTypeModal 
+                open={showSessionModal}
+                onClose={() => setShowSessionModal(false)}
+                recipeId={id}
+            />
         </div>
     );
 }
