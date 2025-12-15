@@ -1,4 +1,4 @@
--- Insert sample users
+-- Insert sample users (same as before)
 INSERT INTO users (
         username,
         email,
@@ -65,7 +65,7 @@ VALUES (
         2020,
         '2024-01-15 08:00:00'
     );
--- Insert user stats
+-- Insert user stats (same as before)
 INSERT INTO user_stats (
         user_id,
         login_streak,
@@ -111,7 +111,7 @@ VALUES (
         1850
     ),
     (5, 1, 1, 0, 100, 100, 10, 0, 0, 0, 0, 0);
--- Insert user achievements
+-- Insert user achievements (same as before)
 INSERT INTO user_achievements (
         user_id,
         achievement_type,
@@ -168,7 +168,7 @@ VALUES (
         'Got 100+ likes on recipes',
         '⭐'
     );
--- Insert sample recipes
+-- Insert sample recipes WITH PRICE AND CURRENCY FIELDS
 INSERT INTO recipes (
         user_id,
         title,
@@ -177,7 +177,9 @@ INSERT INTO recipes (
         cook_time,
         servings,
         difficulty,
-        category
+        category,
+        price,
+        currency
     )
 VALUES (
         1,
@@ -187,7 +189,9 @@ VALUES (
         20,
         4,
         'Easy',
-        'Pasta'
+        'Pasta',
+        50.00,
+        'USD'
     ),
     (
         2,
@@ -197,7 +201,9 @@ VALUES (
         10,
         24,
         'Easy',
-        'Dessert'
+        'Dessert',
+        25.00,
+        'USD'
     ),
     (
         3,
@@ -207,7 +213,9 @@ VALUES (
         40,
         6,
         'Medium',
-        'Curry'
+        'Curry',
+        75.00,
+        'USD'
     ),
     (
         4,
@@ -217,7 +225,9 @@ VALUES (
         0,
         1,
         'Easy',
-        'Breakfast'
+        'Breakfast',
+        10.00,
+        'USD'
     ),
     (
         1,
@@ -227,7 +237,9 @@ VALUES (
         45,
         4,
         'Hard',
-        'Meat'
+        'Meat',
+        150.00,
+        'USD'
     ),
     (
         2,
@@ -237,7 +249,9 @@ VALUES (
         25,
         12,
         'Hard',
-        'Pastry'
+        'Pastry',
+        100.00,
+        'EUR'
     ),
     (
         3,
@@ -247,7 +261,9 @@ VALUES (
         0,
         4,
         'Medium',
-        'Seafood'
+        'Seafood',
+        80.00,
+        'USD'
     ),
     (
         4,
@@ -257,9 +273,11 @@ VALUES (
         15,
         4,
         'Easy',
-        'Salad'
+        'Salad',
+        30.00,
+        'USD'
     );
--- Insert recipe ingredients
+-- Insert recipe ingredients (same as before)
 INSERT INTO recipe_ingredients (recipe_id, ingredient)
 VALUES -- Spaghetti Carbonara ingredients
     (1, '400g spaghetti'),
@@ -298,7 +316,7 @@ VALUES -- Spaghetti Carbonara ingredients
     (5, '500g puff pastry'),
     (5, '2 tbsp mustard'),
     (5, '1 egg (for egg wash)');
--- Insert recipe steps
+-- Insert recipe steps (same as before)
 INSERT INTO recipe_steps (recipe_id, step_number, instruction)
 VALUES -- Spaghetti Carbonara steps
     (
@@ -469,6 +487,125 @@ VALUES (2, 2, 'ready'),
     -- bakermary (host) is ready
     (2, 4, 'ready');
 -- recipeamy is ready
+-- Insert sample likes for recipes
+INSERT INTO recipe_likes (recipe_id, user_id)
+VALUES (1, 2),
+    -- bakermary likes Spaghetti Carbonara
+    (1, 3),
+    -- cookmax likes Spaghetti Carbonara
+    (1, 4),
+    -- recipeamy likes Spaghetti Carbonara
+    (2, 1),
+    -- chefjohn likes Chocolate Chip Cookies
+    (2, 3),
+    -- cookmax likes Chocolate Chip Cookies
+    (3, 1),
+    -- chefjohn likes Chicken Tikka Masala
+    (3, 2),
+    -- bakermary likes Chicken Tikka Masala
+    (4, 5),
+    -- testuser likes Avocado Toast
+    (5, 3),
+    -- cookmax likes Beef Wellington
+    (6, 4),
+    -- recipeamy likes Croissants
+    (7, 1),
+    -- chefjohn likes Sushi Rolls
+    (8, 2);
+-- bakermary likes Quinoa Salad
+-- Insert saved recipes to cookbooks
+INSERT INTO cookbooks (user_id, recipe_id, notes)
+VALUES (1, 2, 'Great cookie recipe!'),
+    (1, 3, 'Want to try this curry'),
+    (2, 1, 'Love this pasta recipe'),
+    (3, 2, 'Perfect for parties'),
+    (4, 5, 'Special occasion dish'),
+    (5, 4, 'My go-to breakfast');
+-- Insert recipe purchases
+INSERT INTO recipe_purchases (user_id, recipe_id, price_gold)
+VALUES (2, 1, 50),
+    -- bakermary purchased Spaghetti Carbonara
+    (3, 2, 25),
+    -- cookmax purchased Chocolate Chip Cookies
+    (5, 4, 10);
+-- testuser purchased Avocado Toast
+-- Insert shop items
+INSERT INTO shop_items (
+        name,
+        description,
+        category,
+        price_gold,
+        icon,
+        effect_description
+    )
+VALUES (
+        'Golden Whisk',
+        'A shiny golden whisk for professional cooking',
+        'tool',
+        200,
+        'kitchen',
+        '+10% cooking speed'
+    ),
+    (
+        'Chef Hat',
+        'A stylish chef hat to show off your skills',
+        'icon',
+        50,
+        'account_circle',
+        'Special chef avatar'
+    ),
+    (
+        'Kitchen Theme',
+        'Beautiful kitchen background theme',
+        'theme',
+        100,
+        'palette',
+        'Custom kitchen background'
+    ),
+    (
+        'Recipe Book',
+        'Extra recipe slots for your cookbook',
+        'tool',
+        150,
+        'menu_book',
+        '+5 recipe storage'
+    ),
+    (
+        'Magic Spoon',
+        'Magical spoon that helps with mixing',
+        'tool',
+        300,
+        'restaurant',
+        'Auto-stir feature'
+    ),
+    (
+        'Golden Apron',
+        'Premium cooking apron with gold accents',
+        'icon',
+        75,
+        'checkroom',
+        'Exclusive apron skin'
+    ),
+    (
+        'Festive Theme',
+        'Holiday kitchen decorations',
+        'theme',
+        120,
+        'celebration',
+        'Festive kitchen atmosphere'
+    );
+-- Insert user inventory items
+INSERT INTO user_inventory (user_id, item_id, is_equipped)
+VALUES (1, 1, TRUE),
+    -- chefjohn has Golden Whisk equipped
+    (1, 2, TRUE),
+    -- chefjohn has Chef Hat equipped
+    (2, 3, FALSE),
+    -- bakermary has Kitchen Theme
+    (3, 4, TRUE),
+    -- cookmax has Recipe Book equipped
+    (4, 5, FALSE);
+-- recipeamy has Magic Spoon
 -- Display inserted data for verification
 SELECT '=== USERS (5 total) ===' as info;
 SELECT id,
@@ -483,13 +620,33 @@ SELECT user_id,
     gem_count,
     recipes_cooked
 FROM user_stats;
-SELECT '=== RECIPES (8 total) ===' as info;
+SELECT '=== RECIPES WITH PRICES (8 total) ===' as info;
 SELECT id,
     title,
     difficulty,
     prep_time,
-    cook_time
+    cook_time,
+    CONCAT(price, ' ', currency) as price,
+    category
 FROM recipes;
+SELECT '=== RECIPE LIKES ===' as info;
+SELECT r.title as recipe,
+    COUNT(rl.id) as like_count,
+    GROUP_CONCAT(u.username) as liked_by
+FROM recipes r
+    LEFT JOIN recipe_likes rl ON r.id = rl.recipe_id
+    LEFT JOIN users u ON rl.user_id = u.id
+GROUP BY r.id
+ORDER BY like_count DESC;
+SELECT '=== RECIPE PURCHASES ===' as info;
+SELECT u.username,
+    r.title,
+    rp.price_gold,
+    rp.purchased_at
+FROM recipe_purchases rp
+    JOIN users u ON rp.user_id = u.id
+    JOIN recipes r ON rp.recipe_id = r.id
+ORDER BY rp.purchased_at DESC;
 SELECT '=== COOKING SESSIONS (5 total) ===' as info;
 SELECT id,
     recipe_id,
@@ -509,12 +666,48 @@ FROM session_participants sp
     JOIN users u ON sp.user_id = u.id
 ORDER BY sp.session_id,
     sp.joined_at;
+SELECT '=== COOKBOOK SAVED RECIPES ===' as info;
+SELECT u.username,
+    r.title,
+    cb.notes,
+    cb.saved_at
+FROM cookbooks cb
+    JOIN users u ON cb.user_id = u.id
+    JOIN recipes r ON cb.recipe_id = r.id
+ORDER BY cb.saved_at DESC;
+SELECT '=== SHOP ITEMS ===' as info;
+SELECT name,
+    category,
+    price_gold,
+    effect_description
+FROM shop_items
+ORDER BY category,
+    price_gold;
+SELECT '=== USER INVENTORY ===' as info;
+SELECT u.username,
+    si.name,
+    si.category,
+    ui.is_equipped
+FROM user_inventory ui
+    JOIN users u ON ui.user_id = u.id
+    JOIN shop_items si ON ui.item_id = si.id
+ORDER BY u.username,
+    si.category;
 SELECT '=== TEST CREDENTIALS ===' as info;
-SELECT 'Username: chefjohn' as account1,
-    'Password: password123' as password1
+SELECT 'Username: chefjohn' as account,
+    'Password: password123' as password
 UNION ALL
-SELECT 'Username: testuser' as account2,
-    'Password: testpass' as password2;
+SELECT 'Username: bakermary' as account,
+    'Password: marypass456' as password
+UNION ALL
+SELECT 'Username: testuser' as account,
+    'Password: testpass' as password;
+SELECT '=== PURCHASE TESTING ===' as info;
+SELECT 'testuser (id:5) has NOT purchased recipe id:1 (can buy)' as note,
+    'Price: 50 gold' as price
+UNION ALL
+SELECT 'bakermary (id:2) HAS purchased recipe id:1 (cannot buy again)' as note,
+    'Already purchased' as price;
 SELECT '=== ACTIVE MULTIPLAYER SESSIONS (for testing Feature 8) ===' as info;
 SELECT cs.id as session_id,
     cs.session_code,
