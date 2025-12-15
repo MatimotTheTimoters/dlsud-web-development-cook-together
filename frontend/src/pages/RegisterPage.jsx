@@ -1,39 +1,56 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import {
+    Container,
+    Box,
+    Typography,
+    Paper,
+} from '@mui/material';
+import { LocalDining } from '@mui/icons-material';
 import RegisterForm from '../components/RegisterForm';
 
 const RegisterPage = () => {
     return (
-        <div className="register-page">
-            <div className="register-header">
-                <h1>🍳 CookTogether</h1>
-                <p>Join our community of cooking enthusiasts!</p>
-            </div>
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="page-transition"
+        >
+            <Container maxWidth="sm">
+                <Box sx={{ mt: 8, mb: 4, textAlign: 'center' }}>
+                    <LocalDining sx={{ fontSize: 60, color: 'secondary.main', mb: 2 }} />
+                    <Typography variant="h3" component="h1" color="primary" gutterBottom>
+                        🍳 CookTogether
+                    </Typography>
+                </Box>
 
-            <div className="register-content">
-                <RegisterForm />
+                <Paper
+                    elevation={3}
+                    sx={{
+                        p: 4,
+                        borderRadius: 3,
+                        background: 'linear-gradient(135deg, #FFFAF0 0%, #FFFFFF 100%)',
+                    }}
+                >
+                    <RegisterForm />
 
-                <div className="features-preview">
-                    <h3>What you'll get:</h3>
-                    <div className="features-grid">
-                        <div className="feature-card">
-                            <div className="feature-icon">👨‍🍳</div>
-                            <h4>Cook with Friends</h4>
-                            <p>Multiplayer cooking sessions</p>
-                        </div>
-                        <div className="feature-card">
-                            <div className="feature-icon">🏆</div>
-                            <h4>Earn Rewards</h4>
-                            <p>Level up & collect currencies</p>
-                        </div>
-                        <div className="feature-card">
-                            <div className="feature-icon">📖</div>
-                            <h4>Recipe Collection</h4>
-                            <p>Save & organize recipes</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <Typography variant="body2" align="center" sx={{ mt: 3, color: 'text.secondary' }}>
+                        Already have account?{' '}
+                        <Link to="/login" style={{ color: '#457B9D', fontWeight: 600, textDecoration: 'none' }}>
+                            Login
+                        </Link>
+                    </Typography>
+                </Paper>
+
+                <Box sx={{ mt: 4, textAlign: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                        Join thousands of home cooks in our gamified cooking community!
+                    </Typography>
+                </Box>
+            </Container>
+        </motion.div>
     );
 };
 
