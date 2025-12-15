@@ -376,3 +376,20 @@
 .complete-step-button:hover {
     transform: translateY(-2px);
 }
+
+/* Like Button Styles */
+.like-button {
+    transition: all 0.3s ease;
+}
+
+.like-button:hover {
+    transform: scale(1.1);
+}
+
+.like-button.liked {
+    color: #E63946;
+}
+
+.like-button.unliked {
+    color: #757575;
+}

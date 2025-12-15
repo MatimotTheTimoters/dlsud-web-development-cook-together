@@ -11,6 +11,7 @@ import RecipeStepList from '../components/RecipeStepList';
 import StartCookingButton from '../components/StartCookingButton';
 import SaveRecipeButton from '../components/SaveRecipeButton';
 import CommentSection from '../components/CommentSection';
+import LikeButton from '../components/LikeButton'; // FIXED: Changed path
 
 function RecipeDetailPage() {
     const { id } = useParams();
@@ -47,16 +48,17 @@ function RecipeDetailPage() {
 
             <Box className="recipe-content">
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                    <RecipeIngredientList ingredients={recipe.ingredients} /> {/* CHANGED */}
+                    <RecipeIngredientList ingredients={recipe.ingredients} />
                 </motion.div>
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                    <RecipeStepList steps={recipe.steps} /> {/* CHANGED */}
+                    <RecipeStepList steps={recipe.steps} />
                 </motion.div>
             </Box>
 
-            <Box className="recipe-actions">
+            <Box className="recipe-actions" sx={{ display: 'flex', gap: '20px', mt: 3 }}>
                 <StartCookingButton recipeId={id} />
                 <SaveRecipeButton recipeId={id} />
+                <LikeButton recipeId={id} initialLikes={recipe.likes || 0} />
             </Box>
 
             <Divider sx={{ my: 4 }} />

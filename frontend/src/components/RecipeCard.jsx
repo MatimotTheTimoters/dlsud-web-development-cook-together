@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, CardMedia, CardContent, CardActions, Typography, IconButton, Box } from '@mui/material';
-import { Favorite, Visibility, Timer, Restaurant, Person } from '@mui/icons-material';
+import { Visibility, Timer, Restaurant, Person } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import LikeButton from './LikeButton';
 
 function RecipeCard({ recipe }) {
     const totalTime = (+recipe.prep_time || 0) + (+recipe.cook_time || 0);
@@ -73,12 +74,20 @@ function RecipeCard({ recipe }) {
                 {/* Stats and Actions */}
                 <CardActions className="recipe-card-actions">
                     {/* Stats */}
-                    <Box className="recipe-card-stats">
-                        <IconButton size="small" className="recipe-card-stat">
-                            <Favorite sx={{ fontSize: 16 }} />
-                        </IconButton>
-                        <IconButton size="small" className="recipe-card-stat">
-                            <Visibility sx={{ fontSize: 16 }} />
+                    <Box className="recipe-card-stats" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {/* Like Button */}
+                        <LikeButton
+                            recipeId={recipe.id}
+                            initialLikes={recipe.likes || 0}
+                            initialLiked={recipe.user_liked || false}
+                        />
+
+                        {/* Views */}
+                        <IconButton size="small" className="recipe-card-stat" disabled>
+                            <Visibility sx={{ fontSize: 16, color: '#757575' }} />
+                            <Typography variant="caption" sx={{ ml: 0.5, color: '#757575' }}>
+                                {recipe.views || 0}
+                            </Typography>
                         </IconButton>
                     </Box>
 
