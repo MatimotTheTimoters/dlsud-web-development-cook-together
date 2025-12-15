@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, CircularProgress } from '@mui/material';
 import { CheckCircle, CheckCircleOutline } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
 
-function CompleteStepButton({ sessionId, stepId, onComplete }) {
+function CompleteStepButton({ sessionId, stepId, isCompleted, onComplete }) {
     const [loading, setLoading] = useState(false);
     const [completed, setCompleted] = useState(false);
+
+    useEffect(() => {
+        setCompleted(isCompleted);
+    }, [isCompleted]);
 
     const handleComplete = async () => {
         setLoading(true);

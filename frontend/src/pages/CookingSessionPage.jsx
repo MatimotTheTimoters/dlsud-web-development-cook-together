@@ -17,6 +17,7 @@ function CookingSessionPage() {
     const [running, setRunning] = useState(true);
     const [completed, setCompleted] = useState(false);
     const [checkedIngredients, setCheckedIngredients] = useState([]);
+    const [completedSteps, setCompletedSteps] = useState([]);
 
     useEffect(() => {
         fetchSession();
@@ -29,6 +30,17 @@ function CookingSessionPage() {
         }
         return () => clearInterval(timer);
     }, [running, completed]);
+
+    const fetchCompletedSteps = async () => {
+        try {
+            const response = await api.get(`/session/get-step-completions.php?session_id=${sessionId}`);
+            if (response.data.success) {
+                setCompletedSteps(response.data.completed_steps);
+            }
+        } catch (error) {
+            console.error('Error fetching completed steps:', error);
+        }
+    };
 
     const fetchSession = async () => {
         try {
@@ -107,7 +119,12 @@ function CookingSessionPage() {
                     <CompleteStepButton
                         sessionId={sessionId}
                         stepId={currentStep}
+                        isCompleted={completedSteps.includes(currentStep)}
                         onComplete={() => {
+                            // Add step to completed list
+                            if (!completedSteps.includes(currentStep)) {
+                                setCompletedSteps([...completedSteps, currentStep]);
+                            }
                             // Auto-advance to next step after completing
                             if (currentStep < steps.length - 1) {
                                 setCurrentStep(currentStep + 1);
