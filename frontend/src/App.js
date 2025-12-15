@@ -7,7 +7,7 @@ import ProfilePage from './pages/ProfilePage';
 import CreateRecipePage from './pages/CreateRecipePage';
 import RecipesPage from './pages/RecipesPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
-import CookingSessionPage from './pages/CookingSessionPage';
+import MultiplayerCookingPage from './pages/MultiplayerCookingPage';
 import SoloCookingPage from './pages/SoloCookingPage';
 
 function App() {
@@ -41,9 +41,9 @@ function App() {
             <Route path="/create-recipe" element={<CreateRecipePage />} />
             <Route path="/recipes" element={<RecipesPage />} />
             <Route path="/recipe/:id" element={<RecipeDetailPage />} />
-            <Route path="/cooking-session/:sessionId" element={<CookingSessionPage />} />
+            <Route path="/cooking-session/:sessionId" element={<MultiplayerCookingPage />} />
             <Route path="/cooking-session/:sessionId" element={<SoloCookingPage />} />
-          </Routes>
+            </Routes>
         </main>
 
         <footer className="footer">
