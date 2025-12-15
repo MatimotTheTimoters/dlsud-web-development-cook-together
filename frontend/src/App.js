@@ -9,9 +9,11 @@ import RecipesPage from './pages/RecipesPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
 import MultiplayerCookingPage from './pages/MultiplayerCookingPage';
 import SoloCookingPage from './pages/SoloCookingPage';
+import { SnackbarProvider } from 'notistack';
 
 function App() {
   return (
+    <SnackbarProvider maxSnack={3}>
     <Router>
       <div className="App">
         <nav className="navbar">
@@ -51,6 +53,7 @@ function App() {
         </footer>
       </div>
     </Router>
+    </SnackbarProvider>
   );
 }
 

@@ -118,6 +118,7 @@ function SessionTypeModal({ open, onClose, recipeId, recipeTitle }) {
                     sessionCode={sessionData.joinCode}
                     sessionId={sessionData.sessionId}
                     recipeTitle={recipeTitle}
+                    onSessionCreated={handleSessionCreated} 
                 />
             )}
         </>
