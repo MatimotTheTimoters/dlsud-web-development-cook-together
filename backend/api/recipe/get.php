@@ -4,18 +4,19 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') exit();
-
+// Handle preflight ONCE
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
+
 require_once '../../db/connection.php';
 
 $db = new Database();
 $conn = $db->getConnection();
 
 $recipeId = intval($_GET['id'] ?? 0);
+$userId = intval($_GET['user_id'] ?? 1); // Get from query param, default to 1 for demo
 
 if (!$recipeId) {
     echo json_encode(['success' => false, 'message' => 'Recipe ID required']);
@@ -43,9 +44,25 @@ if ($result->num_rows > 0) {
     $stepStmt->execute();
     $recipe['steps'] = $stepStmt->get_result()->fetch_assoc()['steps'] ?? '';
 
-    echo json_encode(['success' => true, 'recipe' => $recipe]);
+    // Check purchase status
+    $purchaseStmt = $conn->prepare("SELECT id FROM recipe_purchases WHERE user_id = ? AND recipe_id = ?");
+    $purchaseStmt->bind_param("ii", $userId, $recipeId);
+    $purchaseStmt->execute();
+    $recipe['purchased'] = $purchaseStmt->get_result()->num_rows > 0;
+
+    // Get like count
+    $likeStmt = $conn->prepare("SELECT COUNT(*) as likes FROM recipe_likes WHERE recipe_id = ?");
+    $likeStmt->bind_param("i", $recipeId);
+    $likeStmt->execute();
+    $recipe['likes'] = $likeStmt->get_result()->fetch_assoc()['likes'] ?? 0;
+
+    echo json_encode([
+        'success' => true,
+        'recipe' => $recipe
+    ]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Recipe not found']);
 }
 
 $db->closeConnection();
+    

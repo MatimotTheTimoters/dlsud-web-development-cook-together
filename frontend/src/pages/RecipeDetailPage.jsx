@@ -19,11 +19,18 @@ function RecipeDetailPage() {
     const navigate = useNavigate();
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
-        api.get(`/recipe/get.php?id=${id}`)
+        // Get current user ID
+        const user = JSON.parse(localStorage.getItem('user') || '{"id": 1}');
+        setCurrentUserId(user.id || 1);
+
+        api.get(`/recipe/get.php?id=${id}&user_id=${user.id || 1}`)
             .then(res => {
-                if (res.data.success) setRecipe(res.data.recipe);
+                if (res.data.success) {
+                    setRecipe(res.data.recipe);
+                }
                 setLoading(false);
             })
             .catch(err => {
@@ -34,6 +41,10 @@ function RecipeDetailPage() {
 
     if (loading) return <div className="loading">Loading...</div>;
     if (!recipe) return <div className="error">Recipe not found</div>;
+
+    // Check if user owns recipe OR has purchased it
+    const userOwnsRecipe = recipe.user_id === currentUserId;
+    const canStartCooking = userOwnsRecipe || recipe.purchased;
 
     return (
         <Container maxWidth="md" className="recipe-detail-page">
@@ -57,10 +68,22 @@ function RecipeDetailPage() {
             </Box>
 
             <Box className="recipe-actions" sx={{ display: 'flex', gap: '20px', mt: 3 }}>
-                <StartCookingButton recipeId={id} />
+                <StartCookingButton
+                    recipeId={id}
+                    purchased={canStartCooking}
+                    recipePrice={recipe.price}
+                    userOwnsRecipe={userOwnsRecipe}
+                />
                 <SaveRecipeButton recipeId={id} initialSaved={recipe.saved || false} />
                 <LikeButton recipeId={id} initialLikes={recipe.likes || 0} />
-                <PurchaseButton recipeId={id} recipeTitle={recipe.title} />
+                {/* Only show purchase button if user doesn't own and hasn't purchased */}
+                {!userOwnsRecipe && !recipe.purchased && (
+                    <PurchaseButton
+                        recipeId={id}
+                        recipeTitle={recipe.title}
+                        price={recipe.price || 50}
+                    />
+                )}
             </Box>
 
             <Divider sx={{ my: 4 }} />

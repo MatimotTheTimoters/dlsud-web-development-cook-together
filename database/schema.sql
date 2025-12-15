@@ -56,6 +56,8 @@ CREATE TABLE IF NOT EXISTS recipes (
     difficulty ENUM('Easy', 'Medium', 'Hard') DEFAULT 'Medium',
     category VARCHAR(50),
     image_url TEXT,
+    price DECIMAL(10, 2) DEFAULT 0.00,
+    currency VARCHAR(3) DEFAULT 'USD',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
