@@ -83,7 +83,8 @@ CREATE TABLE IF NOT EXISTS cooking_sessions (
     session_code VARCHAR(10) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_join_code (join_code)
 );
 -- Session participants table
 CREATE TABLE IF NOT EXISTS session_participants (

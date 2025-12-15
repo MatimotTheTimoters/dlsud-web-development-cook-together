@@ -1,4 +1,5 @@
 <?php
+// backend/api/session/create.php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -9,9 +10,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Use your existing connection class
 require_once '../../db/connection.php';
-require_once '../../utils/validation.php';
+require_once '../../utils/code-generator.php'; // NEW: Include the utility
+
+$input = json_decode(file_get_contents('php://input'), true);
+
+$recipe_id = $input['recipe_id'] ?? null;
+$user_id = $input['user_id'] ?? null;
+$session_type = $input['session_type'] ?? 'solo';
+
+if (!$recipe_id || !$user_id) {
+    echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+    exit;
+}
 
 try {
     // Get database connection
@@ -83,30 +94,40 @@ try {
     if ($conn->query($sql)) {
         $recipeId = $conn->insert_id;
 
-        // Insert ingredients
-        $ingSql = "INSERT INTO recipe_ingredients (recipe_id, ingredient) VALUES ($recipeId, '$ingredients')";
-        $conn->query($ingSql);
-
-        // Insert steps
-        $stepSql = "INSERT INTO recipe_steps (recipe_id, step_number, instruction) VALUES ($recipeId, 1, '$steps')";
-        $conn->query($stepSql);
-
-        // Update user stats
-        $statsSql = "UPDATE user_stats SET recipes_created = recipes_created + 1 WHERE user_id = $userId";
-        $conn->query($statsSql);
-
-        echo json_encode([
-            'success' => true,
-            'recipe_id' => $recipeId,
-            'message' => 'Recipe created successfully! 🎉'
-        ]);
+        // Add host as participant
+        $stmt = $conn->prepare("
+            INSERT INTO session_participants 
+            (session_id, user_id, joined_at) 
+            VALUES (?, ?, NOW())
+        ");
+        $stmt->bind_param("ii", $session_id, $user_id);
+        
+        if ($stmt->execute()) {
+            $stmt->close();
+            $conn->commit();
+            
+            // Log successful creation
+            error_log("Session created: ID $session_id, Type: $session_type, Code: " . ($join_code ?: 'N/A'));
+            
+            echo json_encode([
+                'success' => true,
+                'session_id' => $session_id,
+                'join_code' => $join_code,
+                'message' => 'Session created successfully'
+            ]);
+        } else {
+            throw new Exception('Failed to add participant: ' . $conn->error);
+        }
     } else {
-        throw new Exception('Database error: ' . $conn->error);
+        throw new Exception('Failed to create session: ' . $conn->error);
     }
 
     $db->closeConnection();
 } catch (Exception $e) {
-    // Return error response
+    if (isset($conn) && method_exists($conn, 'rollback')) {
+        $conn->rollback();
+    }
+    error_log("Session creation error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
