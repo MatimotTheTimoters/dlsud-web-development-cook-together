@@ -3,12 +3,14 @@ import api from '../api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import SessionShareModal from './SessionShareModal';
 import '../styles/components.css';
+import SessionShareModal from './SessionShareModal';
 
 function SessionTypeModal({ open, onClose, recipeId, recipeTitle }) {
     const [loading, setLoading] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [sessionData, setSessionData] = useState(null);
     const navigate = useNavigate();
+    
 
     const createSession = async (sessionType) => {
         try {
@@ -30,12 +32,12 @@ function SessionTypeModal({ open, onClose, recipeId, recipeTitle }) {
                 if (sessionType === 'solo') {
                     navigate(`/cooking-session/${response.data.session_id}`);
                 } else if (sessionType === 'multiplayer') {
-                    // Store session data and show share modal
-                    setSessionData({
-                        sessionId: response.data.session_id,
-                        joinCode: response.data.join_code
-                    });
-                    setShowShareModal(true);
+                // Store session data and show share modal
+                setSessionData({
+                sessionId: response.data.session_id,
+                joinCode: response.data.join_code
+                });
+                setShowShareModal(true);
                 }
             } else {
                 alert('Failed to start cooking session: ' + (response.data.message || 'Unknown error'));
