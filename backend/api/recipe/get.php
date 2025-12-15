@@ -1,8 +1,10 @@
 <?php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') exit();
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -13,46 +15,37 @@ require_once '../../db/connection.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Get recipe ID from URL parameter
-$recipeId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$recipeId = intval($_GET['id'] ?? 0);
 
-if ($recipeId <= 0) {
+if (!$recipeId) {
     echo json_encode(['success' => false, 'message' => 'Recipe ID required']);
     exit();
 }
 
-// Get recipe with user info
-$sql = "SELECT r.*, u.username 
-        FROM recipes r 
-        LEFT JOIN users u ON r.user_id = u.id 
-        WHERE r.id = $recipeId 
-        LIMIT 1";
+// Get recipe
+$stmt = $conn->prepare("SELECT r.*, u.username FROM recipes r LEFT JOIN users u ON r.user_id = u.id WHERE r.id = ?");
+$stmt->bind_param("i", $recipeId);
+$stmt->execute();
+$result = $stmt->get_result();
 
-$result = $conn->query($sql);
-
-if ($result && $result->num_rows > 0) {
+if ($result->num_rows > 0) {
     $recipe = $result->fetch_assoc();
 
     // Get ingredients
-    $ingResult = $conn->query("SELECT ingredient FROM recipe_ingredients WHERE recipe_id = $recipeId");
-    $ingredients = $ingResult->fetch_assoc()['ingredient'] ?? '';
+    $ingStmt = $conn->prepare("SELECT GROUP_CONCAT(ingredient SEPARATOR ',') as ingredients FROM recipe_ingredients WHERE recipe_id = ?");
+    $ingStmt->bind_param("i", $recipeId);
+    $ingStmt->execute();
+    $recipe['ingredients'] = $ingStmt->get_result()->fetch_assoc()['ingredients'] ?? '';
 
     // Get steps  
-    $stepResult = $conn->query("SELECT instruction FROM recipe_steps WHERE recipe_id = $recipeId LIMIT 1");
-    $steps = $stepResult->fetch_assoc()['instruction'] ?? '';
+    $stepStmt = $conn->prepare("SELECT GROUP_CONCAT(instruction SEPARATOR '.') as steps FROM recipe_steps WHERE recipe_id = ?");
+    $stepStmt->bind_param("i", $recipeId);
+    $stepStmt->execute();
+    $recipe['steps'] = $stepStmt->get_result()->fetch_assoc()['steps'] ?? '';
 
-    echo json_encode([
-        'success' => true,
-        'recipe' => array_merge($recipe, [
-            'ingredients' => $ingredients,
-            'steps' => $steps
-        ])
-    ]);
+    echo json_encode(['success' => true, 'recipe' => $recipe]);
 } else {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Recipe not found'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Recipe not found']);
 }
 
 $db->closeConnection();

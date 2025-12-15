@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     servings INT,
     difficulty ENUM('Easy', 'Medium', 'Hard') DEFAULT 'Medium',
     category VARCHAR(50),
+    image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -80,6 +81,7 @@ CREATE TABLE IF NOT EXISTS cooking_sessions (
     user_id INT NOT NULL,
     session_type ENUM('solo', 'multiplayer') DEFAULT 'solo',
     join_code VARCHAR(6) UNIQUE NULL,
+    session_code VARCHAR(10) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

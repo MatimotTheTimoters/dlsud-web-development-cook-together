@@ -1,18 +1,19 @@
 /* Register Page */
 
 .page-transition {
-  animation: fadeIn 0.5s ease;
+    animation: fadeIn 0.5s ease;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Home Page Updates */
@@ -37,33 +38,28 @@
 
 /* Login Page Styles */
 .page-transition {
-  animation: fadeIn 0.5s ease;
+    animation: fadeIn 0.5s ease;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Background gradient override if needed */
 .custom-gradient-bg {
-  background: linear-gradient(135deg, #F1FAEE 0%, #FFFAF0 100%);
-  min-height: 100vh;
+    background: linear-gradient(135deg, #F1FAEE 0%, #FFFAF0 100%);
+    min-height: 100vh;
 }
 
 /* Profile Page Styles */
-.profile-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
 .profile-loading,
 .profile-error {
     text-align: center;
@@ -71,519 +67,233 @@
     font-size: 18px;
 }
 
-.profile-card {
-    background: white;
-    border-radius: 10px;
-    padding: 30px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.profile-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.profile-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.profile-info h2 {
-    margin: 0;
-    color: #333;
-}
-
-.username {
-    color: #666;
-    margin: 5px 0;
-}
-
-.bio {
-    color: #444;
-    line-height: 1.5;
-    margin: 10px 0;
-}
-
-.location {
-    color: #888;
-    font-size: 14px;
-}
-
-.profile-stats h3 {
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-}
-
-.stat-item {
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.stat-label {
-    display: block;
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    display: block;
-    font-size: 20px;
-    font-weight: bold;
-    color: #333;
-}
-
 /* Create Recipe Page */
-.create-recipe-page {
-    padding: 20px;
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
-.create-recipe-page h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
+.loading,
+.no-recipes {
+    display: none;
 }
 
-/* Recipes Page */
-.recipes-page {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+/* Recipes Page Styles */
+.recipes-container {
+    background-color: #F1FAEE;
+    min-height: 100vh;
+    padding: 32px 0;
 }
 
-.recipes-page h1 {
-    margin-bottom: 10px;
-    color: #333;
+.recipes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
 }
 
-.subtitle {
-    color: #666;
-    margin-bottom: 20px;
+.recipes-title {
+    color: #457B9D;
+    font-weight: bold;
+    font-size: 2rem;
+    margin: 0;
 }
 
 .recipes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    margin-top: 16px;
 }
 
-.loading {
-    text-align: center;
-    padding: 40px;
-    font-size: 18px;
-    color: #666;
+.recipe-grid-item {
+    transition: transform 0.3s ease;
 }
 
-.no-recipes {
+.recipe-grid-item:hover {
+    transform: translateY(-5px);
+}
+
+/* No Recipes Message */
+.no-recipes-container {
     text-align: center;
-    padding: 40px;
-    grid-column: 1 / -1;
-    color: #666;
+    padding: 64px 32px;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 32px auto;
+    max-width: 600px;
+}
+
+.no-recipes-message {
+    color: #1D3557;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Loading State */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.loading-text {
+    color: #457B9D;
+    font-size: 1.125rem;
+}
+
+/* Search Bar Container */
+.search-container {
+    width: 300px;
+}
+
+/* Filters Section */
+.filters-section {
+    margin-bottom: 24px;
 }
 
 /* Recipe Detail Page */
-.recipe-detail {
-    max-width: 1000px;
-    margin: 0 auto;
+.recipe-detail-page {
+    background-color: #FFFAF0;
+    min-height: 100vh;
     padding: 20px;
 }
 
-.recipe-header h1 {
-    color: #333;
-    margin-bottom: 10px;
+.recipe-header {
+    margin-bottom: 20px;
 }
 
 .recipe-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-    color: #666;
-    font-size: 14px;
+    gap: 10px;
+    margin: 20px 0;
 }
 
-.recipe-meta span {
-    padding: 4px 8px;
-    background: #f0f0f0;
-    border-radius: 4px;
-}
-
-.recipe-description {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    line-height: 1.6;
-}
-
-.recipe-grid {
+.recipe-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    margin-bottom: 30px;
+    gap: 20px;
+    margin: 30px 0;
 }
 
-.ingredients,
-.steps {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.ingredients h2,
-.steps h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.ingredients ul,
-.steps ol {
-    padding-left: 20px;
-    margin: 0;
-}
-
-.ingredients li,
-.steps li {
-    margin-bottom: 8px;
-    line-height: 1.5;
+@media (max-width: 768px) {
+    .recipe-content {
+        grid-template-columns: 1fr;
+    }
 }
 
 .recipe-actions {
     display: flex;
-    gap: 15px;
     justify-content: center;
-}
-
-.btn-primary,
-.btn-secondary {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: #4CAF50;
-    color: white;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
+    gap: 20px;
+    margin: 30px 0;
 }
 
 .loading,
 .error {
     text-align: center;
-    padding: 40px;
-    font-size: 18px;
+    padding: 50px;
+    font-size: 1.2rem;
 }
 
-/* Cooking Session Page Styles */
-.cooking-session {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 20px;
-    background: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
+.loading {
+    color: #457B9D;
 }
 
-.session-message {
-    font-size: 1.2em;
-    margin: 20px 0;
-    padding: 10px;
-    background: #e6f7ff;
-    border-radius: 5px;
-}
-
-.session-info {
-    background: white;
-    padding: 15px;
-    border-radius: 5px;
-    margin: 20px 0;
-    text-align: left;
-}
-
-.session-info p {
-    margin: 8px 0;
-}
-
-.session-controls {
-    margin-top: 30px;
-}
-
-.btn-primary,
-.btn-secondary {
-    padding: 10px 20px;
-    margin: 0 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-}
-
-.btn-primary {
-    background: #4CAF50;
-    color: white;
-}
-
-.btn-secondary {
-    background: #f0f0f0;
-    color: #333;
-}
-
-.current-step {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
-}
-
-.step-card {
-    background: #f0f8ff;
-    padding: 15px;
-    border-radius: 5px;
-    margin: 15px 0;
-    min-height: 60px;
-}
-
-.step-controls {
-    margin: 20px 0;
-}
-
-.step-controls button {
-    margin: 0 10px;
-}
-
-/* All Steps List */
-.all-steps {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    margin: 20px 0;
-    text-align: left;
-}
-
-.all-steps ol {
-    padding-left: 20px;
-}
-
-.all-steps li {
-    margin: 8px 0;
-    padding: 5px;
-    border-left: 3px solid transparent;
-}
-
-.all-steps .active-step {
-    background: #e6f7ff;
-    border-left: 3px solid #4CAF50;
-    font-weight: bold;
-}
-
-/* Button states */
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Solo Cooking Page */
-.solo-cooking-page {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #FFF8E1;
-    min-height: 100vh;
-}
-
-.session-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.session-header h1 {
+.error {
     color: #E63946;
-    margin: 0;
+}
+
+.recipe-detail-page {
+    background-color: #FFFAF0;
+    min-height: 100vh;
+    padding: 20px;
 }
 
 .back-button {
-    padding: 8px 16px;
-    background: #457B9D;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-
-.back-btn:hover {
-    background: #1D3557;
-}
-
-.session-timer {
-    background: #FFF8E1;
-    padding: 20px;
-    border-radius: 8px;
+    color: #1D3557;
     margin-bottom: 20px;
-    text-align: center;
-    border: 2px solid #FF9800;
 }
 
-.timer-display {
-    font-size: 48px;
-    color: #E63946;
-    font-weight: bold;
-    margin-bottom: 15px;
-    font-family: monospace;
+.recipe-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 30px 0;
 }
 
+@media (max-width: 768px) {
+    .recipe-content {
+        grid-template-columns: 1fr;
+    }
+}
 
-.timer-controls {
+.recipe-actions {
     display: flex;
-    gap: 10px;
     justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
 }
 
-.current-step {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #A8DADC;
-}
-
-.current-step h2 {
-    color: #1D3557;
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-.current-step h2 {
-    color: #1D3557;
-    margin-top: 0;
-    margin-bottom: 15px;
+.loading,
+.error {
     text-align: center;
+    padding: 100px;
+    font-size: 1.2rem;
 }
 
-.step-content {
-    background: #F1FAEE;
-    padding: 20px;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    min-height: 100px;
-    font-size: 16px;
-    line-height: 1.6;
-}
-
-.ingredient-checklist {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.step-navigation {
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
-}
-
-.checklist-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.checklist-item input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: #4CAF50;
-}
-
-.checklist-item label {
-    font-size: 16px;
-    color: #1D3557;
-    cursor: pointer;
-}
-
-.checklist-progress {
-    text-align: center;
-    margin-top: 15px;
+.loading {
     color: #457B9D;
-    font-weight: bold;
-    padding: 10px;
-    background: #F1FAEE;
-    border-radius: 4px;
 }
 
-.session-notes {
-    background: white;
+.error {
+    color: #E63946;
+}
+
+/* Cooking Session Page Styles */
+/* Cooking Session Page */
+.cooking-session-page {
+    background-color: #FFF8E1;
+    min-height: 100vh;
     padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.session-notes textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #A8DADC;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    font-family: inherit;
-    resize: vertical;
-}
-
-.session-complete {
+.session-header {
     text-align: center;
-    margin-top: 30px;
+    margin-bottom: 30px;
+    color: #E63946;
 }
 
-.complete-btn {
-    padding: 15px 40px;
-    font-size: 18px;
-    background: linear-gradient(135deg, #E63946, #FF9800);
+.session-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.session-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.timer-section {
+    background-color: #457B9D;
     color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.2s;
+    text-align: center;
 }
 
-.complete-btn:hover {
-    transform: scale(1.05);
+.step-section {
+    background-color: #A8DADC;
+    color: #1D3557;
+}
+
+.ingredients-section {
+    background-color: white;
+    border: 1px solid #E0E0E0;
+}
+
+.notes-section {
+    background-color: white;
+    border: 1px solid #E0E0E0;
 }
