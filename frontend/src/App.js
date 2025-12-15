@@ -10,49 +10,54 @@ import RecipeDetailPage from './pages/RecipeDetailPage';
 import MultiplayerCookingPage from './pages/MultiplayerCookingPage';
 import SoloCookingPage from './pages/SoloCookingPage';
 import { SnackbarProvider } from 'notistack';
+import SessionsPage from './pages/SessionsPage';
+import SessionDetailPage from './pages/SessionDetailPage';
 
 function App() {
   return (
     <SnackbarProvider maxSnack={3}>
-    <Router>
-      <div className="App">
-        <nav className="navbar">
-          <div className="nav-container">
-            <Link to="/" className="nav-logo">
-              🍳 CookTogether
-            </Link>
-            <div className="nav-links">
-              <Link to="/" className="nav-link">Home</Link>
-              <Link to="/register" className="nav-link">Register</Link>
-              <Link to="/login" className="nav-link">Login</Link>
-              <Link to="/about" className="nav-link">About</Link>
-              <Link to="/profile" className="nav-link">Profile</Link>
-              <Link to="/create-recipe" className="nav-link">Create Recipe</Link>
-              <Link to="/recipes" className="nav-link">Recipes</Link>
+      <Router>
+        <div className="App">
+          <nav className="navbar">
+            <div className="nav-container">
+              <Link to="/" className="nav-logo">
+                🍳 CookTogether
+              </Link>
+              <div className="nav-links">
+                <Link to="/" className="nav-link">Home</Link>
+                <Link to="/register" className="nav-link">Register</Link>
+                <Link to="/login" className="nav-link">Login</Link>
+                <Link to="/about" className="nav-link">About</Link>
+                <Link to="/profile" className="nav-link">Profile</Link>
+                <Link to="/create-recipe" className="nav-link">Create Recipe</Link>
+                <Link to="/recipes" className="nav-link">Recipes</Link>
+                <Link to="/sessions" className="nav-link">Join Sessions</Link>
+              </div>
             </div>
-          </div>
-        </nav>
+          </nav>
 
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/create-recipe" element={<CreateRecipePage />} />
-            <Route path="/recipes" element={<RecipesPage />} />
-            <Route path="/recipe/:id" element={<RecipeDetailPage />} />
-            <Route path="/cooking-session/:sessionId" element={<MultiplayerCookingPage />} />
-            <Route path="/cooking-session/:sessionId" element={<SoloCookingPage />} />
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/create-recipe" element={<CreateRecipePage />} />
+              <Route path="/recipes" element={<RecipesPage />} />
+              <Route path="/recipe/:id" element={<RecipeDetailPage />} />
+              <Route path="/cooking-session/:sessionId" element={<MultiplayerCookingPage />} />
+              <Route path="/cooking-session/:sessionId" element={<SoloCookingPage />} />
+              <Route path="/sessions" element={<SessionsPage />} />
+              <Route path="/session/:id" element={<SessionDetailPage />} />
             </Routes>
-        </main>
+          </main>
 
-        <footer className="footer">
-          <p>© 2024 CookTogether - Level up your cooking!</p>
-        </footer>
-      </div>
-    </Router>
+          <footer className="footer">
+            <p>© 2024 CookTogether - Level up your cooking!</p>
+          </footer>
+        </div>
+      </Router>
     </SnackbarProvider>
   );
 }

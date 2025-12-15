@@ -1,55 +1,122 @@
 import React, { useState } from 'react';
+import { Button, Modal, Box, TextField, Typography } from '@mui/material';
+import { Group } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useSnackbar } from 'notistack';
 import api from '../api/axiosConfig';
 
-function JoinSessionButton({ sessionId }) {
-    const [joined, setJoined] = useState(false);
+function JoinSessionButton() {
+    const [open, setOpen] = useState(false);
+    const [sessionCode, setSessionCode] = useState('');
     const [loading, setLoading] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
-    const joinSession = async () => {
+    const handleJoin = async () => {
+        if (!sessionCode.trim()) {
+            enqueueSnackbar('Please enter a session code', { variant: 'warning' });
+            return;
+        }
+
         setLoading(true);
         try {
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
-            if (!user) {
-                alert('Please log in to join a session');
-                return;
-            }
-
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
             const response = await api.post('/session/join.php', {
-                session_id: sessionId,
+                session_code: sessionCode,
                 user_id: user.id
             });
 
             if (response.data.success) {
-                setJoined(true);
-                alert('✅ Successfully joined the cooking session!');
+                enqueueSnackbar('Successfully joined session!', { variant: 'success' });
+                setOpen(false);
+                setSessionCode('');
+                // Redirect to session page
+                window.location.href = `/session/${response.data.session_id}`;
             } else {
-                alert(response.data.message || 'Failed to join session');
+                enqueueSnackbar(response.data.message, { variant: 'error' });
             }
         } catch (error) {
-            console.error('Error joining session:', error);
-            alert('Error joining cooking session');
+            enqueueSnackbar('Failed to join session', { variant: 'error' });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <button
-            onClick={joinSession}
-            disabled={joined || loading}
-            className="join-session-btn"
-            style={{
-                padding: '10px 20px',
-                background: joined ? '#4CAF50' : '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: joined ? 'default' : 'pointer',
-                opacity: loading ? 0.7 : 1
-            }}
-        >
-            {loading ? 'Joining...' : joined ? '✅ Joined' : '👥 Join Session'}
-        </button>
+        <>
+            <Button
+                variant="contained"
+                color="secondary"
+                startIcon={<Group />}
+                onClick={() => setOpen(true)}
+                sx={{
+                    bgcolor: '#E63946',
+                    '&:hover': { bgcolor: '#d32f2f' }
+                }}
+            >
+                JOIN SESSION
+            </Button>
+
+            <AnimatePresence>
+                {open && (
+                    <Modal open={open} onClose={() => !loading && setOpen(false)}>
+                        <Box sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 400,
+                            bgcolor: 'white',
+                            p: 4,
+                            borderRadius: 2,
+                            boxShadow: 24,
+                        }}>
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 20 }}
+                            >
+                                <Typography variant="h6" gutterBottom sx={{ color: '#1D3557' }}>
+                                    Enter Session Code
+                                </Typography>
+
+                                <TextField
+                                    fullWidth
+                                    label="Session Code"
+                                    value={sessionCode}
+                                    onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
+                                    disabled={loading}
+                                    sx={{
+                                        mt: 2,
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': { borderColor: '#A8DADC' },
+                                            '&:hover fieldset': { borderColor: '#457B9D' }
+                                        }
+                                    }}
+                                />
+
+                                <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                                    <Button
+                                        onClick={() => setOpen(false)}
+                                        disabled={loading}
+                                        sx={{ color: '#757575' }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        onClick={handleJoin}
+                                        disabled={loading}
+                                        sx={{ bgcolor: '#457B9D', '&:hover': { bgcolor: '#1D3557' } }}
+                                    >
+                                        {loading ? 'Joining...' : 'Join'}
+                                    </Button>
+                                </Box>
+                            </motion.div>
+                        </Box>
+                    </Modal>
+                )}
+            </AnimatePresence>
+        </>
     );
 }
 

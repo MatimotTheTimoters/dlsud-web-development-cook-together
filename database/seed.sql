@@ -386,44 +386,148 @@ VALUES -- Spaghetti Carbonara steps
         6,
         'Brush with egg wash and bake at 400°F for 25-30 minutes'
     );
--- Insert cooking sessions (some completed, some active)
--- Insert cooking sessions (using new table structure)
-INSERT INTO cooking_sessions (recipe_id, user_id, created_at)
-VALUES (1, 1, '2024-01-14 18:00:00'),
-    (2, 2, '2024-01-14 15:30:00'),
-    (3, 3, '2024-01-13 19:00:00'),
-    (4, 4, '2024-01-15 08:30:00'),
-    (2, 5, '2024-01-15 10:00:00');
+-- Insert cooking sessions with new schema fields
+INSERT INTO cooking_sessions (
+        recipe_id,
+        user_id,
+        session_type,
+        session_status,
+        max_players,
+        session_code,
+        created_at
+    )
+VALUES -- Multiplayer sessions (waiting for players)
+    (
+        1,
+        -- Spaghetti Carbonara
+        1,
+        -- chefjohn
+        'multiplayer',
+        'waiting',
+        6,
+        'ABC123',
+        '2024-01-15 18:00:00'
+    ),
+    (
+        2,
+        -- Chocolate Chip Cookies
+        2,
+        -- bakermary
+        'multiplayer',
+        'waiting',
+        4,
+        'XYZ789',
+        '2024-01-15 15:30:00'
+    ),
+    -- Active multiplayer session
+    (
+        3,
+        -- Chicken Tikka Masala
+        3,
+        -- cookmax
+        'multiplayer',
+        'active',
+        6,
+        'DEF456',
+        '2024-01-15 14:00:00'
+    ),
+    -- Completed session
+    (
+        4,
+        -- Avocado Toast
+        4,
+        -- recipeamy
+        'solo',
+        'completed',
+        1,
+        NULL,
+        '2024-01-15 08:30:00'
+    ),
+    -- Another waiting session
+    (
+        2,
+        -- Chocolate Chip Cookies
+        5,
+        -- testuser
+        'multiplayer',
+        'waiting',
+        6,
+        'GHI789',
+        '2024-01-15 10:00:00'
+    );
+-- Insert session participants for the first multiplayer session
+INSERT INTO session_participants (session_id, user_id, ready_status)
+VALUES (1, 1, 'ready'),
+    -- chefjohn (host) is ready
+    (1, 2, 'ready'),
+    -- bakermary is ready
+    (1, 3, 'not_ready');
+-- cookmax is not ready
+-- Insert participants for the second multiplayer session
+INSERT INTO session_participants (session_id, user_id, ready_status)
+VALUES (2, 2, 'ready'),
+    -- bakermary (host) is ready
+    (2, 4, 'ready');
+-- recipeamy is ready
 -- Display inserted data for verification
-SELECT '=== USERS ===' as '';
+SELECT '=== USERS (5 total) ===' as info;
 SELECT id,
     username,
     email,
-    password
+    full_name
 FROM users;
-SELECT '=== USER STATS ===' as '';
+SELECT '=== USER STATS ===' as info;
 SELECT user_id,
     level,
     gold_count,
-    gem_count
+    gem_count,
+    recipes_cooked
 FROM user_stats;
-SELECT '=== RECIPES ===' as '';
+SELECT '=== RECIPES (8 total) ===' as info;
 SELECT id,
     title,
     difficulty,
     prep_time,
     cook_time
 FROM recipes;
-SELECT '=== COOKING SESSIONS ===' as '';
+SELECT '=== COOKING SESSIONS (5 total) ===' as info;
 SELECT id,
     recipe_id,
     user_id,
-    status,
-    total_time
-FROM cooking_sessions;
-SELECT '=== SAMPLE LOGIN INFO ===' as '';
-SELECT 'Test with these credentials:' as note,
-    'Username: chefjohn' as username1,
-    'Password: password123' as password1,
-    'Username: testuser' as username2,
+    session_type,
+    session_status,
+    session_code,
+    created_at
+FROM cooking_sessions
+ORDER BY created_at DESC;
+SELECT '=== SESSION PARTICIPANTS ===' as info;
+SELECT sp.session_id,
+    u.username,
+    sp.ready_status,
+    sp.joined_at
+FROM session_participants sp
+    JOIN users u ON sp.user_id = u.id
+ORDER BY sp.session_id,
+    sp.joined_at;
+SELECT '=== TEST CREDENTIALS ===' as info;
+SELECT 'Username: chefjohn' as account1,
+    'Password: password123' as password1
+UNION ALL
+SELECT 'Username: testuser' as account2,
     'Password: testpass' as password2;
+SELECT '=== ACTIVE MULTIPLAYER SESSIONS (for testing Feature 8) ===' as info;
+SELECT cs.id as session_id,
+    cs.session_code,
+    r.title as recipe_name,
+    u.username as host_name,
+    cs.session_status,
+    cs.max_players,
+    COUNT(sp.id) as current_players
+FROM cooking_sessions cs
+    JOIN recipes r ON cs.recipe_id = r.id
+    JOIN users u ON cs.user_id = u.id
+    LEFT JOIN session_participants sp ON cs.id = sp.session_id
+WHERE cs.session_type = 'multiplayer'
+    AND cs.session_status = 'waiting'
+GROUP BY cs.id
+ORDER BY cs.created_at DESC;

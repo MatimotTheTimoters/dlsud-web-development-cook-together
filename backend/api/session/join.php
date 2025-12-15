@@ -1,52 +1,58 @@
 <?php
-require_once __DIR__ . '/../../db/connection.php';
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Credentials: true");
+require_once '../../db/connection.php';
 
-echo json_encode(["success" => true, "message" => "API is working!"]);
+header('Content-Type: application/json');
+
+// Get POST data
+$data = json_decode(file_get_contents('php://input'), true);
+$sessionCode = $data['session_code'] ?? '';
+$userId = $data['user_id'] ?? 0;
+
+if (empty($sessionCode) || $userId <= 0) {
+    echo json_encode(['success' => false, 'message' => 'Invalid input']);
+    exit;
+}
 
 $db = new Database();
 $conn = $db->getConnection();
 
-// Get POST data
-$input = json_decode(file_get_contents('php://input'), true);
-$session_id = $input['session_id'] ?? null;
-$user_id = $input['user_id'] ?? null;
+// Find session by code
+$stmt = $conn->prepare("SELECT id FROM cooking_sessions WHERE session_code = ? AND session_status = 'waiting'");
+$stmt->bind_param("s", $sessionCode);
+$stmt->execute();
+$result = $stmt->get_result();
 
-// Validate input
-if (!$session_id || !$user_id) {
-    echo json_encode(['success' => false, 'message' => 'Session ID and User ID are required']);
-    exit();
+if ($result->num_rows === 0) {
+    echo json_encode(['success' => false, 'message' => 'Session not found or already started']);
+    exit;
 }
+
+$session = $result->fetch_assoc();
+$sessionId = $session['id'];
 
 // Check if user is already in session
-$check = $conn->prepare("SELECT id FROM session_participants WHERE session_id = ? AND user_id = ?");
-$check->bind_param("ii", $session_id, $user_id);
-$check->execute();
-$check->store_result();
+$checkStmt = $conn->prepare("SELECT id FROM session_participants WHERE session_id = ? AND user_id = ?");
+$checkStmt->bind_param("ii", $sessionId, $userId);
+$checkStmt->execute();
+$checkResult = $checkStmt->get_result();
 
-if ($check->num_rows > 0) {
-    echo json_encode(['success' => false, 'message' => 'Already joined this session']);
-    $check->close();
-    exit();
+if ($checkResult->num_rows > 0) {
+    echo json_encode(['success' => false, 'message' => 'Already in session']);
+    exit;
 }
-$check->close();
 
 // Add participant
-$stmt = $conn->prepare("INSERT INTO session_participants (session_id, user_id) VALUES (?, ?)");
-$stmt->bind_param("ii", $session_id, $user_id);
+$insertStmt = $conn->prepare("INSERT INTO session_participants (session_id, user_id) VALUES (?, ?)");
+$insertStmt->bind_param("ii", $sessionId, $userId);
 
-if ($stmt->execute()) {
+if ($insertStmt->execute()) {
     echo json_encode([
         'success' => true,
-        'message' => 'Joined cooking session',
-        'participant_id' => $stmt->insert_id
+        'message' => 'Joined successfully',
+        'session_id' => $sessionId
     ]);
 } else {
-    echo json_encode(['success' => false, 'message' => 'Failed to join session']);
+    echo json_encode(['success' => false, 'message' => 'Failed to join']);
 }
 
-$stmt->close();
 $db->closeConnection();

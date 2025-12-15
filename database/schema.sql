@@ -80,19 +80,19 @@ CREATE TABLE IF NOT EXISTS cooking_sessions (
     recipe_id INT NOT NULL,
     user_id INT NOT NULL,
     session_type ENUM('solo', 'multiplayer') DEFAULT 'solo',
-    join_code VARCHAR(6) UNIQUE NULL,
+    session_status ENUM('waiting', 'active', 'completed') DEFAULT 'waiting',
+    max_players INT DEFAULT 6,
     session_code VARCHAR(10) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_join_code (join_code),
-    INDEX idx_session_type (session_type)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 -- Session participants table
 CREATE TABLE IF NOT EXISTS session_participants (
     id INT PRIMARY KEY AUTO_INCREMENT,
     session_id INT NOT NULL,
     user_id INT NOT NULL,
+    ready_status ENUM('not_ready', 'ready') DEFAULT 'not_ready',
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES cooking_sessions(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
