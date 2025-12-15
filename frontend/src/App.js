@@ -7,11 +7,13 @@ import ProfilePage from './pages/ProfilePage';
 import CreateRecipePage from './pages/CreateRecipePage';
 import RecipesPage from './pages/RecipesPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
-import MultiplayerCookingPage from './pages/MultiplayerCookingPage';
-import SoloCookingPage from './pages/SoloCookingPage';
 import { SnackbarProvider } from 'notistack';
 import SessionsPage from './pages/SessionsPage';
 import SessionDetailPage from './pages/SessionDetailPage';
+import CookingSessionPage from './pages/CookingSessionPage';
+import CookbookPage from './pages/CookbookPage';
+import ShopPage from './pages/ShopPage';
+import PurchaseButton from './components/PurchaseButton';
 
 function App() {
   return (
@@ -32,6 +34,7 @@ function App() {
                 <Link to="/create-recipe" className="nav-link">Create Recipe</Link>
                 <Link to="/recipes" className="nav-link">Recipes</Link>
                 <Link to="/sessions" className="nav-link">Join Sessions</Link>
+                <Link to="/cookbook" className="nav-link">My Cookbook</Link>
               </div>
             </div>
           </nav>
@@ -46,10 +49,10 @@ function App() {
               <Route path="/create-recipe" element={<CreateRecipePage />} />
               <Route path="/recipes" element={<RecipesPage />} />
               <Route path="/recipe/:id" element={<RecipeDetailPage />} />
-              <Route path="/cooking-session/:sessionId" element={<MultiplayerCookingPage />} />
-              <Route path="/cooking-session/:sessionId" element={<SoloCookingPage />} />
+              <Route path="/cooking-session/:sessionId" element={<CookingSessionPage />} />
               <Route path="/sessions" element={<SessionsPage />} />
               <Route path="/session/:id" element={<SessionDetailPage />} />
+              <Route path="/cookbook" element={<CookbookPage />} />
             </Routes>
           </main>
 

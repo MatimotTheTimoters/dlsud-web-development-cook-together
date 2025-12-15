@@ -1,4 +1,3 @@
-// Add this function to handle image upload BEFORE recipe creation
 import React, { useState } from 'react';
 import {
     TextField,
@@ -9,9 +8,10 @@ import {
     Box,
     Typography,
     Grid,
-    CircularProgress
+    CircularProgress,
+    InputAdornment
 } from '@mui/material';
-import { Timer, Restaurant } from '@mui/icons-material';
+import { Timer, Restaurant, AttachMoney } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import api from '../api/axiosConfig';
 import IngredientList from './IngredientList';
@@ -30,7 +30,9 @@ function RecipeForm() {
         cook_time: '',
         servings: '',
         difficulty: 'Medium',
-        category: ''
+        category: '',
+        price: '',
+        currency: 'USD'
     });
     const [image, setImage] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -44,7 +46,6 @@ function RecipeForm() {
         if (typeof imageData === 'string' && imageData.startsWith('data:image')) {
             return imageData;
         }
-        // If for some reason it's still a File object (fallback), process it
         if (imageData instanceof Blob) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -54,7 +55,6 @@ function RecipeForm() {
                 reader.readAsDataURL(imageData);
             });
         }
-        // If no image, return empty string
         return '';
     };
 
@@ -84,14 +84,15 @@ function RecipeForm() {
                 imageUrl = await uploadImage(image);
             }
 
-            // Send recipe data INCLUDING image
+            // Send recipe data
             const response = await api.post('/recipe/create.php', {
                 ...form,
                 prep_time: parseInt(form.prep_time) || 0,
                 cook_time: parseInt(form.cook_time) || 0,
                 servings: parseInt(form.servings) || 1,
+                price: parseFloat(form.price) || 0,
                 user_id: user.id || 1,
-                image_url: imageUrl // ADD THIS - send the image data
+                image_url: imageUrl
             });
 
             if (response.data.success) {
@@ -110,7 +111,9 @@ function RecipeForm() {
                     cook_time: '',
                     servings: '',
                     difficulty: 'Medium',
-                    category: ''
+                    category: '',
+                    price: '',
+                    currency: 'USD'
                 });
                 setImage(null);
             } else {
@@ -139,7 +142,7 @@ function RecipeForm() {
                 name="title"
                 value={form.title}
                 onChange={handleChange}
-                sx={{ mb: 3, '& .MuiOutlinedInput-root': { borderColor: '#A8DADC' } }}
+                sx={{ mb: 3 }}
                 placeholder="e.g., Chocolate Chip Cookies"
                 required
             />
@@ -169,7 +172,6 @@ function RecipeForm() {
                             value={form[field.name]}
                             onChange={handleChange}
                             InputProps={{ startAdornment: field.icon }}
-                            sx={{ '& .MuiOutlinedInput-root': { borderColor: '#A8DADC' } }}
                         />
                     </Grid>
                 ))}
@@ -181,11 +183,46 @@ function RecipeForm() {
                             value={form.difficulty}
                             onChange={handleChange}
                             label="Difficulty"
-                            sx={{ '& .MuiOutlinedInput-root': { borderColor: '#457B9D' } }}
                         >
                             <MenuItem value="Easy">Easy</MenuItem>
                             <MenuItem value="Medium">Medium</MenuItem>
                             <MenuItem value="Hard">Hard</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Grid>
+
+                {/* Price and Currency */}
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        fullWidth
+                        label="Price (gold)"
+                        name="price"
+                        type="number"
+                        value={form.price}
+                        onChange={handleChange}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <AttachMoney />
+                                </InputAdornment>
+                            ),
+                        }}
+                        placeholder="50"
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                        <InputLabel>Currency</InputLabel>
+                        <Select
+                            name="currency"
+                            value={form.currency}
+                            onChange={handleChange}
+                            label="Currency"
+                        >
+                            <MenuItem value="USD">USD ($)</MenuItem>
+                            <MenuItem value="EUR">EUR (€)</MenuItem>
+                            <MenuItem value="GBP">GBP (£)</MenuItem>
+                            <MenuItem value="PHP">PHP (₱)</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Button, CircularProgress, Alert, Snackbar } from '@mui/material';
-import { PlayArrow } from '@mui/icons-material';
+import { PlayArrow, Lock } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import SessionTypeModal from './SessionTypeModal';
 
-function StartCookingButton({ recipeId }) {
+function StartCookingButton({ recipeId, purchased = false, recipePrice = 0, userOwnsRecipe = false }) {
     const [loading, setLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [message, setMessage] = useState('');
@@ -55,26 +55,33 @@ function StartCookingButton({ recipeId }) {
             navigate('/login');
             return;
         }
+
+        if (!purchased) {
+            alert(`Please purchase this recipe to start cooking! Price: ${recipePrice} gold`);
+            return;
+        }
+
         setModalOpen(true);
     };
 
     return (
         <>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: purchased ? 1.05 : 1 }} whileTap={{ scale: purchased ? 0.95 : 1 }}>
                 <Button
                     variant="contained"
-                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <PlayArrow />}
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> :
+                        (purchased ? <PlayArrow /> : <Lock />)}
                     onClick={handleClick}
-                    disabled={loading}
+                    disabled={loading || !purchased}
                     sx={{
-                        bgcolor: '#E63946',
-                        '&:hover': { bgcolor: '#d32f2f' },
+                        bgcolor: purchased ? '#E63946' : '#757575',
+                        '&:hover': { bgcolor: purchased ? '#d32f2f' : '#616161' },
                         py: 1.5,
                         px: 4,
                         fontSize: '1.1rem'
                     }}
                 >
-                    Start Cooking
+                    {purchased ? 'Start Cooking' : 'Purchase Required'}
                 </Button>
             </motion.div>
 
