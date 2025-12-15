@@ -10,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Use the same connection method as your recipe API
 require_once '../../db/connection.php';
+require_once '../../utils/code-generator.php'; // NEW: Include the utility
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -25,46 +25,22 @@ if (!$recipe_id || !$user_id) {
 }
 
 try {
-    // Get database connection using the same method as recipe API
+    // Get database connection
     $db = new Database();
     $conn = $db->getConnection();
 
     // Start transaction
     $conn->begin_transaction();
 
-    // Create session - check if join_code needs to be generated for multiplayer
     $join_code = null;
     if ($session_type === 'multiplayer') {
-        // Generate a simple 6-character code
-        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        $maxAttempts = 10;
-        $codeGenerated = false;
-        
-        for ($i = 0; $i < $maxAttempts; $i++) {
-            $join_code = '';
-            for ($j = 0; $j < 6; $j++) {
-                $join_code .= $characters[rand(0, strlen($characters) - 1)];
-            }
-            
-            // Check if code exists
-            $checkStmt = $conn->prepare("SELECT COUNT(*) FROM cooking_sessions WHERE join_code = ?");
-            $checkStmt->bind_param("s", $join_code);
-            $checkStmt->execute();
-            $checkStmt->bind_result($count);
-            $checkStmt->fetch();
-            $checkStmt->close();
-            
-            if ($count == 0) {
-                $codeGenerated = true;
-                break;
-            }
-        }
-        
-        if (!$codeGenerated) {
-            throw new Exception('Failed to generate unique session code');
-        }
-        
-        // Insert with join_code
+        // NEW: Use the reusable code generator
+        $join_code = generateUniqueSessionCode($conn);
+        error_log("Multiplayer session created with code: $join_code by user $user_id");
+    }
+
+    // Create session
+    if ($session_type === 'multiplayer') {
         $stmt = $conn->prepare("
             INSERT INTO cooking_sessions 
             (recipe_id, user_id, join_code, created_at) 
@@ -72,7 +48,6 @@ try {
         ");
         $stmt->bind_param("iis", $recipe_id, $user_id, $join_code);
     } else {
-        // Solo session - no join_code
         $stmt = $conn->prepare("
             INSERT INTO cooking_sessions 
             (recipe_id, user_id, created_at) 
@@ -97,6 +72,9 @@ try {
             $stmt->close();
             $conn->commit();
             
+            // Log successful creation
+            error_log("Session created: ID $session_id, Type: $session_type, Code: " . ($join_code ?: 'N/A'));
+            
             echo json_encode([
                 'success' => true,
                 'session_id' => $session_id,
@@ -115,6 +93,7 @@ try {
     if (isset($conn) && method_exists($conn, 'rollback')) {
         $conn->rollback();
     }
+    error_log("Session creation error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()

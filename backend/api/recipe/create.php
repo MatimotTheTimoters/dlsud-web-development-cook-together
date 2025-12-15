@@ -11,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once '../../db/connection.php';
-require_once '../../utils/code-generator.php'; // NEW: Include the utility
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -19,41 +18,98 @@ $recipe_id = $input['recipe_id'] ?? null;
 $user_id = $input['user_id'] ?? null;
 $session_type = $input['session_type'] ?? 'solo';
 
+// DEBUG: Log the request
+error_log("Session creation request: recipe_id=$recipe_id, user_id=$user_id, session_type=$session_type");
+
 if (!$recipe_id || !$user_id) {
     echo json_encode(['success' => false, 'message' => 'Missing required fields']);
     exit;
 }
 
 try {
-    // Get database connection
     $db = new Database();
     $conn = $db->getConnection();
+    
+    // Check if user exists
+    $checkUser = $conn->prepare("SELECT id FROM users WHERE id = ?");
+    $checkUser->bind_param("i", $user_id);
+    $checkUser->execute();
+    $checkUser->store_result();
+    
+    if ($checkUser->num_rows === 0) {
+        $checkUser->close();
+        echo json_encode([
+            'success' => false, 
+            'message' => 'User not found. Please log in first.',
+            'debug' => "User ID $user_id not found in database"
+        ]);
+        exit;
+    }
+    $checkUser->close();
+    
+    // Check if recipe exists
+    $checkRecipe = $conn->prepare("SELECT id FROM recipes WHERE id = ?");
+    $checkRecipe->bind_param("i", $recipe_id);
+    $checkRecipe->execute();
+    $checkRecipe->store_result();
+    
+    if ($checkRecipe->num_rows === 0) {
+        $checkRecipe->close();
+        echo json_encode(['success' => false, 'message' => 'Recipe not found']);
+        exit;
+    }
+    $checkRecipe->close();
 
     // Start transaction
     $conn->begin_transaction();
 
+    // Create session with session_type
     $join_code = null;
     if ($session_type === 'multiplayer') {
-        // NEW: Use the reusable code generator
-        $join_code = generateUniqueSessionCode($conn);
-        error_log("Multiplayer session created with code: $join_code by user $user_id");
-    }
-
-    // Create session
-    if ($session_type === 'multiplayer') {
+        // Generate a 6-character code
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $maxAttempts = 10;
+        $codeGenerated = false;
+        
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            $join_code = '';
+            for ($j = 0; $j < 6; $j++) {
+                $join_code .= $characters[rand(0, strlen($characters) - 1)];
+            }
+            
+            // Check if code exists
+            $checkStmt = $conn->prepare("SELECT COUNT(*) FROM cooking_sessions WHERE join_code = ?");
+            $checkStmt->bind_param("s", $join_code);
+            $checkStmt->execute();
+            $checkStmt->bind_result($count);
+            $checkStmt->fetch();
+            $checkStmt->close();
+            
+            if ($count == 0) {
+                $codeGenerated = true;
+                break;
+            }
+        }
+        
+        if (!$codeGenerated) {
+            throw new Exception('Failed to generate unique session code');
+        }
+        
+        // Insert with join_code and session_type
         $stmt = $conn->prepare("
             INSERT INTO cooking_sessions 
-            (recipe_id, user_id, join_code, created_at) 
+            (recipe_id, user_id, session_type, join_code, created_at) 
+            VALUES (?, ?, ?, ?, NOW())
+        ");
+        $stmt->bind_param("iiss", $recipe_id, $user_id, $session_type, $join_code);
+    } else {
+        // Solo session - no join_code, but include session_type
+        $stmt = $conn->prepare("
+            INSERT INTO cooking_sessions 
+            (recipe_id, user_id, session_type, created_at) 
             VALUES (?, ?, ?, NOW())
         ");
-        $stmt->bind_param("iis", $recipe_id, $user_id, $join_code);
-    } else {
-        $stmt = $conn->prepare("
-            INSERT INTO cooking_sessions 
-            (recipe_id, user_id, created_at) 
-            VALUES (?, ?, NOW())
-        ");
-        $stmt->bind_param("ii", $recipe_id, $user_id);
+        $stmt->bind_param("iis", $recipe_id, $user_id, $session_type);
     }
 
     if ($stmt->execute()) {
@@ -72,12 +128,12 @@ try {
             $stmt->close();
             $conn->commit();
             
-            // Log successful creation
-            error_log("Session created: ID $session_id, Type: $session_type, Code: " . ($join_code ?: 'N/A'));
+            error_log("Session created successfully: id=$session_id, type=$session_type, join_code=$join_code");
             
             echo json_encode([
                 'success' => true,
                 'session_id' => $session_id,
+                'session_type' => $session_type,
                 'join_code' => $join_code,
                 'message' => 'Session created successfully'
             ]);
@@ -96,7 +152,8 @@ try {
     error_log("Session creation error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => $e->getMessage(),
+        'debug' => "recipe_id: $recipe_id, user_id: $user_id, session_type: $session_type"
     ]);
 }
 ?>
