@@ -1,3 +1,4 @@
+// Add this function to handle image upload BEFORE recipe creation
 import React, { useState } from 'react';
 import {
     TextField,
@@ -39,6 +40,24 @@ function RecipeForm() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
+    const uploadImage = async (imageData) => {
+        if (typeof imageData === 'string' && imageData.startsWith('data:image')) {
+            return imageData;
+        }
+        // If for some reason it's still a File object (fallback), process it
+        if (imageData instanceof Blob) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    resolve(reader.result);
+                };
+                reader.readAsDataURL(imageData);
+            });
+        }
+        // If no image, return empty string
+        return '';
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -60,12 +79,19 @@ function RecipeForm() {
             // Get user ID from localStorage
             const user = JSON.parse(localStorage.getItem('user') || '{"id": 1}');
 
+            let imageUrl = '';
+            if (image) {
+                imageUrl = await uploadImage(image);
+            }
+
+            // Send recipe data INCLUDING image
             const response = await api.post('/recipe/create.php', {
                 ...form,
                 prep_time: parseInt(form.prep_time) || 0,
                 cook_time: parseInt(form.cook_time) || 0,
                 servings: parseInt(form.servings) || 1,
-                user_id: user.id || 1
+                user_id: user.id || 1,
+                image_url: imageUrl // ADD THIS - send the image data
             });
 
             if (response.data.success) {

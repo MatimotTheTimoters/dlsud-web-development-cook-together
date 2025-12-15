@@ -18,14 +18,12 @@ function RecipesPage() {
     });
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Fetch recipes when filters change
     useEffect(() => {
         fetchRecipes();
-    }, [filters]); // Re-fetch when filters change
+    }, [filters]);
 
     const fetchRecipes = async () => {
         try {
-            // Build query parameters from filters
             const params = new URLSearchParams();
             if (filters.difficulty !== 'all') params.append('difficulty', filters.difficulty);
             if (filters.category !== 'all') params.append('category', filters.category);
@@ -47,29 +45,27 @@ function RecipesPage() {
 
     const handleFilterChange = (newFilters) => {
         setFilters(newFilters);
-        setLoading(true); // Show loading when changing filters
+        setLoading(true);
     };
 
     const handleSearch = (query) => {
         setSearchQuery(query);
-        // SIMPLE SEARCH: Filter client-side for now
         if (query) {
             const filtered = recipes.filter(recipe =>
                 recipe.title.toLowerCase().includes(query.toLowerCase()) ||
                 recipe.description.toLowerCase().includes(query.toLowerCase()) ||
-                recipe.category.toLowerCase().includes(query.toLowerCase())
+                (recipe.category && recipe.category.toLowerCase().includes(query.toLowerCase()))
             );
             setRecipes(filtered);
         } else {
-            // If search is cleared, refetch original recipes
             fetchRecipes();
         }
     };
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Typography variant="h6" color="#457B9D">
+            <Box className="loading-container">
+                <Typography className="loading-text">
                     Loading recipes...
                 </Typography>
             </Box>
@@ -77,32 +73,24 @@ function RecipesPage() {
     }
 
     return (
-        <Container
-            sx={{
-                backgroundColor: '#F1FAEE',
-                minHeight: '100vh',
-                py: 4
-            }}
-        >
+        <Container className="recipes-container">
             {/* Header with search */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography
-                    variant="h4"
-                    sx={{
-                        color: '#457B9D',
-                        fontWeight: 'bold'
-                    }}
-                >
+            <Box className="recipes-header">
+                <Typography className="recipes-title">
                     🍳 Recipes
                 </Typography>
-                <SearchBar onSearch={handleSearch} />
+                <div className="search-container">
+                    <SearchBar onSearch={handleSearch} />
+                </div>
             </Box>
 
-            {/* Filters - Pass current filters and onChange handler */}
-            <RecipeFilters
-                currentFilters={filters}
-                onFilterChange={handleFilterChange}
-            />
+            {/* Filters */}
+            <div className="filters-section">
+                <RecipeFilters
+                    currentFilters={filters}
+                    onFilterChange={handleFilterChange}
+                />
+            </div>
 
             {/* Recipe Grid */}
             <motion.div
@@ -110,10 +98,10 @@ function RecipesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <Grid container spacing={3} sx={{ mt: 2 }}>
+                <Grid container spacing={3} className="recipes-grid">
                     {recipes.length > 0 ? (
                         recipes.map((recipe, index) => (
-                            <Grid item xs={12} sm={6} md={4} key={recipe.id}>
+                            <Grid item xs={12} sm={6} md={4} key={recipe.id} className="recipe-grid-item">
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -125,14 +113,8 @@ function RecipesPage() {
                         ))
                     ) : (
                         <Grid item xs={12}>
-                            <Box sx={{
-                                textAlign: 'center',
-                                py: 8,
-                                backgroundColor: '#FFFFFF',
-                                borderRadius: 2,
-                                boxShadow: 1
-                            }}>
-                                <Typography variant="h6" color="#1D3557">
+                            <Box className="no-recipes-container">
+                                <Typography className="no-recipes-message">
                                     {searchQuery ? 'No recipes match your search' : 'No recipes found. Be the first to create one!'}
                                 </Typography>
                             </Box>

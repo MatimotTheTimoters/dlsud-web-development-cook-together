@@ -49,6 +49,25 @@ try {
     $difficulty = Validation::sanitizeInput($data['difficulty'] ?? 'Medium');
     $category = Validation::sanitizeInput($data['category'] ?? '');
 
+    // Handle image - SIMPLE: Save base64 if provided, otherwise empty
+    $imageUrl = '';
+    if (!empty($data['image_url']) && strlen($data['image_url']) > 100) {
+        // Check if it's base64
+        if (strpos($data['image_url'], 'data:image') === 0) {
+            // Save base64 to database (simple solution for now)
+            $imageUrl = $data['image_url'];
+
+            // OPTIONAL: Save to file system (comment out if you want database storage only)
+            /*
+            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data['image_url']));
+            $filename = 'recipe_' . time() . '.jpg';
+            $filepath = '../../uploads/' . $filename;
+            file_put_contents($filepath, $imageData);
+            $imageUrl = 'uploads/' . $filename;
+            */
+        }
+    }
+
     // Escape strings for SQL (additional safety)
     $title = $conn->real_escape_string($title);
     $description = $conn->real_escape_string($description);
@@ -56,12 +75,11 @@ try {
     $steps = $conn->real_escape_string($steps);
     $difficulty = $conn->real_escape_string($difficulty);
     $category = $conn->real_escape_string($category);
-
-    $imageUrl = Validation::sanitizeInput($data['image_url'] ?? '');
+    $imageUrl = $conn->real_escape_string($imageUrl);
 
     $sql = "INSERT INTO recipes (user_id, title, description, prep_time, cook_time, servings, difficulty, category, image_url) 
         VALUES ($userId, '$title', '$description', $prepTime, $cookTime, $servings, '$difficulty', '$category', '$imageUrl')";
-        
+
     if ($conn->query($sql)) {
         $recipeId = $conn->insert_id;
 

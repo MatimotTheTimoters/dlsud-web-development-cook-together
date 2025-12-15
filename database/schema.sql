@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     servings INT,
     difficulty ENUM('Easy', 'Medium', 'Hard') DEFAULT 'Medium',
     category VARCHAR(50),
-    image_url VARCHAR(255),
+    image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
