@@ -17,12 +17,6 @@ function RecipeDetailPage() {
     const navigate = useNavigate();
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [showSessionModal, setShowSessionModal] = useState(false);
-    const [showShareModal, setShowShareModal] = useState(false);
-    const [sessionData, setSessionData] = useState(null);
-    const [currentUser, setCurrentUser] = useState(null); // ADDED
-    const navigate = useNavigate();
-    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         api.get(`/recipe/get.php?id=${id}`)
