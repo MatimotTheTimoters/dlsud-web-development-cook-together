@@ -180,6 +180,9 @@ database/
 *Create these new files for this feature:*
 
 - `frontend/src/pages/ProfilePage.jsx` - User profile page component
+- `frontend/src/components/UserAvatar.jsx` - User avatar component with level border
+- `frontend/src/components/StatsTabs.jsx` - Stats display component with 3-column layout
+- `frontend/src/components/EditProfileButton.jsx` - Edit profile button component
 - `backend/api/profile.php` - User profile API endpoint
 
 **Directory Structure:**
@@ -194,6 +197,10 @@ frontend/
 │   │   └── pages.css
 │   ├── pages/
 │   │   └── ProfilePage.jsx
+│   ├── components/
+│   │   ├── UserAvatar.jsx
+│   │   ├── StatsTabs.jsx
+│   │   └── EditProfileButton.jsx
 │   ├── App.js
 │   └── index.js
 backend/
@@ -247,6 +254,11 @@ database/
 
 - `frontend/src/pages/CreateRecipePage.jsx` - Recipe creation page
 - `frontend/src/components/RecipeForm.jsx` - Recipe form component
+- `frontend/src/components/IngredientList.jsx` - Ingredient list component
+- `frontend/src/components/StepList.jsx` - Step list component
+- `frontend/src/components/ImageUpload.jsx` - Image upload component
+- `frontend/src/components/SaveRecipeButton.jsx` - Save recipe button
+- `frontend/src/components/CancelButton.jsx` - Cancel button
 - `backend/api/recipe/create.php` - Recipe creation API endpoint
 
 **Directory Structure:**
@@ -263,7 +275,12 @@ frontend/
 │   ├── pages/
 │   │   └── CreateRecipePage.jsx
 │   ├── components/
-│   │   └── RecipeForm.jsx
+│   │   ├── RecipeForm.jsx
+│   │   ├── IngredientList.jsx
+│   │   ├── StepList.jsx
+│   │   ├── ImageUpload.jsx
+│   │   ├── SaveRecipeButton.jsx
+│   │   └── CancelButton.jsx
 │   ├── App.js
 │   └── index.js
 backend/
@@ -319,6 +336,9 @@ database/
 
 - `frontend/src/pages/RecipesPage.jsx` - Recipe list page
 - `frontend/src/components/RecipeCard.jsx` - Recipe card component
+- `frontend/src/components/SearchBar.jsx` - Search bar component
+- `frontend/src/components/RecipeFilters.jsx` - Recipe filters component
+- `frontend/src/components/CreateRecipeButton.jsx` - Create recipe button
 - `backend/api/recipe/list.php` - Recipe list API endpoint
 
 **Directory Structure:**
@@ -335,7 +355,10 @@ frontend/
 │   ├── pages/
 │   │   └── RecipesPage.jsx
 │   ├── components/
-│   │   └── RecipeCard.jsx
+│   │   ├── RecipeCard.jsx
+│   │   ├── SearchBar.jsx
+│   │   ├── RecipeFilters.jsx
+│   │   └── CreateRecipeButton.jsx
 │   ├── App.js
 │   └── index.js
 backend/
@@ -387,6 +410,13 @@ database/
 *Create these new files for this feature:*
 
 - `frontend/src/pages/RecipeDetailPage.jsx` - Recipe detail page
+- `frontend/src/components/RecipeHeader.jsx` - Recipe header component
+- `frontend/src/components/RecipeImage.jsx` - Recipe image component
+- `frontend/src/components/IngredientList.jsx` - Ingredient list component
+- `frontend/src/components/StepList.jsx` - Step list component
+- `frontend/src/components/StartCookingButton.jsx` - Start cooking button
+- `frontend/src/components/SaveRecipeButton.jsx` - Save recipe button
+- `frontend/src/components/CommentSection.jsx` - Comment section component
 - `backend/api/recipe/get.php` - Single recipe API endpoint
 
 **Directory Structure:**
@@ -401,6 +431,14 @@ frontend/
 │   │   └── pages.css
 │   ├── pages/
 │   │   └── RecipeDetailPage.jsx
+│   ├── components/
+│   │   ├── RecipeHeader.jsx
+│   │   ├── RecipeImage.jsx
+│   │   ├── IngredientList.jsx
+│   │   ├── StepList.jsx
+│   │   ├── StartCookingButton.jsx
+│   │   ├── SaveRecipeButton.jsx
+│   │   └── CommentSection.jsx
 │   ├── App.js
 │   └── index.js
 backend/
@@ -414,8 +452,6 @@ database/
 ```
 
 ---
-
-Perfect! Here's Feature 7 expanded with the subtasks you requested, using the existing .md syntax:
 
 ## Feature 7: Start Cooking Session
 
@@ -455,6 +491,12 @@ Perfect! Here's Feature 7 expanded with the subtasks you requested, using the ex
 *Create these new files for this feature:*
 
 - `frontend/src/pages/CookingSessionPage.jsx` - Cooking session page
+- `frontend/src/components/SessionTimer.jsx` - Session timer component
+- `frontend/src/components/CurrentStep.jsx` - Current step component
+- `frontend/src/components/StepNavigation.jsx` - Step navigation component
+- `frontend/src/components/IngredientChecklist.jsx` - Ingredient checklist component
+- `frontend/src/components/SessionNotes.jsx` - Session notes component
+- `frontend/src/components/CompleteSessionButton.jsx` - Complete session button
 - `backend/api/session/create.php` - Session creation API endpoint
 
 **Directory Structure:**
@@ -469,6 +511,13 @@ frontend/
 │   │   └── pages.css
 │   ├── pages/
 │   │   └── CookingSessionPage.jsx
+│   ├── components/
+│   │   ├── SessionTimer.jsx
+│   │   ├── CurrentStep.jsx
+│   │   ├── StepNavigation.jsx
+│   │   ├── IngredientChecklist.jsx
+│   │   ├── SessionNotes.jsx
+│   │   └── CompleteSessionButton.jsx
 │   ├── App.js
 │   └── index.js
 backend/
@@ -542,231 +591,6 @@ backend/
 │       └── create.php
 database/
 └── schema.sql
-```
-
----
-
-## Feature 7.2: Solo Cooking Session
-
-**Flow:**
-
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐
-│ Frontend │────▶│ Backend  │────▶│ Database │
-│          │     │          │     │          │
-│   Solo   │     │  Create  │     │ Create   │
-│ Session  │     │  Solo    │     │  Solo    │
-│  Choice  │     │ Session  │     │ Session  │
-└──────────┘     └──────────┘     └──────────┘
-       │                │                │
-       │                │                │
-       │    Create Solo Session         │
-       │    (type: solo, private)       │
-       │                │                │
-       │                ▼                │
-       │         Return Session ID      │
-       │                │                │
-       ▼                ▼                ▼
-  Redirect to     Log Solo        Session Created
-  Solo Cooking    Session         with Solo Flag
-  Session Page    Creation
-```
-
-**Files Needed:**
-*What existing files should be referenced or modified?*
-
-- `backend/api/session/create.php` - Handle solo session creation
-- `database/schema.sql` - Add session_type and visibility fields
-
-**Files Created:**
-*Create these new files for this feature:*
-
-- `frontend/src/pages/SoloCookingPage.jsx` - Solo cooking session page
-- Modify: `frontend/src/pages/CookingSessionPage.jsx` - Rename to MultiplayerCookingPage.jsx
-
-**Directory Structure:**
-
-```
-frontend/
-├── src/
-│   ├── pages/
-│   │   ├── SoloCookingPage.jsx
-│   │   └── MultiplayerCookingPage.jsx
-│   └── App.js
-backend/
-├── api/
-│   └── session/
-│       └── create.php
-database/
-└── schema.sql
-```
-
----
-
-## Feature 7.3: Multiplayer Session Creation
-
-**Flow:**
-
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐
-│ Frontend │────▶│ Backend  │────▶│ Database │
-│          │     │          │     │          │
-│ Multi-   │     │  Create  │     │ Create   │
-│ player   │     │  Multi   │     │  Multi   │
-│ Session  │     │ Session  │     │ Session  │
-│ Choice   │     │          │     │          │
-└──────────┘     └──────────┘     └──────────┘
-       │                │                │
-       │                │                │
-       │  Create Multi Session          │
-       │  (type: multiplayer, public)   │
-       │                │                │
-       │                ▼                │
-       │   Return Session ID + Code     │
-       │                │                │
-       ▼                ▼                ▼
-  Show Session     Log Multi      Session Created
-  Code & Share     Session        with Multi Flag
-  Options          Creation       & Join Code
-```
-
-**Files Needed:**
-*What existing files should be referenced or modified?*
-
-- `backend/api/session/create.php` - Handle multiplayer session creation
-- `database/schema.sql` - Add join_code field
-
-**Files Created:**
-*Create these new files for this feature:*
-
-- `backend/api/session/generate-code.php` - Generate unique session code
-- `frontend/src/components/SessionShareModal.jsx` - Share session code modal
-
-**Directory Structure:**
-
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   └── SessionShareModal.jsx
-│   └── pages/
-│       └── MultiplayerCookingPage.jsx
-backend/
-├── api/
-│   └── session/
-│       ├── create.php
-│       └── generate-code.php
-database/
-└── schema.sql
-```
-
----
-
-## Feature 7.4: Session Code Generation
-
-**Flow:**
-
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐
-│ Frontend │     │ Backend  │     │ Database │
-│          │     │          │     │          │
-│ Request  │────▶│Generate  │────▶│ Check    │
-│ Session  │     │  Unique  │     │ Code     │
-│  Code    │     │   Code   │     │ Uniqueness
-└──────────┘     └──────────┘     └──────────┘
-       │                │                │
-       │                │                │
-       │                ▼                │
-       │         Generate 6-char Code   │
-       │                │                │
-       │                ▼                │
-       │       Verify Not in Use        │
-       │                │                │
-       ▼                ▼                ▼
-  Receive Unique  Log Code        Store Code
-  Session Code    Generation      with Session
-```
-
-**Files Needed:**
-*What existing files should be referenced or modified?*
-
-- `backend/api/session/create.php` - Call code generator
-- `database/schema.sql` - Ensure join_code is unique
-
-**Files Created:**
-*Create these new files for this feature:*
-
-- `backend/api/session/generate-code.php` - Code generation endpoint
-- `backend/utils/code-generator.php` - Reusable code generator
-
-**Directory Structure:**
-
-```
-backend/
-├── api/
-│   └── session/
-│       ├── create.php
-│       └── generate-code.php
-├── utils/
-│   └── code-generator.php
-├── db/
-│   └── connection.php
-database/
-└── schema.sql
-```
-
----
-
-## Feature 7.5: Session Invitation Sharing
-
-**Flow:**
-
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐
-│ Frontend │     │          │     │          │
-│          │     │          │     │          │
-│  Share   │────▶│ Display  │────▶│  User    │
-│ Session  │     │  Share   │     │ Copies   │
-│  Button  │     │ Options  │     │ Code or  │
-│          │     │          │     │  Link    │
-└──────────┘     └──────────┘     └──────────┘
-       │                │                │
-       │                │                │
-       │                ▼                │
-       │    Show: Code, Link, QR Code   │
-       │                │                │
-       │                ▼                │
-       │         User Selects Method    │
-       │                │                │
-       ▼                ▼                ▼
-  Copy to         Log Share      Invitation
-  Clipboard       Action         Sent/Shared
-```
-
-**Files Needed:**
-*What existing files should be referenced or modified?*
-
-- `frontend/src/components/SessionShareModal.jsx` - Add share functionality
-- `frontend/src/styles/components.css` - Share modal styles
-
-**Files Created:**
-*Create these new files for this feature:*
-
-- `frontend/src/components/ShareOptions.jsx` - Share options component
-- `frontend/src/utils/copyToClipboard.js` - Clipboard utility
-
-**Directory Structure:**
-
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   ├── SessionShareModal.jsx
-│   │   └── ShareOptions.jsx
-│   ├── utils/
-│   │   └── copyToClipboard.js
-│   └── styles/
-│       └── components.css
 ```
 
 ---
@@ -1810,11 +1634,17 @@ database/
 *Create these new files for this feature:*
 
 - `backend/api/user/daily-bonus.php` - Daily bonus API endpoint
+- `frontend/src/components/DailyBonusModal.jsx` - Daily bonus modal component
 - Modify: `backend/api/login.php` to call bonus check
 
 **Directory Structure:**
 
 ```
+frontend/
+├── src/
+│   ├── components/
+│   │   └── DailyBonusModal.jsx
+│   └── App.js
 backend/
 ├── api/
 │   ├── login.php
@@ -1864,6 +1694,7 @@ database/
 *Create these new files for this feature:*
 
 - `frontend/src/pages/HomePage.jsx` - Home page component
+- `frontend/src/components/QuickActions.jsx` - Quick actions component
 - `backend/api/home.php` - Home API endpoint
 
 **Directory Structure:**
@@ -1878,6 +1709,8 @@ frontend/
 │   │   └── pages.css
 │   ├── pages/
 │   │   └── HomePage.jsx
+│   ├── components/
+│   │   └── QuickActions.jsx
 │   ├── App.js
 │   └── index.js
 backend/
