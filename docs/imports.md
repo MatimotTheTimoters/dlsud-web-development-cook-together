@@ -78,7 +78,13 @@
 Run this command in your `frontend/` directory to install the complete, complementary suite of packages:
 
 ```bash
+# old command to install @emoji-mart (doesn't work on React 19 and above)
 npm install react-confetti framer-motion notistack lottie-react @mui/material @mui/icons-material @emotion/react @emotion/styled react-circular-progressbar react-hook-form @emoji-mart/react react-dropzone date-fns axios react-router-dom
+```
+
+```bash
+# command to force install @emoji-mart for React 19 (not compatible, but some libraries in it work)
+npm install --legacy-peer-deps react-confetti framer-motion notistack lottie-react @mui/material @mui/icons-material @emotion/react @emotion/styled react-circular-progressbar react-hook-form @emoji-mart/react react-dropzone date-fns axios react-router-dom
 ```
 
 **Post-Installation Setup for MUI**: To use MUI with your custom theme, you'll need to wrap your app in a `ThemeProvider`. Here is a basic setup using your color palette:
