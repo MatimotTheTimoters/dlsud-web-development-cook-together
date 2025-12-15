@@ -10,52 +10,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Use the same connection method as your recipe API
 require_once '../../db/connection.php';
+require_once '../../utils/code-generator.php'; // NEW: Include the utility
 
 try {
     $db = new Database();
     $conn = $db->getConnection();
 
-    // Generate 6-character alphanumeric code
-    $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    $maxAttempts = 20;
-    $code = '';
-
-    for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
-        $code = '';
-        for ($i = 0; $i < 6; $i++) {
-            $code .= $characters[rand(0, strlen($characters) - 1)];
-        }
-        
-        // Check if code already exists using MySQLi
-        $checkStmt = $conn->prepare("SELECT COUNT(*) FROM cooking_sessions WHERE join_code = ?");
-        $checkStmt->bind_param("s", $code);
-        $checkStmt->execute();
-        $checkStmt->bind_result($count);
-        $checkStmt->fetch();
-        $checkStmt->close();
-        
-        if ($count == 0) {
-            // Found unique code
-            break;
-        }
-        
-        $code = ''; // Reset for next attempt
-    }
-
-    if ($code === '') {
-        throw new Exception('Failed to generate unique code after ' . $maxAttempts . ' attempts');
-    }
-
+    // NEW: Use the reusable code generator
+    $code = generateUniqueSessionCode($conn);
+    
+    // Log the generation
+    error_log("API: Generated session code: $code");
+    
     echo json_encode([
         'success' => true,
         'code' => $code,
-        'message' => 'Code generated successfully'
+        'message' => 'Unique session code generated'
     ]);
 
     $db->closeConnection();
 } catch (Exception $e) {
+    error_log("API: Code generation failed: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()

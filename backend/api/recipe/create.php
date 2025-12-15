@@ -1,4 +1,5 @@
 <?php
+// backend/api/session/create.php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -9,87 +10,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Use your existing connection class
 require_once '../../db/connection.php';
-require_once '../../utils/validation.php';
+require_once '../../utils/code-generator.php'; // NEW: Include the utility
+
+$input = json_decode(file_get_contents('php://input'), true);
+
+$recipe_id = $input['recipe_id'] ?? null;
+$user_id = $input['user_id'] ?? null;
+$session_type = $input['session_type'] ?? 'solo';
+
+if (!$recipe_id || !$user_id) {
+    echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+    exit;
+}
 
 try {
     // Get database connection
     $db = new Database();
     $conn = $db->getConnection();
 
-    // Get POST data
-    $input = file_get_contents('php://input');
-    $data = json_decode($input, true);
+    // Start transaction
+    $conn->begin_transaction();
 
-    if (!$data) {
-        throw new Exception('Invalid JSON data');
+    $join_code = null;
+    if ($session_type === 'multiplayer') {
+        // NEW: Use the reusable code generator
+        $join_code = generateUniqueSessionCode($conn);
+        error_log("Multiplayer session created with code: $join_code by user $user_id");
     }
 
-    // Validate required fields
-    if (empty($data['title'])) {
-        throw new Exception('Recipe title is required');
-    }
-
-    if (empty($data['ingredients'])) {
-        throw new Exception('Ingredients are required');
-    }
-
-    // Sanitize inputs using your validation class
-    $title = Validation::sanitizeInput($data['title']);
-    $ingredients = Validation::sanitizeInput($data['ingredients']);
-    $description = Validation::sanitizeInput($data['description'] ?? '');
-    $steps = Validation::sanitizeInput($data['steps'] ?? 'No steps provided');
-    $userId = isset($data['user_id']) ? intval($data['user_id']) : 1;
-
-    // Set number values (use 0 for empty)
-    $prepTime = isset($data['prep_time']) && $data['prep_time'] !== '' ? intval($data['prep_time']) : 0;
-    $cookTime = isset($data['cook_time']) && $data['cook_time'] !== '' ? intval($data['cook_time']) : 0;
-    $servings = isset($data['servings']) && $data['servings'] !== '' ? intval($data['servings']) : 1;
-    $difficulty = Validation::sanitizeInput($data['difficulty'] ?? 'Medium');
-    $category = Validation::sanitizeInput($data['category'] ?? '');
-
-    // Escape strings for SQL (additional safety)
-    $title = $conn->real_escape_string($title);
-    $description = $conn->real_escape_string($description);
-    $ingredients = $conn->real_escape_string($ingredients);
-    $steps = $conn->real_escape_string($steps);
-    $difficulty = $conn->real_escape_string($difficulty);
-    $category = $conn->real_escape_string($category);
-
-    // Insert recipe using simple query (avoid bind_param issues)
-    $sql = "INSERT INTO recipes (user_id, title, description, prep_time, cook_time, servings, difficulty, category) 
-            VALUES ($userId, '$title', '$description', $prepTime, $cookTime, $servings, '$difficulty', '$category')";
-
-    if ($conn->query($sql)) {
-        $recipeId = $conn->insert_id;
-
-        // Insert ingredients
-        $ingSql = "INSERT INTO recipe_ingredients (recipe_id, ingredient) VALUES ($recipeId, '$ingredients')";
-        $conn->query($ingSql);
-
-        // Insert steps
-        $stepSql = "INSERT INTO recipe_steps (recipe_id, step_number, instruction) VALUES ($recipeId, 1, '$steps')";
-        $conn->query($stepSql);
-
-        // Update user stats
-        $statsSql = "UPDATE user_stats SET recipes_created = recipes_created + 1 WHERE user_id = $userId";
-        $conn->query($statsSql);
-
-        echo json_encode([
-            'success' => true,
-            'recipe_id' => $recipeId,
-            'message' => 'Recipe created successfully! 🎉'
-        ]);
+    // Create session
+    if ($session_type === 'multiplayer') {
+        $stmt = $conn->prepare("
+            INSERT INTO cooking_sessions 
+            (recipe_id, user_id, join_code, created_at) 
+            VALUES (?, ?, ?, NOW())
+        ");
+        $stmt->bind_param("iis", $recipe_id, $user_id, $join_code);
     } else {
-        throw new Exception('Database error: ' . $conn->error);
+        $stmt = $conn->prepare("
+            INSERT INTO cooking_sessions 
+            (recipe_id, user_id, created_at) 
+            VALUES (?, ?, NOW())
+        ");
+        $stmt->bind_param("ii", $recipe_id, $user_id);
+    }
+
+    if ($stmt->execute()) {
+        $session_id = $conn->insert_id;
+        $stmt->close();
+
+        // Add host as participant
+        $stmt = $conn->prepare("
+            INSERT INTO session_participants 
+            (session_id, user_id, joined_at) 
+            VALUES (?, ?, NOW())
+        ");
+        $stmt->bind_param("ii", $session_id, $user_id);
+        
+        if ($stmt->execute()) {
+            $stmt->close();
+            $conn->commit();
+            
+            // Log successful creation
+            error_log("Session created: ID $session_id, Type: $session_type, Code: " . ($join_code ?: 'N/A'));
+            
+            echo json_encode([
+                'success' => true,
+                'session_id' => $session_id,
+                'join_code' => $join_code,
+                'message' => 'Session created successfully'
+            ]);
+        } else {
+            throw new Exception('Failed to add participant: ' . $conn->error);
+        }
+    } else {
+        throw new Exception('Failed to create session: ' . $conn->error);
     }
 
     $db->closeConnection();
 } catch (Exception $e) {
-    // Return error response
+    if (isset($conn) && method_exists($conn, 'rollback')) {
+        $conn->rollback();
+    }
+    error_log("Session creation error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
     ]);
 }
+?>
