@@ -12,42 +12,47 @@ function SessionTypeModal({ open, onClose, recipeId, recipeTitle }) {
     
 
     const createSession = async (sessionType) => {
-        try {
-            setLoading(true);
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
-            if (!user) {
-                alert('Please log in to start cooking');
-                onClose();
-                return;
-            }
+    try {
+        setLoading(true);
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        
+        if (!user) {
+            alert('Please log in to start cooking');
+            onClose();
+            return;
+        }
 
-            const response = await api.post('/session/create.php', {
-                recipe_id: recipeId,
-                user_id: user.id,
-                session_type: sessionType
-            });
+        // Make sure the URL is correct
+        const response = await api.post('/session/create.php', {
+            recipe_id: recipeId,
+            user_id: user.id,
+            session_type: sessionType
+        });
 
-            if (response.data.success) {
-                if (sessionType === 'solo') {
-                    navigate(`/cooking-session/${response.data.session_id}`);
-                } else if (sessionType === 'multiplayer') {
-                // Store session data and show share modal
+        console.log('Response:', response.data); // Add this for debugging
+
+        if (response.data.success) {
+            if (sessionType === 'solo') {
+                navigate(`/cooking-session/${response.data.session_id}`);
+            } else if (sessionType === 'multiplayer') {
                 setSessionData({
-                sessionId: response.data.session_id,
-                joinCode: response.data.join_code
+                    sessionId: response.data.session_id,
+                    joinCode: response.data.join_code
                 });
                 setShowShareModal(true);
-                }
-            } else {
-                alert('Failed to start cooking session: ' + (response.data.message || 'Unknown error'));
             }
-        } catch (error) {
+        } else {
+            alert('Failed to start cooking session: ' + (response.data.message || 'Unknown error'));
+            }
+            } catch (error) {
             console.error('Error creating session:', error);
-            alert('Error starting cooking session');
-        } finally {
+            console.error('Error details:', error.response?.data); // Log more details
+            alert('Error starting cooking session. Check console for details.');
+            } finally {
             setLoading(false);
         }
     };
+
 
     if (!open) return null;
 
