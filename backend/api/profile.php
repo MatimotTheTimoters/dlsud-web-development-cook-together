@@ -15,8 +15,7 @@ $db = new Database();
 $conn = $db->getConnection();
 
 try {
-    // Always return user ID 1 for now
-    $userId = 1;
+    $userId = isset($_GET['id']) ? intval($_GET['id']) : 1;
 
     // Get user basic info
     $userQuery = $conn->prepare("SELECT id, username, email, full_name, bio, location, profile_picture, cooking_since, created_at FROM users WHERE id = ?");

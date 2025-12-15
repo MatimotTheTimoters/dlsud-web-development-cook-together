@@ -5,15 +5,15 @@ import {
   Typography,
   IconButton,
   Paper,
-  Avatar,
   Box,
-  CircularProgress,
-  Card,
-  CardContent
+  CircularProgress
 } from '@mui/material';
-import { ArrowBack, Settings, LocationOn, EmojiEvents } from '@mui/icons-material';
+import { ArrowBack, Settings, LocationOn } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
+import UserAvatar from '../components/UserAvatar';
+import StatsTabs from '../components/StatsTabs';
+import EditProfileButton from '../components/EditProfileButton';
 
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -26,27 +26,36 @@ function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get('/profile.php?id=1');
+      // Try to get current user from localStorage (from login)
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      let userId = 1; // Default to user 1 if no user logged in
+
+      if (storedUser && storedUser.id) {
+        userId = storedUser.id;
+        console.log('Using logged-in user ID:', userId);
+      } else {
+        console.log('No user in localStorage, defaulting to ID 1');
+      }
+
+      const response = await api.get(`/profile.php?id=${userId}`);
       setProfile(response.data);
     } catch (error) {
-      console.log('Using fallback data');
-      // Fallback data
+      console.log('Error fetching profile:', error);
+      // Simple fallback with generic user
       setProfile({
         success: true,
         user: {
-          username: 'chefjohn',
-          full_name: 'Chef John',
-          bio: 'Professional chef with 10 years experience',
-          location: 'New York',
-          cooking_since: '2018'
+          username: 'guest',
+          full_name: 'Guest User',
+          bio: 'Please login to see your profile',
+          location: 'Unknown'
         },
         stats: {
-          level: 15,
-          current_exp: 1250,
-          gold_count: 500,
-          gem_count: 25,
-          recipes_created: 50,
-          recipes_cooked: 12
+          level: 1,
+          recipes_created: 0,
+          recipes_cooked: 0,
+          challenges_completed: 0,
+          gold_count: 100
         }
       });
     } finally {
@@ -62,22 +71,12 @@ function ProfilePage() {
     );
   }
 
-  if (!profile) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Typography>Failed to load profile</Typography>
-      </Container>
-    );
-  }
+  if (!profile) return <Typography>Failed to load profile</Typography>;
 
   const { user, stats } = profile;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <Container maxWidth="md" sx={{ mt: 2, mb: 4 }}>
         {/* Header */}
         <Paper sx={{ p: 2, mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#457B9D' }}>
@@ -92,15 +91,13 @@ function ProfilePage() {
           </IconButton>
         </Paper>
 
-        {/* Profile Card */}
+        {/* Profile Content */}
         <Paper sx={{ p: 3, borderRadius: 2 }}>
-          {/* Avatar & Info */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-            <Avatar sx={{ width: 100, height: 100, border: '3px solid #E63946', fontSize: '2.5rem', bgcolor: '#A8DADC' }}>
-              {user.full_name?.charAt(0) || '👤'}
-            </Avatar>
+          {/* User Avatar & Info */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
+            <UserAvatar user={user} stats={stats} />
 
-            <Box>
+            <Box sx={{ textAlign: { xs: 'center', sm: 'left' }, flex: 1 }}>
               <Typography variant="h5" sx={{ color: '#1D3557', fontWeight: 'bold' }}>
                 {user.full_name || user.username}
               </Typography>
@@ -108,15 +105,10 @@ function ProfilePage() {
                 @{user.username}
               </Typography>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EmojiEvents sx={{ color: '#FFD700' }} />
-                <Typography sx={{ color: '#1D3557' }}>
-                  Level {stats.level}
-                </Typography>
-                <Box sx={{ mx: 1 }}>•</Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
                 <LocationOn sx={{ color: '#E63946' }} />
                 <Typography sx={{ color: '#1D3557' }}>
-                  {user.location}
+                  {user.location || 'Unknown'}
                 </Typography>
               </Box>
 
@@ -128,45 +120,14 @@ function ProfilePage() {
             </Box>
           </Box>
 
-          {/* Stats Grid */}
+          {/* Stats Tabs */}
           <Typography variant="h6" sx={{ color: '#1D3557', mb: 2 }}>
-            📊 Stats
+            📊 Cooking Stats
           </Typography>
+          <StatsTabs stats={stats} />
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
-            <Card sx={{ bgcolor: '#A8DADC', textAlign: 'center' }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: '#1D3557' }}>
-                  {stats.recipes_created}
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#457B9D' }}>
-                  Recipes
-                </Typography>
-              </CardContent>
-            </Card>
-
-            <Card sx={{ bgcolor: '#A8DADC', textAlign: 'center' }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: '#1D3557' }}>
-                  {stats.recipes_cooked}
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#457B9D' }}>
-                  Cooked
-                </Typography>
-              </CardContent>
-            </Card>
-
-            <Card sx={{ bgcolor: '#A8DADC', textAlign: 'center' }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: '#1D3557' }}>
-                  {stats.gold_count}
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#457B9D' }}>
-                  Gold
-                </Typography>
-              </CardContent>
-            </Card>
-          </Box>
+          {/* Edit Profile Button */}
+          <EditProfileButton />
         </Paper>
       </Container>
     </motion.div>
