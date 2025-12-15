@@ -1,26 +1,20 @@
-import React from 'react';
-import { Button, CircularProgress } from '@mui/material';
-import { Save } from '@mui/icons-material';
+import React, { useState } from 'react';
+import { Button } from '@mui/material';
+import { Bookmark } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
-function SaveRecipeButton({ loading, onClick }) {
+function SaveRecipeButton({ recipeId }) {
+    const [saved, setSaved] = useState(false);
+
+    const handleSave = () => {
+        setSaved(!saved);
+        alert(saved ? 'Recipe removed from cookbook' : 'Recipe saved to cookbook!');
+    };
+
     return (
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-                type="submit"
-                variant="contained"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
-                disabled={loading}
-                onClick={onClick}
-                sx={{
-                    backgroundColor: '#4CAF50',
-                    '&:hover': { backgroundColor: '#388E3C' },
-                    py: 1.5,
-                    px: 4,
-                    fontSize: '1.1rem'
-                }}
-            >
-                {loading ? 'Saving...' : 'Save Recipe'}
+            <Button variant="outlined" startIcon={<Bookmark />} onClick={handleSave} sx={{ borderColor: saved ? '#4CAF50' : '#457B9D', color: saved ? '#4CAF50' : '#457B9D', py: 1.5, px: 4 }}>
+                {saved ? 'Saved' : 'Save Recipe'}
             </Button>
         </motion.div>
     );

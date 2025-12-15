@@ -1,103 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Container, Box, IconButton, Divider } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
+import RecipeHeader from '../components/RecipeHeader';
+import RecipeImage from '../components/RecipeImage';
+import RecipeIngredientList from '../components/RecipeIngredientList'; // CHANGED
+import RecipeStepList from '../components/RecipeStepList'; // CHANGED
+import StartCookingButton from '../components/StartCookingButton';
+import SaveRecipeButton from '../components/SaveRecipeButton';
+import CommentSection from '../components/CommentSection';
 
 function RecipeDetailPage() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchRecipe();
+        api.get(`/recipe/get.php?id=${id}`)
+            .then(res => {
+                if (res.data.success) setRecipe(res.data.recipe);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
     }, [id]);
 
-    const fetchRecipe = async () => {
-        try {
-            const response = await api.get(`/recipe/get.php?id=${id}`);
-            if (response.data.success) {
-                setRecipe(response.data.recipe);
-            }
-        } catch (error) {
-            console.error('Error fetching recipe:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) return <div className="loading">Loading recipe...</div>;
+    if (loading) return <div className="loading">Loading...</div>;
     if (!recipe) return <div className="error">Recipe not found</div>;
 
-    const totalTime = (+recipe.prep_time || 0) + (+recipe.cook_time || 0);
-
-    const startCookingSession = async () => {
-        try {
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
-            if (!user) {
-                alert('Please log in to start cooking');
-                return;
-            }
-
-            const response = await api.post('/session/create.php', {
-                recipe_id: id,
-                user_id: user.id
-            });
-
-            if (response.data.success) {
-                // Redirect to cooking session page
-                window.location.href = `/cooking-session/${response.data.session_id}`;
-            } else {
-                alert('Failed to start cooking session');
-            }
-        } catch (error) {
-            console.error('Error starting session:', error);
-            alert('Error starting cooking session');
-        }
-    };
-
     return (
-        <div className="recipe-detail">
-            <div className="recipe-header">
-                <h1>{recipe.title}</h1>
-                <div className="recipe-meta">
-                    <span className="author">👤 By {recipe.username || 'Anonymous'}</span>
-                    <span className="difficulty">{recipe.difficulty}</span>
-                    <span className="time">⏱️ {totalTime} min</span>
-                    <span className="servings">🍽️ {recipe.servings} servings</span>
-                    <span className="category">#{recipe.category || 'Uncategorized'}</span>
-                </div>
-            </div>
+        <Container maxWidth="md" className="recipe-detail-page">
+            <IconButton onClick={() => navigate(-1)} className="back-button">
+                <ArrowBack />
+            </IconButton>
 
-            <div className="recipe-description">
-                <p>{recipe.description}</p>
-            </div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <RecipeHeader recipe={recipe} />
+            </motion.div>
 
-            <div className="recipe-grid">
-                <div className="ingredients">
-                    <h2>📝 Ingredients</h2>
-                    <ul>
-                        {recipe.ingredients && recipe.ingredients.split(',').map((item, index) => (
-                            <li key={index}>{item.trim()}</li>
-                        ))}
-                    </ul>
-                </div>
+            <RecipeImage image={recipe.image_url} title={recipe.title} />
 
-                <div className="steps">
-                    <h2>👨‍🍳 Steps</h2>
-                    <ol>
-                        {recipe.steps && recipe.steps.split('.').filter(step => step.trim()).map((step, index) => (
-                            <li key={index}>{step.trim()}</li>
-                        ))}
-                    </ol>
-                </div>
-            </div>
+            <Box className="recipe-content">
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                    <RecipeIngredientList ingredients={recipe.ingredients} /> {/* CHANGED */}
+                </motion.div>
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                    <RecipeStepList steps={recipe.steps} /> {/* CHANGED */}
+                </motion.div>
+            </Box>
 
-            <div className="recipe-actions">
-                <button className="btn-primary" onClick={startCookingSession}>
-                    Start Cooking
-                </button>
-                <button className="btn-secondary">Save Recipe</button>
-            </div>
-        </div>
+            <Box className="recipe-actions">
+                <StartCookingButton recipeId={id} />
+                <SaveRecipeButton recipeId={id} />
+            </Box>
+
+            <Divider sx={{ my: 4 }} />
+
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <CommentSection recipeId={id} />
+            </motion.div>
+        </Container>
     );
 }
 
