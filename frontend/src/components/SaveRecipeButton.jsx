@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Button } from '@mui/material';
+import { IconButton, Tooltip, Button } from '@mui/material'; // Added Button import
 import { Bookmark, BookmarkBorder } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useSnackbar } from 'notistack';
 import api from '../api/axiosConfig';
 
-const SaveRecipeButton = ({ recipeId, initialSaved = false }) => {
+const SaveRecipeButton = ({ recipeId, initialSaved = false, compact = false }) => {
     const [saved, setSaved] = useState(initialSaved);
     const [loading, setLoading] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
@@ -33,6 +33,31 @@ const SaveRecipeButton = ({ recipeId, initialSaved = false }) => {
             setLoading(false);
         }
     };
+
+    if (compact) {
+        return (
+            <Tooltip title={saved ? "Remove from cookbook" : "Save to cookbook"}>
+                <IconButton
+                    onClick={handleSave}
+                    disabled={loading}
+                    size="small"
+                    sx={{
+                        color: saved ? '#4CAF50' : '#457B9D',
+                        '&:hover': {
+                            backgroundColor: saved ? 'rgba(76, 175, 80, 0.1)' : 'rgba(69, 123, 157, 0.1)'
+                        }
+                    }}
+                >
+                    <motion.div
+                        animate={{ rotate: saved ? 360 : 0 }}
+                        transition={{ type: 'spring', stiffness: 200 }}
+                    >
+                        {saved ? <Bookmark fontSize="small" /> : <BookmarkBorder fontSize="small" />}
+                    </motion.div>
+                </IconButton>
+            </Tooltip>
+        );
+    }
 
     return (
         <Button
