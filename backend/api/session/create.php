@@ -21,11 +21,50 @@ if (!$recipeId || !$userId) {
     exit();
 }
 
-// Generate session code for multiplayer
-$sessionCode = $sessionType === 'multiplayer' ? substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 6) : null;
+// Set session status and max players based on session type
+$sessionStatus = ($sessionType === 'solo') ? 'active' : 'waiting';
+$maxPlayers = ($sessionType === 'solo') ? 1 : 6;
 
-$stmt = $conn->prepare("INSERT INTO cooking_sessions (recipe_id, user_id, session_type, session_code) VALUES (?, ?, ?, ?)");
-$stmt->bind_param("iiss", $recipeId, $userId, $sessionType, $sessionCode);
+// Generate session code for multiplayer (10 characters as per schema)
+$sessionCode = null;
+if ($sessionType === 'multiplayer') {
+    // Keep trying until we get a unique code
+    $maxAttempts = 10;
+    $attempt = 0;
+    $unique = false;
+    
+    while (!$unique && $attempt < $maxAttempts) {
+        // Generate 10-character alphanumeric code
+        $code = substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 10);
+        
+        // Check if code exists
+        $checkStmt = $conn->prepare("SELECT id FROM cooking_sessions WHERE session_code = ?");
+        $checkStmt->bind_param("s", $code);
+        $checkStmt->execute();
+        $checkStmt->store_result();
+        
+        if ($checkStmt->num_rows === 0) {
+            $sessionCode = $code;
+            $unique = true;
+        }
+        
+        $checkStmt->close();
+        $attempt++;
+    }
+    
+    if (!$unique) {
+        echo json_encode(['success' => false, 'message' => 'Failed to generate unique session code']);
+        exit();
+    }
+}
+
+// Insert into cooking_sessions with all required fields
+$stmt = $conn->prepare("
+    INSERT INTO cooking_sessions 
+    (recipe_id, user_id, session_type, session_status, max_players, session_code) 
+    VALUES (?, ?, ?, ?, ?, ?)
+");
+$stmt->bind_param("iissis", $recipeId, $userId, $sessionType, $sessionStatus, $maxPlayers, $sessionCode);
 $stmt->execute();
 
 $sessionId = $stmt->insert_id;
@@ -39,8 +78,11 @@ if ($sessionId) {
     echo json_encode([
         'success' => true,
         'session_id' => $sessionId,
+        'session_type' => $sessionType,
+        'session_status' => $sessionStatus,
+        'max_players' => $maxPlayers,
         'session_code' => $sessionCode,
-        'message' => 'Cooking session created'
+        'message' => 'Cooking session created successfully'
     ]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Failed to create session']);
